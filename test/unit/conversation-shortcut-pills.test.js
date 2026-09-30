@@ -478,6 +478,80 @@ describe('conversation shortcut pills', () => {
     expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(0);
   });
 
+  it('keeps pills when focus moves within a conversation row', async () => {
+    const row = createConversationRow();
+    const link = row.querySelector('a');
+    const menuButton = row.querySelector('button');
+    document.body.append(row);
+
+    disconnect = installConversationShortcutPills({
+      documentRoot: document,
+      getShortcutLabels: vi.fn(async () => ({
+        archive: 'Ctrl+Shift+Y',
+        trash: 'Ctrl+Shift+D'
+      }))
+    });
+    link.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
+
+    await vi.waitFor(() => {
+      expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(2);
+    });
+    link.dispatchEvent(new FocusEvent('focusout', {
+      bubbles: true,
+      relatedTarget: menuButton
+    }));
+
+    expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(2);
+  });
+
+  it('keeps pills when browser focus leaves a Google Messages-focused row', async () => {
+    const row = createConversationRow({ focused: true });
+    const link = row.querySelector('a');
+    document.body.append(row);
+
+    disconnect = installConversationShortcutPills({
+      documentRoot: document,
+      getShortcutLabels: vi.fn(async () => ({
+        archive: 'Ctrl+Shift+Y',
+        trash: 'Ctrl+Shift+D'
+      }))
+    });
+    link.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
+
+    await vi.waitFor(() => {
+      expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(2);
+    });
+    link.dispatchEvent(new FocusEvent('focusout', { bubbles: true }));
+
+    expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(2);
+  });
+
+  it('ignores mutation records whose target is not an element', () => {
+    const NativeMutationObserver = globalThis.MutationObserver;
+    let observerCallback;
+
+    globalThis.MutationObserver = class {
+      constructor(callback) {
+        observerCallback = callback;
+      }
+
+      disconnect() {}
+
+      observe() {}
+    };
+
+    try {
+      disconnect = installConversationShortcutPills({
+        documentRoot: document,
+        getShortcutLabels: vi.fn()
+      });
+
+      observerCallback([{ target: document }]);
+    } finally {
+      globalThis.MutationObserver = NativeMutationObserver;
+    }
+  });
+
   it('ignores focus events outside a conversation row', async () => {
     const getShortcutLabels = vi.fn(async () => ({
       archive: 'Ctrl+Shift+Y',

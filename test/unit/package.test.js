@@ -2,7 +2,7 @@ import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import JSZip from 'jszip';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { packageExtension } from '../../scripts/package.js';
 
 const temporaryDirectories = [];
@@ -46,5 +46,48 @@ describe('packageExtension', () => {
     );
     await expect(archive.file('background.js').async('string')).resolves.toBe('background');
     await expect(archive.file('icons/icon16.png').async('string')).resolves.toBe('icon');
+  });
+
+  it('forwards archive errors to the output stream', async () => {
+    const projectDirectory = await mkdtemp(path.join(tmpdir(), 'extension-package-failure-'));
+    const releaseDirectory = path.join(projectDirectory, 'release');
+    const error = new Error('Archive failed');
+    temporaryDirectories.push(projectDirectory);
+
+    class ZipArchiveMock {
+      on(eventName, listener) {
+        if (eventName === 'error') {
+          this.errorListener = listener;
+        }
+
+        return this;
+      }
+
+      pipe() {
+        return this;
+      }
+
+      directory() {
+        return this;
+      }
+
+      async finalize() {
+        this.errorListener(error);
+      }
+    }
+
+    vi.resetModules();
+    vi.doMock('archiver', async (importOriginal) => ({
+      ...(await importOriginal()),
+      ZipArchive: ZipArchiveMock
+    }));
+
+    try {
+      const { packageExtension: packageWithMockedArchive } = await import('../../scripts/package.js');
+
+      await expect(packageWithMockedArchive('dist', releaseDirectory)).rejects.toBe(error);
+    } finally {
+      vi.doUnmock('archiver');
+    }
   });
 });

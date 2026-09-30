@@ -52,6 +52,24 @@ describe('conversation-target', () => {
     expect(findConversationRow(document)).toBe(selected.row);
   });
 
+  it('falls back when the selected link is not in a conversation row', () => {
+    const selectedLink = document.createElement('a');
+    selectedLink.setAttribute('aria-selected', 'true');
+    const focused = createConversationRow();
+    focused.row.setAttribute('is-focused', 'true');
+    document.body.append(selectedLink, focused.row);
+
+    const selectors = {
+      selectedConversationLink: 'a[aria-selected="true"]',
+      focusedConversationItem: 'mws-conversation-list-item[is-focused="true"]',
+      hoveredConversationItem: 'mws-conversation-list-item:hover',
+      conversationRow: 'mws-conversation-list-item',
+      rowMenuButton: 'button[aria-haspopup="menu"]'
+    };
+
+    expect(findConversationRow(document, selectors)).toBe(focused.row);
+  });
+
   it('falls back to the hovered conversation row', () => {
     document.body.innerHTML = `
       <mws-conversation-list-item class="hovered-row">

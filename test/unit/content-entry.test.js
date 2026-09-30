@@ -28,6 +28,19 @@ describe('content entry helpers', () => {
     expect(globalThis.chrome.runtime.onMessage.addListener).toHaveBeenCalled();
   });
 
+  it('preserves existing test namespace properties', async () => {
+    vi.resetModules();
+    globalThis.MessagesShortcuts = { existingProperty: true };
+
+    await import('../../content.js');
+
+    expect(globalThis.MessagesShortcuts).toMatchObject({
+      existingProperty: true,
+      handleCommand: expect.any(Function),
+      runConversationAction: expect.any(Function)
+    });
+  });
+
   it('installs shortcut pills for the focused conversation row', async () => {
     await vi.waitFor(() => {
       expect(
