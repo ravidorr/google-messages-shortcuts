@@ -177,11 +177,19 @@ export function installConversationShortcutPills({
     conversationRow?.removeAttribute(PILL_HOST_ATTRIBUTE);
   }
 
+  function openConversation(conversationRow) {
+    const conversationLink = conversationRow?.querySelector('a[aria-selected]')
+      || conversationRow?.querySelector('a');
+
+    conversationLink?.click();
+  }
+
   function handlePointerOver(event) {
     const conversationRow = getConversationRow(event);
 
     if (conversationRow && !isWithinConversationRow(event, conversationRow)) {
       hoveredRows.add(conversationRow);
+      openConversation(conversationRow);
       void showPills(conversationRow);
     }
   }
@@ -203,6 +211,11 @@ export function installConversationShortcutPills({
 
     if (conversationRow) {
       focusedRows.add(conversationRow);
+
+      if (!isWithinConversationRow(event, conversationRow)) {
+        openConversation(conversationRow);
+      }
+
       void showPills(conversationRow);
     }
   }
@@ -223,6 +236,10 @@ export function installConversationShortcutPills({
     for (const record of records) {
       if (record.target instanceof Element) {
         if (isFocusedConversationRow(record.target)) {
+          if (!focusedRows.has(record.target) && !hoveredRows.has(record.target)) {
+            openConversation(record.target);
+          }
+
           void showPills(record.target);
         } else if (!focusedRows.has(record.target) && !hoveredRows.has(record.target)) {
           removePills(record.target);
