@@ -3,7 +3,6 @@ import path from 'node:path';
 import sharp from 'sharp';
 
 const ICON_SIZES = [16, 32, 48, 128];
-const OUTPUT_DIR = path.resolve('icons');
 
 function buildSvg(size) {
   const bubbleSize = Math.round(size * 0.58);
@@ -22,20 +21,24 @@ function buildSvg(size) {
 </svg>`;
 }
 
-async function generateIcons() {
-  await mkdir(OUTPUT_DIR, { recursive: true });
+export async function generateIcons(outputDirectory = path.resolve('icons')) {
+  await mkdir(outputDirectory, { recursive: true });
 
   for (const size of ICON_SIZES) {
     const svg = buildSvg(size);
-    const outputPath = path.join(OUTPUT_DIR, `icon${size}.png`);
+    const outputPath = path.join(outputDirectory, `icon${size}.png`);
 
     await sharp(Buffer.from(svg)).png().toFile(outputPath);
   }
 
-  await writeFile(path.join(OUTPUT_DIR, 'icon.svg'), buildSvg(128));
+  await writeFile(path.join(outputDirectory, 'icon.svg'), buildSvg(128));
 }
 
-generateIcons().catch((error) => {
-  console.error('Failed to generate icons.', error);
-  process.exit(1);
-});
+if (process.argv[1] === new URL(import.meta.url).pathname) {
+  const outputDirectory = process.argv[2] ? path.resolve(process.argv[2]) : undefined;
+
+  generateIcons(outputDirectory).catch((error) => {
+    console.error('Failed to generate icons.', error);
+    process.exit(1);
+  });
+}

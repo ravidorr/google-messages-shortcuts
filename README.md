@@ -18,9 +18,10 @@ Chrome extension that archives or trashes the selected or hovered conversation i
 
 1. Clone this repository.
 2. Run `npm install`.
-3. Open `chrome://extensions`.
-4. Enable Developer mode.
-5. Click **Load unpacked** and select this repository directory.
+3. Run `npm run build`.
+4. Open `chrome://extensions`.
+5. Enable Developer mode.
+6. Click **Load unpacked** and select the `dist/` directory.
 
 ## Change shortcuts
 
@@ -47,11 +48,13 @@ If Chrome or the operating system already uses a suggested shortcut, Chrome may 
 
 ```bash
 npm install
+npm run build
+npm run package
 npm run lint
 npm test
 ```
 
-Pre-commit hooks run staged linting and the full test suite with coverage thresholds.
+`npm run build` creates a loadable extension in `dist/`, including manifest icons. `npm run package` creates `release/google-messages-shortcuts.zip`. Use `npm run clean` to remove generated build, package, and coverage output. Pre-commit hooks run staged linting and the full test suite with coverage thresholds.
 
 ## License
 

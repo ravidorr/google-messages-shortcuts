@@ -5,6 +5,10 @@ node_modules/
 coverage/
 .nyc_output/
 
+# Build artifacts
+dist/
+release/
+
 # IDE and OS
 .idea/
 .vscode/
