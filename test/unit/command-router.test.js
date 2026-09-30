@@ -88,4 +88,26 @@ describe('command-router', () => {
     expect(result.ok).toBe(false);
     expect(result.reason).toBe('content-script-unavailable');
   });
+
+  it('handles non-Error content script failures', async () => {
+    const chromeApi = {
+      tabs: {
+        query: vi.fn(async () => [{
+          id: 42,
+          url: 'https://messages.google.com/web/conversations'
+        }]),
+        sendMessage: vi.fn(async () => {
+          throw 'Could not establish connection';
+        })
+      }
+    };
+
+    const result = await routeCommand(COMMAND_ARCHIVE, chromeApi);
+
+    expect(result).toEqual({
+      ok: false,
+      reason: 'content-script-unavailable',
+      error: 'Could not establish connection'
+    });
+  });
 });
