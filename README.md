@@ -58,6 +58,13 @@ npm test
 
 GitHub Actions posts overall and per-file coverage summaries to every pull request.
 
+## Community and support
+
+- Read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request.
+- Follow the [Code of Conduct](CODE_OF_CONDUCT.md) in community spaces.
+- Read [SECURITY.md](SECURITY.md) to report vulnerabilities privately.
+- Read [SUPPORT.md](SUPPORT.md) for help, bugs, and feature requests.
+
 ## License
 
 MIT. See [LICENSE.md](LICENSE.md).
