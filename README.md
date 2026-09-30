@@ -7,7 +7,7 @@ Chrome extension that archives or trashes the selected or hovered conversation i
 - Archive the active conversation with `Ctrl+Shift+Y` (`Command+Shift+Y` on macOS)
 - Move the active conversation to trash with `Ctrl+Shift+D` (`Command+Shift+D` on macOS)
 - Show Archive and Trash shortcut pills on hovered and focused conversations
-- Open conversations immediately when they are hovered or focused
+- Optionally open conversations immediately when they are hovered or focused
 - Popup UI that shows the effective Chrome shortcut assignments
 - Configurable automatic confirmation for the native Move to trash dialog
 - Language-agnostic menu targeting through Google Messages `data-e2e-*` attributes, with English text fallback
@@ -35,6 +35,14 @@ Chrome controls extension keyboard shortcuts. Open the extension popup or go to 
 The popup's **Automatically confirm Move to trash** setting controls whether a
 trash shortcut or pill automatically confirms Google Messages' native dialog.
 It is enabled by default.
+
+## Configure conversation opening
+
+The popup's **Open conversations on hover or focus** setting controls whether
+hovering or tabbing to a conversation opens it. It is disabled by default, so
+these interactions display shortcut pills without marking unread conversations
+as read. Clicking a conversation or pressing Enter uses Google Messages'
+native behavior.
 
 If Chrome or the operating system already uses a suggested shortcut, Chrome may leave that command unassigned until you choose a different key combination.
 
