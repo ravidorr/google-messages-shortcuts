@@ -6,6 +6,8 @@ describe('popup entry', () => {
       <ul id="shortcut-list"></ul>
       <p id="shortcut-warning" hidden></p>
       <a id="shortcuts-link" href="#">shortcuts</a>
+      <input id="auto-confirm-trash" type="checkbox">
+      <label for="auto-confirm-trash">Automatically confirm Move to trash</label>
     `;
 
     globalThis.chrome = {
@@ -17,6 +19,12 @@ describe('popup entry', () => {
       },
       tabs: {
         create: vi.fn(async () => ({}))
+      },
+      storage: {
+        local: {
+          get: vi.fn(async () => ({})),
+          set: vi.fn(async () => {})
+        }
       }
     };
   });
@@ -29,6 +37,7 @@ describe('popup entry', () => {
 
     expect(document.querySelectorAll('.shortcut-item')).toHaveLength(2);
     expect(document.getElementById('shortcut-warning').hidden).toBe(false);
+    expect(document.getElementById('auto-confirm-trash').checked).toBe(true);
   });
 
   it('logs popup initialization failures', async () => {
@@ -43,6 +52,12 @@ describe('popup entry', () => {
       },
       tabs: {
         create: vi.fn(async () => ({}))
+      },
+      storage: {
+        local: {
+          get: vi.fn(async () => ({})),
+          set: vi.fn(async () => {})
+        }
       }
     };
 
@@ -50,6 +65,8 @@ describe('popup entry', () => {
       <ul id="shortcut-list"></ul>
       <p id="shortcut-warning" hidden></p>
       <a id="shortcuts-link" href="#">shortcuts</a>
+      <input id="auto-confirm-trash" type="checkbox">
+      <label for="auto-confirm-trash">Automatically confirm Move to trash</label>
     `;
 
     await import('../../popup.js');

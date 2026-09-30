@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Messages Shortcut Actions",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "Use shortcuts to Archive or Trash active conversations in Google Messages.",
   "icons": {
     "16": "icons/icon16.png",
@@ -10,6 +10,7 @@
     "128": "icons/icon128.png"
   },
   "permissions": [
+    "storage",
     "tabs"
   ],
   "host_permissions": [

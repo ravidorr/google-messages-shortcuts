@@ -1,4 +1,5 @@
 import { COMMAND_ARCHIVE, COMMAND_TRASH } from '../shared/commands.js';
+import { isTrashConfirmationEnabled } from '../shared/trash-confirmation-preference.js';
 import { findConversationRow, findRowMenuButton } from './conversation-target.js';
 import { MENU_TEXT, SELECTORS } from './google-messages-dom.js';
 import { waitForElement, waitForSelector } from './wait-for-element.js';
@@ -30,16 +31,24 @@ async function clickMenuAction(documentRoot, primarySelector, fallbackText) {
   }
 }
 
-async function confirmTrash(documentRoot) {
+function handleTrashConfirmation(confirmButton, shouldConfirm) {
+  if (shouldConfirm) {
+    confirmButton.click();
+  } else {
+    confirmButton.focus();
+  }
+
+  return { ok: true };
+}
+
+async function confirmTrash(documentRoot, shouldConfirm = true) {
   try {
     const confirmButton = await waitForSelector(
       documentRoot,
       SELECTORS.trashConfirmButton
     );
 
-    confirmButton.click();
-
-    return { ok: true };
+    return handleTrashConfirmation(confirmButton, shouldConfirm);
   } catch (_primaryError) {
     try {
       const fallbackButton = await waitForElement(
@@ -48,9 +57,7 @@ async function confirmTrash(documentRoot) {
         MENU_TEXT.trash
       );
 
-      fallbackButton.click();
-
-      return { ok: true };
+      return handleTrashConfirmation(fallbackButton, shouldConfirm);
     } catch (fallbackError) {
       return {
         ok: false,
@@ -64,7 +71,8 @@ export async function runConversationAction(
   documentRoot,
   command,
   selectors = SELECTORS,
-  targetConversationRow
+  targetConversationRow,
+  chromeApi = chrome
 ) {
   const conversationRow = targetConversationRow || findConversationRow(documentRoot, selectors);
 
@@ -99,6 +107,10 @@ export async function runConversationAction(
 
     if (!trashResult.ok) {
       return trashResult;
+    }
+
+    if (!await isTrashConfirmationEnabled(chromeApi)) {
+      return confirmTrash(documentRoot, false);
     }
 
     return confirmTrash(documentRoot);
