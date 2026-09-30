@@ -16,9 +16,9 @@ export default defineConfig({
         'src/**/*.js'
       ],
       thresholds: {
-        lines: 90,
+        lines: 100,
         branches: 100,
-        statements: 90,
+        statements: 100,
         functions: 100
       }
     }
