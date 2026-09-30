@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.5.1 - 2026-09-30
+
+### Fixed
+
+- Prevent duplicate shortcut-pill removal during nested pointer events
+
 ## 1.5.0 - 2026-09-30
 
 ### Added

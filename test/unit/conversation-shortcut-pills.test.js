@@ -394,6 +394,46 @@ describe('conversation shortcut pills', () => {
     expect(row.hasAttribute('data-messages-shortcuts-pill-host')).toBe(false);
   });
 
+  it('removes pills once when a pointerout handler runs re-entrantly', async () => {
+    const row = createConversationRow();
+    document.body.append(row);
+
+    disconnect = installConversationShortcutPills({
+      documentRoot: document,
+      getShortcutLabels: vi.fn(async () => ({
+        archive: 'Ctrl+Shift+Y',
+        trash: 'Ctrl+Shift+D'
+      }))
+    });
+    row.dispatchEvent(new Event('pointerover', { bubbles: true }));
+
+    await vi.waitFor(() => {
+      expect(row.querySelector('[data-messages-shortcuts-pill-group]')).not.toBeNull();
+    });
+    const pillGroup = row.querySelector('[data-messages-shortcuts-pill-group]');
+    const nativeRemove = pillGroup.remove.bind(pillGroup);
+    let removeCalls = 0;
+    vi.spyOn(pillGroup, 'remove').mockImplementation(() => {
+      removeCalls += 1;
+
+      if (removeCalls === 1) {
+        row.dispatchEvent(new Event('pointerout', { bubbles: true }));
+
+        if (!pillGroup.parentElement) {
+          throw new DOMException('The pill group was already removed.', 'NotFoundError');
+        }
+      }
+
+      nativeRemove();
+    });
+
+    expect(() => {
+      row.dispatchEvent(new Event('pointerout', { bubbles: true }));
+    }).not.toThrow();
+    expect(removeCalls).toBe(1);
+    expect(row.querySelector('[data-messages-shortcuts-pill-group]')).toBeNull();
+  });
+
   it('removes pills when the pointer leaves an unfocused row through a pill', async () => {
     const row = createConversationRow();
     document.body.append(row);
