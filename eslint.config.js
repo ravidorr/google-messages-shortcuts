@@ -70,7 +70,9 @@ export default [
   {
     ignores: [
       'node_modules/**',
-      'coverage/**'
+      'coverage/**',
+      'dist/**',
+      'release/**'
     ]
   }
 ];

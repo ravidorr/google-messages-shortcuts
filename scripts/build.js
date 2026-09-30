@@ -1,10 +1,10 @@
 import { cp, mkdir, rm } from 'node:fs/promises';
 import path from 'node:path';
+import { build } from 'esbuild';
 import { generateIcons } from './generate-icons.js';
 
 export const BUILD_PATHS = [
   'background.js',
-  'content.js',
   'icons',
   'manifest.json',
   'popup.css',
@@ -22,6 +22,13 @@ export async function buildExtension(sourceDirectory, outputDirectory) {
     path.join(outputDirectory, buildPath),
     { recursive: true }
   )));
+  await build({
+    bundle: true,
+    entryPoints: [path.join(sourceDirectory, 'content.js')],
+    format: 'iife',
+    outfile: path.join(outputDirectory, 'content.js'),
+    platform: 'browser'
+  });
   await generateIcons(path.join(outputDirectory, 'icons'));
 }
 
