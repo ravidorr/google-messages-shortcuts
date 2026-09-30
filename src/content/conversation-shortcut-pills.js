@@ -124,6 +124,7 @@ export function installConversationShortcutPills({
   const style = addStyles(documentRoot);
   const focusedRows = new WeakSet();
   const hoveredRows = new WeakSet();
+  const removingPillsFromRows = new WeakSet();
   let shortcutLabelsPromise;
 
   function getLabels() {
@@ -175,8 +176,18 @@ export function installConversationShortcutPills({
   }
 
   function removePills(conversationRow) {
-    conversationRow?.querySelector(PILL_GROUP_SELECTOR)?.remove();
-    conversationRow?.removeAttribute(PILL_HOST_ATTRIBUTE);
+    if (!conversationRow || removingPillsFromRows.has(conversationRow)) {
+      return;
+    }
+
+    removingPillsFromRows.add(conversationRow);
+
+    try {
+      conversationRow.querySelector(PILL_GROUP_SELECTOR)?.remove();
+      conversationRow.removeAttribute(PILL_HOST_ATTRIBUTE);
+    } finally {
+      removingPillsFromRows.delete(conversationRow);
+    }
   }
 
   async function openConversation(conversationRow) {
