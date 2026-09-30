@@ -42,8 +42,18 @@ function packageLockFile(version, rootPackageVersion = version) {
   });
 }
 
+function gitSafeEnvironment() {
+  return Object.fromEntries(
+    Object.entries(process.env).filter(([name]) => !name.startsWith('GIT_'))
+  );
+}
+
 async function runScript(scriptName, args = [], cwd = repositoryRoot) {
-  return execFileAsync(process.execPath, [scriptPath(scriptName), ...args], { cwd });
+  return execFileAsync(
+    process.execPath,
+    [scriptPath(scriptName), ...args],
+    { cwd, env: gitSafeEnvironment() }
+  );
 }
 
 async function importEntrypoint(scriptName, args = []) {
@@ -69,6 +79,13 @@ async function waitForEntrypoint() {
 
 async function withWorkingDirectory(directory, callback) {
   const originalDirectory = process.cwd();
+  const gitEnvironment = Object.fromEntries(
+    Object.entries(process.env).filter(([name]) => name.startsWith('GIT_'))
+  );
+
+  for (const name of Object.keys(gitEnvironment)) {
+    delete process.env[name];
+  }
 
   process.chdir(directory);
 
@@ -76,11 +93,12 @@ async function withWorkingDirectory(directory, callback) {
     return await callback();
   } finally {
     process.chdir(originalDirectory);
+    Object.assign(process.env, gitEnvironment);
   }
 }
 
 async function runGit(cwd, args) {
-  return execFileAsync('git', args, { cwd });
+  return execFileAsync('git', args, { cwd, env: gitSafeEnvironment() });
 }
 
 async function writeReleaseFiles(projectDirectory, {

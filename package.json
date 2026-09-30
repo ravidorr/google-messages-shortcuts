@@ -1,1 +1,63 @@
-{"version":"1.0.0"}
+{
+  "name": "google-messages-shortcuts",
+  "version": "1.1.0",
+  "description": "Use shortcuts to Archive or Trash active conversations in Google Messages.",
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.js",
+    "clean": "node scripts/clean.js",
+    "generate:icons": "node scripts/generate-icons.js",
+    "lint": "npm run lint:js && npm run lint:html && npm run lint:md",
+    "lint:js": "eslint . --max-warnings=0",
+    "lint:html": "htmlhint popup.html",
+    "lint:md": "markdownlint-cli2 \"**/*.md\" \"#node_modules\"",
+    "package": "npm run build && node scripts/package.js",
+    "test": "vitest run --coverage",
+    "test:watch": "vitest",
+    "verify:version-bump": "node scripts/validate-version-bump.js origin/main",
+    "prepare": "husky"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ravidorr/google-messages-shortcuts.git"
+  },
+  "keywords": [
+    "chrome-extension",
+    "google-messages",
+    "keyboard-shortcuts"
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ravidorr/google-messages-shortcuts/issues"
+  },
+  "homepage": "https://github.com/ravidorr/google-messages-shortcuts#readme",
+  "devDependencies": {
+    "@eslint/js": "^9.39.2",
+    "@vitest/coverage-v8": "^3.2.4",
+    "archiver": "^8.0.0",
+    "esbuild": "^0.28.2",
+    "eslint": "^9.39.2",
+    "eslint-plugin-no-em-dash": "^1.0.0",
+    "eslint-plugin-no-emoji": "^2.0.2",
+    "globals": "^17.0.0",
+    "htmlhint": "^1.8.0",
+    "husky": "^9.1.7",
+    "jsdom": "^26.1.0",
+    "jszip": "^3.10.2",
+    "lint-staged": "^16.2.7",
+    "markdownlint-cli2": "^0.20.0",
+    "sharp": "^0.34.3",
+    "vitest": "^3.2.4"
+  },
+  "lint-staged": {
+    "*.js": [
+      "eslint --fix"
+    ],
+    "popup.html": [
+      "htmlhint"
+    ],
+    "**/*.md": [
+      "markdownlint-cli2"
+    ]
+  }
+}
