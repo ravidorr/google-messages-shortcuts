@@ -1,7 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { COMMAND_ARCHIVE, COMMAND_MARK_UNREAD, COMMAND_TRASH } from '../../src/shared/commands.js';
 import { getCommandIcon } from '../../src/shared/command-icons.js';
-import { installConversationShortcutPills, safeDomMutation } from '../../src/content/conversation-shortcut-pills.js';
+import {
+  installConversationShortcutPills,
+  resetConversationShortcutPillInstallationsForTests,
+  safeDomMutation
+} from '../../src/content/conversation-shortcut-pills.js';
 
 function createConversationRow({ focused = false, unread = true } = {}) {
   const row = document.createElement('mws-conversation-list-item');
@@ -1230,6 +1234,41 @@ describe('conversation shortcut pills', () => {
 
     expect(getShortcutLabels).toHaveBeenCalledTimes(2);
     warning.mockRestore();
+  });
+
+  it('ignores stale disconnect callbacks from prior installations', () => {
+    const firstCallback = installConversationShortcutPills({
+      documentRoot: document,
+      getShortcutLabels: vi.fn(async () => ({
+        archive: 'Ctrl+Shift+Y',
+        trash: 'Ctrl+Shift+D'
+      }))
+    });
+    const staleCallback = installConversationShortcutPills({
+      documentRoot: document,
+      getShortcutLabels: vi.fn(async () => ({
+        archive: 'Ctrl+Shift+Y',
+        trash: 'Ctrl+Shift+D'
+      }))
+    });
+
+    resetConversationShortcutPillInstallationsForTests(document);
+    firstCallback();
+
+    disconnect = installConversationShortcutPills({
+      documentRoot: document,
+      getShortcutLabels: vi.fn(async () => ({
+        archive: 'Ctrl+Shift+Y',
+        trash: 'Ctrl+Shift+D'
+      }))
+    });
+
+    staleCallback();
+
+    expect(document.querySelector('[data-messages-shortcuts-pill-styles]')).not.toBeNull();
+
+    disconnect();
+    disconnect = undefined;
   });
 
   it('ignores disconnect calls after the final installation is released', () => {

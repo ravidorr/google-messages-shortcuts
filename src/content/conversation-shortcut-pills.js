@@ -228,19 +228,31 @@ function createPillGroup(documentRoot, shortcutLabels, runAction, conversationRo
   return group;
 }
 
-function releaseInstallation(documentRoot) {
-  const installation = installationRegistry.get(documentRoot);
+function createReleaseCallback(documentRoot, releaseToken) {
+  let released = false;
 
-  if (!installation) {
-    return;
-  }
+  return () => {
+    if (released) {
+      return;
+    }
 
-  installation.refCount -= 1;
+    released = true;
 
-  if (installation.refCount <= 0) {
-    installation.disconnect();
-    installationRegistry.delete(documentRoot);
-  }
+    const installation = installationRegistry.get(documentRoot);
+
+    if (!installation) {
+      return;
+    }
+
+    if (!installation.tokens.delete(releaseToken)) {
+      return;
+    }
+
+    if (installation.tokens.size === 0) {
+      installation.disconnect();
+      installationRegistry.delete(documentRoot);
+    }
+  };
 }
 
 function createInstallation({
@@ -486,26 +498,27 @@ function createInstallation({
   };
 }
 
+export function resetConversationShortcutPillInstallationsForTests(documentRoot = document) {
+  installationRegistry.delete(documentRoot);
+}
+
 export function installConversationShortcutPills(options = {}) {
   const documentRoot = options.documentRoot ?? document;
+  const releaseToken = Symbol('conversation-shortcut-pill-installation');
   const existingInstallation = installationRegistry.get(documentRoot);
 
   if (existingInstallation) {
-    existingInstallation.refCount += 1;
+    existingInstallation.tokens.add(releaseToken);
 
-    return () => {
-      releaseInstallation(documentRoot);
-    };
+    return createReleaseCallback(documentRoot, releaseToken);
   }
 
   const disconnect = createInstallation(options);
 
   installationRegistry.set(documentRoot, {
-    refCount: 1,
-    disconnect
+    disconnect,
+    tokens: new Set([releaseToken])
   });
 
-  return () => {
-    releaseInstallation(documentRoot);
-  };
+  return createReleaseCallback(documentRoot, releaseToken);
 }
