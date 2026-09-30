@@ -1,4 +1,4 @@
-import { readFile } from 'node:fs/promises';
+import { readdir, readFile } from 'node:fs/promises';
 import path from 'node:path';
 import JSZip from 'jszip';
 
@@ -12,11 +12,7 @@ export const REQUIRED_PACKAGE_ENTRIES = [
   'icons/icon16.png',
   'icons/icon32.png',
   'icons/icon48.png',
-  'icons/icon128.png',
-  'src/background/command-listener.js',
-  'src/background/shortcut-label-listener.js',
-  'src/popup/init-popup.js',
-  'src/shared/commands.js'
+  'icons/icon128.png'
 ];
 
 function normalizeArchiveEntry(entryName) {
@@ -29,14 +25,37 @@ export function getMissingPackageEntries(entries, requiredEntries = REQUIRED_PAC
   return requiredEntries.filter((entry) => !normalizedEntries.has(entry));
 }
 
-export async function validatePackageArtifact(archivePath) {
+async function collectRelativeFiles(directory, baseDirectory = directory) {
+  const entries = await readdir(directory, { withFileTypes: true });
+  const files = await Promise.all(entries.map(async (entry) => {
+    const entryPath = path.join(directory, entry.name);
+
+    if (entry.isDirectory()) {
+      return collectRelativeFiles(entryPath, baseDirectory);
+    }
+
+    return [path.relative(baseDirectory, entryPath).replace(/\\/g, '/')];
+  }));
+
+  return files.flat();
+}
+
+export async function validatePackageArtifact(archivePath, distDirectory = path.join(process.cwd(), 'dist')) {
   const archiveBuffer = await readFile(archivePath);
   const archive = await JSZip.loadAsync(archiveBuffer);
-  const entries = Object.keys(archive.files).filter((entry) => !archive.files[entry].dir);
-  const missingEntries = getMissingPackageEntries(entries);
+  const archiveEntries = Object.keys(archive.files).filter((entry) => !archive.files[entry].dir);
+  const normalizedArchiveEntries = archiveEntries.map(normalizeArchiveEntry);
+  const missingRequiredEntries = getMissingPackageEntries(normalizedArchiveEntries);
 
-  if (missingEntries.length > 0) {
-    throw new Error(`Package artifact is missing required entries: ${missingEntries.join(', ')}`);
+  if (missingRequiredEntries.length > 0) {
+    throw new Error(`Package artifact is missing required entries: ${missingRequiredEntries.join(', ')}`);
+  }
+
+  const distFiles = await collectRelativeFiles(distDirectory);
+  const missingDistFiles = getMissingPackageEntries(normalizedArchiveEntries, distFiles);
+
+  if (missingDistFiles.length > 0) {
+    throw new Error(`Package artifact is missing built distribution files: ${missingDistFiles.join(', ')}`);
   }
 
   const manifest = JSON.parse(await archive.file('manifest.json').async('string'));
@@ -47,7 +66,8 @@ export async function validatePackageArtifact(archivePath) {
 
   return {
     archivePath,
-    entryCount: entries.length
+    entryCount: archiveEntries.length,
+    distFileCount: distFiles.length
   };
 }
 

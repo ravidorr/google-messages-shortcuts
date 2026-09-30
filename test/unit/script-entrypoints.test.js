@@ -435,10 +435,11 @@ describe('script entrypoint coverage', () => {
   it('covers successful package artifact validation in-process', async () => {
     const projectDirectory = await mkdtemp(path.join(tmpdir(), 'package-artifact-cli-'));
     temporaryDirectories.push(projectDirectory);
+    const distDirectory = path.join(projectDirectory, 'dist');
     const releaseDirectory = path.join(projectDirectory, 'release');
     const archivePath = path.join(releaseDirectory, 'google-messages-shortcuts.zip');
     const archive = new JSZip();
-    const requiredEntries = [
+    const distEntries = [
       'background.js',
       'content.js',
       'manifest.json',
@@ -449,19 +450,19 @@ describe('script entrypoint coverage', () => {
       'icons/icon32.png',
       'icons/icon48.png',
       'icons/icon128.png',
-      'src/background/command-listener.js',
-      'src/background/shortcut-label-listener.js',
-      'src/popup/init-popup.js',
-      'src/shared/commands.js'
+      'src/background/command-listener.js'
     ];
 
     await mkdir(releaseDirectory, { recursive: true });
+    await mkdir(path.join(distDirectory, 'src/background'), { recursive: true });
 
-    for (const entry of requiredEntries) {
-      archive.file(
-        entry,
-        entry === 'manifest.json' ? '{"manifest_version":3}' : entry
-      );
+    for (const entry of distEntries) {
+      const contents = entry === 'manifest.json' ? '{"manifest_version":3}' : entry;
+      const entryPath = path.join(distDirectory, entry);
+
+      archive.file(entry, contents);
+      await mkdir(path.dirname(entryPath), { recursive: true });
+      await writeFile(entryPath, contents);
     }
 
     await writeFile(archivePath, await archive.generateAsync({ type: 'nodebuffer' }));
