@@ -8,6 +8,7 @@ All notable changes to this project will be documented in this file.
 
 - `npm run build` to produce a loadable extension in `dist/`
 - `generate:icons`, `clean`, and `package` scripts for extension artifacts
+- Pull request coverage reports updated by GitHub Actions
 - Pre-commit validation blocking direct commits to `main`
 - Pre-commit validation requiring a new changelog entry or synchronized version bumps
 

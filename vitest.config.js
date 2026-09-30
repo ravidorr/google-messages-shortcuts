@@ -6,6 +6,7 @@ export default defineConfig({
     setupFiles: ['./test/setup.js'],
     coverage: {
       provider: 'v8',
+      reporter: ['text', 'json-summary'],
       include: [
         'background.js',
         'content.js',
