@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.1.3 - 2026-09-30
+
+### Changed
+
+- Require complete line and statement coverage in the test suite
+
+## 1.1.2 - 2026-09-30
+
+### Fixed
+
+- Make the coverage-report path assertion independent of checkout depth
+
+## 1.1.1 - 2026-09-30
+
+### Changed
+
+- Enforce 100% branch coverage in the test suite
+
 ## 1.1.0 - 2026-09-30
 
 ### Added
