@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.5.0 - 2026-09-30
+
+### Added
+
+- Configurable opening of conversations on hover or focus, disabled by default
+
 ## 1.4.1 - 2026-09-30
 
 ### Changed

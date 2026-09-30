@@ -1,6 +1,7 @@
 import { runConversationAction } from './conversation-action.js';
 import { SELECTORS } from './google-messages-dom.js';
 import { COMMAND_ARCHIVE, COMMAND_TRASH } from '../shared/commands.js';
+import { isConversationOpeningEnabled } from '../shared/conversation-open-preference.js';
 import { MESSAGE_GET_CONVERSATION_SHORTCUT_LABELS } from '../shared/shortcut-labels.js';
 
 const PILL_GROUP_SELECTOR = '[data-messages-shortcuts-pill-group]';
@@ -117,7 +118,8 @@ export function installConversationShortcutPills({
     command,
     SELECTORS,
     conversationRow
-  )
+  ),
+  isAutoOpenEnabled = isConversationOpeningEnabled
 } = {}) {
   const style = addStyles(documentRoot);
   const focusedRows = new WeakSet();
@@ -177,7 +179,11 @@ export function installConversationShortcutPills({
     conversationRow?.removeAttribute(PILL_HOST_ATTRIBUTE);
   }
 
-  function openConversation(conversationRow) {
+  async function openConversation(conversationRow) {
+    if (!await isAutoOpenEnabled()) {
+      return;
+    }
+
     const conversationLink = conversationRow?.querySelector('a[aria-selected]')
       || conversationRow?.querySelector('a');
 
@@ -189,7 +195,7 @@ export function installConversationShortcutPills({
 
     if (conversationRow && !isWithinConversationRow(event, conversationRow)) {
       hoveredRows.add(conversationRow);
-      openConversation(conversationRow);
+      void openConversation(conversationRow);
       void showPills(conversationRow);
     }
   }
@@ -213,7 +219,7 @@ export function installConversationShortcutPills({
       focusedRows.add(conversationRow);
 
       if (!isWithinConversationRow(event, conversationRow)) {
-        openConversation(conversationRow);
+        void openConversation(conversationRow);
       }
 
       void showPills(conversationRow);
@@ -237,7 +243,7 @@ export function installConversationShortcutPills({
       if (record.target instanceof Element) {
         if (isFocusedConversationRow(record.target)) {
           if (!focusedRows.has(record.target) && !hoveredRows.has(record.target)) {
-            openConversation(record.target);
+            void openConversation(record.target);
           }
 
           void showPills(record.target);
