@@ -448,7 +448,11 @@ describe('script entrypoint coverage', () => {
       'icons/icon16.png',
       'icons/icon32.png',
       'icons/icon48.png',
-      'icons/icon128.png'
+      'icons/icon128.png',
+      'src/background/command-listener.js',
+      'src/background/shortcut-label-listener.js',
+      'src/popup/init-popup.js',
+      'src/shared/commands.js'
     ];
 
     await mkdir(releaseDirectory, { recursive: true });

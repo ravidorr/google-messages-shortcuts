@@ -12,7 +12,11 @@ export const REQUIRED_PACKAGE_ENTRIES = [
   'icons/icon16.png',
   'icons/icon32.png',
   'icons/icon48.png',
-  'icons/icon128.png'
+  'icons/icon128.png',
+  'src/background/command-listener.js',
+  'src/background/shortcut-label-listener.js',
+  'src/popup/init-popup.js',
+  'src/shared/commands.js'
 ];
 
 function normalizeArchiveEntry(entryName) {
