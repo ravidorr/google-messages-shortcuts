@@ -6,6 +6,7 @@ Chrome extension that archives or trashes the selected or hovered conversation i
 
 - Archive the active conversation with `Ctrl+Shift+Y` (`Command+Shift+Y` on macOS)
 - Move the active conversation to trash with `Ctrl+Shift+D` (`Command+Shift+D` on macOS)
+- Show Archive and Trash shortcut pills on hovered and focused conversations
 - Popup UI that shows the effective Chrome shortcut assignments
 - Language-agnostic menu targeting through Google Messages `data-e2e-*` attributes, with English text fallback
 

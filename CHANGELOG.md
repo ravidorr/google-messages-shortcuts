@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.2.0 - 2026-09-30
+
+### Added
+
+- Show archive and trash shortcut pills on hovered and focused Google Messages conversations
+
 ## 1.1.4 - 2026-09-30
 
 ### Changed

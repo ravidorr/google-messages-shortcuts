@@ -60,8 +60,13 @@ async function confirmTrash(documentRoot) {
   }
 }
 
-export async function runConversationAction(documentRoot, command, selectors = SELECTORS) {
-  const conversationRow = findConversationRow(documentRoot, selectors);
+export async function runConversationAction(
+  documentRoot,
+  command,
+  selectors = SELECTORS,
+  targetConversationRow
+) {
+  const conversationRow = targetConversationRow || findConversationRow(documentRoot, selectors);
 
   if (!conversationRow) {
     return { ok: false, reason: 'no-target' };
