@@ -1,5 +1,5 @@
 import { populateShortcutList } from './popup-view.js';
-import { COMMAND_ARCHIVE, COMMAND_TRASH } from '../shared/commands.js';
+import { COMMAND_ARCHIVE, COMMAND_MARK_UNREAD, COMMAND_TRASH } from '../shared/commands.js';
 import {
   isConversationOpeningEnabled,
   setConversationOpeningEnabled
@@ -9,7 +9,7 @@ import {
   setTrashConfirmationEnabled
 } from '../shared/trash-confirmation-preference.js';
 
-const SHORTCUT_COMMANDS = [COMMAND_ARCHIVE, COMMAND_TRASH];
+const SHORTCUT_COMMANDS = [COMMAND_ARCHIVE, COMMAND_TRASH, COMMAND_MARK_UNREAD];
 
 export function updateShortcutWarning(commands, documentRoot = document) {
   const warning = documentRoot.getElementById('shortcut-warning');

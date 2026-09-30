@@ -7,7 +7,8 @@ import {
 function getFallbackLabels() {
   return {
     archive: UNASSIGNED_SHORTCUT_LABEL,
-    trash: UNASSIGNED_SHORTCUT_LABEL
+    trash: UNASSIGNED_SHORTCUT_LABEL,
+    markUnread: UNASSIGNED_SHORTCUT_LABEL
   };
 }
 

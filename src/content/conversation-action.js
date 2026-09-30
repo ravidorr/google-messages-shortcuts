@@ -1,7 +1,9 @@
-import { COMMAND_ARCHIVE, COMMAND_TRASH } from '../shared/commands.js';
+import { COMMAND_ARCHIVE, COMMAND_MARK_UNREAD, COMMAND_TRASH } from '../shared/commands.js';
+import { isConversationRead } from './conversation-read-state.js';
 import { isTrashConfirmationEnabled } from '../shared/trash-confirmation-preference.js';
 import { findConversationRow, findRowMenuButton } from './conversation-target.js';
 import { MENU_TEXT, SELECTORS } from './google-messages-dom.js';
+import { beginMenuAction, endMenuAction } from './menu-action-overlay.js';
 import { waitForElement, waitForSelector } from './wait-for-element.js';
 
 async function clickMenuAction(documentRoot, primarySelector, fallbackText) {
@@ -86,35 +88,51 @@ export async function runConversationAction(
     return { ok: false, reason: 'menu-button-not-found' };
   }
 
-  menuButton.click();
-
-  if (command === COMMAND_ARCHIVE) {
-    const archiveResult = await clickMenuAction(
-      documentRoot,
-      selectors.archiveMenuItem,
-      MENU_TEXT.archive
-    );
-
-    return archiveResult;
+  if (command === COMMAND_MARK_UNREAD && !isConversationRead(conversationRow, selectors)) {
+    return { ok: false, reason: 'already-unread' };
   }
 
-  if (command === COMMAND_TRASH) {
-    const trashResult = await clickMenuAction(
-      documentRoot,
-      selectors.trashMenuItem,
-      MENU_TEXT.trash
-    );
+  beginMenuAction(documentRoot);
 
-    if (!trashResult.ok) {
-      return trashResult;
+  try {
+    menuButton.click();
+
+    if (command === COMMAND_ARCHIVE) {
+      return await clickMenuAction(
+        documentRoot,
+        selectors.archiveMenuItem,
+        MENU_TEXT.archive
+      );
     }
 
-    if (!await isTrashConfirmationEnabled(chromeApi)) {
-      return confirmTrash(documentRoot, false);
+    if (command === COMMAND_TRASH) {
+      const trashResult = await clickMenuAction(
+        documentRoot,
+        selectors.trashMenuItem,
+        MENU_TEXT.trash
+      );
+
+      if (!trashResult.ok) {
+        return trashResult;
+      }
+
+      if (!await isTrashConfirmationEnabled(chromeApi)) {
+        return confirmTrash(documentRoot, false);
+      }
+
+      return confirmTrash(documentRoot);
     }
 
-    return confirmTrash(documentRoot);
+    if (command === COMMAND_MARK_UNREAD) {
+      return await clickMenuAction(
+        documentRoot,
+        selectors.markUnreadMenuItem,
+        MENU_TEXT.markUnread
+      );
+    }
+
+    return { ok: false, reason: 'unknown-command' };
+  } finally {
+    endMenuAction(documentRoot);
   }
-
-  return { ok: false, reason: 'unknown-command' };
 }

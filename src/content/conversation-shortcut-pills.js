@@ -1,17 +1,37 @@
 import { runConversationAction } from './conversation-action.js';
+import { isConversationRead } from './conversation-read-state.js';
 import { SELECTORS } from './google-messages-dom.js';
-import { COMMAND_ARCHIVE, COMMAND_TRASH } from '../shared/commands.js';
+import { COMMAND_ARCHIVE, COMMAND_MARK_UNREAD, COMMAND_TRASH } from '../shared/commands.js';
 import { isConversationOpeningEnabled } from '../shared/conversation-open-preference.js';
-import { MESSAGE_GET_CONVERSATION_SHORTCUT_LABELS } from '../shared/shortcut-labels.js';
+import {
+  MESSAGE_GET_CONVERSATION_SHORTCUT_LABELS,
+  UNASSIGNED_SHORTCUT_LABEL
+} from '../shared/shortcut-labels.js';
 
 const PILL_GROUP_SELECTOR = '[data-messages-shortcuts-pill-group]';
 const STYLE_SELECTOR = 'style[data-messages-shortcuts-pill-styles]';
 const PILL_HOST_ATTRIBUTE = 'data-messages-shortcuts-pill-host';
 
-const PILL_DEFINITIONS = [
+const BASE_PILL_DEFINITIONS = [
   { command: COMMAND_ARCHIVE, label: 'Archive', shortcutKey: 'archive' },
   { command: COMMAND_TRASH, label: 'Trash', shortcutKey: 'trash' }
 ];
+
+const MARK_UNREAD_PILL_DEFINITION = {
+  command: COMMAND_MARK_UNREAD,
+  label: 'Mark as unread',
+  shortcutKey: 'markUnread'
+};
+
+function getPillDefinitions(conversationRow) {
+  const definitions = [...BASE_PILL_DEFINITIONS];
+
+  if (isConversationRead(conversationRow)) {
+    definitions.push(MARK_UNREAD_PILL_DEFINITION);
+  }
+
+  return definitions;
+}
 
 function addStyles(documentRoot) {
   const existingStyle = documentRoot.querySelector(STYLE_SELECTOR);
@@ -55,6 +75,40 @@ function isFocusedConversationRow(conversationRow) {
   return conversationRow.getAttribute('is-focused') === 'true';
 }
 
+function shouldShowPills(conversationRow, focusedRows, hoveredRows) {
+  return isFocusedConversationRow(conversationRow)
+    || focusedRows.has(conversationRow)
+    || hoveredRows.has(conversationRow);
+}
+
+function getConversationRowFromNode(node) {
+  if (!(node instanceof Element)) {
+    return null;
+  }
+
+  return node.closest(SELECTORS.conversationRow);
+}
+
+function isUnreadMarkerElement(node) {
+  return node?.nodeType === 1 && node.matches(SELECTORS.unreadConversationMarker);
+}
+
+function getConversationRowForUnreadMutation(record) {
+  if (record.type === 'attributes' && record.attributeName === 'data-e2e-is-unread') {
+    return getConversationRowFromNode(record.target);
+  }
+
+  if (record.type === 'childList') {
+    for (const node of [...record.addedNodes, ...record.removedNodes]) {
+      if (isUnreadMarkerElement(node)) {
+        return getConversationRowFromNode(record.target);
+      }
+    }
+  }
+
+  return null;
+}
+
 function getConversationRow(event, { allowPillGroup = false } = {}) {
   if (!(event.target instanceof Element)) {
     return null;
@@ -71,13 +125,21 @@ function isWithinConversationRow(event, conversationRow) {
   return event.relatedTarget instanceof Node && conversationRow.contains(event.relatedTarget);
 }
 
+function formatPillLabel(definition, shortcut) {
+  if (shortcut === UNASSIGNED_SHORTCUT_LABEL) {
+    return definition.label;
+  }
+
+  return `${definition.label} ${shortcut}`;
+}
+
 function createPill(documentRoot, definition, shortcut, runAction, conversationRow) {
   const pill = documentRoot.createElement('button');
   pill.type = 'button';
   pill.setAttribute('data-messages-shortcuts-pill', '');
   pill.setAttribute('data-command', definition.command);
   pill.setAttribute('aria-label', `${definition.label} conversation, ${shortcut}`);
-  pill.textContent = `${definition.label} ${shortcut}`;
+  pill.textContent = formatPillLabel(definition, shortcut);
   pill.addEventListener('click', (event) => {
     event.preventDefault();
     event.stopPropagation();
@@ -95,7 +157,7 @@ function createPillGroup(documentRoot, shortcutLabels, runAction, conversationRo
   group.setAttribute('role', 'group');
   group.setAttribute('aria-label', 'Conversation shortcuts');
 
-  for (const definition of PILL_DEFINITIONS) {
+  for (const definition of getPillDefinitions(conversationRow)) {
     group.append(createPill(
       documentRoot,
       definition,
@@ -157,11 +219,7 @@ export function installConversationShortcutPills({
     if (
       !conversationRow.isConnected
       || conversationRow.querySelector(PILL_GROUP_SELECTOR)
-      || (
-        !isFocusedConversationRow(conversationRow)
-        && !focusedRows.has(conversationRow)
-        && !hoveredRows.has(conversationRow)
-      )
+      || !shouldShowPills(conversationRow, focusedRows, hoveredRows)
     ) {
       return;
     }
@@ -170,9 +228,28 @@ export function installConversationShortcutPills({
     conversationRow.append(createPillGroup(
       documentRoot,
       shortcutLabels,
-      runAction,
+      runActionWithRefresh,
       conversationRow
     ));
+  }
+
+  async function refreshPills(conversationRow) {
+    if (!conversationRow || !shouldShowPills(conversationRow, focusedRows, hoveredRows)) {
+      return;
+    }
+
+    removePills(conversationRow);
+    await showPills(conversationRow);
+  }
+
+  async function runActionWithRefresh(command, conversationRow) {
+    const result = await runAction(command, conversationRow);
+
+    if (command === COMMAND_MARK_UNREAD && result?.ok) {
+      await refreshPills(conversationRow);
+    }
+
+    return result;
   }
 
   function removePills(conversationRow) {
@@ -280,6 +357,28 @@ export function installConversationShortcutPills({
     attributeFilter: ['is-focused'],
     subtree: true
   });
+
+  const readStateObserver = new MutationObserver((records) => {
+    const rowsToRefresh = new Set();
+
+    for (const record of records) {
+      const conversationRow = getConversationRowForUnreadMutation(record);
+
+      if (conversationRow?.querySelector(PILL_GROUP_SELECTOR)) {
+        rowsToRefresh.add(conversationRow);
+      }
+    }
+
+    for (const conversationRow of rowsToRefresh) {
+      void refreshPills(conversationRow);
+    }
+  });
+  readStateObserver.observe(documentRoot.body, {
+    attributes: true,
+    attributeFilter: ['data-e2e-is-unread'],
+    childList: true,
+    subtree: true
+  });
   documentRoot.addEventListener('pointerover', handlePointerOver);
   documentRoot.addEventListener('pointerout', handlePointerOut);
   documentRoot.addEventListener('focusin', handleFocusIn);
@@ -293,6 +392,7 @@ export function installConversationShortcutPills({
 
   return () => {
     observer.disconnect();
+    readStateObserver.disconnect();
     documentRoot.removeEventListener('pointerover', handlePointerOver);
     documentRoot.removeEventListener('pointerout', handlePointerOut);
     documentRoot.removeEventListener('focusin', handleFocusIn);

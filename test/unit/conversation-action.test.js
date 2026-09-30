@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { runConversationAction } from '../../src/content/conversation-action.js';
-import { COMMAND_ARCHIVE, COMMAND_TRASH } from '../../src/shared/commands.js';
+import { MENU_ACTION_ATTRIBUTE } from '../../src/content/menu-action-overlay.js';
+import { COMMAND_ARCHIVE, COMMAND_MARK_UNREAD, COMMAND_TRASH } from '../../src/shared/commands.js';
 import * as waitForElement from '../../src/content/wait-for-element.js';
 
 function createConversationFixture() {
@@ -14,6 +15,9 @@ function createConversationFixture() {
     </button>
     <button data-e2e-conversation-delete class="mat-mdc-menu-item">
       <span class="mat-mdc-menu-item-text">Move to trash</span>
+    </button>
+    <button data-e2e-conversation-menu-mark-unread class="mat-mdc-menu-item">
+      <span class="mat-mdc-menu-item-text">Mark as unread</span>
     </button>
     <mat-dialog-container>
       <button data-e2e-action-button-confirm>Move to trash</button>
@@ -37,6 +41,7 @@ function createConversationFixture() {
 describe('runConversationAction', () => {
   beforeEach(() => {
     document.body.innerHTML = '';
+    document.documentElement.removeAttribute(MENU_ACTION_ATTRIBUTE);
     vi.restoreAllMocks();
   });
 
@@ -48,6 +53,7 @@ describe('runConversationAction', () => {
     expect(result.ok).toBe(true);
     expect(fixture.menuButton.click).toHaveBeenCalled();
     expect(fixture.archiveButton.click).toHaveBeenCalled();
+    expect(document.documentElement.hasAttribute(MENU_ACTION_ATTRIBUTE)).toBe(false);
   });
 
   it('archives the conversation row supplied by a shortcut pill', async () => {
@@ -277,6 +283,52 @@ describe('runConversationAction', () => {
       ok: false,
       reason: 'confirmation fallback unavailable'
     });
+  });
+
+  it('marks a read conversation as unread', async () => {
+    const fixture = createConversationFixture();
+    const markUnreadButton = document.querySelector('[data-e2e-conversation-menu-mark-unread]');
+    vi.spyOn(markUnreadButton, 'click');
+
+    const result = await runConversationAction(document, COMMAND_MARK_UNREAD);
+
+    expect(result.ok).toBe(true);
+    expect(fixture.menuButton.click).toHaveBeenCalled();
+    expect(markUnreadButton.click).toHaveBeenCalled();
+  });
+
+  it('returns already-unread when the target conversation is unread', async () => {
+    document.body.innerHTML = `
+      <mws-conversation-list-item>
+        <span data-e2e-is-unread="true"></span>
+        <a aria-selected="true"></a>
+        <button aria-haspopup="menu"></button>
+      </mws-conversation-list-item>
+    `;
+    const menuButton = document.querySelector('button[aria-haspopup="menu"]');
+    vi.spyOn(menuButton, 'click');
+
+    const result = await runConversationAction(document, COMMAND_MARK_UNREAD);
+
+    expect(result).toEqual({ ok: false, reason: 'already-unread' });
+    expect(menuButton.click).not.toHaveBeenCalled();
+    expect(document.documentElement.hasAttribute(MENU_ACTION_ATTRIBUTE)).toBe(false);
+  });
+
+  it('falls back to English mark-unread menu text when data-e2e selectors are absent', async () => {
+    document.body.innerHTML = `
+      <mws-conversation-list-item>
+        <a aria-selected="true"></a>
+        <button aria-haspopup="menu"></button>
+      </mws-conversation-list-item>
+      <button class="mat-mdc-menu-item">Mark as unread</button>
+    `;
+    vi.spyOn(waitForElement, 'waitForSelector')
+      .mockRejectedValueOnce(new Error('mark-unread selector unavailable'));
+
+    const result = await runConversationAction(document, COMMAND_MARK_UNREAD);
+
+    expect(result.ok).toBe(true);
   });
 
   it('returns unknown-command for unsupported actions', async () => {

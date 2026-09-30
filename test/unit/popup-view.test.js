@@ -4,7 +4,7 @@ import {
   populateShortcutList,
   renderShortcutRows
 } from '../../src/popup/popup-view.js';
-import { COMMAND_ARCHIVE, COMMAND_TRASH } from '../../src/shared/commands.js';
+import { COMMAND_ARCHIVE, COMMAND_MARK_UNREAD, COMMAND_TRASH } from '../../src/shared/commands.js';
 
 describe('popup-view', () => {
   beforeEach(() => {
@@ -25,15 +25,17 @@ describe('popup-view', () => {
     });
   });
 
-  it('renders archive and trash rows', () => {
+  it('renders archive, trash, and mark-unread rows', () => {
     const rows = renderShortcutRows([
       { name: COMMAND_ARCHIVE, shortcut: 'Ctrl+Shift+Y' },
-      { name: COMMAND_TRASH, shortcut: '' }
+      { name: COMMAND_TRASH, shortcut: '' },
+      { name: COMMAND_MARK_UNREAD, shortcut: 'Ctrl+Shift+U' }
     ]);
 
-    expect(rows).toHaveLength(2);
+    expect(rows).toHaveLength(3);
     expect(rows[0].shortcut).toBe('Ctrl+Shift+Y');
     expect(rows[1].shortcut).toBe('Not assigned');
+    expect(rows[2].shortcut).toBe('Ctrl+Shift+U');
   });
 
   it('populates the shortcut list in the popup', () => {
@@ -41,9 +43,10 @@ describe('popup-view', () => {
 
     populateShortcutList(container, [
       { name: COMMAND_ARCHIVE, shortcut: 'Ctrl+Shift+Y' },
-      { name: COMMAND_TRASH, shortcut: 'Ctrl+Shift+D' }
+      { name: COMMAND_TRASH, shortcut: 'Ctrl+Shift+D' },
+      { name: COMMAND_MARK_UNREAD, shortcut: 'Ctrl+Shift+U' }
     ]);
 
-    expect(container.querySelectorAll('.shortcut-item')).toHaveLength(2);
+    expect(container.querySelectorAll('.shortcut-item')).toHaveLength(3);
   });
 });
