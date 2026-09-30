@@ -2,7 +2,37 @@
 
 All notable changes to this project will be documented in this file.
 
-## Unreleased
+## 1.0.5 - 2026-09-30
+
+### Changed
+
+- Group existing changelog entries under the extension version in which they shipped
+
+## 1.0.4 - 2026-09-30
+
+### Added
+
+- Replace generated extension artwork with the new product icon
+
+### Fixed
+
+- Generate product icons into custom output directories without requiring a copied source image
+
+## 1.0.3 - 2026-09-30
+
+### Added
+
+- Complete branch coverage for content-script routing failures
+- Keep package-lock metadata synchronized with extension version bumps
+- Block local commits with unsynchronized package-lock metadata
+
+## 1.0.2 - 2026-09-30
+
+### Added
+
+- Branch coverage above 96% with command and conversation failure-path tests
+
+## 1.0.1 - 2026-09-30
 
 ### Added
 
@@ -13,17 +43,8 @@ All notable changes to this project will be documented in this file.
 - Shortcut warning ignores Chrome's unassigned extension activation command
 - Bundled content script compatible with Chrome's classic content-script loader
 - Required synchronized version bumps for every pull request
-- Branch coverage above 96% with command and conversation failure-path tests
-- Complete branch coverage for content-script routing failures
-- Keep package-lock metadata synchronized with extension version bumps
-- Block local commits with unsynchronized package-lock metadata
-- Replace generated extension artwork with the new product icon
 - Pre-commit validation blocking direct commits to `main`
 - Pre-commit validation requiring a new changelog entry or synchronized version bumps
-
-### Fixed
-
-- Generate product icons into custom output directories without requiring a copied source image
 
 ## 1.0.0 - 2026-09-30
 
