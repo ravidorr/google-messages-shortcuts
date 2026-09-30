@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
+  bindConversationOpenPreference,
   bindTrashConfirmationPreference,
   bindShortcutsLink,
   initializePopup,
@@ -14,6 +15,8 @@ describe('init-popup', () => {
       <a id="shortcuts-link" href="#">shortcuts</a>
       <input id="auto-confirm-trash" type="checkbox" checked disabled>
       <label for="auto-confirm-trash">Automatically confirm Move to trash</label>
+      <input id="open-conversation-on-focus" type="checkbox" disabled>
+      <label for="open-conversation-on-focus">Open conversations on hover or focus</label>
     `;
   });
 
@@ -136,6 +139,64 @@ describe('init-popup', () => {
 
     await bindTrashConfirmationPreference(document, chromeApi);
     const checkbox = document.getElementById('auto-confirm-trash');
+    checkbox.checked = false;
+    checkbox.dispatchEvent(new Event('change'));
+
+    await vi.waitFor(() => {
+      expect(warnSpy).toHaveBeenCalled();
+    });
+
+    expect(checkbox.checked).toBe(true);
+    expect(checkbox.disabled).toBe(false);
+  });
+
+  it('loads and persists the conversation open preference', async () => {
+    const set = vi.fn(async () => {});
+    const chromeApi = {
+      commands: {
+        getAll: vi.fn(async () => [
+          { name: 'archive-conversation', shortcut: 'Ctrl+Shift+Y' },
+          { name: 'trash-conversation', shortcut: 'Ctrl+Shift+D' }
+        ])
+      },
+      tabs: {
+        create: vi.fn(async () => ({}))
+      },
+      storage: {
+        local: {
+          get: vi.fn(async () => ({ openConversationOnFocus: true })),
+          set
+        }
+      }
+    };
+
+    await initializePopup(chromeApi, document);
+    const checkbox = document.getElementById('open-conversation-on-focus');
+
+    expect(checkbox.checked).toBe(true);
+    expect(checkbox.disabled).toBe(false);
+    checkbox.checked = false;
+    checkbox.dispatchEvent(new Event('change'));
+    await Promise.resolve();
+
+    expect(set).toHaveBeenCalledWith({ openConversationOnFocus: false });
+  });
+
+  it('restores the conversation open preference when persistence fails', async () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const chromeApi = {
+      storage: {
+        local: {
+          get: vi.fn(async () => ({ openConversationOnFocus: true })),
+          set: vi.fn(async () => {
+            throw new Error('storage unavailable');
+          })
+        }
+      }
+    };
+
+    await bindConversationOpenPreference(document, chromeApi);
+    const checkbox = document.getElementById('open-conversation-on-focus');
     checkbox.checked = false;
     checkbox.dispatchEvent(new Event('change'));
 

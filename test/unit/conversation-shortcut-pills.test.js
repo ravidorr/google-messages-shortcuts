@@ -51,7 +51,7 @@ describe('conversation shortcut pills', () => {
     expect(row.textContent).toContain('Not assigned');
   });
 
-  it('opens only the hovered conversation row', () => {
+  it('does not open conversations when a row is hovered by default', () => {
     const firstRow = createConversationRow();
     const secondRow = createConversationRow();
     const firstLink = firstRow.querySelector('a');
@@ -69,11 +69,86 @@ describe('conversation shortcut pills', () => {
     });
     firstLink.dispatchEvent(new Event('pointerover', { bubbles: true }));
 
-    expect(firstLink.click).toHaveBeenCalledTimes(1);
+    expect(firstLink.click).not.toHaveBeenCalled();
     expect(secondLink.click).not.toHaveBeenCalled();
   });
 
-  it('opens the native conversation anchor instead of an incidental row link', () => {
+  it('opens a conversation when hovering is enabled', async () => {
+    const row = createConversationRow();
+    const link = row.querySelector('a');
+    document.body.append(row);
+    vi.spyOn(link, 'click');
+
+    disconnect = installConversationShortcutPills({
+      documentRoot: document,
+      getShortcutLabels: vi.fn(async () => ({
+        archive: 'Ctrl+Shift+Y',
+        trash: 'Ctrl+Shift+D'
+      })),
+      isAutoOpenEnabled: vi.fn(async () => true)
+    });
+    row.dispatchEvent(new Event('pointerover', { bubbles: true }));
+
+    await vi.waitFor(() => {
+      expect(link.click).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  it('does not open a row after the pointer leaves before opening is enabled', async () => {
+    const row = createConversationRow();
+    const link = row.querySelector('a');
+    let resolveAutoOpenEnabled;
+    document.body.append(row);
+    vi.spyOn(link, 'click');
+
+    disconnect = installConversationShortcutPills({
+      documentRoot: document,
+      getShortcutLabels: vi.fn(async () => ({
+        archive: 'Ctrl+Shift+Y',
+        trash: 'Ctrl+Shift+D'
+      })),
+      isAutoOpenEnabled: () => new Promise((resolve) => {
+        resolveAutoOpenEnabled = resolve;
+      })
+    });
+    row.dispatchEvent(new Event('pointerover', { bubbles: true }));
+    await Promise.resolve();
+    row.dispatchEvent(new Event('pointerout', { bubbles: true }));
+    resolveAutoOpenEnabled(true);
+
+    await Promise.resolve();
+
+    expect(link.click).not.toHaveBeenCalled();
+  });
+
+  it('does not open a row removed before opening is enabled', async () => {
+    const row = createConversationRow();
+    const link = row.querySelector('a');
+    let resolveAutoOpenEnabled;
+    document.body.append(row);
+    vi.spyOn(link, 'click');
+
+    disconnect = installConversationShortcutPills({
+      documentRoot: document,
+      getShortcutLabels: vi.fn(async () => ({
+        archive: 'Ctrl+Shift+Y',
+        trash: 'Ctrl+Shift+D'
+      })),
+      isAutoOpenEnabled: () => new Promise((resolve) => {
+        resolveAutoOpenEnabled = resolve;
+      })
+    });
+    row.dispatchEvent(new Event('pointerover', { bubbles: true }));
+    await Promise.resolve();
+    row.remove();
+    resolveAutoOpenEnabled(true);
+
+    await Promise.resolve();
+
+    expect(link.click).not.toHaveBeenCalled();
+  });
+
+  it('does not open either row link when an incidental link is hovered', () => {
     const row = createConversationRow();
     const conversationLink = row.querySelector('a');
     const incidentalLink = document.createElement('a');
@@ -91,11 +166,11 @@ describe('conversation shortcut pills', () => {
     });
     incidentalLink.dispatchEvent(new Event('pointerover', { bubbles: true }));
 
-    expect(conversationLink.click).toHaveBeenCalledTimes(1);
+    expect(conversationLink.click).not.toHaveBeenCalled();
     expect(incidentalLink.click).not.toHaveBeenCalled();
   });
 
-  it('opens the row anchor when Google Messages does not expose aria-selected', () => {
+  it('opens a hovered row without an aria-selected anchor when opening is enabled', async () => {
     const row = createConversationRow();
     const link = row.querySelector('a');
     link.removeAttribute('aria-selected');
@@ -107,14 +182,17 @@ describe('conversation shortcut pills', () => {
       getShortcutLabels: vi.fn(async () => ({
         archive: 'Ctrl+Shift+Y',
         trash: 'Ctrl+Shift+D'
-      }))
+      })),
+      isAutoOpenEnabled: vi.fn(async () => true)
     });
     link.dispatchEvent(new Event('pointerover', { bubbles: true }));
 
-    expect(link.click).toHaveBeenCalledTimes(1);
+    await vi.waitFor(() => {
+      expect(link.click).toHaveBeenCalledTimes(1);
+    });
   });
 
-  it('opens the conversation when keyboard focus enters its row', () => {
+  it('does not open the conversation when keyboard focus enters its row', () => {
     const row = createConversationRow();
     const link = row.querySelector('a');
     document.body.append(row);
@@ -129,10 +207,31 @@ describe('conversation shortcut pills', () => {
     });
     link.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
 
-    expect(link.click).toHaveBeenCalledTimes(1);
+    expect(link.click).not.toHaveBeenCalled();
   });
 
-  it('opens a conversation when Google Messages marks its row as focused', async () => {
+  it('opens a conversation when focus enters its row and opening is enabled', async () => {
+    const row = createConversationRow();
+    const link = row.querySelector('a');
+    document.body.append(row);
+    vi.spyOn(link, 'click');
+
+    disconnect = installConversationShortcutPills({
+      documentRoot: document,
+      getShortcutLabels: vi.fn(async () => ({
+        archive: 'Ctrl+Shift+Y',
+        trash: 'Ctrl+Shift+D'
+      })),
+      isAutoOpenEnabled: vi.fn(async () => true)
+    });
+    link.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
+
+    await vi.waitFor(() => {
+      expect(link.click).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  it('does not open a conversation when Google Messages marks its row as focused', async () => {
     const row = createConversationRow();
     const link = row.querySelector('a');
     document.body.append(row);
@@ -147,12 +246,33 @@ describe('conversation shortcut pills', () => {
     });
     row.setAttribute('is-focused', 'true');
 
+    await Promise.resolve();
+
+    expect(link.click).not.toHaveBeenCalled();
+  });
+
+  it('opens a conversation when Google Messages focuses its row and opening is enabled', async () => {
+    const row = createConversationRow();
+    const link = row.querySelector('a');
+    document.body.append(row);
+    vi.spyOn(link, 'click');
+
+    disconnect = installConversationShortcutPills({
+      documentRoot: document,
+      getShortcutLabels: vi.fn(async () => ({
+        archive: 'Ctrl+Shift+Y',
+        trash: 'Ctrl+Shift+D'
+      })),
+      isAutoOpenEnabled: vi.fn(async () => true)
+    });
+    row.setAttribute('is-focused', 'true');
+
     await vi.waitFor(() => {
       expect(link.click).toHaveBeenCalledTimes(1);
     });
   });
 
-  it('does not reopen a hovered conversation when Google Messages marks it as focused', async () => {
+  it('does not open a hovered conversation when Google Messages marks it as focused', async () => {
     const row = createConversationRow();
     const link = row.querySelector('a');
     document.body.append(row);
@@ -170,10 +290,10 @@ describe('conversation shortcut pills', () => {
 
     await new Promise((resolve) => setTimeout(resolve));
 
-    expect(link.click).toHaveBeenCalledTimes(1);
+    expect(link.click).not.toHaveBeenCalled();
   });
 
-  it('does not reopen a conversation when focus moves within its row', () => {
+  it('does not open a conversation when focus moves within its row', () => {
     const row = createConversationRow();
     const link = row.querySelector('a');
     const menuButton = row.querySelector('button');
@@ -193,10 +313,10 @@ describe('conversation shortcut pills', () => {
       relatedTarget: link
     }));
 
-    expect(link.click).toHaveBeenCalledTimes(1);
+    expect(link.click).not.toHaveBeenCalled();
   });
 
-  it('opens dynamically rendered rows but ignores interactions within shortcut pills', async () => {
+  it('does not open dynamically rendered rows or shortcut pill interactions', async () => {
     disconnect = installConversationShortcutPills({
       documentRoot: document,
       getShortcutLabels: vi.fn(async () => ({
@@ -214,7 +334,7 @@ describe('conversation shortcut pills', () => {
     await vi.waitFor(() => {
       expect(row.querySelector('[data-messages-shortcuts-pill]')).not.toBeNull();
     });
-    expect(link.click).toHaveBeenCalledTimes(1);
+    expect(link.click).not.toHaveBeenCalled();
     row.querySelector('[data-messages-shortcuts-pill]').dispatchEvent(
       new Event('pointerover', { bubbles: true })
     );
@@ -222,7 +342,7 @@ describe('conversation shortcut pills', () => {
       new FocusEvent('focusin', { bubbles: true })
     );
 
-    expect(link.click).toHaveBeenCalledTimes(1);
+    expect(link.click).not.toHaveBeenCalled();
   });
 
   it('runs an action against the row that owns its pill', async () => {
