@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { COMMAND_ARCHIVE, COMMAND_MARK_UNREAD, COMMAND_TRASH } from '../../src/shared/commands.js';
-import { installConversationShortcutPills } from '../../src/content/conversation-shortcut-pills.js';
+import { installConversationShortcutPills, safeDomMutation } from '../../src/content/conversation-shortcut-pills.js';
 
 function createConversationRow({ focused = false, unread = true } = {}) {
   const row = document.createElement('mws-conversation-list-item');
@@ -673,6 +673,83 @@ describe('conversation shortcut pills', () => {
     }).not.toThrow();
     expect(removeCalls).toBe(1);
     expect(row.querySelector('[data-messages-shortcuts-pill-group]')).toBeNull();
+  });
+
+  it('contains a NotFoundError raised while removing pills', async () => {
+    const row = createConversationRow();
+    document.body.append(row);
+
+    disconnect = installConversationShortcutPills({
+      documentRoot: document,
+      getShortcutLabels: vi.fn(async () => ({
+        archive: 'Ctrl+Shift+Y',
+        trash: 'Ctrl+Shift+D'
+      }))
+    });
+    row.dispatchEvent(new Event('pointerover', { bubbles: true }));
+
+    await vi.waitFor(() => {
+      expect(row.querySelector('[data-messages-shortcuts-pill-group]')).not.toBeNull();
+    });
+    const pillGroup = row.querySelector('[data-messages-shortcuts-pill-group]');
+    vi.spyOn(pillGroup, 'remove').mockImplementation(() => {
+      throw new DOMException(
+        "Failed to execute 'remove' on 'Element': The node to be removed is no longer a child of this node.",
+        'NotFoundError'
+      );
+    });
+
+    expect(() => {
+      row.dispatchEvent(new Event('pointerout', { bubbles: true }));
+    }).not.toThrow();
+  });
+
+  it('contains a NotFoundError raised while appending pills', async () => {
+    const row = createConversationRow();
+    const nativeAppend = row.append.bind(row);
+    document.body.append(row);
+
+    disconnect = installConversationShortcutPills({
+      documentRoot: document,
+      getShortcutLabels: vi.fn(async () => ({
+        archive: 'Ctrl+Shift+Y',
+        trash: 'Ctrl+Shift+D'
+      }))
+    });
+    vi.spyOn(row, 'append').mockImplementation((node) => {
+      if (node instanceof Element && node.hasAttribute('data-messages-shortcuts-pill-group')) {
+        throw new DOMException(
+          "Failed to execute 'append' on 'Element': The node is no longer connected.",
+          'NotFoundError'
+        );
+      }
+
+      return nativeAppend(node);
+    });
+    row.dispatchEvent(new Event('pointerover', { bubbles: true }));
+
+    await vi.waitFor(() => {
+      expect(row.querySelector('[data-messages-shortcuts-pill-group]')).toBeNull();
+    });
+  });
+
+  it('rethrows unexpected errors from safeDomMutation', () => {
+    expect(() => {
+      safeDomMutation(() => {
+        throw new TypeError('Unexpected failure');
+      });
+    }).toThrow('Unexpected failure');
+  });
+
+  it('contains NotFoundError from safeDomMutation', () => {
+    expect(() => {
+      safeDomMutation(() => {
+        throw new DOMException(
+          "Failed to execute 'remove' on 'Element': The node to be removed is no longer a child of this node.",
+          'NotFoundError'
+        );
+      });
+    }).not.toThrow();
   });
 
   it('removes pills when the pointer leaves an unfocused row through a pill', async () => {
