@@ -32,6 +32,19 @@ export function versionsMatch(packageVersion, manifestVersion) {
   ));
 }
 
+export function packageLockVersionMatches(packageVersion, packageLock) {
+  try {
+    const parsedPackageLock = JSON.parse(packageLock);
+
+    return (
+      versionsMatch(packageVersion, parsedPackageLock.version)
+      && versionsMatch(packageVersion, parsedPackageLock.packages?.[''].version)
+    );
+  } catch {
+    return false;
+  }
+}
+
 export function isVersionBumped(previousVersion, currentVersion) {
   const previousParts = getVersionParts(previousVersion);
   const currentParts = getVersionParts(currentVersion);
@@ -58,7 +71,8 @@ export function validateVersionBump({
   basePackage,
   currentPackage,
   baseManifest,
-  currentManifest
+  currentManifest,
+  currentPackageLock
 }) {
   const basePackageVersion = getVersion(basePackage);
   const currentPackageVersion = getVersion(currentPackage);
@@ -67,11 +81,19 @@ export function validateVersionBump({
   const packageVersionBumped = isVersionBumped(basePackageVersion, currentPackageVersion);
   const manifestVersionBumped = isVersionBumped(baseManifestVersion, currentManifestVersion);
   const versionsAreSynchronized = versionsMatch(currentPackageVersion, currentManifestVersion);
+  const packageLockVersionIsSynchronized = packageLockVersionMatches(
+    currentPackageVersion,
+    currentPackageLock
+  );
 
   return {
     packageVersionBumped,
     manifestVersionBumped,
-    valid: packageVersionBumped && manifestVersionBumped && versionsAreSynchronized,
+    packageLockVersionIsSynchronized,
+    valid: packageVersionBumped
+      && manifestVersionBumped
+      && versionsAreSynchronized
+      && packageLockVersionIsSynchronized,
     versionsAreSynchronized
   };
 }
@@ -91,12 +113,13 @@ async function validateCurrentBranch() {
     basePackage: readGitFile(baseRevision, 'package.json'),
     currentPackage: await readFile('package.json', 'utf8'),
     baseManifest: readGitFile(baseRevision, 'manifest.json'),
-    currentManifest: await readFile('manifest.json', 'utf8')
+    currentManifest: await readFile('manifest.json', 'utf8'),
+    currentPackageLock: await readFile('package-lock.json', 'utf8')
   });
 
   if (!result.valid) {
     throw new Error(
-      'Both package.json and manifest.json versions must increase and remain synchronized.'
+      'package.json, manifest.json, and package-lock.json versions must be synchronized after a bump.'
     );
   }
 }
