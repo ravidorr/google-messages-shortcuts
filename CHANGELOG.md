@@ -13,6 +13,7 @@ All notable changes to this project will be documented in this file.
 - Shortcut warning ignores Chrome's unassigned extension activation command
 - Bundled content script compatible with Chrome's classic content-script loader
 - Required synchronized version bumps for every pull request
+- Branch coverage above 96% with command and conversation failure-path tests
 - Pre-commit validation blocking direct commits to `main`
 - Pre-commit validation requiring a new changelog entry or synchronized version bumps
 

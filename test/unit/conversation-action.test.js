@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { runConversationAction } from '../../src/content/conversation-action.js';
 import { COMMAND_ARCHIVE, COMMAND_TRASH } from '../../src/shared/commands.js';
+import * as waitForElement from '../../src/content/wait-for-element.js';
 
 function createConversationFixture() {
   document.body.innerHTML = `
@@ -105,6 +106,58 @@ describe('runConversationAction', () => {
     const result = await runConversationAction(document, COMMAND_TRASH);
 
     expect(result.ok).toBe(true);
+  });
+
+  it('returns a menu-action failure when trash menu items are unavailable', async () => {
+    document.body.innerHTML = `
+      <mws-conversation-list-item>
+        <a aria-selected="true"></a>
+        <button aria-haspopup="menu"></button>
+      </mws-conversation-list-item>
+    `;
+
+    const result = await runConversationAction(document, COMMAND_TRASH);
+
+    expect(result.ok).toBe(false);
+    expect(result.reason).toContain('Timed out waiting for selector');
+  });
+
+  it('returns a confirmation failure when no trash confirmation control appears', async () => {
+    document.body.innerHTML = `
+      <mws-conversation-list-item>
+        <a aria-selected="true"></a>
+        <button aria-haspopup="menu"></button>
+      </mws-conversation-list-item>
+      <div data-e2e-conversation-delete>Move to trash</div>
+    `;
+
+    const result = await runConversationAction(document, COMMAND_TRASH);
+
+    expect(result.ok).toBe(false);
+    expect(result.reason).toContain('Timed out waiting for selector');
+  });
+
+  it('returns a confirmation fallback failure', async () => {
+    document.body.innerHTML = `
+      <mws-conversation-list-item>
+        <a aria-selected="true"></a>
+        <button aria-haspopup="menu"></button>
+      </mws-conversation-list-item>
+      <div data-e2e-conversation-delete>Move to trash</div>
+    `;
+    const trashMenuItem = document.querySelector('[data-e2e-conversation-delete]');
+    vi.spyOn(waitForElement, 'waitForSelector')
+      .mockResolvedValueOnce(trashMenuItem)
+      .mockRejectedValueOnce(new Error('confirmation unavailable'));
+    vi.spyOn(waitForElement, 'waitForElement')
+      .mockRejectedValueOnce(new Error('confirmation fallback unavailable'));
+
+    const result = await runConversationAction(document, COMMAND_TRASH);
+
+    expect(result).toEqual({
+      ok: false,
+      reason: 'confirmation fallback unavailable'
+    });
   });
 
   it('returns unknown-command for unsupported actions', async () => {

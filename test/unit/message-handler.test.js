@@ -39,6 +39,17 @@ describe('message-handler', () => {
     expect(warnSpy).toHaveBeenCalled();
   });
 
+  it('warns with an unknown failure step', () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    warnActionFailure('custom-step', 'custom failure');
+
+    expect(warnSpy).toHaveBeenCalledWith(
+      '[Messages Shortcut Actions] Failed to custom-step.',
+      'custom failure'
+    );
+  });
+
   it('handles archive commands', async () => {
     createConversationFixture();
 
@@ -53,6 +64,15 @@ describe('message-handler', () => {
     const result = await handleCommand(COMMAND_TRASH);
 
     expect(result.ok).toBe(true);
+  });
+
+  it('warns when a valid command cannot find a conversation', async () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    const result = await handleCommand(COMMAND_ARCHIVE);
+
+    expect(result).toEqual({ ok: false, reason: 'no-target' });
+    expect(warnSpy).toHaveBeenCalled();
   });
 
   it('returns unknown-command for invalid commands', async () => {
@@ -88,6 +108,19 @@ describe('message-handler', () => {
   it('returns execute-action-failed when the action throws', async () => {
     vi.spyOn(conversationAction, 'runConversationAction')
       .mockRejectedValueOnce(new Error('unexpected failure'));
+
+    const result = await handleCommand(COMMAND_ARCHIVE);
+
+    expect(result).toEqual({
+      ok: false,
+      reason: 'execute-action-failed',
+      error: 'unexpected failure'
+    });
+  });
+
+  it('returns execute-action-failed when the action rejects without an Error', async () => {
+    vi.spyOn(conversationAction, 'runConversationAction')
+      .mockRejectedValueOnce('unexpected failure');
 
     const result = await handleCommand(COMMAND_ARCHIVE);
 
