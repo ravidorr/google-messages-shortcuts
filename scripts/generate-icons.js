@@ -23,11 +23,15 @@ export async function generateIcons(
   }
 }
 
-if (process.argv[1] === new URL(import.meta.url).pathname) {
+function runCli() {
   const outputDirectory = process.argv[2] ? path.resolve(process.argv[2]) : undefined;
 
-  generateIcons(outputDirectory).catch((error) => {
+  return generateIcons(outputDirectory);
+}
+
+export const cliExecutionPromise = process.argv[1] === new URL(import.meta.url).pathname
+  ? runCli().catch((error) => {
     console.error('Failed to generate icons.', error);
     process.exit(1);
-  });
-}
+  })
+  : undefined;

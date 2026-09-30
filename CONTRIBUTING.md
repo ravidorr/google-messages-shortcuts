@@ -15,9 +15,10 @@ Thanks for contributing to Messages Shortcut Actions.
 2. Run `npm test`.
 3. Add or update tests for code changes.
 4. Add an entry to `CHANGELOG.md`.
-5. Bump and synchronize the versions in `package.json` and `manifest.json`.
-6. Run `npm run verify:version-bump`.
-7. Keep each pull request focused on one change.
+5. Bump and synchronize the versions in `package.json`, `manifest.json`, and `package-lock.json`.
+6. Run `npm install --package-lock-only` after updating the package version so the lockfile root metadata is regenerated.
+7. Run `npm run verify:version-bump`.
+8. Keep each pull request focused on one change.
 
 ## Pull requests
 

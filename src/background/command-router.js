@@ -35,9 +35,13 @@ export async function routeCommand(command, chromeApi = chrome) {
   }
 
   try {
-    await chromeApi.tabs.sendMessage(activeTab.id, { command });
+    const response = await chromeApi.tabs.sendMessage(activeTab.id, { command });
 
-    return { ok: true };
+    if (typeof response?.ok === 'boolean') {
+      return response;
+    }
+
+    return { ok: false, reason: 'invalid-content-script-response' };
   } catch (error) {
     return {
       ok: false,

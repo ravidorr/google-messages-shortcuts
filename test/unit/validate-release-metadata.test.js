@@ -12,6 +12,14 @@ const previousChangelog = `# Changelog
 
 const packageFile = (version) => JSON.stringify({ version });
 const manifestFile = (version) => JSON.stringify({ version });
+const packageLockFile = (version, rootPackageVersion = version) => JSON.stringify({
+  version,
+  packages: {
+    '': {
+      version: rootPackageVersion
+    }
+  }
+});
 
 describe('validate-release-metadata', () => {
   it('detects a new level-two changelog entry', () => {
@@ -45,40 +53,114 @@ Updated release notes.
     expect(isVersionBumped('1.0', '1.0.1')).toBe(true);
     expect(isVersionBumped('1.0.0', '1.1.0')).toBe(true);
     expect(isVersionBumped('1.1.0', '1.0.1')).toBe(false);
+    expect(isVersionBumped('1.0.0', '1.0.0')).toBe(false);
+    expect(isVersionBumped('invalid', '1.0.1')).toBe(false);
   });
 
-  it('allows commits with a new changelog entry', () => {
+  it('allows commits with a changelog entry and synchronized version bump', () => {
     expect(canCommit({
       previousChangelog,
       currentChangelog: `${previousChangelog}
-## Unreleased
+## 1.0.1 - 2026-10-01
+`,
+      previousPackage: packageFile('1.0.0'),
+      currentPackage: packageFile('1.0.1'),
+      previousManifest: manifestFile('1.0.0'),
+      currentManifest: manifestFile('1.0.1'),
+      currentPackageLock: packageLockFile('1.0.1')
+    })).toBe(true);
+  });
+
+  it('blocks changelog-only commits', () => {
+    expect(canCommit({
+      previousChangelog,
+      currentChangelog: `${previousChangelog}
+## 1.0.1 - 2026-10-01
 `,
       previousPackage: packageFile('1.0.0'),
       currentPackage: packageFile('1.0.0'),
-      previousManifest: manifestFile('1.0'),
-      currentManifest: manifestFile('1.0')
-    })).toBe(true);
+      previousManifest: manifestFile('1.0.0'),
+      currentManifest: manifestFile('1.0.0'),
+      currentPackageLock: packageLockFile('1.0.0')
+    })).toBe(false);
   });
 
-  it('allows commits when both version files are bumped', () => {
+  it('blocks version bumps without a changelog entry', () => {
     expect(canCommit({
       previousChangelog,
       currentChangelog: previousChangelog,
       previousPackage: packageFile('1.0.0'),
       currentPackage: packageFile('1.0.1'),
-      previousManifest: manifestFile('1.0'),
-      currentManifest: manifestFile('1.0.1')
-    })).toBe(true);
+      previousManifest: manifestFile('1.0.0'),
+      currentManifest: manifestFile('1.0.1'),
+      currentPackageLock: packageLockFile('1.0.1')
+    })).toBe(false);
   });
 
-  it('blocks commits without a changelog entry or both version bumps', () => {
+  it('blocks version bumps with mismatched package and manifest versions', () => {
     expect(canCommit({
       previousChangelog,
-      currentChangelog: previousChangelog,
+      currentChangelog: `${previousChangelog}
+## 1.0.2 - 2026-10-01
+`,
+      previousPackage: packageFile('1.0.0'),
+      currentPackage: packageFile('1.0.2'),
+      previousManifest: manifestFile('1.0.0'),
+      currentManifest: manifestFile('1.0.1'),
+      currentPackageLock: packageLockFile('1.0.2')
+    })).toBe(false);
+  });
+
+  it('blocks version bumps with stale package-lock metadata', () => {
+    expect(canCommit({
+      previousChangelog,
+      currentChangelog: `${previousChangelog}
+## 1.0.1 - 2026-10-01
+`,
       previousPackage: packageFile('1.0.0'),
       currentPackage: packageFile('1.0.1'),
-      previousManifest: manifestFile('1.0'),
-      currentManifest: manifestFile('1.0')
+      previousManifest: manifestFile('1.0.0'),
+      currentManifest: manifestFile('1.0.1'),
+      currentPackageLock: packageLockFile('1.0.0')
+    })).toBe(false);
+  });
+
+  it('blocks version bumps with stale package-lock root package metadata', () => {
+    expect(canCommit({
+      previousChangelog,
+      currentChangelog: `${previousChangelog}
+## 1.0.1 - 2026-10-01
+`,
+      previousPackage: packageFile('1.0.0'),
+      currentPackage: packageFile('1.0.1'),
+      previousManifest: manifestFile('1.0.0'),
+      currentManifest: manifestFile('1.0.1'),
+      currentPackageLock: packageLockFile('1.0.1', '1.0.0')
+    })).toBe(false);
+  });
+
+  it('blocks malformed release metadata', () => {
+    expect(canCommit({
+      previousChangelog,
+      currentChangelog: `${previousChangelog}
+## 1.0.1 - 2026-10-01
+`,
+      previousPackage: packageFile('1.0.0'),
+      currentPackage: 'not JSON',
+      previousManifest: manifestFile('1.0.0'),
+      currentManifest: manifestFile('1.0.1'),
+      currentPackageLock: packageLockFile('1.0.1')
+    })).toBe(false);
+    expect(canCommit({
+      previousChangelog,
+      currentChangelog: `${previousChangelog}
+## 1.0.1 - 2026-10-01
+`,
+      previousPackage: packageFile('1.0.0'),
+      currentPackage: packageFile('1.0.1'),
+      previousManifest: manifestFile('1.0.0'),
+      currentManifest: 'not JSON',
+      currentPackageLock: packageLockFile('1.0.1')
     })).toBe(false);
   });
 });

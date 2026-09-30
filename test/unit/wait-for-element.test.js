@@ -36,6 +36,21 @@ describe('waitForElement', () => {
     await assertion;
   });
 
+  it('resolves when a matching element is appended after polling begins', async () => {
+    const promise = waitForElement(document, '.mat-menu-item', 'Archive', 1000);
+
+    await vi.advanceTimersByTimeAsync(POLL_INTERVAL_MS - 1);
+
+    const button = document.createElement('button');
+    button.className = 'mat-menu-item';
+    button.textContent = 'Archive';
+    document.body.append(button);
+
+    await vi.advanceTimersByTimeAsync(1);
+
+    await expect(promise).resolves.toBe(button);
+  });
+
   it('matches text after normalizing whitespace', async () => {
     const button = document.createElement('button');
     button.className = 'mat-menu-item';

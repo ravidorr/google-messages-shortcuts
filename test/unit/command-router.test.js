@@ -70,6 +70,41 @@ describe('command-router', () => {
     expect(chromeApi.tabs.sendMessage).toHaveBeenCalledWith(42, { command: COMMAND_ARCHIVE });
   });
 
+  it('propagates content script no-target responses', async () => {
+    const chromeApi = {
+      tabs: {
+        query: vi.fn(async () => [{
+          id: 42,
+          url: 'https://messages.google.com/web/conversations'
+        }]),
+        sendMessage: vi.fn(async () => ({ ok: false, reason: 'no-target' }))
+      }
+    };
+
+    const result = await routeCommand(COMMAND_ARCHIVE, chromeApi);
+
+    expect(result).toEqual({ ok: false, reason: 'no-target' });
+  });
+
+  it('rejects invalid content script responses', async () => {
+    const chromeApi = {
+      tabs: {
+        query: vi.fn(async () => [{
+          id: 42,
+          url: 'https://messages.google.com/web/conversations'
+        }]),
+        sendMessage: vi.fn(async () => ({ reason: 'missing-ok' }))
+      }
+    };
+
+    const result = await routeCommand(COMMAND_ARCHIVE, chromeApi);
+
+    expect(result).toEqual({
+      ok: false,
+      reason: 'invalid-content-script-response'
+    });
+  });
+
   it('handles unavailable content scripts', async () => {
     const chromeApi = {
       tabs: {

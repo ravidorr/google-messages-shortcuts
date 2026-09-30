@@ -8,7 +8,8 @@
 - [ ] `npm test`
 - [ ] I updated tests for code changes
 - [ ] I updated `CHANGELOG.md`
-- [ ] I bumped matching versions in `package.json` and `manifest.json`
+- [ ] I synchronized versions in `package.json`, `manifest.json`, and `package-lock.json`
+- [ ] I regenerated lockfile metadata with `npm install --package-lock-only`
 - [ ] `npm run verify:version-bump`
 
 ## Additional context

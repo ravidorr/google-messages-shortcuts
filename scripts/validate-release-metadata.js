@@ -1,4 +1,8 @@
 import { execFileSync } from 'node:child_process';
+import {
+  packageLockVersionMatches,
+  versionsMatch
+} from './validate-version-bump.js';
 
 function getVersion(content) {
   try {
@@ -56,19 +60,31 @@ export function canCommit({
   previousPackage,
   currentPackage,
   previousManifest,
-  currentManifest
+  currentManifest,
+  currentPackageLock
 }) {
+  const currentPackageVersion = getVersion(currentPackage);
+  const currentManifestVersion = getVersion(currentManifest);
   const hasChangelogEntry = hasNewChangelogEntry(previousChangelog, currentChangelog);
   const packageVersionBumped = isVersionBumped(
     getVersion(previousPackage),
-    getVersion(currentPackage)
+    currentPackageVersion
   );
   const manifestVersionBumped = isVersionBumped(
     getVersion(previousManifest),
-    getVersion(currentManifest)
+    currentManifestVersion
+  );
+  const versionsAreSynchronized = versionsMatch(currentPackageVersion, currentManifestVersion);
+  const packageLockVersionIsSynchronized = packageLockVersionMatches(
+    currentPackageVersion,
+    currentPackageLock
   );
 
-  return hasChangelogEntry || (packageVersionBumped && manifestVersionBumped);
+  return hasChangelogEntry
+    && packageVersionBumped
+    && manifestVersionBumped
+    && versionsAreSynchronized
+    && packageLockVersionIsSynchronized;
 }
 
 function readGitFile(revision, filePath) {
@@ -79,19 +95,32 @@ function readGitFile(revision, filePath) {
   }
 }
 
+function getBaseRevision() {
+  try {
+    return execFileSync('git', ['merge-base', 'HEAD', 'origin/main'], {
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore']
+    }).trim();
+  } catch {
+    return 'HEAD';
+  }
+}
+
 function validateReleaseMetadata() {
+  const baseRevision = getBaseRevision();
   const canCommitChanges = canCommit({
-    previousChangelog: readGitFile('HEAD', 'CHANGELOG.md'),
+    previousChangelog: readGitFile(baseRevision, 'CHANGELOG.md'),
     currentChangelog: readGitFile('', 'CHANGELOG.md'),
-    previousPackage: readGitFile('HEAD', 'package.json'),
+    previousPackage: readGitFile(baseRevision, 'package.json'),
     currentPackage: readGitFile('', 'package.json'),
-    previousManifest: readGitFile('HEAD', 'manifest.json'),
-    currentManifest: readGitFile('', 'manifest.json')
+    previousManifest: readGitFile(baseRevision, 'manifest.json'),
+    currentManifest: readGitFile('', 'manifest.json'),
+    currentPackageLock: readGitFile('', 'package-lock.json')
   });
 
   if (!canCommitChanges) {
     console.error(
-      'Commit blocked: add a new CHANGELOG.md entry or bump versions in both package.json and manifest.json.'
+      'Commit blocked: add a new CHANGELOG.md entry, bump package.json and manifest.json, and keep package-lock.json synchronized.'
     );
     process.exit(1);
   }

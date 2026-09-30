@@ -3,6 +3,7 @@ import { defineConfig } from 'vitest/config';
 export default defineConfig({
   test: {
     environment: 'jsdom',
+    fileParallelism: false,
     setupFiles: ['./test/setup.js'],
     coverage: {
       provider: 'v8',
@@ -11,6 +12,7 @@ export default defineConfig({
         'background.js',
         'content.js',
         'popup.js',
+        'scripts/**/*.js',
         'src/**/*.js'
       ],
       thresholds: {

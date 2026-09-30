@@ -8,6 +8,12 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { buildExtension } from '../../scripts/build.js';
 
 const temporaryDirectories = [];
+const expectedIconMetadata = {
+  16: 'icons/icon16.png',
+  32: 'icons/icon32.png',
+  48: 'icons/icon48.png',
+  128: 'icons/icon128.png'
+};
 
 afterEach(async () => {
   await Promise.all(temporaryDirectories.map((directory) => rm(directory, {
@@ -34,7 +40,12 @@ describe('buildExtension', () => {
         path.join(sourceDirectory, 'content.js'),
         "import { message } from './src/content/entry.js'; globalThis.contentMessage = message;"
       ),
-      writeFile(path.join(sourceDirectory, 'manifest.json'), '{}'),
+      writeFile(path.join(sourceDirectory, 'manifest.json'), JSON.stringify({
+        action: {
+          default_icon: expectedIconMetadata
+        },
+        icons: expectedIconMetadata
+      })),
       writeFile(path.join(sourceDirectory, 'popup.css'), 'body {}'),
       writeFile(path.join(sourceDirectory, 'popup.html'), '<main></main>'),
       writeFile(path.join(sourceDirectory, 'popup.js'), 'popup'),
@@ -58,7 +69,19 @@ describe('buildExtension', () => {
     await expect(readFile(path.join(outputDirectory, 'icons', 'icon.svg'), 'utf8')).resolves.toContain('<svg');
     await expect(readFile(path.join(outputDirectory, 'src', 'shared', 'commands.js'), 'utf8')).resolves.toBe('commands');
     await expect(readFile(path.join(outputDirectory, 'stale.txt'), 'utf8')).rejects.toThrow();
-    await expect(readFile(path.join(outputDirectory, 'icons', 'icon16.png'))).resolves.toBeInstanceOf(Buffer);
     await expect(readFile(path.join(outputDirectory, 'content.js'), 'utf8')).resolves.not.toContain('import ');
+
+    const manifest = JSON.parse(await readFile(path.join(outputDirectory, 'manifest.json'), 'utf8'));
+    expect(manifest.icons).toEqual(expectedIconMetadata);
+    expect(manifest.action.default_icon).toEqual(expectedIconMetadata);
+
+    await Promise.all(Object.keys(expectedIconMetadata).map(async (size) => {
+      const iconPath = path.join(outputDirectory, expectedIconMetadata[size]);
+      const metadata = await sharp(iconPath).metadata();
+
+      expect(metadata.format).toBe('png');
+      expect(metadata.width).toBe(Number(size));
+      expect(metadata.height).toBe(Number(size));
+    }));
   });
 });

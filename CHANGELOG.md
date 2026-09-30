@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.1.0 - 2026-09-30
+
+### Added
+
+- Strengthen generated icon, build artifact, package archive, and polling behavior coverage
+
+### Fixed
+
+- Scope trash confirmation fallback matching to the native dialog instead of the full page
+- Preserve content-script action failures through the background command router
+- Require synchronized release metadata across `package.json`, `manifest.json`, and `package-lock.json`
+
 ## 1.0.5 - 2026-09-30
 
 ### Changed
@@ -44,7 +56,7 @@ All notable changes to this project will be documented in this file.
 - Bundled content script compatible with Chrome's classic content-script loader
 - Required synchronized version bumps for every pull request
 - Pre-commit validation blocking direct commits to `main`
-- Pre-commit validation requiring a new changelog entry or synchronized version bumps
+- Pre-commit validation requiring a new changelog entry and synchronized version metadata
 
 ## 1.0.0 - 2026-09-30
 
