@@ -5,10 +5,8 @@ import { handleCommand, installMessageListener } from './src/content/message-han
 installMessageListener();
 installConversationShortcutPills();
 
-if (typeof globalThis !== 'undefined') {
-  globalThis.MessagesShortcuts = {
-    ...(globalThis.MessagesShortcuts || {}),
-    handleCommand,
-    runConversationAction
-  };
-}
+globalThis.MessagesShortcuts = {
+  ...(globalThis.MessagesShortcuts || {}),
+  handleCommand,
+  runConversationAction
+};

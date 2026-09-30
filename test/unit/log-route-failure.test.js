@@ -31,4 +31,12 @@ describe('logRouteFailure', () => {
       '[Messages Shortcut Actions] No active tab is available for the shortcut.'
     );
   });
+
+  it('does not log for already handled routing failures', () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    logRouteFailure({ reason: 'unknown-command' });
+
+    expect(warnSpy).not.toHaveBeenCalled();
+  });
 });

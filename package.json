@@ -1,6 +1,6 @@
 {
   "name": "google-messages-shortcuts",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "Use shortcuts to Archive or Trash active conversations in Google Messages.",
   "type": "module",
   "scripts": {
@@ -33,7 +33,7 @@
   "homepage": "https://github.com/ravidorr/google-messages-shortcuts#readme",
   "devDependencies": {
     "@eslint/js": "^9.39.2",
-    "@vitest/coverage-v8": "^3.2.4",
+    "@vitest/coverage-v8": "^5.0.3",
     "archiver": "^8.0.0",
     "esbuild": "^0.28.2",
     "eslint": "^9.39.2",
@@ -45,9 +45,9 @@
     "jsdom": "^26.1.0",
     "jszip": "^3.10.2",
     "lint-staged": "^16.2.7",
-    "markdownlint-cli2": "^0.20.0",
-    "sharp": "^0.34.3",
-    "vitest": "^3.2.4"
+    "markdownlint-cli2": "^0.23.3",
+    "sharp": "^0.35.5",
+    "vitest": "^5.0.3"
   },
   "lint-staged": {
     "*.js": [

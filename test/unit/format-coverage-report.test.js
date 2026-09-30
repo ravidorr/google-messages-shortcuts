@@ -42,6 +42,16 @@ describe('formatCoverageReport', () => {
     expect(formatCoverageReport({ total: {} })).toContain('| Lines | N/A |');
   });
 
+  it('sorts per-file coverage rows by path', () => {
+    const report = formatCoverageReport({
+      total: {},
+      'src/zebra.js': { lines: { pct: 100 } },
+      'src/alpha.js': { lines: { pct: 100 } }
+    });
+
+    expect(report.indexOf('src/alpha.js')).toBeLessThan(report.indexOf('src/zebra.js'));
+  });
+
   it('formats absolute paths and non-finite per-file metrics', () => {
     const coverageFilePath = '/tmp/coverage/example.js';
     const report = formatCoverageReport({
