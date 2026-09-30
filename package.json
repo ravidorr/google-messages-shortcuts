@@ -1,6 +1,6 @@
 {
   "name": "google-messages-shortcuts",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Use shortcuts to Archive or Trash active conversations in Google Messages.",
   "type": "module",
   "scripts": {

@@ -51,4 +51,25 @@ describe('handleCommandEvent', () => {
     expect(result.reason).toBe('route-error');
     expect(warnSpy).toHaveBeenCalled();
   });
+
+  it('handles non-Error routing failures', async () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const chromeApi = {
+      tabs: {
+        query: vi.fn(async () => {
+          throw 'tabs unavailable';
+        }),
+        sendMessage: vi.fn()
+      }
+    };
+
+    const result = await handleCommandEvent(COMMAND_ARCHIVE, chromeApi);
+
+    expect(result).toEqual({
+      ok: false,
+      reason: 'route-error',
+      error: 'tabs unavailable'
+    });
+    expect(warnSpy).toHaveBeenCalled();
+  });
 });
