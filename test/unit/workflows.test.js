@@ -4,6 +4,7 @@ import { readdir, readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
+import { parse as parseYaml } from 'yaml';
 
 const workflowsDirectory = fileURLToPath(new URL('../../.github/workflows', import.meta.url));
 const pinnedExternalActionPattern = /^[^/\s]+\/[^@\s]+@[0-9a-f]{40}(?:\s+#\s+v\d+(?:\.\d+)*)?$/;
@@ -19,21 +20,62 @@ async function readWorkflowFiles() {
     })));
 }
 
-function getActionUses(content) {
-  return [...content.matchAll(/^\s*(?:-\s*)?uses:\s*(.+)$/gm)]
-    .map((match) => match[1].trim())
-    .filter((actionUse) => !actionUse.startsWith('./') && !actionUse.startsWith('docker://'));
+function isExternalActionReference(actionUse) {
+  return typeof actionUse === 'string'
+    && !actionUse.startsWith('./')
+    && !actionUse.startsWith('docker://');
+}
+
+function collectUsesFromSteps(steps, actionUses) {
+  if (!Array.isArray(steps)) {
+    return;
+  }
+
+  for (const step of steps) {
+    if (step && typeof step === 'object' && 'uses' in step && isExternalActionReference(step.uses)) {
+      actionUses.push(step.uses);
+    }
+  }
+}
+
+function collectUsesFromJobs(jobs, actionUses) {
+  if (!jobs || typeof jobs !== 'object') {
+    return;
+  }
+
+  for (const job of Object.values(jobs)) {
+    if (!job || typeof job !== 'object') {
+      continue;
+    }
+
+    if ('uses' in job && isExternalActionReference(job.uses)) {
+      actionUses.push(job.uses);
+    }
+
+    collectUsesFromSteps(job.steps, actionUses);
+  }
+}
+
+export function getActionUses(content) {
+  const workflow = parseYaml(content);
+  const actionUses = [];
+
+  collectUsesFromJobs(workflow?.jobs, actionUses);
+
+  return actionUses;
 }
 
 describe('GitHub workflow security', () => {
-  it('collects step and job uses declarations with flexible spacing', () => {
+  it('collects step and job uses declarations from parsed YAML', () => {
     const localThis = {
       content: [
         'jobs:',
         '  report:',
         '    uses: owner/reusable-workflow@aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
         '    steps:',
-        '      - uses:    actions/checkout@bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+        '      - uses: actions/checkout@bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+        '      - "uses": actions/setup-node@cccccccccccccccccccccccccccccccccccccccc',
+        '      - { uses: actions/github-script@dddddddddddddddddddddddddddddddddddddddd }',
         '      - uses: ./scripts/local-action',
         '      - uses: docker://node:22'
       ].join('\n')
@@ -41,7 +83,9 @@ describe('GitHub workflow security', () => {
 
     expect(getActionUses(localThis.content)).toEqual([
       'owner/reusable-workflow@aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-      'actions/checkout@bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'
+      'actions/checkout@bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+      'actions/setup-node@cccccccccccccccccccccccccccccccccccccccc',
+      'actions/github-script@dddddddddddddddddddddddddddddddddddddddd'
     ]);
   });
 
