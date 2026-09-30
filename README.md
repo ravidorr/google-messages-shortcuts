@@ -9,6 +9,7 @@ Chrome extension that archives or trashes the selected or hovered conversation i
 - Show Archive and Trash shortcut pills on hovered and focused conversations
 - Open conversations immediately when they are hovered or focused
 - Popup UI that shows the effective Chrome shortcut assignments
+- Configurable automatic confirmation for the native Move to trash dialog
 - Language-agnostic menu targeting through Google Messages `data-e2e-*` attributes, with English text fallback
 
 ## Requirements
@@ -28,6 +29,12 @@ Chrome extension that archives or trashes the selected or hovered conversation i
 ## Change shortcuts
 
 Chrome controls extension keyboard shortcuts. Open the extension popup or go to `chrome://extensions/shortcuts` and assign keys for **Messages Shortcut Actions**.
+
+## Configure trash confirmation
+
+The popup's **Automatically confirm Move to trash** setting controls whether a
+trash shortcut or pill automatically confirms Google Messages' native dialog.
+It is enabled by default.
 
 If Chrome or the operating system already uses a suggested shortcut, Chrome may leave that command unassigned until you choose a different key combination.
 

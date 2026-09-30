@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
+  bindTrashConfirmationPreference,
   bindShortcutsLink,
   initializePopup,
   updateShortcutWarning
@@ -11,6 +12,8 @@ describe('init-popup', () => {
       <ul id="shortcut-list"></ul>
       <p id="shortcut-warning" hidden></p>
       <a id="shortcuts-link" href="#">shortcuts</a>
+      <input id="auto-confirm-trash" type="checkbox" checked disabled>
+      <label for="auto-confirm-trash">Automatically confirm Move to trash</label>
     `;
   });
 
@@ -44,6 +47,106 @@ describe('init-popup', () => {
     expect(create).toHaveBeenCalledWith({ url: 'chrome://extensions/shortcuts' });
   });
 
+  it('loads a missing confirmation preference as checked', async () => {
+    const chromeApi = {
+      storage: {
+        local: {
+          get: vi.fn(async () => ({})),
+          set: vi.fn(async () => {})
+        }
+      }
+    };
+
+    await bindTrashConfirmationPreference(document, chromeApi);
+
+    expect(document.getElementById('auto-confirm-trash').checked).toBe(true);
+  });
+
+  it('keeps the confirmation preference disabled until it is loaded', async () => {
+    let resolvePreference;
+    const chromeApi = {
+      storage: {
+        local: {
+          get: vi.fn(() => new Promise((resolve) => {
+            resolvePreference = resolve;
+          })),
+          set: vi.fn(async () => {})
+        }
+      }
+    };
+    const checkbox = document.getElementById('auto-confirm-trash');
+
+    const binding = bindTrashConfirmationPreference(document, chromeApi);
+
+    expect(checkbox.disabled).toBe(true);
+    resolvePreference({ autoConfirmTrash: false });
+    await binding;
+
+    expect(checkbox.disabled).toBe(false);
+    expect(checkbox.checked).toBe(false);
+  });
+
+  it('loads a saved disabled confirmation preference', async () => {
+    const chromeApi = {
+      storage: {
+        local: {
+          get: vi.fn(async () => ({ autoConfirmTrash: false })),
+          set: vi.fn(async () => {})
+        }
+      }
+    };
+
+    await bindTrashConfirmationPreference(document, chromeApi);
+
+    expect(document.getElementById('auto-confirm-trash').checked).toBe(false);
+  });
+
+  it('persists a changed confirmation preference', async () => {
+    const set = vi.fn(async () => {});
+    const chromeApi = {
+      storage: {
+        local: {
+          get: vi.fn(async () => ({ autoConfirmTrash: true })),
+          set
+        }
+      }
+    };
+
+    await bindTrashConfirmationPreference(document, chromeApi);
+    const checkbox = document.getElementById('auto-confirm-trash');
+    checkbox.checked = false;
+    checkbox.dispatchEvent(new Event('change'));
+    await Promise.resolve();
+
+    expect(set).toHaveBeenCalledWith({ autoConfirmTrash: false });
+  });
+
+  it('restores the saved preference when persistence fails', async () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const chromeApi = {
+      storage: {
+        local: {
+          get: vi.fn(async () => ({ autoConfirmTrash: true })),
+          set: vi.fn(async () => {
+            throw new Error('storage unavailable');
+          })
+        }
+      }
+    };
+
+    await bindTrashConfirmationPreference(document, chromeApi);
+    const checkbox = document.getElementById('auto-confirm-trash');
+    checkbox.checked = false;
+    checkbox.dispatchEvent(new Event('change'));
+
+    await vi.waitFor(() => {
+      expect(warnSpy).toHaveBeenCalled();
+    });
+
+    expect(checkbox.checked).toBe(true);
+    expect(checkbox.disabled).toBe(false);
+  });
+
   it('initializes the popup shortcut list', async () => {
     const chromeApi = {
       commands: {
@@ -54,6 +157,12 @@ describe('init-popup', () => {
       },
       tabs: {
         create: vi.fn(async () => ({}))
+      },
+      storage: {
+        local: {
+          get: vi.fn(async () => ({})),
+          set: vi.fn(async () => {})
+        }
       }
     };
 
@@ -61,5 +170,6 @@ describe('init-popup', () => {
 
     expect(document.querySelectorAll('.shortcut-item')).toHaveLength(2);
     expect(document.getElementById('shortcut-warning').hidden).toBe(true);
+    expect(document.getElementById('auto-confirm-trash').checked).toBe(true);
   });
 });

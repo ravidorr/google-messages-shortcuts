@@ -78,15 +78,77 @@ describe('runConversationAction', () => {
     expect(archiveButton.click).toHaveBeenCalledTimes(1);
   });
 
-  it('moves the selected conversation to trash and confirms', async () => {
+  it('moves the selected conversation to trash and confirms when enabled', async () => {
     const fixture = createConversationFixture();
+    const chromeApi = {
+      storage: {
+        local: {
+          get: vi.fn(async () => ({ autoConfirmTrash: true }))
+        }
+      }
+    };
 
-    const result = await runConversationAction(document, COMMAND_TRASH);
+    const result = await runConversationAction(
+      document,
+      COMMAND_TRASH,
+      undefined,
+      undefined,
+      chromeApi
+    );
 
     expect(result.ok).toBe(true);
     expect(fixture.menuButton.click).toHaveBeenCalled();
     expect(fixture.trashButton.click).toHaveBeenCalled();
     expect(fixture.confirmButton.click).toHaveBeenCalled();
+  });
+
+  it('leaves the native trash dialog visible when confirmation is disabled', async () => {
+    const fixture = createConversationFixture();
+    vi.spyOn(fixture.confirmButton, 'focus');
+    const chromeApi = {
+      storage: {
+        local: {
+          get: vi.fn(async () => ({ autoConfirmTrash: false }))
+        }
+      }
+    };
+
+    const result = await runConversationAction(
+      document,
+      COMMAND_TRASH,
+      undefined,
+      undefined,
+      chromeApi
+    );
+
+    expect(result).toEqual({ ok: true });
+    expect(fixture.trashButton.click).toHaveBeenCalledTimes(1);
+    expect(fixture.confirmButton.click).not.toHaveBeenCalled();
+    expect(fixture.confirmButton.focus).toHaveBeenCalledTimes(1);
+  });
+
+  it('confirms trash when storage cannot be read', async () => {
+    const fixture = createConversationFixture();
+    const chromeApi = {
+      storage: {
+        local: {
+          get: vi.fn(async () => {
+            throw new Error('storage unavailable');
+          })
+        }
+      }
+    };
+
+    const result = await runConversationAction(
+      document,
+      COMMAND_TRASH,
+      undefined,
+      undefined,
+      chromeApi
+    );
+
+    expect(result.ok).toBe(true);
+    expect(fixture.confirmButton.click).toHaveBeenCalledTimes(1);
   });
 
   it('returns no-target when no conversation row exists', async () => {

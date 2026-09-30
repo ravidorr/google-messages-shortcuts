@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.4.0 - 2026-09-30
+
+### Added
+
+- Configurable automatic confirmation for the native Move to trash dialog
+
 ## 1.3.0 - 2026-09-30
 
 ### Added
