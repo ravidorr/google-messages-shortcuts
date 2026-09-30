@@ -56,7 +56,7 @@ npm test
 
 `npm run build` creates a loadable extension in `dist/`, including manifest icons. `npm run package` creates `release/google-messages-shortcuts.zip`. Use `npm run clean` to remove generated build, package, and coverage output. Pre-commit hooks run staged linting and the full test suite with coverage thresholds.
 
-GitHub Actions posts the latest coverage summary to every pull request.
+GitHub Actions posts overall and per-file coverage summaries to every pull request.
 
 ## License
 

@@ -9,6 +9,12 @@ describe('formatCoverageReport', () => {
         functions: { pct: 100 },
         lines: { pct: 96.23 },
         statements: { pct: 96.23 }
+      },
+      'src/example.js': {
+        branches: { pct: 80 },
+        functions: { pct: 75 },
+        lines: { pct: 90 },
+        statements: { pct: 85 }
       }
     });
 
@@ -19,7 +25,16 @@ describe('formatCoverageReport', () => {
 | Lines | 96.23% |
 | Statements | 96.23% |
 | Functions | 100.00% |
-| Branches | 93.69% |`);
+| Branches | 93.69% |
+
+<details>
+<summary>Per-file coverage</summary>
+
+| File | Lines | Statements | Functions | Branches |
+| --- | ---: | ---: | ---: | ---: |
+| \`src/example.js\` | 90.00% | 85.00% | 75.00% | 80.00% |
+
+</details>`);
   });
 
   it('uses N/A when a coverage metric is unavailable', () => {
