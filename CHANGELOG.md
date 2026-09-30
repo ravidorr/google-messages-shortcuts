@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## Unreleased
+
+### Added
+
+- Pre-commit validation blocking direct commits to `main`
+- Pre-commit validation requiring a new changelog entry or synchronized version bumps
+
 ## 1.0.0 - 2026-09-30
 
 ### Added
