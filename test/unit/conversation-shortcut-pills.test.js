@@ -1232,6 +1232,22 @@ describe('conversation shortcut pills', () => {
     warning.mockRestore();
   });
 
+  it('ignores disconnect calls after the final installation is released', () => {
+    disconnect = installConversationShortcutPills({
+      documentRoot: document,
+      getShortcutLabels: vi.fn(async () => ({
+        archive: 'Ctrl+Shift+Y',
+        trash: 'Ctrl+Shift+D'
+      }))
+    });
+
+    disconnect();
+    disconnect();
+    disconnect = undefined;
+
+    expect(document.querySelector('[data-messages-shortcuts-pill-styles]')).toBeNull();
+  });
+
   it('keeps pills while moving within a focused row and cleans up shared styles', async () => {
     const row = createConversationRow({ focused: true });
     const link = row.querySelector('a');
@@ -1262,6 +1278,11 @@ describe('conversation shortcut pills', () => {
 
     expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(2);
     firstDisconnect();
+
+    expect(document.querySelector('[data-messages-shortcuts-pill-styles]')).not.toBeNull();
+    expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(2);
+    expect(row.hasAttribute('data-messages-shortcuts-pill-host')).toBe(true);
+
     disconnect();
 
     expect(document.querySelector('[data-messages-shortcuts-pill-styles]')).toBeNull();

@@ -12,6 +12,7 @@ import {
 const PILL_GROUP_SELECTOR = '[data-messages-shortcuts-pill-group]';
 const STYLE_SELECTOR = 'style[data-messages-shortcuts-pill-styles]';
 const PILL_HOST_ATTRIBUTE = 'data-messages-shortcuts-pill-host';
+const installationRegistry = new WeakMap();
 
 const BASE_PILL_DEFINITIONS = [
   { command: COMMAND_ARCHIVE, label: 'Archive', shortcutKey: 'archive' },
@@ -227,7 +228,22 @@ function createPillGroup(documentRoot, shortcutLabels, runAction, conversationRo
   return group;
 }
 
-export function installConversationShortcutPills({
+function releaseInstallation(documentRoot) {
+  const installation = installationRegistry.get(documentRoot);
+
+  if (!installation) {
+    return;
+  }
+
+  installation.refCount -= 1;
+
+  if (installation.refCount <= 0) {
+    installation.disconnect();
+    installationRegistry.delete(documentRoot);
+  }
+}
+
+function createInstallation({
   documentRoot = document,
   getShortcutLabels = () => chrome.runtime.sendMessage({
     type: MESSAGE_GET_CONVERSATION_SHORTCUT_LABELS
@@ -467,5 +483,29 @@ export function installConversationShortcutPills({
     safeDomMutation(() => {
       style.remove();
     });
+  };
+}
+
+export function installConversationShortcutPills(options = {}) {
+  const documentRoot = options.documentRoot ?? document;
+  const existingInstallation = installationRegistry.get(documentRoot);
+
+  if (existingInstallation) {
+    existingInstallation.refCount += 1;
+
+    return () => {
+      releaseInstallation(documentRoot);
+    };
+  }
+
+  const disconnect = createInstallation(options);
+
+  installationRegistry.set(documentRoot, {
+    refCount: 1,
+    disconnect
+  });
+
+  return () => {
+    releaseInstallation(documentRoot);
   };
 }
