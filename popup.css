@@ -73,7 +73,16 @@ body {
 }
 
 .shortcut-item__label {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
   font-size: 13px;
+}
+
+.shortcut-item__icon {
+  flex: 0 0 auto;
+  width: 16px;
+  height: 16px;
 }
 
 .shortcut-status {

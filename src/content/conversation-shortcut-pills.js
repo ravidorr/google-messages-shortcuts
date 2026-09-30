@@ -2,6 +2,7 @@ import { runConversationAction } from './conversation-action.js';
 import { isConversationRead } from './conversation-read-state.js';
 import { SELECTORS } from './google-messages-dom.js';
 import { COMMAND_ARCHIVE, COMMAND_MARK_UNREAD, COMMAND_TRASH } from '../shared/commands.js';
+import { getCommandIcon } from '../shared/command-icons.js';
 import { isConversationOpeningEnabled } from '../shared/conversation-open-preference.js';
 import {
   MESSAGE_GET_CONVERSATION_SHORTCUT_LABELS,
@@ -13,21 +14,14 @@ const STYLE_SELECTOR = 'style[data-messages-shortcuts-pill-styles]';
 const PILL_HOST_ATTRIBUTE = 'data-messages-shortcuts-pill-host';
 
 const BASE_PILL_DEFINITIONS = [
-  { command: COMMAND_ARCHIVE, icon: 'archive', label: 'Archive', shortcutKey: 'archive' },
-  { command: COMMAND_TRASH, icon: 'trash', label: 'Trash', shortcutKey: 'trash' }
+  { command: COMMAND_ARCHIVE, label: 'Archive', shortcutKey: 'archive' },
+  { command: COMMAND_TRASH, label: 'Trash', shortcutKey: 'trash' }
 ];
 
 const MARK_UNREAD_PILL_DEFINITION = {
   command: COMMAND_MARK_UNREAD,
-  icon: 'markUnread',
   label: 'Mark as unread',
   shortcutKey: 'markUnread'
-};
-
-const PILL_ICON_PATHS = {
-  archive: 'M20.54 5.23 19.15 3.55A2 2 0 0 0 17.61 3H6.39a2 2 0 0 0-1.54.55L3.46 5.23A2 2 0 0 0 3 6.5V19a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6.5a2 2 0 0 0-.46-1.27ZM12 17l-4-4h2.5v-3h3v3H16l-4 4ZM5.12 7l.81-1h12.14l.81 1H5.12Z',
-  markUnread: 'M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2Zm0 4-8 5-8-5V6l8 5 8-5v2Z',
-  trash: 'M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12ZM8 9h8v10H8V9Zm7.5-5-1-1h-5l-1 1H5v2h14V4z'
 };
 
 function isDomRaceNotFoundError(error) {
@@ -94,7 +88,6 @@ function addStyles(documentRoot) {
     }
 
     [data-messages-shortcuts-pill] svg {
-      fill: currentColor;
       height: 14px;
       width: 14px;
     }
@@ -162,16 +155,25 @@ function isWithinConversationRow(event, conversationRow) {
   return event.relatedTarget instanceof Node && conversationRow.contains(event.relatedTarget);
 }
 
-function createPillIcon(documentRoot, icon) {
+function createPillIcon(documentRoot, commandName) {
+  const icon = getCommandIcon(commandName);
   const svg = documentRoot.createElementNS('http://www.w3.org/2000/svg', 'svg');
-  const path = documentRoot.createElementNS('http://www.w3.org/2000/svg', 'path');
 
   svg.setAttribute('aria-hidden', 'true');
-  svg.setAttribute('data-messages-shortcuts-pill-icon', icon);
+  svg.setAttribute('data-messages-shortcuts-pill-icon', commandName);
+  svg.setAttribute('fill', 'none');
   svg.setAttribute('focusable', 'false');
-  svg.setAttribute('viewBox', '0 0 24 24');
-  path.setAttribute('d', PILL_ICON_PATHS[icon]);
-  svg.append(path);
+  svg.setAttribute('stroke', 'currentColor');
+  svg.setAttribute('stroke-linecap', 'round');
+  svg.setAttribute('stroke-linejoin', 'round');
+  svg.setAttribute('stroke-width', '2');
+  svg.setAttribute('viewBox', icon.viewBox);
+
+  for (const pathDefinition of icon.paths) {
+    const path = documentRoot.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', pathDefinition);
+    svg.append(path);
+  }
 
   return svg;
 }
@@ -179,16 +181,14 @@ function createPillIcon(documentRoot, icon) {
 function createPill(documentRoot, definition, shortcut, runAction, conversationRow) {
   const pill = documentRoot.createElement('button');
   const hasShortcut = shortcut !== UNASSIGNED_SHORTCUT_LABEL;
+  const ariaLabel = `${definition.label} conversation${hasShortcut ? `, ${shortcut}` : ''}`;
 
   pill.type = 'button';
   pill.setAttribute('data-messages-shortcuts-pill', '');
   pill.setAttribute('data-command', definition.command);
-  pill.setAttribute(
-    'aria-label',
-    `${definition.label} conversation${hasShortcut ? `, ${shortcut}` : ''}`
-  );
-  pill.title = definition.label;
-  pill.append(createPillIcon(documentRoot, definition.icon));
+  pill.setAttribute('aria-label', ariaLabel);
+  pill.title = ariaLabel;
+  pill.append(createPillIcon(documentRoot, definition.command));
 
   if (hasShortcut) {
     const shortcutLabel = documentRoot.createElement('span');
