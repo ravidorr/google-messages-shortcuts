@@ -1237,13 +1237,6 @@ describe('conversation shortcut pills', () => {
   });
 
   it('ignores stale disconnect callbacks from prior installations', () => {
-    const firstCallback = installConversationShortcutPills({
-      documentRoot: document,
-      getShortcutLabels: vi.fn(async () => ({
-        archive: 'Ctrl+Shift+Y',
-        trash: 'Ctrl+Shift+D'
-      }))
-    });
     const staleCallback = installConversationShortcutPills({
       documentRoot: document,
       getShortcutLabels: vi.fn(async () => ({
@@ -1253,7 +1246,7 @@ describe('conversation shortcut pills', () => {
     });
 
     resetConversationShortcutPillInstallationsForTests(document);
-    firstCallback();
+    staleCallback();
 
     disconnect = installConversationShortcutPills({
       documentRoot: document,
@@ -1269,6 +1262,35 @@ describe('conversation shortcut pills', () => {
 
     disconnect();
     disconnect = undefined;
+  });
+
+  it('ignores stale disconnect callbacks whose token is not in the active installation', () => {
+    const staleCallback = installConversationShortcutPills({
+      documentRoot: document,
+      getShortcutLabels: vi.fn(async () => ({
+        archive: 'Ctrl+Shift+Y',
+        trash: 'Ctrl+Shift+D'
+      }))
+    });
+
+    resetConversationShortcutPillInstallationsForTests(document);
+
+    disconnect = installConversationShortcutPills({
+      documentRoot: document,
+      getShortcutLabels: vi.fn(async () => ({
+        archive: 'Ctrl+Shift+Y',
+        trash: 'Ctrl+Shift+D'
+      }))
+    });
+
+    staleCallback();
+
+    disconnect();
+    disconnect = undefined;
+  });
+
+  it('ignores reset requests when no installation is registered', () => {
+    resetConversationShortcutPillInstallationsForTests(document);
   });
 
   it('ignores disconnect calls after the final installation is released', () => {

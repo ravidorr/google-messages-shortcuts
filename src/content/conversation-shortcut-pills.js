@@ -499,6 +499,13 @@ function createInstallation({
 }
 
 export function resetConversationShortcutPillInstallationsForTests(documentRoot = document) {
+  const installation = installationRegistry.get(documentRoot);
+
+  if (!installation) {
+    return;
+  }
+
+  installation.disconnect();
   installationRegistry.delete(documentRoot);
 }
 
