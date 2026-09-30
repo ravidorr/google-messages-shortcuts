@@ -13,7 +13,6 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 const execFileAsync = promisify(execFile);
 const repositoryRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const temporaryDirectories = [];
-let entrypointImportCount = 0;
 const previousChangelog = `# Changelog
 
 ## 1.0.0 - 2026-09-30
@@ -63,10 +62,24 @@ async function importEntrypoint(scriptName, args = []) {
   process.argv = [process.execPath, entrypointPath, ...args];
 
   try {
-    entrypointImportCount += 1;
-
-    const entrypointModule = await import(`${pathToFileURL(entrypointPath).href}?entrypoint=${entrypointImportCount}`);
+    vi.resetModules();
+    const entrypointModule = await import(pathToFileURL(entrypointPath).href);
     await entrypointModule.cliExecutionPromise;
+  } finally {
+    process.argv = originalArgv;
+  }
+}
+
+async function importAsModule(scriptName) {
+  const entrypointPath = scriptPath(scriptName);
+  const originalArgv = process.argv;
+
+  process.argv = [process.execPath, 'not-the-entrypoint'];
+
+  try {
+    vi.resetModules();
+
+    return await import(pathToFileURL(entrypointPath).href);
   } finally {
     process.argv = originalArgv;
   }
@@ -382,6 +395,26 @@ describe('script entrypoints', () => {
 });
 
 describe('script entrypoint coverage', () => {
+  it('does not execute CLI handlers when scripts are imported as modules', async () => {
+    const scriptNames = [
+      'build.js',
+      'clean.js',
+      'format-coverage-report.js',
+      'generate-icons.js',
+      'package.js',
+      'prevent-main-commit.js',
+      'validate-package-lock-version.js',
+      'validate-release-metadata.js',
+      'validate-version-bump.js'
+    ];
+
+    for (const scriptName of scriptNames) {
+      const { cliExecutionPromise } = await importAsModule(scriptName);
+
+      expect(cliExecutionPromise).toBeUndefined();
+    }
+  });
+
   it('covers pre-commit branch guard execution in-process', async () => {
     const projectDirectory = await createReleaseRepository();
     const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
@@ -435,6 +468,23 @@ describe('script entrypoint coverage', () => {
       packageVersion: '1.0.1'
     });
     await stageReleaseFiles(projectDirectory);
+
+    await withWorkingDirectory(projectDirectory, async () => {
+      await importEntrypoint('validate-release-metadata.js');
+    });
+
+    expect(consoleError).toHaveBeenCalledWith(expect.stringContaining('Commit blocked'));
+    expect(processExit).toHaveBeenCalledWith(1);
+
+    consoleError.mockRestore();
+    processExit.mockRestore();
+  });
+
+  it('fails safely when staged release metadata cannot be read', async () => {
+    const projectDirectory = await mkdtemp(path.join(tmpdir(), 'missing-release-metadata-'));
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const processExit = vi.spyOn(process, 'exit').mockImplementation(() => {});
+    temporaryDirectories.push(projectDirectory);
 
     await withWorkingDirectory(projectDirectory, async () => {
       await importEntrypoint('validate-release-metadata.js');
@@ -614,6 +664,91 @@ describe('script entrypoint coverage', () => {
       'Version bump validation failed.',
       'package.json, manifest.json, and package-lock.json versions must be synchronized after a bump.'
     );
+    expect(processExit).toHaveBeenCalledWith(1);
+
+    consoleError.mockRestore();
+    processExit.mockRestore();
+  });
+
+  it('allows pre-commit execution from a feature branch', async () => {
+    const projectDirectory = await createReleaseRepository();
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const processExit = vi.spyOn(process, 'exit').mockImplementation(() => {});
+
+    await runGit(projectDirectory, ['checkout', '-b', 'feature/entrypoint-coverage']);
+    await withWorkingDirectory(projectDirectory, async () => {
+      await importEntrypoint('prevent-main-commit.js');
+    });
+
+    expect(consoleError).not.toHaveBeenCalled();
+    expect(processExit).not.toHaveBeenCalled();
+
+    consoleError.mockRestore();
+    processExit.mockRestore();
+  });
+
+  it('accepts synchronized package-lock metadata in-process', async () => {
+    const projectDirectory = await mkdtemp(path.join(tmpdir(), 'package-lock-success-entrypoint-'));
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const processExit = vi.spyOn(process, 'exit').mockImplementation(() => {});
+    temporaryDirectories.push(projectDirectory);
+
+    await Promise.all([
+      writeFile(path.join(projectDirectory, 'package.json'), packageFile('1.0.1')),
+      writeFile(path.join(projectDirectory, 'package-lock.json'), packageLockFile('1.0.1'))
+    ]);
+    await withWorkingDirectory(projectDirectory, async () => {
+      await importEntrypoint('validate-package-lock-version.js');
+    });
+
+    expect(consoleError).not.toHaveBeenCalled();
+    expect(processExit).not.toHaveBeenCalled();
+
+    consoleError.mockRestore();
+    processExit.mockRestore();
+  });
+
+  it('reports missing base revisions from version bump validation', async () => {
+    const projectDirectory = await createReleaseRepository();
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const processExit = vi.spyOn(process, 'exit').mockImplementation(() => {});
+
+    await withWorkingDirectory(projectDirectory, async () => {
+      await importEntrypoint('validate-version-bump.js');
+    });
+
+    expect(consoleError).toHaveBeenCalledWith(
+      'Version bump validation failed.',
+      'Pass the base revision, for example: origin/main.'
+    );
+    expect(processExit).toHaveBeenCalledWith(1);
+
+    consoleError.mockRestore();
+    processExit.mockRestore();
+  });
+
+  it.each([
+    ['build.js', 'Failed to build the extension.'],
+    ['clean.js', 'Failed to clean generated files.'],
+    ['format-coverage-report.js', 'Failed to format the coverage report.'],
+    ['package.js', 'Failed to package the extension.']
+  ])('reports asynchronous %s failures', async (scriptName, expectedMessage) => {
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const processExit = vi.spyOn(process, 'exit').mockImplementation(() => {});
+
+    vi.doMock('node:fs/promises', async (importOriginal) => ({
+      ...(await importOriginal()),
+      mkdir: vi.fn().mockRejectedValue(new Error('filesystem unavailable')),
+      rm: vi.fn().mockRejectedValue(new Error('filesystem unavailable'))
+    }));
+
+    try {
+      await importEntrypoint(scriptName);
+    } finally {
+      vi.doUnmock('node:fs/promises');
+    }
+
+    expect(consoleError).toHaveBeenCalledWith(expectedMessage, expect.any(Error));
     expect(processExit).toHaveBeenCalledWith(1);
 
     consoleError.mockRestore();

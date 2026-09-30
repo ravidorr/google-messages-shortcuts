@@ -40,4 +40,29 @@ describe('formatCoverageReport', () => {
   it('uses N/A when a coverage metric is unavailable', () => {
     expect(formatCoverageReport({ total: {} })).toContain('| Lines | N/A |');
   });
+
+  it('formats absolute paths and non-finite per-file metrics', () => {
+    const report = formatCoverageReport({
+      total: {
+        branches: { pct: Number.NaN },
+        functions: { pct: Number.POSITIVE_INFINITY },
+        lines: { pct: Number.NEGATIVE_INFINITY },
+        statements: { pct: undefined }
+      },
+      '/tmp/coverage/example.js': {
+        branches: { pct: undefined },
+        functions: { pct: Number.NaN },
+        lines: { pct: Number.POSITIVE_INFINITY },
+        statements: { pct: Number.NEGATIVE_INFINITY }
+      }
+    });
+
+    expect(report).toContain('| Lines | N/A |');
+    expect(report).toContain('| Statements | N/A |');
+    expect(report).toContain('| Functions | N/A |');
+    expect(report).toContain('| Branches | N/A |');
+    expect(report).toContain(
+      '| `../../../../tmp/coverage/example.js` | N/A | N/A | N/A | N/A |'
+    );
+  });
 });

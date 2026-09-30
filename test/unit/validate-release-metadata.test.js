@@ -52,6 +52,8 @@ Updated release notes.
   it('accepts version components that increase at different precision levels', () => {
     expect(isVersionBumped('1.0', '1.0.1')).toBe(true);
     expect(isVersionBumped('1.0.0', '1.1.0')).toBe(true);
+    expect(isVersionBumped('1.0.1', '2')).toBe(true);
+    expect(isVersionBumped('1.0.1', '1.0')).toBe(false);
     expect(isVersionBumped('1.1.0', '1.0.1')).toBe(false);
     expect(isVersionBumped('1.0.0', '1.0.0')).toBe(false);
     expect(isVersionBumped('invalid', '1.0.1')).toBe(false);

@@ -36,6 +36,20 @@ describe('waitForElement', () => {
     await assertion;
   });
 
+  it('treats a missing element text value as empty text', async () => {
+    const documentRoot = {
+      querySelectorAll: () => [{ textContent: undefined }]
+    };
+
+    await expect(waitForElement(documentRoot, '.mat-menu-item', 'Archive', 0))
+      .rejects.toThrow('Timed out waiting for selector ".mat-menu-item" with text "Archive"');
+  });
+
+  it('formats a timeout without a requested text value', async () => {
+    await expect(waitForElement(document, '.missing', '', 0))
+      .rejects.toThrow('Timed out waiting for selector ".missing" with text ""');
+  });
+
   it('resolves when a matching element is appended after polling begins', async () => {
     const promise = waitForElement(document, '.mat-menu-item', 'Archive', 1000);
 

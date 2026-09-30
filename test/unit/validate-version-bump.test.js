@@ -47,10 +47,13 @@ describe('validateVersionBump', () => {
   it('rejects version files with different version values', () => {
     expect(versionsMatch('1.0.1', '1.0.2')).toBe(false);
     expect(versionsMatch('1.0.1', 'not-a-version')).toBe(false);
+    expect(versionsMatch('1.0', '1')).toBe(true);
+    expect(versionsMatch('1', '1.0')).toBe(true);
   });
 
   it('rejects malformed version bumps', () => {
     expect(isVersionBumped('1.0.0', '1.0.0')).toBe(false);
+    expect(isVersionBumped('1.0.1', '1.0')).toBe(false);
     expect(validateVersionBump({
       basePackage: packageFile('1.0.0'),
       currentPackage: 'not JSON',
