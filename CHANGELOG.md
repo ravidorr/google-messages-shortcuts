@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.6.7 - 2026-09-30
+
+### Fixed
+
+- Document local preference storage and all supported shortcut actions in the privacy policy
+
 ## 1.6.6 - 2026-09-30
 
 ### Added
