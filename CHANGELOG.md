@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.0.5 - 2026-09-30
+
+### Changed
+
+- Group existing changelog entries under the extension version in which they shipped
+
 ## 1.0.4 - 2026-09-30
 
 ### Added
