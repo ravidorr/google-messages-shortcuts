@@ -66,13 +66,27 @@ describe('message-handler', () => {
     expect(result.ok).toBe(true);
   });
 
-  it('warns when a valid command cannot find a conversation', async () => {
+  it('silently ignores a valid command when no conversation is available', async () => {
     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
     const result = await handleCommand(COMMAND_ARCHIVE);
 
     expect(result).toEqual({ ok: false, reason: 'no-target' });
-    expect(warnSpy).toHaveBeenCalled();
+    expect(warnSpy).not.toHaveBeenCalled();
+  });
+
+  it('warns when a valid command cannot find its menu button', async () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    vi.spyOn(conversationAction, 'runConversationAction')
+      .mockResolvedValueOnce({ ok: false, reason: 'menu-button-not-found' });
+
+    const result = await handleCommand(COMMAND_ARCHIVE);
+
+    expect(result).toEqual({ ok: false, reason: 'menu-button-not-found' });
+    expect(warnSpy).toHaveBeenCalledWith(
+      '[Messages Shortcut Actions] Failed to find the conversation menu button.',
+      'menu-button-not-found'
+    );
   });
 
   it('returns unknown-command for invalid commands', async () => {

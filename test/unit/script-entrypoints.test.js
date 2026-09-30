@@ -739,6 +739,7 @@ describe('script entrypoint coverage', () => {
     vi.doMock('node:fs/promises', async (importOriginal) => ({
       ...(await importOriginal()),
       mkdir: vi.fn().mockRejectedValue(new Error('filesystem unavailable')),
+      readFile: vi.fn().mockRejectedValue(new Error('filesystem unavailable')),
       rm: vi.fn().mockRejectedValue(new Error('filesystem unavailable'))
     }));
 

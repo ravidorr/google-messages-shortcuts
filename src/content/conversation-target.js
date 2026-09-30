@@ -11,6 +11,12 @@ export function findConversationRow(documentRoot, selectors = SELECTORS) {
     }
   }
 
+  const focusedRow = documentRoot.querySelector(selectors.focusedConversationItem);
+
+  if (focusedRow) {
+    return focusedRow;
+  }
+
   const hoveredRow = documentRoot.querySelector(selectors.hoveredConversationItem);
 
   if (hoveredRow) {

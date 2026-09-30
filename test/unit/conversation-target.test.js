@@ -35,6 +35,23 @@ describe('conversation-target', () => {
     expect(findConversationRow(document)).toBe(selected.row);
   });
 
+  it('uses the focused conversation row when none is selected', () => {
+    const focused = createConversationRow();
+    focused.row.setAttribute('is-focused', 'true');
+    document.body.append(focused.row);
+
+    expect(findConversationRow(document)).toBe(focused.row);
+  });
+
+  it('prefers the selected conversation row over a focused row', () => {
+    const selected = createConversationRow({ selected: true });
+    const focused = createConversationRow();
+    focused.row.setAttribute('is-focused', 'true');
+    document.body.append(selected.row, focused.row);
+
+    expect(findConversationRow(document)).toBe(selected.row);
+  });
+
   it('falls back to the hovered conversation row', () => {
     document.body.innerHTML = `
       <mws-conversation-list-item class="hovered-row">
@@ -45,6 +62,7 @@ describe('conversation-target', () => {
 
     const hoveredSelectors = {
       selectedConversationLink: 'mws-conversation-list-item a[aria-selected="true"]',
+      focusedConversationItem: 'mws-conversation-list-item[is-focused="true"]',
       hoveredConversationItem: 'mws-conversation-list-item.hovered-row',
       conversationRow: 'mws-conversation-list-item',
       rowMenuButton: 'button[aria-haspopup="menu"], mws-menu-button button'
