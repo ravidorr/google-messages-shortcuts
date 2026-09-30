@@ -3,6 +3,7 @@
 import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
+import sharp from 'sharp';
 import { afterEach, describe, expect, it } from 'vitest';
 import { buildExtension } from '../../scripts/build.js';
 
@@ -38,6 +39,14 @@ describe('buildExtension', () => {
       writeFile(path.join(sourceDirectory, 'popup.html'), '<main></main>'),
       writeFile(path.join(sourceDirectory, 'popup.js'), 'popup'),
       writeFile(path.join(sourceDirectory, 'icons', 'icon.svg'), '<svg/>'),
+      sharp({
+        create: {
+          background: '#ff0000',
+          channels: 4,
+          height: 128,
+          width: 128
+        }
+      }).png().toFile(path.join(sourceDirectory, 'icons', 'icon-source.png')),
       writeFile(path.join(sourceDirectory, 'src', 'content', 'entry.js'), "export const message = 'ready';"),
       writeFile(path.join(sourceDirectory, 'src', 'shared', 'commands.js'), 'commands')
     ]);

@@ -17,6 +17,7 @@ All notable changes to this project will be documented in this file.
 - Complete branch coverage for content-script routing failures
 - Keep package-lock metadata synchronized with extension version bumps
 - Block local commits with unsynchronized package-lock metadata
+- Replace generated extension artwork with the new product icon
 - Pre-commit validation blocking direct commits to `main`
 - Pre-commit validation requiring a new changelog entry or synchronized version bumps
 
