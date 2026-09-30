@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.6.4 - 2026-09-30
+
+### Changed
+
+- Use Lucide action icons consistently in shortcut pills and the popup
+
 ## 1.6.3 - 2026-09-30
 
 ### Changed

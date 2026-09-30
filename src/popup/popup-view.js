@@ -1,4 +1,5 @@
 import { COMMAND_ARCHIVE, COMMAND_MARK_UNREAD, COMMAND_TRASH } from '../shared/commands.js';
+import { getCommandIcon } from '../shared/command-icons.js';
 
 export const COMMAND_LABELS = {
   [COMMAND_ARCHIVE]: 'Archive conversation',
@@ -38,6 +39,29 @@ export function renderShortcutRows(commands) {
   return rows;
 }
 
+function createShortcutIcon(documentRoot, commandName) {
+  const icon = getCommandIcon(commandName);
+  const svg = documentRoot.createElementNS('http://www.w3.org/2000/svg', 'svg');
+
+  svg.classList.add('shortcut-item__icon');
+  svg.setAttribute('aria-hidden', 'true');
+  svg.setAttribute('fill', 'none');
+  svg.setAttribute('focusable', 'false');
+  svg.setAttribute('stroke', 'currentColor');
+  svg.setAttribute('stroke-linecap', 'round');
+  svg.setAttribute('stroke-linejoin', 'round');
+  svg.setAttribute('stroke-width', '2');
+  svg.setAttribute('viewBox', icon.viewBox);
+
+  for (const pathDefinition of icon.paths) {
+    const path = documentRoot.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', pathDefinition);
+    svg.append(path);
+  }
+
+  return svg;
+}
+
 export function populateShortcutList(container, commands, documentRoot = document) {
   const rows = renderShortcutRows(commands);
 
@@ -49,7 +73,7 @@ export function populateShortcutList(container, commands, documentRoot = documen
 
     const title = documentRoot.createElement('span');
     title.className = 'shortcut-item__label';
-    title.textContent = row.label;
+    title.append(createShortcutIcon(documentRoot, row.commandName), row.label);
 
     const shortcut = documentRoot.createElement('span');
     shortcut.className = row.className;

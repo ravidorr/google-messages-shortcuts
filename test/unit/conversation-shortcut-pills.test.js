@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { COMMAND_ARCHIVE, COMMAND_MARK_UNREAD, COMMAND_TRASH } from '../../src/shared/commands.js';
+import { getCommandIcon } from '../../src/shared/command-icons.js';
 import { installConversationShortcutPills, safeDomMutation } from '../../src/content/conversation-shortcut-pills.js';
 
 function createConversationRow({ focused = false, unread = true } = {}) {
@@ -22,6 +23,23 @@ function createConversationRow({ focused = false, unread = true } = {}) {
   }
 
   return row;
+}
+
+function expectLucidePillIcon(pill, commandName) {
+  const icon = getCommandIcon(commandName);
+  const svg = pill.querySelector(`[data-messages-shortcuts-pill-icon="${commandName}"]`);
+
+  expect(svg).not.toBeNull();
+  expect(svg.getAttribute('aria-hidden')).toBe('true');
+  expect(svg.getAttribute('fill')).toBe('none');
+  expect(svg.getAttribute('focusable')).toBe('false');
+  expect(svg.getAttribute('stroke')).toBe('currentColor');
+  expect(svg.getAttribute('stroke-linecap')).toBe('round');
+  expect(svg.getAttribute('stroke-linejoin')).toBe('round');
+  expect(svg.getAttribute('stroke-width')).toBe('2');
+  expect(svg.getAttribute('viewBox')).toBe(icon.viewBox);
+  expect([...svg.querySelectorAll('path')].map((path) => path.getAttribute('d')))
+    .toEqual(icon.paths);
 }
 
 describe('conversation shortcut pills', () => {
@@ -58,12 +76,13 @@ describe('conversation shortcut pills', () => {
     const trashPill = row.querySelector(`[data-command="${COMMAND_TRASH}"]`);
 
     expect(archivePill.getAttribute('aria-label')).toBe('Archive conversation, Ctrl+Shift+Y');
-    expect(archivePill.getAttribute('title')).toBe('Archive');
+    expect(archivePill.getAttribute('title')).toBe('Archive conversation, Ctrl+Shift+Y');
     expect(archivePill.textContent).toBe('Ctrl+Shift+Y');
-    expect(archivePill.querySelector('[data-messages-shortcuts-pill-icon="archive"]')).not.toBeNull();
+    expectLucidePillIcon(archivePill, COMMAND_ARCHIVE);
     expect(trashPill.getAttribute('aria-label')).toBe('Trash conversation');
+    expect(trashPill.getAttribute('title')).toBe('Trash conversation');
     expect(trashPill.textContent).toBe('');
-    expect(trashPill.querySelector('[data-messages-shortcuts-pill-icon="trash"]')).not.toBeNull();
+    expectLucidePillIcon(trashPill, COMMAND_TRASH);
   });
 
   it('renders unassigned shortcut pills as icons only', async () => {
@@ -89,7 +108,7 @@ describe('conversation shortcut pills', () => {
       .toBe('');
     expect(
       row.querySelector(`[data-command="${COMMAND_MARK_UNREAD}"]`)
-        .querySelector('[data-messages-shortcuts-pill-icon="markUnread"]')
+        .querySelector(`[data-messages-shortcuts-pill-icon="${COMMAND_MARK_UNREAD}"]`)
     ).not.toBeNull();
   });
 
@@ -116,9 +135,11 @@ describe('conversation shortcut pills', () => {
     expect(markUnreadPill.getAttribute('aria-label')).toBe(
       'Mark as unread conversation, Ctrl+Shift+U'
     );
+    expect(markUnreadPill.getAttribute('title')).toBe(
+      'Mark as unread conversation, Ctrl+Shift+U'
+    );
     expect(markUnreadPill.textContent).toBe('Ctrl+Shift+U');
-    expect(markUnreadPill.querySelector('[data-messages-shortcuts-pill-icon="markUnread"]'))
-      .not.toBeNull();
+    expectLucidePillIcon(markUnreadPill, COMMAND_MARK_UNREAD);
   });
 
   it('omits the Mark as unread pill for unread conversations', async () => {
