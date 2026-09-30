@@ -1,12 +1,14 @@
 # Messages Shortcut Actions
 
-Chrome extension that archives or trashes the selected or hovered conversation in [Google Messages Web](https://messages.google.com/web/).
+Chrome extension that archives, trashes, or marks as unread the selected or hovered conversation in [Google Messages Web](https://messages.google.com/web/).
 
 ## Features
 
 - Archive the active conversation with `Ctrl+Shift+Y` (`Command+Shift+Y` on macOS)
 - Move the active conversation to trash with `Ctrl+Shift+D` (`Command+Shift+D` on macOS)
+- Mark the active read conversation as unread with `Ctrl+Shift+U` (`Command+Shift+U` on macOS)
 - Show Archive and Trash shortcut pills on hovered and focused conversations
+- Show a Mark as unread pill on read conversations
 - Optionally open conversations immediately when they are hovered or focused
 - Popup UI that shows the effective Chrome shortcut assignments
 - Configurable automatic confirmation for the native Move to trash dialog
@@ -52,8 +54,9 @@ If Chrome or the operating system already uses a suggested shortcut, Chrome may 
 2. The worker checks that the active tab is Google Messages.
 3. The worker sends the command to the content script.
 4. The content script finds the selected conversation row, or the hovered row if none is selected.
-5. The content script opens the row menu and clicks Archive or Move to trash.
+5. The content script opens the row menu and clicks Archive, Move to trash, or Mark as unread.
 6. Trash actions confirm through Google Messages' native dialog.
+7. Mark as unread is available only for conversations that are currently read.
 
 ## Limitations
 

@@ -8,13 +8,16 @@ describe('popup entry', () => {
       <a id="shortcuts-link" href="#">shortcuts</a>
       <input id="auto-confirm-trash" type="checkbox">
       <label for="auto-confirm-trash">Automatically confirm Move to trash</label>
+      <input id="open-conversation-on-focus" type="checkbox" disabled>
+      <label for="open-conversation-on-focus">Open conversations on hover or focus</label>
     `;
 
     globalThis.chrome = {
       commands: {
         getAll: vi.fn(async () => [
           { name: 'archive-conversation', shortcut: 'Ctrl+Shift+Y' },
-          { name: 'trash-conversation', shortcut: '' }
+          { name: 'trash-conversation', shortcut: '' },
+          { name: 'mark-unread-conversation', shortcut: '' }
         ])
       },
       tabs: {
@@ -35,7 +38,7 @@ describe('popup entry', () => {
     await Promise.resolve();
     await Promise.resolve();
 
-    expect(document.querySelectorAll('.shortcut-item')).toHaveLength(2);
+    expect(document.querySelectorAll('.shortcut-item')).toHaveLength(3);
     expect(document.getElementById('shortcut-warning').hidden).toBe(false);
     expect(document.getElementById('auto-confirm-trash').checked).toBe(true);
   });
@@ -67,6 +70,8 @@ describe('popup entry', () => {
       <a id="shortcuts-link" href="#">shortcuts</a>
       <input id="auto-confirm-trash" type="checkbox">
       <label for="auto-confirm-trash">Automatically confirm Move to trash</label>
+      <input id="open-conversation-on-focus" type="checkbox" disabled>
+      <label for="open-conversation-on-focus">Open conversations on hover or focus</label>
     `;
 
     await import('../../popup.js');

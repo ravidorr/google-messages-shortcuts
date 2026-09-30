@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.6.0 - 2026-09-30
+
+### Added
+
+- Mark the active read conversation as unread with `Ctrl+Shift+U` (`Command+Shift+U` on macOS)
+- Show a Mark as unread shortcut pill on read conversations in the conversation list
+
 ## 1.5.1 - 2026-09-30
 
 ### Fixed

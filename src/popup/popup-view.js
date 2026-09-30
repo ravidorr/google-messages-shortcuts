@@ -1,8 +1,9 @@
-import { COMMAND_ARCHIVE, COMMAND_TRASH } from '../shared/commands.js';
+import { COMMAND_ARCHIVE, COMMAND_MARK_UNREAD, COMMAND_TRASH } from '../shared/commands.js';
 
 export const COMMAND_LABELS = {
   [COMMAND_ARCHIVE]: 'Archive conversation',
-  [COMMAND_TRASH]: 'Trash conversation'
+  [COMMAND_TRASH]: 'Trash conversation',
+  [COMMAND_MARK_UNREAD]: 'Mark conversation as unread'
 };
 
 export function getShortcutStatus(shortcut) {
@@ -22,7 +23,7 @@ export function getShortcutStatus(shortcut) {
 export function renderShortcutRows(commands) {
   const rows = [];
 
-  for (const commandName of [COMMAND_ARCHIVE, COMMAND_TRASH]) {
+  for (const commandName of [COMMAND_ARCHIVE, COMMAND_TRASH, COMMAND_MARK_UNREAD]) {
     const command = commands.find((entry) => entry.name === commandName);
     const status = getShortcutStatus(command?.shortcut || '');
 

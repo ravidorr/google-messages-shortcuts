@@ -1,6 +1,7 @@
 import { runConversationAction } from './conversation-action.js';
+import { isConversationRead } from './conversation-read-state.js';
 import { SELECTORS } from './google-messages-dom.js';
-import { COMMAND_ARCHIVE, COMMAND_TRASH } from '../shared/commands.js';
+import { COMMAND_ARCHIVE, COMMAND_MARK_UNREAD, COMMAND_TRASH } from '../shared/commands.js';
 import { isConversationOpeningEnabled } from '../shared/conversation-open-preference.js';
 import { MESSAGE_GET_CONVERSATION_SHORTCUT_LABELS } from '../shared/shortcut-labels.js';
 
@@ -8,10 +9,26 @@ const PILL_GROUP_SELECTOR = '[data-messages-shortcuts-pill-group]';
 const STYLE_SELECTOR = 'style[data-messages-shortcuts-pill-styles]';
 const PILL_HOST_ATTRIBUTE = 'data-messages-shortcuts-pill-host';
 
-const PILL_DEFINITIONS = [
+const BASE_PILL_DEFINITIONS = [
   { command: COMMAND_ARCHIVE, label: 'Archive', shortcutKey: 'archive' },
   { command: COMMAND_TRASH, label: 'Trash', shortcutKey: 'trash' }
 ];
+
+const MARK_UNREAD_PILL_DEFINITION = {
+  command: COMMAND_MARK_UNREAD,
+  label: 'Mark as unread',
+  shortcutKey: 'markUnread'
+};
+
+function getPillDefinitions(conversationRow) {
+  const definitions = [...BASE_PILL_DEFINITIONS];
+
+  if (isConversationRead(conversationRow)) {
+    definitions.push(MARK_UNREAD_PILL_DEFINITION);
+  }
+
+  return definitions;
+}
 
 function addStyles(documentRoot) {
   const existingStyle = documentRoot.querySelector(STYLE_SELECTOR);
@@ -95,7 +112,7 @@ function createPillGroup(documentRoot, shortcutLabels, runAction, conversationRo
   group.setAttribute('role', 'group');
   group.setAttribute('aria-label', 'Conversation shortcuts');
 
-  for (const definition of PILL_DEFINITIONS) {
+  for (const definition of getPillDefinitions(conversationRow)) {
     group.append(createPill(
       documentRoot,
       definition,

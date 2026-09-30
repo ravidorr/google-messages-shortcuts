@@ -1,4 +1,5 @@
-import { COMMAND_ARCHIVE, COMMAND_TRASH } from '../shared/commands.js';
+import { COMMAND_ARCHIVE, COMMAND_MARK_UNREAD, COMMAND_TRASH } from '../shared/commands.js';
+import { isConversationRead } from './conversation-read-state.js';
 import { isTrashConfirmationEnabled } from '../shared/trash-confirmation-preference.js';
 import { findConversationRow, findRowMenuButton } from './conversation-target.js';
 import { MENU_TEXT, SELECTORS } from './google-messages-dom.js';
@@ -86,6 +87,10 @@ export async function runConversationAction(
     return { ok: false, reason: 'menu-button-not-found' };
   }
 
+  if (command === COMMAND_MARK_UNREAD && !isConversationRead(conversationRow, selectors)) {
+    return { ok: false, reason: 'already-unread' };
+  }
+
   menuButton.click();
 
   if (command === COMMAND_ARCHIVE) {
@@ -114,6 +119,14 @@ export async function runConversationAction(
     }
 
     return confirmTrash(documentRoot);
+  }
+
+  if (command === COMMAND_MARK_UNREAD) {
+    return clickMenuAction(
+      documentRoot,
+      selectors.markUnreadMenuItem,
+      MENU_TEXT.markUnread
+    );
   }
 
   return { ok: false, reason: 'unknown-command' };
