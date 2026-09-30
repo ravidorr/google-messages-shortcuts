@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  isVersionBumped,
   packageLockVersionMatches,
   validateVersionBump,
   versionsMatch
@@ -45,6 +46,18 @@ describe('validateVersionBump', () => {
 
   it('rejects version files with different version values', () => {
     expect(versionsMatch('1.0.1', '1.0.2')).toBe(false);
+    expect(versionsMatch('1.0.1', 'not-a-version')).toBe(false);
+  });
+
+  it('rejects malformed version bumps', () => {
+    expect(isVersionBumped('1.0.0', '1.0.0')).toBe(false);
+    expect(validateVersionBump({
+      basePackage: packageFile('1.0.0'),
+      currentPackage: 'not JSON',
+      baseManifest: manifestFile('1.0.0'),
+      currentManifest: manifestFile('1.0.1'),
+      currentPackageLock: packageLockFile('1.0.1')
+    }).valid).toBe(false);
   });
 
   it('rejects a version bump with stale package-lock metadata', () => {
@@ -60,5 +73,7 @@ describe('validateVersionBump', () => {
   it('requires both package-lock root version fields to match', () => {
     expect(packageLockVersionMatches('1.0.1', packageLockFile('1.0.1'))).toBe(true);
     expect(packageLockVersionMatches('1.0.1', packageLockFile('1.0.1', '1.0.0'))).toBe(false);
+    expect(packageLockVersionMatches('1.0.1', '{"version":"1.0.1"}')).toBe(false);
+    expect(packageLockVersionMatches('1.0.1', 'not JSON')).toBe(false);
   });
 });

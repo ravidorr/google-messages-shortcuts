@@ -87,6 +87,8 @@ describe('runConversationAction', () => {
       </mws-conversation-list-item>
       <button class="mat-mdc-menu-item">Archive</button>
     `;
+    vi.spyOn(waitForElement, 'waitForSelector')
+      .mockRejectedValueOnce(new Error('archive selector unavailable'));
 
     const result = await runConversationAction(document, COMMAND_ARCHIVE);
 
@@ -100,12 +102,25 @@ describe('runConversationAction', () => {
         <button aria-haspopup="menu"></button>
       </mws-conversation-list-item>
       <button class="mat-mdc-menu-item">Move to trash</button>
-      <button class="mat-focus-indicator">Move to trash</button>
+      <mat-dialog-container>
+        <button class="mat-focus-indicator">Move to trash</button>
+      </mat-dialog-container>
     `;
+    const trashMenuItem = document.querySelector('.mat-mdc-menu-item');
+    const confirmButton = document.querySelector('mat-dialog-container .mat-focus-indicator');
+    vi.spyOn(trashMenuItem, 'click');
+    vi.spyOn(confirmButton, 'click');
+    vi.spyOn(waitForElement, 'waitForSelector')
+      .mockRejectedValueOnce(new Error('trash selector unavailable'))
+      .mockRejectedValueOnce(new Error('confirmation selector unavailable'));
+    vi.spyOn(waitForElement, 'waitForElement')
+      .mockResolvedValueOnce(trashMenuItem);
 
     const result = await runConversationAction(document, COMMAND_TRASH);
 
     expect(result.ok).toBe(true);
+    expect(trashMenuItem.click).toHaveBeenCalledTimes(1);
+    expect(confirmButton.click).toHaveBeenCalledTimes(1);
   });
 
   it('returns a menu-action failure when trash menu items are unavailable', async () => {
@@ -115,11 +130,17 @@ describe('runConversationAction', () => {
         <button aria-haspopup="menu"></button>
       </mws-conversation-list-item>
     `;
+    vi.spyOn(waitForElement, 'waitForSelector')
+      .mockRejectedValueOnce(new Error('trash menu unavailable'));
+    vi.spyOn(waitForElement, 'waitForElement')
+      .mockRejectedValueOnce(new Error('trash fallback unavailable'));
 
     const result = await runConversationAction(document, COMMAND_TRASH);
 
-    expect(result.ok).toBe(false);
-    expect(result.reason).toContain('Timed out waiting for selector');
+    expect(result).toEqual({
+      ok: false,
+      reason: 'trash fallback unavailable'
+    });
   });
 
   it('returns a confirmation failure when no trash confirmation control appears', async () => {
@@ -130,11 +151,19 @@ describe('runConversationAction', () => {
       </mws-conversation-list-item>
       <div data-e2e-conversation-delete>Move to trash</div>
     `;
+    const trashMenuItem = document.querySelector('[data-e2e-conversation-delete]');
+    vi.spyOn(waitForElement, 'waitForSelector')
+      .mockResolvedValueOnce(trashMenuItem)
+      .mockRejectedValueOnce(new Error('confirmation unavailable'));
+    vi.spyOn(waitForElement, 'waitForElement')
+      .mockRejectedValueOnce(new Error('confirmation fallback unavailable'));
 
     const result = await runConversationAction(document, COMMAND_TRASH);
 
-    expect(result.ok).toBe(false);
-    expect(result.reason).toContain('Timed out waiting for selector');
+    expect(result).toEqual({
+      ok: false,
+      reason: 'confirmation fallback unavailable'
+    });
   });
 
   it('returns a confirmation fallback failure', async () => {

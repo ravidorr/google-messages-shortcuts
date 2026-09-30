@@ -44,7 +44,7 @@ async function confirmTrash(documentRoot) {
     try {
       const fallbackButton = await waitForElement(
         documentRoot,
-        'button, .mat-focus-indicator',
+        'mat-dialog-container button, mat-dialog-container .mat-focus-indicator',
         MENU_TEXT.trash
       );
 

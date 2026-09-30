@@ -1,4 +1,8 @@
 import { execFileSync } from 'node:child_process';
+import {
+  packageLockVersionMatches,
+  versionsMatch
+} from './validate-version-bump.js';
 
 function getVersion(content) {
   try {
@@ -56,19 +60,31 @@ export function canCommit({
   previousPackage,
   currentPackage,
   previousManifest,
-  currentManifest
+  currentManifest,
+  currentPackageLock
 }) {
+  const currentPackageVersion = getVersion(currentPackage);
+  const currentManifestVersion = getVersion(currentManifest);
   const hasChangelogEntry = hasNewChangelogEntry(previousChangelog, currentChangelog);
   const packageVersionBumped = isVersionBumped(
     getVersion(previousPackage),
-    getVersion(currentPackage)
+    currentPackageVersion
   );
   const manifestVersionBumped = isVersionBumped(
     getVersion(previousManifest),
-    getVersion(currentManifest)
+    currentManifestVersion
+  );
+  const versionsAreSynchronized = versionsMatch(currentPackageVersion, currentManifestVersion);
+  const packageLockVersionIsSynchronized = packageLockVersionMatches(
+    currentPackageVersion,
+    currentPackageLock
   );
 
-  return hasChangelogEntry || (packageVersionBumped && manifestVersionBumped);
+  return hasChangelogEntry
+    && packageVersionBumped
+    && manifestVersionBumped
+    && versionsAreSynchronized
+    && packageLockVersionIsSynchronized;
 }
 
 function readGitFile(revision, filePath) {
@@ -86,12 +102,13 @@ function validateReleaseMetadata() {
     previousPackage: readGitFile('HEAD', 'package.json'),
     currentPackage: readGitFile('', 'package.json'),
     previousManifest: readGitFile('HEAD', 'manifest.json'),
-    currentManifest: readGitFile('', 'manifest.json')
+    currentManifest: readGitFile('', 'manifest.json'),
+    currentPackageLock: readGitFile('', 'package-lock.json')
   });
 
   if (!canCommitChanges) {
     console.error(
-      'Commit blocked: add a new CHANGELOG.md entry or bump versions in both package.json and manifest.json.'
+      'Commit blocked: add a new CHANGELOG.md entry, bump package.json and manifest.json, and keep package-lock.json synchronized.'
     );
     process.exit(1);
   }
