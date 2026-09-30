@@ -65,16 +65,11 @@ async function importEntrypoint(scriptName, args = []) {
   try {
     entrypointImportCount += 1;
 
-    await import(`${pathToFileURL(entrypointPath).href}?entrypoint=${entrypointImportCount}`);
+    const entrypointModule = await import(`${pathToFileURL(entrypointPath).href}?entrypoint=${entrypointImportCount}`);
+    await entrypointModule.cliExecutionPromise;
   } finally {
     process.argv = originalArgv;
   }
-}
-
-async function waitForEntrypoint() {
-  await new Promise((resolve) => {
-    setTimeout(resolve, 50);
-  });
 }
 
 async function withWorkingDirectory(directory, callback) {
@@ -487,7 +482,6 @@ describe('script entrypoint coverage', () => {
 
     await withWorkingDirectory(projectDirectory, async () => {
       await importEntrypoint('validate-version-bump.js', ['HEAD']);
-      await waitForEntrypoint();
     });
 
     expect(consoleError).not.toHaveBeenCalled();
@@ -529,21 +523,16 @@ describe('script entrypoint coverage', () => {
 
     await withWorkingDirectory(cleanDirectory, async () => {
       await importEntrypoint('clean.js');
-      await waitForEntrypoint();
     });
     await withWorkingDirectory(coverageDirectory, async () => {
       await importEntrypoint('format-coverage-report.js');
-      await waitForEntrypoint();
     });
     await importEntrypoint('generate-icons.js', [iconsDirectory]);
-    await waitForEntrypoint();
     await withWorkingDirectory(packageDirectory, async () => {
       await importEntrypoint('package.js');
-      await waitForEntrypoint();
     });
     await withWorkingDirectory(buildDirectory, async () => {
       await importEntrypoint('build.js');
-      await waitForEntrypoint();
     });
 
     await expect(access(path.join(cleanDirectory, 'coverage'))).rejects.toThrow();
@@ -567,7 +556,6 @@ describe('script entrypoint coverage', () => {
 
     await withWorkingDirectory(projectDirectory, async () => {
       await importEntrypoint('generate-icons.js');
-      await waitForEntrypoint();
     });
 
     await expect(readFile(path.join(projectDirectory, 'icons', 'icon16.png')))
@@ -594,21 +582,16 @@ describe('script entrypoint coverage', () => {
 
     await withWorkingDirectory(buildDirectory, async () => {
       await importEntrypoint('build.js');
-      await waitForEntrypoint();
     });
     await withWorkingDirectory(coverageDirectory, async () => {
       await importEntrypoint('format-coverage-report.js');
-      await waitForEntrypoint();
     });
     await importEntrypoint('generate-icons.js', [path.join(iconsDirectory, 'icons-as-file')]);
-    await waitForEntrypoint();
     await withWorkingDirectory(packageDirectory, async () => {
       await importEntrypoint('package.js');
-      await waitForEntrypoint();
     });
     await withWorkingDirectory(versionDirectory, async () => {
       await importEntrypoint('validate-version-bump.js', ['HEAD']);
-      await waitForEntrypoint();
     });
 
     expect(consoleError).toHaveBeenCalledWith(

@@ -35,12 +35,16 @@ export async function buildExtension(sourceDirectory, outputDirectory) {
   );
 }
 
-if (process.argv[1] === new URL(import.meta.url).pathname) {
+function runCli() {
   const sourceDirectory = process.cwd();
   const outputDirectory = path.join(sourceDirectory, 'dist');
 
-  buildExtension(sourceDirectory, outputDirectory).catch((error) => {
+  return buildExtension(sourceDirectory, outputDirectory);
+}
+
+export const cliExecutionPromise = process.argv[1] === new URL(import.meta.url).pathname
+  ? runCli().catch((error) => {
     console.error('Failed to build the extension.', error);
     process.exit(1);
-  });
-}
+  })
+  : undefined;

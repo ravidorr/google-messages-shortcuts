@@ -124,9 +124,9 @@ async function validateCurrentBranch() {
   }
 }
 
-if (process.argv[1] === new URL(import.meta.url).pathname) {
-  validateCurrentBranch().catch((error) => {
+export const cliExecutionPromise = process.argv[1] === new URL(import.meta.url).pathname
+  ? validateCurrentBranch().catch((error) => {
     console.error('Version bump validation failed.', error.message);
     process.exit(1);
-  });
-}
+  })
+  : undefined;

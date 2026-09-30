@@ -95,13 +95,25 @@ function readGitFile(revision, filePath) {
   }
 }
 
+function getBaseRevision() {
+  try {
+    return execFileSync('git', ['merge-base', 'HEAD', 'origin/main'], {
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore']
+    }).trim();
+  } catch {
+    return 'HEAD';
+  }
+}
+
 function validateReleaseMetadata() {
+  const baseRevision = getBaseRevision();
   const canCommitChanges = canCommit({
-    previousChangelog: readGitFile('HEAD', 'CHANGELOG.md'),
+    previousChangelog: readGitFile(baseRevision, 'CHANGELOG.md'),
     currentChangelog: readGitFile('', 'CHANGELOG.md'),
-    previousPackage: readGitFile('HEAD', 'package.json'),
+    previousPackage: readGitFile(baseRevision, 'package.json'),
     currentPackage: readGitFile('', 'package.json'),
-    previousManifest: readGitFile('HEAD', 'manifest.json'),
+    previousManifest: readGitFile(baseRevision, 'manifest.json'),
     currentManifest: readGitFile('', 'manifest.json'),
     currentPackageLock: readGitFile('', 'package-lock.json')
   });

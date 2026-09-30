@@ -10,9 +10,13 @@ export async function cleanProject(projectDirectory) {
   )));
 }
 
-if (process.argv[1] === new URL(import.meta.url).pathname) {
-  cleanProject(process.cwd()).catch((error) => {
+function runCli() {
+  return cleanProject(process.cwd());
+}
+
+export const cliExecutionPromise = process.argv[1] === new URL(import.meta.url).pathname
+  ? runCli().catch((error) => {
     console.error('Failed to clean generated files.', error);
     process.exit(1);
-  });
-}
+  })
+  : undefined;

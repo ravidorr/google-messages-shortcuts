@@ -52,9 +52,9 @@ async function writeCoverageReport() {
   console.log(formatCoverageReport(summary));
 }
 
-if (process.argv[1] === new URL(import.meta.url).pathname) {
-  writeCoverageReport().catch((error) => {
+export const cliExecutionPromise = process.argv[1] === new URL(import.meta.url).pathname
+  ? writeCoverageReport().catch((error) => {
     console.error('Failed to format the coverage report.', error);
     process.exit(1);
-  });
-}
+  })
+  : undefined;

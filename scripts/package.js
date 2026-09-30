@@ -22,14 +22,18 @@ export async function packageExtension(distDirectory, releaseDirectory) {
   return archivePath;
 }
 
-if (process.argv[1] === new URL(import.meta.url).pathname) {
+function runCli() {
   const projectDirectory = process.cwd();
 
-  packageExtension(
+  return packageExtension(
     path.join(projectDirectory, 'dist'),
     path.join(projectDirectory, 'release')
-  ).catch((error) => {
+  );
+}
+
+export const cliExecutionPromise = process.argv[1] === new URL(import.meta.url).pathname
+  ? runCli().catch((error) => {
     console.error('Failed to package the extension.', error);
     process.exit(1);
-  });
-}
+  })
+  : undefined;
