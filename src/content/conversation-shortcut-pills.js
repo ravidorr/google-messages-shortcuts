@@ -23,6 +23,22 @@ const MARK_UNREAD_PILL_DEFINITION = {
   shortcutKey: 'markUnread'
 };
 
+function isDomRaceNotFoundError(error) {
+  return error instanceof DOMException && error.name === 'NotFoundError';
+}
+
+export function safeDomMutation(operation) {
+  try {
+    return operation();
+  } catch (error) {
+    if (isDomRaceNotFoundError(error)) {
+      return undefined;
+    }
+
+    throw error;
+  }
+}
+
 function getPillDefinitions(conversationRow) {
   const definitions = [...BASE_PILL_DEFINITIONS];
 
@@ -224,13 +240,15 @@ export function installConversationShortcutPills({
       return;
     }
 
-    conversationRow.setAttribute(PILL_HOST_ATTRIBUTE, '');
-    conversationRow.append(createPillGroup(
-      documentRoot,
-      shortcutLabels,
-      runActionWithRefresh,
-      conversationRow
-    ));
+    safeDomMutation(() => {
+      conversationRow.setAttribute(PILL_HOST_ATTRIBUTE, '');
+      conversationRow.append(createPillGroup(
+        documentRoot,
+        shortcutLabels,
+        runActionWithRefresh,
+        conversationRow
+      ));
+    });
   }
 
   async function refreshPills(conversationRow) {
@@ -260,8 +278,10 @@ export function installConversationShortcutPills({
     removingPillsFromRows.add(conversationRow);
 
     try {
-      conversationRow.querySelector(PILL_GROUP_SELECTOR)?.remove();
-      conversationRow.removeAttribute(PILL_HOST_ATTRIBUTE);
+      safeDomMutation(() => {
+        conversationRow.querySelector(PILL_GROUP_SELECTOR)?.remove();
+        conversationRow.removeAttribute(PILL_HOST_ATTRIBUTE);
+      });
     } finally {
       removingPillsFromRows.delete(conversationRow);
     }
@@ -398,9 +418,13 @@ export function installConversationShortcutPills({
     documentRoot.removeEventListener('focusin', handleFocusIn);
     documentRoot.removeEventListener('focusout', handleFocusOut);
     documentRoot.querySelectorAll(PILL_GROUP_SELECTOR).forEach((group) => {
-      group.parentElement?.removeAttribute(PILL_HOST_ATTRIBUTE);
-      group.remove();
+      safeDomMutation(() => {
+        group.parentElement?.removeAttribute(PILL_HOST_ATTRIBUTE);
+        group.remove();
+      });
     });
-    style.remove();
+    safeDomMutation(() => {
+      style.remove();
+    });
   };
 }
