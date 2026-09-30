@@ -12,7 +12,8 @@ describe('content entry helpers', () => {
         },
         sendMessage: vi.fn(async () => ({
           archive: 'Ctrl+Shift+Y',
-          trash: 'Ctrl+Shift+D'
+          trash: 'Ctrl+Shift+D',
+          markUnread: 'Ctrl+Shift+U'
         }))
       }
     };
@@ -45,7 +46,7 @@ describe('content entry helpers', () => {
     await vi.waitFor(() => {
       expect(
         document.querySelectorAll('[data-messages-shortcuts-pill]')
-      ).toHaveLength(2);
+      ).toHaveLength(3);
     });
   });
 });

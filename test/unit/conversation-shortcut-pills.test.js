@@ -1,8 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { COMMAND_ARCHIVE, COMMAND_TRASH } from '../../src/shared/commands.js';
+import { COMMAND_ARCHIVE, COMMAND_MARK_UNREAD, COMMAND_TRASH } from '../../src/shared/commands.js';
 import { installConversationShortcutPills } from '../../src/content/conversation-shortcut-pills.js';
 
-function createConversationRow({ focused = false } = {}) {
+function createConversationRow({ focused = false, unread = true } = {}) {
   const row = document.createElement('mws-conversation-list-item');
   const link = document.createElement('a');
   const menuButton = document.createElement('button');
@@ -10,6 +10,12 @@ function createConversationRow({ focused = false } = {}) {
   link.setAttribute('aria-selected', 'false');
   menuButton.setAttribute('aria-haspopup', 'menu');
   row.append(link, menuButton);
+
+  if (unread) {
+    const unreadMarker = document.createElement('span');
+    unreadMarker.setAttribute('data-e2e-is-unread', 'true');
+    row.append(unreadMarker);
+  }
 
   if (focused) {
     row.setAttribute('is-focused', 'true');
@@ -38,7 +44,8 @@ describe('conversation shortcut pills', () => {
       documentRoot: document,
       getShortcutLabels: vi.fn(async () => ({
         archive: 'Ctrl+Shift+Y',
-        trash: 'Not assigned'
+        trash: 'Not assigned',
+        markUnread: 'Ctrl+Shift+U'
       }))
     });
 
@@ -47,8 +54,242 @@ describe('conversation shortcut pills', () => {
     });
 
     expect(row.hasAttribute('data-messages-shortcuts-pill-host')).toBe(true);
-    expect(row.textContent).toContain('Ctrl+Shift+Y');
-    expect(row.textContent).toContain('Not assigned');
+    expect(row.textContent).toContain('Archive Ctrl+Shift+Y');
+    expect(row.textContent).toContain('Trash');
+    expect(row.textContent).not.toContain('Not assigned');
+  });
+
+  it('omits unassigned shortcut text from pill labels', async () => {
+    const row = createConversationRow({ focused: true, unread: false });
+    document.body.append(row);
+
+    disconnect = installConversationShortcutPills({
+      documentRoot: document,
+      getShortcutLabels: vi.fn(async () => ({
+        archive: 'Ctrl+Shift+Y',
+        trash: 'Not assigned',
+        markUnread: 'Not assigned'
+      }))
+    });
+
+    await vi.waitFor(() => {
+      expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(3);
+    });
+
+    expect(row.querySelector(`[data-command="${COMMAND_MARK_UNREAD}"]`).textContent)
+      .toBe('Mark as unread');
+    expect(row.querySelector(`[data-command="${COMMAND_TRASH}"]`).textContent)
+      .toBe('Trash');
+  });
+
+  it('renders a Mark as unread pill for read conversations', async () => {
+    const row = createConversationRow({ focused: true, unread: false });
+    document.body.append(row);
+
+    disconnect = installConversationShortcutPills({
+      documentRoot: document,
+      getShortcutLabels: vi.fn(async () => ({
+        archive: 'Ctrl+Shift+Y',
+        trash: 'Ctrl+Shift+D',
+        markUnread: 'Ctrl+Shift+U'
+      }))
+    });
+
+    await vi.waitFor(() => {
+      expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(3);
+    });
+
+    expect(row.querySelector(`[data-command="${COMMAND_MARK_UNREAD}"]`)).not.toBeNull();
+    expect(row.textContent).toContain('Mark as unread Ctrl+Shift+U');
+  });
+
+  it('omits the Mark as unread pill for unread conversations', async () => {
+    const row = createConversationRow({ focused: true, unread: true });
+    document.body.append(row);
+
+    disconnect = installConversationShortcutPills({
+      documentRoot: document,
+      getShortcutLabels: vi.fn(async () => ({
+        archive: 'Ctrl+Shift+Y',
+        trash: 'Ctrl+Shift+D',
+        markUnread: 'Ctrl+Shift+U'
+      }))
+    });
+
+    await vi.waitFor(() => {
+      expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(2);
+    });
+
+    expect(row.querySelector(`[data-command="${COMMAND_MARK_UNREAD}"]`)).toBeNull();
+  });
+
+  it('runs the mark-unread command from its pill', async () => {
+    const row = createConversationRow({ focused: true, unread: false });
+    const runAction = vi.fn(async () => ({ ok: true }));
+    document.body.append(row);
+
+    disconnect = installConversationShortcutPills({
+      documentRoot: document,
+      getShortcutLabels: vi.fn(async () => ({
+        archive: 'Ctrl+Shift+Y',
+        trash: 'Ctrl+Shift+D',
+        markUnread: 'Ctrl+Shift+U'
+      })),
+      runAction
+    });
+
+    await vi.waitFor(() => {
+      expect(row.querySelector(`[data-command="${COMMAND_MARK_UNREAD}"]`)).not.toBeNull();
+    });
+
+    row.querySelector(`[data-command="${COMMAND_MARK_UNREAD}"]`).click();
+
+    expect(runAction).toHaveBeenCalledWith(COMMAND_MARK_UNREAD, row);
+  });
+
+  it('removes the Mark as unread pill after a successful mark-unread action', async () => {
+    const row = createConversationRow({ focused: true, unread: false });
+    const runAction = vi.fn(async (command, conversationRow) => {
+      if (command === COMMAND_MARK_UNREAD) {
+        const unreadMarker = document.createElement('span');
+        unreadMarker.setAttribute('data-e2e-is-unread', 'true');
+        conversationRow.append(unreadMarker);
+      }
+
+      return { ok: true };
+    });
+    document.body.append(row);
+
+    disconnect = installConversationShortcutPills({
+      documentRoot: document,
+      getShortcutLabels: vi.fn(async () => ({
+        archive: 'Ctrl+Shift+Y',
+        trash: 'Ctrl+Shift+D',
+        markUnread: 'Ctrl+Shift+U'
+      })),
+      runAction
+    });
+
+    await vi.waitFor(() => {
+      expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(3);
+    });
+
+    row.querySelector(`[data-command="${COMMAND_MARK_UNREAD}"]`).click();
+
+    await vi.waitFor(() => {
+      expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(2);
+    });
+    expect(row.querySelector(`[data-command="${COMMAND_MARK_UNREAD}"]`)).toBeNull();
+  });
+
+  it('refreshes pills when the unread marker is added to a visible row', async () => {
+    const row = createConversationRow({ focused: true, unread: false });
+    document.body.append(row);
+
+    disconnect = installConversationShortcutPills({
+      documentRoot: document,
+      getShortcutLabels: vi.fn(async () => ({
+        archive: 'Ctrl+Shift+Y',
+        trash: 'Ctrl+Shift+D',
+        markUnread: 'Ctrl+Shift+U'
+      }))
+    });
+
+    await vi.waitFor(() => {
+      expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(3);
+    });
+
+    const unreadMarker = document.createElement('span');
+    unreadMarker.setAttribute('data-e2e-is-unread', 'true');
+    row.append(unreadMarker);
+
+    await vi.waitFor(() => {
+      expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(2);
+    });
+    expect(row.querySelector(`[data-command="${COMMAND_MARK_UNREAD}"]`)).toBeNull();
+  });
+
+  it('refreshes pills when the unread marker is removed from a visible row', async () => {
+    const row = createConversationRow({ focused: true, unread: true });
+    document.body.append(row);
+
+    disconnect = installConversationShortcutPills({
+      documentRoot: document,
+      getShortcutLabels: vi.fn(async () => ({
+        archive: 'Ctrl+Shift+Y',
+        trash: 'Ctrl+Shift+D',
+        markUnread: 'Ctrl+Shift+U'
+      }))
+    });
+
+    await vi.waitFor(() => {
+      expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(2);
+    });
+
+    row.querySelector('[data-e2e-is-unread="true"]').remove();
+
+    await vi.waitFor(() => {
+      expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(3);
+    });
+    expect(row.querySelector(`[data-command="${COMMAND_MARK_UNREAD}"]`)).not.toBeNull();
+  });
+
+  it('refreshes pills when the unread marker attribute changes', async () => {
+    const row = createConversationRow({ focused: true, unread: true });
+    document.body.append(row);
+
+    disconnect = installConversationShortcutPills({
+      documentRoot: document,
+      getShortcutLabels: vi.fn(async () => ({
+        archive: 'Ctrl+Shift+Y',
+        trash: 'Ctrl+Shift+D',
+        markUnread: 'Ctrl+Shift+U'
+      }))
+    });
+
+    await vi.waitFor(() => {
+      expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(2);
+    });
+
+    row.querySelector('[data-e2e-is-unread="true"]').setAttribute('data-e2e-is-unread', 'false');
+
+    await vi.waitFor(() => {
+      expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(3);
+    });
+    expect(row.querySelector(`[data-command="${COMMAND_MARK_UNREAD}"]`)).not.toBeNull();
+  });
+
+  it('skips pill refresh after mark-unread when the row is no longer active', async () => {
+    const row = createConversationRow({ unread: false });
+    let finishAction;
+    const getShortcutLabels = vi.fn(async () => ({
+      archive: 'Ctrl+Shift+Y',
+      trash: 'Ctrl+Shift+D',
+      markUnread: 'Ctrl+Shift+U'
+    }));
+    const runAction = vi.fn(() => new Promise((resolve) => {
+      finishAction = () => resolve({ ok: true });
+    }));
+    document.body.append(row);
+
+    disconnect = installConversationShortcutPills({
+      documentRoot: document,
+      getShortcutLabels,
+      runAction
+    });
+    row.dispatchEvent(new Event('pointerover', { bubbles: true }));
+
+    await vi.waitFor(() => {
+      expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(3);
+    });
+
+    row.querySelector(`[data-command="${COMMAND_MARK_UNREAD}"]`).click();
+    row.dispatchEvent(new Event('pointerout', { bubbles: true }));
+    finishAction();
+    await Promise.resolve();
+
+    expect(getShortcutLabels).toHaveBeenCalledTimes(1);
+    expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(0);
   });
 
   it('does not open conversations when a row is hovered by default', () => {
@@ -688,11 +929,11 @@ describe('conversation shortcut pills', () => {
 
   it('ignores mutation records whose target is not an element', () => {
     const NativeMutationObserver = globalThis.MutationObserver;
-    let observerCallback;
+    const observerCallbacks = [];
 
     globalThis.MutationObserver = class {
       constructor(callback) {
-        observerCallback = callback;
+        observerCallbacks.push(callback);
       }
 
       disconnect() {}
@@ -706,7 +947,22 @@ describe('conversation shortcut pills', () => {
         getShortcutLabels: vi.fn()
       });
 
-      observerCallback([{ target: document }]);
+      observerCallbacks[0]([{ target: document }]);
+      observerCallbacks[1]([{
+        type: 'attributes',
+        attributeName: 'data-e2e-is-unread',
+        target: document
+      }]);
+      observerCallbacks[1]([{
+        type: 'childList',
+        target: document.body,
+        addedNodes: [document.createElement('span')],
+        removedNodes: []
+      }]);
+      observerCallbacks[1]([{
+        type: 'other',
+        target: document.body
+      }]);
     } finally {
       globalThis.MutationObserver = NativeMutationObserver;
     }

@@ -9,20 +9,23 @@ import {
 } from '../../src/shared/shortcut-labels.js';
 
 describe('shortcut label listener', () => {
-  it('maps the two conversation command shortcuts', () => {
+  it('maps the conversation command shortcuts', () => {
     expect(getConversationShortcutLabels([
       { name: 'archive-conversation', shortcut: 'Ctrl+Shift+Y' },
-      { name: 'trash-conversation', shortcut: 'Ctrl+Shift+D' }
+      { name: 'trash-conversation', shortcut: 'Ctrl+Shift+D' },
+      { name: 'mark-unread-conversation', shortcut: 'Ctrl+Shift+U' }
     ])).toEqual({
       archive: 'Ctrl+Shift+Y',
-      trash: 'Ctrl+Shift+D'
+      trash: 'Ctrl+Shift+D',
+      markUnread: 'Ctrl+Shift+U'
     });
   });
 
   it('uses a stable label for commands without a shortcut', () => {
     expect(getConversationShortcutLabels([])).toEqual({
       archive: 'Not assigned',
-      trash: 'Not assigned'
+      trash: 'Not assigned',
+      markUnread: 'Not assigned'
     });
   });
 
@@ -31,14 +34,16 @@ describe('shortcut label listener', () => {
       commands: {
         getAll: vi.fn(async () => [
           { name: 'archive-conversation', shortcut: 'Ctrl+Shift+Y' },
-          { name: 'trash-conversation', shortcut: 'Ctrl+Shift+D' }
+          { name: 'trash-conversation', shortcut: 'Ctrl+Shift+D' },
+          { name: 'mark-unread-conversation', shortcut: 'Ctrl+Shift+U' }
         ])
       }
     };
 
     await expect(getShortcutLabels(chromeApi)).resolves.toEqual({
       archive: 'Ctrl+Shift+Y',
-      trash: 'Ctrl+Shift+D'
+      trash: 'Ctrl+Shift+D',
+      markUnread: 'Ctrl+Shift+U'
     });
   });
 
@@ -88,7 +93,8 @@ describe('shortcut label listener', () => {
     await vi.waitFor(() => {
       expect(sendResponse).toHaveBeenCalledWith({
         archive: 'Not assigned',
-        trash: 'Not assigned'
+        trash: 'Not assigned',
+        markUnread: 'Not assigned'
       });
     });
   });

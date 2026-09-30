@@ -71,7 +71,8 @@ describe('background entry', () => {
     await vi.waitFor(() => {
       expect(sendResponse).toHaveBeenCalledWith({
         archive: 'Ctrl+Shift+Y',
-        trash: 'Not assigned'
+        trash: 'Not assigned',
+        markUnread: 'Not assigned'
       });
     });
   });
