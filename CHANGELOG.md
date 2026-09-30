@@ -10,6 +10,7 @@ All notable changes to this project will be documented in this file.
 - `generate:icons`, `clean`, and `package` scripts for extension artifacts
 - Pull request coverage reports with overall and per-file metrics updated by GitHub Actions
 - Community, security, contribution, funding, and GitHub issue and pull request templates
+- Shortcut warning ignores Chrome's unassigned extension activation command
 - Pre-commit validation blocking direct commits to `main`
 - Pre-commit validation requiring a new changelog entry or synchronized version bumps
 

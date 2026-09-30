@@ -23,6 +23,16 @@ describe('init-popup', () => {
     expect(document.getElementById('shortcut-warning').hidden).toBe(false);
   });
 
+  it('ignores the unassigned Chrome extension activation shortcut', () => {
+    updateShortcutWarning([
+      { name: '_execute_action', shortcut: '' },
+      { name: 'archive-conversation', shortcut: 'Ctrl+Shift+Y' },
+      { name: 'trash-conversation', shortcut: 'Ctrl+Shift+D' }
+    ]);
+
+    expect(document.getElementById('shortcut-warning').hidden).toBe(true);
+  });
+
   it('opens Chrome shortcut settings when the link is clicked', () => {
     const create = vi.fn(async () => ({}));
     const chromeApi = { tabs: { create } };
