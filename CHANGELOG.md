@@ -6,7 +6,7 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
-- Replace the extension icon with the provided Google Messages shortcut artwork
+- Replace the extension icon with a new extension icon
 
 ## 1.1.3 - 2026-09-30
 
