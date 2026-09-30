@@ -6,6 +6,8 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
+- `npm run build` to produce a loadable extension in `dist/`
+- `generate:icons`, `clean`, and `package` scripts for extension artifacts
 - Pre-commit validation blocking direct commits to `main`
 - Pre-commit validation requiring a new changelog entry or synchronized version bumps
 

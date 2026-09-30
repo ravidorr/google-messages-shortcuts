@@ -32,6 +32,15 @@ Updated release notes.
     )).toBe(false);
   });
 
+  it('detects a new changelog bullet in an existing release entry', () => {
+    expect(hasNewChangelogEntry(
+      previousChangelog,
+      `${previousChangelog}
+- Updated release notes.
+`
+    )).toBe(true);
+  });
+
   it('accepts version components that increase at different precision levels', () => {
     expect(isVersionBumped('1.0', '1.0.1')).toBe(true);
     expect(isVersionBumped('1.0.0', '1.1.0')).toBe(true);

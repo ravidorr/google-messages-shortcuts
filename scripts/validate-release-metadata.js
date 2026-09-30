@@ -42,7 +42,7 @@ export function hasNewChangelogEntry(previousChangelog, currentChangelog) {
   const getEntries = (changelog) => new Set(
     changelog
       .split('\n')
-      .map((line) => line.match(/^##\s+(.+?)\s*$/)?.[1])
+      .map((line) => line.match(/^(?:##|-)\s+(.+?)\s*$/)?.[1])
       .filter(Boolean)
   );
   const previousEntries = getEntries(previousChangelog);
