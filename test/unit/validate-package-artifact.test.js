@@ -111,6 +111,32 @@ describe('validate-package-artifact', () => {
     });
   });
 
+  it('rejects package artifacts whose contents differ from the built distribution', async () => {
+    const projectDirectory = await mkdtemp(path.join(tmpdir(), 'package-artifact-mismatch-'));
+    const distDirectory = path.join(projectDirectory, 'dist');
+    temporaryDirectories.push(projectDirectory);
+
+    await Promise.all(REQUIRED_PACKAGE_ENTRIES.map(async (entry) => {
+      const entryPath = path.join(distDirectory, entry);
+      await mkdir(path.dirname(entryPath), { recursive: true });
+      await writeFile(
+        entryPath,
+        entry.endsWith('.json') ? '{"manifest_version":3}' : `${entry}-built`
+      );
+    }));
+
+    const archivePath = await createArchive(projectDirectory, Object.fromEntries(
+      REQUIRED_PACKAGE_ENTRIES.map((entry) => [
+        entry,
+        entry.endsWith('.json') ? '{"manifest_version":3}' : `${entry}-stale`
+      ])
+    ));
+
+    await expect(validatePackageArtifact(archivePath, distDirectory)).rejects.toThrow(
+      'Package artifact contents do not match the built distribution files:'
+    );
+  });
+
   it('rejects package artifacts missing built distribution files', async () => {
     const projectDirectory = await mkdtemp(path.join(tmpdir(), 'package-artifact-missing-'));
     const distDirectory = path.join(projectDirectory, 'dist');

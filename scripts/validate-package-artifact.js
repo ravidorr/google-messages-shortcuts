@@ -58,6 +58,21 @@ export async function validatePackageArtifact(archivePath, distDirectory = path.
     throw new Error(`Package artifact is missing built distribution files: ${missingDistFiles.join(', ')}`);
   }
 
+  const mismatchedDistFiles = [];
+
+  for (const distFile of distFiles) {
+    const distContents = await readFile(path.join(distDirectory, distFile));
+    const archiveContents = Buffer.from(await archive.file(distFile).async('nodebuffer'));
+
+    if (!distContents.equals(archiveContents)) {
+      mismatchedDistFiles.push(distFile);
+    }
+  }
+
+  if (mismatchedDistFiles.length > 0) {
+    throw new Error(`Package artifact contents do not match the built distribution files: ${mismatchedDistFiles.join(', ')}`);
+  }
+
   const manifest = JSON.parse(await archive.file('manifest.json').async('string'));
 
   if (manifest.manifest_version !== 3) {
