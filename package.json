@@ -1,6 +1,6 @@
 {
   "name": "google-messages-shortcuts",
-  "version": "1.6.4",
+  "version": "1.6.5",
   "description": "Use shortcuts to Archive, Trash, or Mark as unread for active conversations in Google Messages.",
   "type": "module",
   "scripts": {
@@ -47,7 +47,8 @@
     "lint-staged": "^16.2.7",
     "markdownlint-cli2": "^0.23.3",
     "sharp": "^0.35.5",
-    "vitest": "^5.0.3"
+    "vitest": "^5.0.3",
+    "yaml": "^2.9.1"
   },
   "lint-staged": {
     "*.js": [

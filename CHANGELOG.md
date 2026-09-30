@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.6.5 - 2026-09-30
+
+### Fixed
+
+- Pin third-party GitHub Actions to immutable commit SHAs in CI workflows
+
 ## 1.6.4 - 2026-09-30
 
 ### Changed
