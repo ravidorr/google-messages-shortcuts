@@ -14,8 +14,10 @@ Thanks for contributing to Messages Shortcut Actions.
 1. Run `npm run lint`.
 2. Run `npm test`.
 3. Add or update tests for code changes.
-4. Add an entry to `CHANGELOG.md` or bump the versions in `package.json` and `manifest.json`.
-5. Keep each pull request focused on one change.
+4. Add an entry to `CHANGELOG.md`.
+5. Bump and synchronize the versions in `package.json` and `manifest.json`.
+6. Run `npm run verify:version-bump`.
+7. Keep each pull request focused on one change.
 
 ## Pull requests
 

@@ -58,6 +58,8 @@ npm test
 
 GitHub Actions posts overall and per-file coverage summaries to every pull request.
 
+Every pull request must increase matching versions in `package.json` and `manifest.json`.
+
 ## Community and support
 
 - Read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request.

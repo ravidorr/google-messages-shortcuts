@@ -7,7 +7,9 @@
 - [ ] `npm run lint`
 - [ ] `npm test`
 - [ ] I updated tests for code changes
-- [ ] I updated `CHANGELOG.md` or bumped both extension versions
+- [ ] I updated `CHANGELOG.md`
+- [ ] I bumped matching versions in `package.json` and `manifest.json`
+- [ ] `npm run verify:version-bump`
 
 ## Additional context
 
