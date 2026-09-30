@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Messages Shortcut Actions</title>
+    <link rel="stylesheet" href="popup.css">
+  </head>
+  <body>
+    <main class="popup">
+      <header class="popup__header">
+        <img src="icons/icon48.png" alt="" width="32" height="32" class="popup__icon">
+        <div>
+          <h1 class="popup__title">Messages Shortcut Actions</h1>
+          <p class="popup__subtitle">Archive or trash the selected or hovered Google Messages conversation.</p>
+        </div>
+      </header>
+
+      <section class="popup__section" aria-labelledby="shortcuts-heading">
+        <h2 id="shortcuts-heading" class="popup__section-title">Keyboard shortcuts</h2>
+        <ul id="shortcut-list" class="shortcut-list"></ul>
+        <p id="shortcut-warning" class="popup__warning" hidden>
+          One or more shortcuts are not assigned. Open Chrome shortcut settings to configure them.
+        </p>
+      </section>
+
+      <section class="popup__section" aria-labelledby="help-heading">
+        <h2 id="help-heading" class="popup__section-title">Change shortcuts</h2>
+        <p class="popup__help">
+          Chrome controls extension shortcuts. Open
+          <a id="shortcuts-link" href="#">chrome://extensions/shortcuts</a>
+          and assign keys for this extension.
+        </p>
+      </section>
+    </main>
+    <script type="module" src="popup.js"></script>
+  </body>
+</html>
