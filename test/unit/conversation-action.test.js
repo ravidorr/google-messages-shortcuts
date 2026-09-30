@@ -50,6 +50,34 @@ describe('runConversationAction', () => {
     expect(fixture.archiveButton.click).toHaveBeenCalled();
   });
 
+  it('archives the conversation row supplied by a shortcut pill', async () => {
+    document.body.innerHTML = `
+      <mws-conversation-list-item id="selected-row">
+        <a aria-selected="true"></a>
+        <button aria-haspopup="menu"></button>
+      </mws-conversation-list-item>
+      <mws-conversation-list-item id="pill-row">
+        <a></a>
+        <button aria-haspopup="menu"></button>
+      </mws-conversation-list-item>
+      <button data-e2e-conversation-menu-archive>Archive</button>
+    `;
+    const selectedMenuButton = document.querySelector('#selected-row button');
+    const pillRow = document.getElementById('pill-row');
+    const pillRowMenuButton = pillRow.querySelector('button');
+    const archiveButton = document.querySelector('[data-e2e-conversation-menu-archive]');
+    vi.spyOn(selectedMenuButton, 'click');
+    vi.spyOn(pillRowMenuButton, 'click');
+    vi.spyOn(archiveButton, 'click');
+
+    const result = await runConversationAction(document, COMMAND_ARCHIVE, undefined, pillRow);
+
+    expect(result.ok).toBe(true);
+    expect(selectedMenuButton.click).not.toHaveBeenCalled();
+    expect(pillRowMenuButton.click).toHaveBeenCalledTimes(1);
+    expect(archiveButton.click).toHaveBeenCalledTimes(1);
+  });
+
   it('moves the selected conversation to trash and confirms', async () => {
     const fixture = createConversationFixture();
 

@@ -1,5 +1,6 @@
 export const SELECTORS = {
   selectedConversationLink: 'mws-conversation-list-item a[aria-selected="true"]',
+  focusedConversationItem: 'mws-conversation-list-item[is-focused="true"]',
   hoveredConversationItem: 'mws-conversation-list-item:hover',
   conversationRow: 'mws-conversation-list-item',
   rowMenuButton: 'button[aria-haspopup="menu"], mws-menu-button button',

@@ -26,7 +26,7 @@ export async function handleCommand(command, documentRoot = document) {
   try {
     const result = await runConversationAction(documentRoot, command);
 
-    if (!result.ok) {
+    if (!result.ok && result.reason !== 'no-target') {
       warnActionFailure(result.reason, result.reason);
     }
 
