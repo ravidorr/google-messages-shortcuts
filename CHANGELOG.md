@@ -21,6 +21,10 @@ All notable changes to this project will be documented in this file.
 - Pre-commit validation blocking direct commits to `main`
 - Pre-commit validation requiring a new changelog entry or synchronized version bumps
 
+### Fixed
+
+- Generate product icons into custom output directories without requiring a copied source image
+
 ## 1.0.0 - 2026-09-30
 
 ### Added

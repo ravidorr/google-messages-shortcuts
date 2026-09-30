@@ -29,7 +29,10 @@ export async function buildExtension(sourceDirectory, outputDirectory) {
     outfile: path.join(outputDirectory, 'content.js'),
     platform: 'browser'
   });
-  await generateIcons(path.join(outputDirectory, 'icons'));
+  await generateIcons(
+    path.join(outputDirectory, 'icons'),
+    path.join(sourceDirectory, 'icons', 'icon-source.png')
+  );
 }
 
 if (process.argv[1] === new URL(import.meta.url).pathname) {

@@ -1,12 +1,15 @@
 import { mkdir } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import sharp from 'sharp';
 
 const ICON_SIZES = [16, 32, 48, 128];
+const repositoryRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const defaultSourceIconPath = path.join(repositoryRoot, 'icons', 'icon-source.png');
 
 export async function generateIcons(
   outputDirectory = path.resolve('icons'),
-  sourceIconPath = path.join(outputDirectory, 'icon-source.png')
+  sourceIconPath = defaultSourceIconPath
 ) {
   await mkdir(outputDirectory, { recursive: true });
 
