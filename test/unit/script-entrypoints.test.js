@@ -404,6 +404,7 @@ describe('script entrypoint coverage', () => {
       'package.js',
       'prevent-main-commit.js',
       'validate-package-lock-version.js',
+      'validate-package-artifact.js',
       'validate-release-metadata.js',
       'validate-version-bump.js'
     ];
@@ -426,6 +427,55 @@ describe('script entrypoint coverage', () => {
 
     expect(consoleError).toHaveBeenCalledWith(expect.stringContaining('Commit blocked'));
     expect(processExit).toHaveBeenCalledWith(1);
+
+    consoleError.mockRestore();
+    processExit.mockRestore();
+  });
+
+  it('covers successful package artifact validation in-process', async () => {
+    const projectDirectory = await mkdtemp(path.join(tmpdir(), 'package-artifact-cli-'));
+    temporaryDirectories.push(projectDirectory);
+    const distDirectory = path.join(projectDirectory, 'dist');
+    const releaseDirectory = path.join(projectDirectory, 'release');
+    const archivePath = path.join(releaseDirectory, 'google-messages-shortcuts.zip');
+    const archive = new JSZip();
+    const distEntries = [
+      'background.js',
+      'content.js',
+      'manifest.json',
+      'popup.css',
+      'popup.html',
+      'popup.js',
+      'icons/icon16.png',
+      'icons/icon32.png',
+      'icons/icon48.png',
+      'icons/icon128.png',
+      'src/background/command-listener.js'
+    ];
+
+    await mkdir(releaseDirectory, { recursive: true });
+    await mkdir(path.join(distDirectory, 'src/background'), { recursive: true });
+
+    for (const entry of distEntries) {
+      const contents = entry === 'manifest.json' ? '{"manifest_version":3}' : entry;
+      const entryPath = path.join(distDirectory, entry);
+
+      archive.file(entry, contents);
+      await mkdir(path.dirname(entryPath), { recursive: true });
+      await writeFile(entryPath, contents);
+    }
+
+    await writeFile(archivePath, await archive.generateAsync({ type: 'nodebuffer' }));
+
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const processExit = vi.spyOn(process, 'exit').mockImplementation(() => {});
+
+    await withWorkingDirectory(projectDirectory, async () => {
+      await importEntrypoint('validate-package-artifact.js');
+    });
+
+    expect(consoleError).not.toHaveBeenCalled();
+    expect(processExit).not.toHaveBeenCalled();
 
     consoleError.mockRestore();
     processExit.mockRestore();
@@ -731,7 +781,8 @@ describe('script entrypoint coverage', () => {
     ['build.js', 'Failed to build the extension.'],
     ['clean.js', 'Failed to clean generated files.'],
     ['format-coverage-report.js', 'Failed to format the coverage report.'],
-    ['package.js', 'Failed to package the extension.']
+    ['package.js', 'Failed to package the extension.'],
+    ['validate-package-artifact.js', 'Failed to validate the package artifact.']
   ])('reports asynchronous %s failures', async (scriptName, expectedMessage) => {
     const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
     const processExit = vi.spyOn(process, 'exit').mockImplementation(() => {});

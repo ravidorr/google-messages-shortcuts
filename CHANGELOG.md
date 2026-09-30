@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.6.6 - 2026-09-30
+
+### Added
+
+- Add a required CI workflow that validates linting, tests, build output, and the release ZIP artifact
+
 ## 1.6.5 - 2026-09-30
 
 ### Fixed
