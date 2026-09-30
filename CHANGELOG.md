@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.6.3 - 2026-09-30
+
+### Changed
+
+- Simplify the popup description and group shortcut configuration help with keyboard shortcuts
+
 ## 1.6.2 - 2026-09-30
 
 ### Changed

@@ -12,7 +12,7 @@
         <img src="icons/icon48.png" alt="" width="32" height="32" class="popup__icon">
         <div>
           <h1 class="popup__title">Messages Shortcut Actions</h1>
-          <p class="popup__subtitle">Archive, trash, or mark as unread the selected or hovered Google Messages conversation.</p>
+          <p class="popup__subtitle">Archive, trash, or mark as unread Google Messages conversation.</p>
         </div>
       </header>
 
@@ -21,6 +21,15 @@
         <ul id="shortcut-list" class="shortcut-list"></ul>
         <p id="shortcut-warning" class="popup__warning" hidden>
           One or more shortcuts are not assigned. Open Chrome shortcut settings to configure them.
+        </p>
+      </section>
+
+      <section class="popup__section" aria-labelledby="help-heading">
+        <h2 id="help-heading" class="popup__section-title">Change shortcuts</h2>
+        <p class="popup__help">
+          Chrome controls extension shortcuts. Open
+          <a id="shortcuts-link" href="#">chrome://extensions/shortcuts</a>
+          and assign keys for this extension.
         </p>
       </section>
 
@@ -38,15 +47,6 @@
           <input id="open-conversation-on-focus" type="checkbox" disabled>
           Open conversations on hover or focus
         </label>
-      </section>
-
-      <section class="popup__section" aria-labelledby="help-heading">
-        <h2 id="help-heading" class="popup__section-title">Change shortcuts</h2>
-        <p class="popup__help">
-          Chrome controls extension shortcuts. Open
-          <a id="shortcuts-link" href="#">chrome://extensions/shortcuts</a>
-          and assign keys for this extension.
-        </p>
       </section>
     </main>
     <script type="module" src="popup.js"></script>
