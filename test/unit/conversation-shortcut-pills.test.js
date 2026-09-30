@@ -36,7 +36,7 @@ describe('conversation shortcut pills', () => {
     disconnect = undefined;
   });
 
-  it('renders effective shortcut labels for the focused row', async () => {
+  it('renders compact icon-and-shortcut pills for the focused row', async () => {
     const row = createConversationRow({ focused: true });
     document.body.append(row);
 
@@ -54,12 +54,19 @@ describe('conversation shortcut pills', () => {
     });
 
     expect(row.hasAttribute('data-messages-shortcuts-pill-host')).toBe(true);
-    expect(row.textContent).toContain('Archive Ctrl+Shift+Y');
-    expect(row.textContent).toContain('Trash');
-    expect(row.textContent).not.toContain('Not assigned');
+    const archivePill = row.querySelector(`[data-command="${COMMAND_ARCHIVE}"]`);
+    const trashPill = row.querySelector(`[data-command="${COMMAND_TRASH}"]`);
+
+    expect(archivePill.getAttribute('aria-label')).toBe('Archive conversation, Ctrl+Shift+Y');
+    expect(archivePill.getAttribute('title')).toBe('Archive');
+    expect(archivePill.textContent).toBe('Ctrl+Shift+Y');
+    expect(archivePill.querySelector('[data-messages-shortcuts-pill-icon="archive"]')).not.toBeNull();
+    expect(trashPill.getAttribute('aria-label')).toBe('Trash conversation');
+    expect(trashPill.textContent).toBe('');
+    expect(trashPill.querySelector('[data-messages-shortcuts-pill-icon="trash"]')).not.toBeNull();
   });
 
-  it('omits unassigned shortcut text from pill labels', async () => {
+  it('renders unassigned shortcut pills as icons only', async () => {
     const row = createConversationRow({ focused: true, unread: false });
     document.body.append(row);
 
@@ -77,9 +84,13 @@ describe('conversation shortcut pills', () => {
     });
 
     expect(row.querySelector(`[data-command="${COMMAND_MARK_UNREAD}"]`).textContent)
-      .toBe('Mark as unread');
+      .toBe('');
     expect(row.querySelector(`[data-command="${COMMAND_TRASH}"]`).textContent)
-      .toBe('Trash');
+      .toBe('');
+    expect(
+      row.querySelector(`[data-command="${COMMAND_MARK_UNREAD}"]`)
+        .querySelector('[data-messages-shortcuts-pill-icon="markUnread"]')
+    ).not.toBeNull();
   });
 
   it('renders a Mark as unread pill for read conversations', async () => {
@@ -99,8 +110,15 @@ describe('conversation shortcut pills', () => {
       expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(3);
     });
 
-    expect(row.querySelector(`[data-command="${COMMAND_MARK_UNREAD}"]`)).not.toBeNull();
-    expect(row.textContent).toContain('Mark as unread Ctrl+Shift+U');
+    const markUnreadPill = row.querySelector(`[data-command="${COMMAND_MARK_UNREAD}"]`);
+
+    expect(markUnreadPill).not.toBeNull();
+    expect(markUnreadPill.getAttribute('aria-label')).toBe(
+      'Mark as unread conversation, Ctrl+Shift+U'
+    );
+    expect(markUnreadPill.textContent).toBe('Ctrl+Shift+U');
+    expect(markUnreadPill.querySelector('[data-messages-shortcuts-pill-icon="markUnread"]'))
+      .not.toBeNull();
   });
 
   it('omits the Mark as unread pill for unread conversations', async () => {

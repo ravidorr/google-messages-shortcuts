@@ -13,14 +13,21 @@ const STYLE_SELECTOR = 'style[data-messages-shortcuts-pill-styles]';
 const PILL_HOST_ATTRIBUTE = 'data-messages-shortcuts-pill-host';
 
 const BASE_PILL_DEFINITIONS = [
-  { command: COMMAND_ARCHIVE, label: 'Archive', shortcutKey: 'archive' },
-  { command: COMMAND_TRASH, label: 'Trash', shortcutKey: 'trash' }
+  { command: COMMAND_ARCHIVE, icon: 'archive', label: 'Archive', shortcutKey: 'archive' },
+  { command: COMMAND_TRASH, icon: 'trash', label: 'Trash', shortcutKey: 'trash' }
 ];
 
 const MARK_UNREAD_PILL_DEFINITION = {
   command: COMMAND_MARK_UNREAD,
+  icon: 'markUnread',
   label: 'Mark as unread',
   shortcutKey: 'markUnread'
+};
+
+const PILL_ICON_PATHS = {
+  archive: 'M20.54 5.23 19.15 3.55A2 2 0 0 0 17.61 3H6.39a2 2 0 0 0-1.54.55L3.46 5.23A2 2 0 0 0 3 6.5V19a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6.5a2 2 0 0 0-.46-1.27ZM12 17l-4-4h2.5v-3h3v3H16l-4 4ZM5.12 7l.81-1h12.14l.81 1H5.12Z',
+  markUnread: 'M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2Zm0 4-8 5-8-5V6l8 5 8-5v2Z',
+  trash: 'M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12ZM8 9h8v10H8V9Zm7.5-5-1-1h-5l-1 1H5v2h14V4z'
 };
 
 function isDomRaceNotFoundError(error) {
@@ -73,13 +80,27 @@ function addStyles(documentRoot) {
     }
 
     [data-messages-shortcuts-pill] {
+      align-items: center;
       background: #ffffff;
       border: 1px solid #dadce0;
       border-radius: 999px;
       color: #174ea6;
       cursor: pointer;
-      font: 600 11px/16px system-ui, sans-serif;
-      padding: 3px 7px;
+      display: inline-flex;
+      font: 600 10px/14px system-ui, sans-serif;
+      gap: 3px;
+      min-height: 24px;
+      padding: 2px 5px;
+    }
+
+    [data-messages-shortcuts-pill] svg {
+      fill: currentColor;
+      height: 14px;
+      width: 14px;
+    }
+
+    [data-messages-shortcuts-pill-shortcut] {
+      white-space: nowrap;
     }
   `;
   documentRoot.head.append(style);
@@ -141,21 +162,41 @@ function isWithinConversationRow(event, conversationRow) {
   return event.relatedTarget instanceof Node && conversationRow.contains(event.relatedTarget);
 }
 
-function formatPillLabel(definition, shortcut) {
-  if (shortcut === UNASSIGNED_SHORTCUT_LABEL) {
-    return definition.label;
-  }
+function createPillIcon(documentRoot, icon) {
+  const svg = documentRoot.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  const path = documentRoot.createElementNS('http://www.w3.org/2000/svg', 'path');
 
-  return `${definition.label} ${shortcut}`;
+  svg.setAttribute('aria-hidden', 'true');
+  svg.setAttribute('data-messages-shortcuts-pill-icon', icon);
+  svg.setAttribute('focusable', 'false');
+  svg.setAttribute('viewBox', '0 0 24 24');
+  path.setAttribute('d', PILL_ICON_PATHS[icon]);
+  svg.append(path);
+
+  return svg;
 }
 
 function createPill(documentRoot, definition, shortcut, runAction, conversationRow) {
   const pill = documentRoot.createElement('button');
+  const hasShortcut = shortcut !== UNASSIGNED_SHORTCUT_LABEL;
+
   pill.type = 'button';
   pill.setAttribute('data-messages-shortcuts-pill', '');
   pill.setAttribute('data-command', definition.command);
-  pill.setAttribute('aria-label', `${definition.label} conversation, ${shortcut}`);
-  pill.textContent = formatPillLabel(definition, shortcut);
+  pill.setAttribute(
+    'aria-label',
+    `${definition.label} conversation${hasShortcut ? `, ${shortcut}` : ''}`
+  );
+  pill.title = definition.label;
+  pill.append(createPillIcon(documentRoot, definition.icon));
+
+  if (hasShortcut) {
+    const shortcutLabel = documentRoot.createElement('span');
+
+    shortcutLabel.setAttribute('data-messages-shortcuts-pill-shortcut', '');
+    shortcutLabel.textContent = shortcut;
+    pill.append(shortcutLabel);
+  }
   pill.addEventListener('click', (event) => {
     event.preventDefault();
     event.stopPropagation();

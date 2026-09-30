@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.6.2 - 2026-09-30
+
+### Changed
+
+- Compact conversation shortcut pills with action icons and shortcut labels
+
 ## 1.6.1 - 2026-09-30
 
 ### Fixed
