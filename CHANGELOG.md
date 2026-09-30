@@ -14,6 +14,9 @@ All notable changes to this project will be documented in this file.
 - Bundled content script compatible with Chrome's classic content-script loader
 - Required synchronized version bumps for every pull request
 - Branch coverage above 96% with command and conversation failure-path tests
+- Complete branch coverage for content-script routing failures
+- Keep package-lock metadata synchronized with extension version bumps
+- Block local commits with unsynchronized package-lock metadata
 - Pre-commit validation blocking direct commits to `main`
 - Pre-commit validation requiring a new changelog entry or synchronized version bumps
 
