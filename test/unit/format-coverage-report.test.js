@@ -1,3 +1,4 @@
+import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { formatCoverageReport } from '../../scripts/format-coverage-report.js';
 
@@ -42,6 +43,7 @@ describe('formatCoverageReport', () => {
   });
 
   it('formats absolute paths and non-finite per-file metrics', () => {
+    const coverageFilePath = '/tmp/coverage/example.js';
     const report = formatCoverageReport({
       total: {
         branches: { pct: Number.NaN },
@@ -49,7 +51,7 @@ describe('formatCoverageReport', () => {
         lines: { pct: Number.NEGATIVE_INFINITY },
         statements: { pct: undefined }
       },
-      '/tmp/coverage/example.js': {
+      [coverageFilePath]: {
         branches: { pct: undefined },
         functions: { pct: Number.NaN },
         lines: { pct: Number.POSITIVE_INFINITY },
@@ -62,7 +64,7 @@ describe('formatCoverageReport', () => {
     expect(report).toContain('| Functions | N/A |');
     expect(report).toContain('| Branches | N/A |');
     expect(report).toContain(
-      '| `../../../../tmp/coverage/example.js` | N/A | N/A | N/A | N/A |'
+      `| \`${path.relative(process.cwd(), coverageFilePath).replaceAll('\\', '/')}\` | N/A | N/A | N/A | N/A |`
     );
   });
 });
