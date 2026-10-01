@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.6.26 - 2026-10-01
+
+### Fixed
+
+- Replace a duplicate trash confirmation failure test with fallback coverage
+
 ## 1.6.25 - 2026-10-01
 
 ### Fixed

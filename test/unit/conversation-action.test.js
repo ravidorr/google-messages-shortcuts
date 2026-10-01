@@ -321,27 +321,32 @@ describe('runConversationAction', () => {
     });
   });
 
-  it('returns a confirmation fallback failure', async () => {
+  it('confirms trash through the English fallback control', async () => {
     document.body.innerHTML = `
       <mws-conversation-list-item>
         <a aria-selected="true"></a>
         <button aria-haspopup="menu"></button>
       </mws-conversation-list-item>
       <div data-e2e-conversation-delete>Move to trash</div>
+      <mat-dialog-container>
+        <button class="mat-focus-indicator">Move to trash</button>
+      </mat-dialog-container>
     `;
     const trashMenuItem = document.querySelector('[data-e2e-conversation-delete]');
+    const fallbackConfirmButton = document.querySelector(
+      'mat-dialog-container .mat-focus-indicator'
+    );
+    vi.spyOn(fallbackConfirmButton, 'click');
     vi.spyOn(waitForElement, 'waitForSelector')
       .mockResolvedValueOnce(trashMenuItem)
       .mockRejectedValueOnce(new Error('confirmation unavailable'));
     vi.spyOn(waitForElement, 'waitForElement')
-      .mockRejectedValueOnce(new Error('confirmation fallback unavailable'));
+      .mockResolvedValueOnce(fallbackConfirmButton);
 
     const result = await runConversationAction(document, COMMAND_TRASH);
 
-    expect(result).toEqual({
-      ok: false,
-      reason: 'confirmation fallback unavailable'
-    });
+    expect(result).toEqual({ ok: true });
+    expect(fallbackConfirmButton.click).toHaveBeenCalledTimes(1);
   });
 
   it('marks a read conversation as unread', async () => {
