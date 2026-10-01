@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.6.17 - 2026-10-01
+
+### Fixed
+
+- Restrict coverage report updates to comments created by GitHub Actions
+
 ## 1.6.16 - 2026-10-01
 
 ### Fixed

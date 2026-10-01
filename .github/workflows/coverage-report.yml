@@ -32,7 +32,9 @@ jobs:
               repo: context.repo.repo,
               issue_number: context.issue.number
             });
-            const existingComment = comments.find((comment) => comment.body.includes(marker));
+            const existingComment = comments.find((comment) =>
+              comment.body.includes(marker) && comment.user?.login === 'github-actions[bot]'
+            );
 
             if (existingComment) {
               await github.rest.issues.updateComment({

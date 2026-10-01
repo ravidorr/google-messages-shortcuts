@@ -109,4 +109,13 @@ describe('GitHub workflow security', () => {
       'if: github.event.pull_request.head.repo.full_name == github.repository'
     );
   });
+
+  it('updates only the GitHub Actions coverage comment', async () => {
+    const workflows = await readWorkflowFiles();
+    const coverageWorkflow = workflows.find(({ name }) => name === 'coverage-report.yml');
+
+    expect(coverageWorkflow?.content).toContain(
+      "comment.user?.login === 'github-actions[bot]'"
+    );
+  });
 });
