@@ -72,7 +72,8 @@ export default [
       'node_modules/**',
       'coverage/**',
       'dist/**',
-      'release/**'
+      'release/**',
+      'output/**'
     ]
   }
 ];

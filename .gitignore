@@ -9,6 +9,10 @@ coverage/
 dist/
 release/
 
+# Local validation artifacts (keep the reusable console helper tracked)
+output/*
+!output/live-validation-console.js
+
 # IDE and OS
 .idea/
 .vscode/

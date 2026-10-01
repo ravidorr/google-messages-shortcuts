@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.6.34 - 2026-10-01
+
+### Added
+
+- Reusable mark-as-read live validation console helper at `output/live-validation-console.js`
+
+### Changed
+
+- Gitignore local `output/` artifacts while keeping the validation console helper tracked
+
 ## 1.6.33 - 2026-10-01
 
 ### Fixed
