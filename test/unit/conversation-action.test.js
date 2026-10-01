@@ -84,6 +84,24 @@ describe('runConversationAction', () => {
     expect(archiveButton.click).toHaveBeenCalledTimes(1);
   });
 
+  it('rejects an action while another action is waiting for its menu item', async () => {
+    const fixture = createConversationFixture();
+    let resolveMenuItem;
+    vi.spyOn(waitForElement, 'waitForSelector').mockImplementationOnce(() => new Promise((resolve) => {
+      resolveMenuItem = resolve;
+    }));
+
+    const firstAction = runConversationAction(document, COMMAND_ARCHIVE);
+    const secondResult = await runConversationAction(document, COMMAND_ARCHIVE);
+
+    expect(secondResult).toEqual({ ok: false, reason: 'action-in-progress' });
+    expect(fixture.menuButton.click).toHaveBeenCalledTimes(1);
+
+    resolveMenuItem(fixture.archiveButton);
+
+    await expect(firstAction).resolves.toEqual({ ok: true });
+  });
+
   it('moves the selected conversation to trash and confirms when enabled', async () => {
     const fixture = createConversationFixture();
     const chromeApi = {
@@ -106,6 +124,44 @@ describe('runConversationAction', () => {
     expect(fixture.menuButton.click).toHaveBeenCalled();
     expect(fixture.trashButton.click).toHaveBeenCalled();
     expect(fixture.confirmButton.click).toHaveBeenCalled();
+  });
+
+  it('keeps the action lock while waiting for trash confirmation', async () => {
+    const fixture = createConversationFixture();
+    const chromeApi = {
+      storage: {
+        local: {
+          get: vi.fn(async () => ({ autoConfirmTrash: true }))
+        }
+      }
+    };
+    let resolveConfirmation;
+    vi.spyOn(waitForElement, 'waitForSelector')
+      .mockResolvedValueOnce(fixture.trashButton)
+      .mockImplementationOnce(() => new Promise((resolve) => {
+        resolveConfirmation = resolve;
+      }))
+      .mockResolvedValueOnce(fixture.archiveButton);
+
+    const trashAction = runConversationAction(
+      document,
+      COMMAND_TRASH,
+      undefined,
+      undefined,
+      chromeApi
+    );
+    await vi.waitFor(() => {
+      expect(waitForElement.waitForSelector).toHaveBeenCalledTimes(2);
+    });
+
+    await expect(runConversationAction(document, COMMAND_ARCHIVE)).resolves.toEqual({
+      ok: false,
+      reason: 'action-in-progress'
+    });
+
+    resolveConfirmation(fixture.confirmButton);
+
+    await expect(trashAction).resolves.toEqual({ ok: true });
   });
 
   it('leaves the native trash dialog visible when confirmation is disabled', async () => {

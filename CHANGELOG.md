@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.6.15 - 2026-10-01
+
+### Fixed
+
+- Serialize conversation actions to prevent concurrent menu interactions
+
 ## 1.6.14 - 2026-09-30
 
 ### Fixed

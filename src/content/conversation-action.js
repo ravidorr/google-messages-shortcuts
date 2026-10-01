@@ -6,6 +6,8 @@ import { MENU_TEXT, SELECTORS } from './google-messages-dom.js';
 import { beginMenuAction, endMenuAction } from './menu-action-overlay.js';
 import { waitForElement, waitForSelector } from './wait-for-element.js';
 
+let actionInProgress = false;
+
 async function clickMenuAction(documentRoot, primarySelector, fallbackText) {
   try {
     const primaryItem = await waitForSelector(documentRoot, primarySelector);
@@ -76,63 +78,73 @@ export async function runConversationAction(
   targetConversationRow,
   chromeApi = chrome
 ) {
-  const conversationRow = targetConversationRow || findConversationRow(documentRoot, selectors);
-
-  if (!conversationRow) {
-    return { ok: false, reason: 'no-target' };
+  if (actionInProgress) {
+    return { ok: false, reason: 'action-in-progress' };
   }
 
-  const menuButton = findRowMenuButton(conversationRow, selectors);
-
-  if (!menuButton) {
-    return { ok: false, reason: 'menu-button-not-found' };
-  }
-
-  if (command === COMMAND_MARK_UNREAD && !isConversationRead(conversationRow, selectors)) {
-    return { ok: false, reason: 'already-unread' };
-  }
-
-  beginMenuAction(documentRoot);
+  actionInProgress = true;
 
   try {
-    menuButton.click();
+    const conversationRow = targetConversationRow || findConversationRow(documentRoot, selectors);
 
-    if (command === COMMAND_ARCHIVE) {
-      return await clickMenuAction(
-        documentRoot,
-        selectors.archiveMenuItem,
-        MENU_TEXT.archive
-      );
+    if (!conversationRow) {
+      return { ok: false, reason: 'no-target' };
     }
 
-    if (command === COMMAND_TRASH) {
-      const trashResult = await clickMenuAction(
-        documentRoot,
-        selectors.trashMenuItem,
-        MENU_TEXT.trash
-      );
+    const menuButton = findRowMenuButton(conversationRow, selectors);
 
-      if (!trashResult.ok) {
-        return trashResult;
+    if (!menuButton) {
+      return { ok: false, reason: 'menu-button-not-found' };
+    }
+
+    if (command === COMMAND_MARK_UNREAD && !isConversationRead(conversationRow, selectors)) {
+      return { ok: false, reason: 'already-unread' };
+    }
+
+    beginMenuAction(documentRoot);
+
+    try {
+      menuButton.click();
+
+      if (command === COMMAND_ARCHIVE) {
+        return await clickMenuAction(
+          documentRoot,
+          selectors.archiveMenuItem,
+          MENU_TEXT.archive
+        );
       }
 
-      if (!await isTrashConfirmationEnabled(chromeApi)) {
-        return confirmTrash(documentRoot, false);
+      if (command === COMMAND_TRASH) {
+        const trashResult = await clickMenuAction(
+          documentRoot,
+          selectors.trashMenuItem,
+          MENU_TEXT.trash
+        );
+
+        if (!trashResult.ok) {
+          return trashResult;
+        }
+
+        if (!await isTrashConfirmationEnabled(chromeApi)) {
+          return await confirmTrash(documentRoot, false);
+        }
+
+        return await confirmTrash(documentRoot);
       }
 
-      return confirmTrash(documentRoot);
-    }
+      if (command === COMMAND_MARK_UNREAD) {
+        return await clickMenuAction(
+          documentRoot,
+          selectors.markUnreadMenuItem,
+          MENU_TEXT.markUnread
+        );
+      }
 
-    if (command === COMMAND_MARK_UNREAD) {
-      return await clickMenuAction(
-        documentRoot,
-        selectors.markUnreadMenuItem,
-        MENU_TEXT.markUnread
-      );
+      return { ok: false, reason: 'unknown-command' };
+    } finally {
+      endMenuAction(documentRoot);
     }
-
-    return { ok: false, reason: 'unknown-command' };
   } finally {
-    endMenuAction(documentRoot);
+    actionInProgress = false;
   }
 }
