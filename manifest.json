@@ -13,9 +13,6 @@
     "storage",
     "tabs"
   ],
-  "host_permissions": [
-    "https://messages.google.com/web/*"
-  ],
   "background": {
     "service_worker": "background.js",
     "type": "module"
