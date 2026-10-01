@@ -62,7 +62,7 @@ If Chrome or the operating system already uses a suggested shortcut, Chrome may 
 1. A keyboard command triggers the background service worker.
 2. The worker checks that the active tab is Google Messages.
 3. The worker sends the command to the content script.
-4. The content script finds the selected conversation row, or the hovered row if none is selected.
+4. The content script finds the hovered conversation row, the keyboard-focused row, or the selected row when neither is present.
 5. Archive, trash, and mark-as-unread actions open the row menu and click the matching item.
 6. Mark as read clicks the conversation link on unread rows and waits for the unread marker to clear.
 7. Trash actions confirm through Google Messages' native dialog.

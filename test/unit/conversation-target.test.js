@@ -26,12 +26,28 @@ describe('conversation-target', () => {
     document.body.innerHTML = '';
   });
 
-  it('prefers the selected conversation row', () => {
+  it('prefers the hovered conversation row over the selected row', () => {
     const selected = createConversationRow({ selected: true });
     const hovered = createConversationRow();
-    hovered.row.classList.add('hover');
+    hovered.row.classList.add('hovered-row');
 
     document.body.append(selected.row, hovered.row);
+
+    const selectors = {
+      selectedConversationLink: 'mws-conversation-list-item a[aria-selected="true"]',
+      focusedConversationItem: 'mws-conversation-list-item[is-focused="true"]',
+      hoveredConversationItem: 'mws-conversation-list-item.hovered-row',
+      conversationRow: 'mws-conversation-list-item',
+      rowMenuButton: 'button[aria-haspopup="menu"]'
+    };
+
+    expect(findConversationRow(document, selectors)).toBe(hovered.row);
+  });
+
+  it('uses the selected conversation row when none is hovered or focused', () => {
+    const selected = createConversationRow({ selected: true });
+
+    document.body.append(selected.row);
 
     expect(findConversationRow(document)).toBe(selected.row);
   });
@@ -44,13 +60,13 @@ describe('conversation-target', () => {
     expect(findConversationRow(document)).toBe(focused.row);
   });
 
-  it('prefers the selected conversation row over a focused row', () => {
+  it('prefers the focused conversation row over the selected row', () => {
     const selected = createConversationRow({ selected: true });
     const focused = createConversationRow();
     focused.row.setAttribute('is-focused', 'true');
     document.body.append(selected.row, focused.row);
 
-    expect(findConversationRow(document)).toBe(selected.row);
+    expect(findConversationRow(document)).toBe(focused.row);
   });
 
   it('falls back when the selected link is not in a conversation row', () => {
@@ -92,6 +108,22 @@ describe('conversation-target', () => {
 
   it('returns null when no row is available', () => {
     expect(findConversationRow(document)).toBeNull();
+  });
+
+  it('returns null when the selected link is outside a conversation row and no other row is available', () => {
+    const selectedLink = document.createElement('a');
+    selectedLink.setAttribute('aria-selected', 'true');
+    document.body.append(selectedLink);
+
+    const selectors = {
+      selectedConversationLink: 'a[aria-selected="true"]',
+      focusedConversationItem: 'mws-conversation-list-item[is-focused="true"]',
+      hoveredConversationItem: 'mws-conversation-list-item:hover',
+      conversationRow: 'mws-conversation-list-item',
+      rowMenuButton: 'button[aria-haspopup="menu"]'
+    };
+
+    expect(findConversationRow(document, selectors)).toBeNull();
   });
 
   it('finds the menu button within the row', () => {

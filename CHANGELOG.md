@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.6.33 - 2026-10-01
+
+### Fixed
+
+- Prefer hovered and keyboard-focused conversation rows over the selected row so mark-as-read shortcuts work while another conversation is open in the pane
+
+### Changed
+
+- Record 1.6.32 mark-as-read production validation in the compatibility matrix
+
 ## 1.6.32 - 2026-10-01
 
 ### Added
