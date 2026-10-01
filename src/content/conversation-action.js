@@ -1,4 +1,9 @@
-import { COMMAND_ARCHIVE, COMMAND_MARK_UNREAD, COMMAND_TRASH } from '../shared/commands.js';
+import {
+  COMMAND_ARCHIVE,
+  COMMAND_MARK_UNREAD,
+  COMMAND_TRASH,
+  isValidCommand
+} from '../shared/commands.js';
 import { isConversationRead } from './conversation-read-state.js';
 import { isTrashConfirmationEnabled } from '../shared/trash-confirmation-preference.js';
 import { findConversationRow, findRowMenuButton } from './conversation-target.js';
@@ -78,6 +83,10 @@ export async function runConversationAction(
   targetConversationRow,
   chromeApi = chrome
 ) {
+  if (!isValidCommand(command)) {
+    return { ok: false, reason: 'unknown-command' };
+  }
+
   if (actionInProgress) {
     return { ok: false, reason: 'action-in-progress' };
   }
@@ -132,15 +141,11 @@ export async function runConversationAction(
         return await confirmTrash(documentRoot);
       }
 
-      if (command === COMMAND_MARK_UNREAD) {
-        return await clickMenuAction(
-          documentRoot,
-          selectors.markUnreadMenuItem,
-          MENU_TEXT.markUnread
-        );
-      }
-
-      return { ok: false, reason: 'unknown-command' };
+      return await clickMenuAction(
+        documentRoot,
+        selectors.markUnreadMenuItem,
+        MENU_TEXT.markUnread
+      );
     } finally {
       endMenuAction(documentRoot);
     }
