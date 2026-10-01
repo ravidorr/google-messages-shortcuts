@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.6.20 - 2026-10-01
+
+### Fixed
+
+- Support Windows package installs and synchronize the Git index after path-limited commits
+
+## 1.6.19 - 2026-10-01
+
+### Fixed
+
+- Regenerate and stage package-lock metadata during commits that include package.json
+
 ## 1.6.18 - 2026-10-01
 
 ### Fixed

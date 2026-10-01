@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Messages Shortcut Actions",
-  "version": "1.6.18",
+  "version": "1.6.20",
   "description": "Use shortcuts to Archive, Trash, or Mark as unread for active conversations in Google Messages.",
   "icons": {
     "16": "icons/icon16.png",

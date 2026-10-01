@@ -2,6 +2,7 @@
 set -e
 
 node scripts/prevent-main-commit.js
+node scripts/update-package-lock.js
 node scripts/validate-release-metadata.js
 node scripts/validate-package-lock-version.js
 npx lint-staged
