@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.6.9 - 2026-09-30
+
+### Fixed
+
+- Ignore unread-state mutation records outside conversation rows when refreshing shortcut pills
+
 ## 1.6.8 - 2026-09-30
 
 ### Fixed

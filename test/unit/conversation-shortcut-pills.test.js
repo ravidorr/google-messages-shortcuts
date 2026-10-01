@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { COMMAND_ARCHIVE, COMMAND_MARK_UNREAD, COMMAND_TRASH } from '../../src/shared/commands.js';
 import { getCommandIcon } from '../../src/shared/command-icons.js';
 import {
+  getConversationRowForUnreadMutation,
   installConversationShortcutPills,
   resetConversationShortcutPillInstallationsForTests,
   safeDomMutation
@@ -223,6 +224,94 @@ describe('conversation shortcut pills', () => {
       expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(2);
     });
     expect(row.querySelector(`[data-command="${COMMAND_MARK_UNREAD}"]`)).toBeNull();
+  });
+
+  it('ignores unread mutation records outside conversation rows', () => {
+    const unrelatedNode = document.createElement('div');
+    const localThis = {
+      attributeRecord: {
+        type: 'attributes',
+        attributeName: 'data-e2e-is-unread',
+        target: unrelatedNode
+      },
+      childListRecord: {
+        type: 'childList',
+        target: unrelatedNode,
+        addedNodes: [document.createElement('span')],
+        removedNodes: []
+      }
+    };
+
+    expect(getConversationRowForUnreadMutation(localThis.attributeRecord)).toBeNull();
+    expect(getConversationRowForUnreadMutation(localThis.childListRecord)).toBeNull();
+    expect(getConversationRowForUnreadMutation({
+      type: 'attributes',
+      attributeName: 'data-e2e-is-unread',
+      target: document
+    })).toBeNull();
+  });
+
+  it('matches unread mutation records inside conversation rows', () => {
+    const row = createConversationRow({ unread: false });
+    const unreadMarker = document.createElement('span');
+
+    unreadMarker.setAttribute('data-e2e-is-unread', 'true');
+    document.body.append(row);
+
+    expect(getConversationRowForUnreadMutation({
+      type: 'attributes',
+      attributeName: 'data-e2e-is-unread',
+      target: row
+    })).toBe(row);
+    expect(getConversationRowForUnreadMutation({
+      type: 'childList',
+      target: row,
+      addedNodes: [unreadMarker],
+      removedNodes: []
+    })).toBe(row);
+    expect(getConversationRowForUnreadMutation({
+      type: 'childList',
+      target: row,
+      addedNodes: [document.createElement('span')],
+      removedNodes: []
+    })).toBeNull();
+    expect(getConversationRowForUnreadMutation({
+      type: 'other',
+      target: row
+    })).toBeNull();
+  });
+
+  it('ignores unrelated DOM mutations when watching unread state', async () => {
+    const row = createConversationRow({ focused: true, unread: false });
+    const getShortcutLabels = vi.fn(async () => ({
+      archive: 'Ctrl+Shift+Y',
+      trash: 'Ctrl+Shift+D',
+      markUnread: 'Ctrl+Shift+U'
+    }));
+
+    document.body.append(row);
+
+    disconnect = installConversationShortcutPills({
+      documentRoot: document,
+      getShortcutLabels
+    });
+
+    await vi.waitFor(() => {
+      expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(3);
+    });
+
+    getShortcutLabels.mockClear();
+
+    const unrelated = document.createElement('div');
+    document.body.append(unrelated);
+    unrelated.append(document.createElement('span'));
+
+    await new Promise((resolve) => {
+      setTimeout(resolve, 50);
+    });
+
+    expect(getShortcutLabels).not.toHaveBeenCalled();
+    expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(3);
   });
 
   it('refreshes pills when the unread marker is added to a visible row', async () => {
