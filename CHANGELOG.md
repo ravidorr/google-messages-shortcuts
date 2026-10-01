@@ -10,7 +10,7 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
-- Record 1.6.32 mark-as-read production validation in the compatibility matrix
+- Record mark-as-read production validation in the compatibility matrix (self-test on 1.6.32; pill and shortcut pass on 1.6.33)
 
 ## 1.6.32 - 2026-10-01
 

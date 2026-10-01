@@ -32,7 +32,7 @@ Use **pass** when `runCapabilitySelfTest()` returns `ok: true` (no DOM mutation,
 | 2026-10-01 | Chrome | 1.6.28 | en-US | LTR | baseline (trash dialog) | n/a | Move to trash dialog opens via extension; cancel without trashing verified; confirm control reachable (matches `data-e2e-action-button-confirm` contract). |
 | 2026-10-01 | Chrome | 1.6.28 | en-US | LTR | baseline-trash-dialog-open | pass | Self-test with dialog open: `menu.trashConfirm` `dom-query`; `menu.archive`, `menu.trash`, and `menu.markUnread` `contract` (row menu not open). `ok: true`, `unsafe: 0`, `mutated: false`. |
 | 2026-10-01 | Chrome 154 | 1.6.32 | en-US | LTR | baseline | pass | `ok: true`, `unsafe: 0`, `mutated: false`. `list.conversationLink` `dom-structure` supported; seven capabilities supported; eight deferred unavailable (composer, message pane, connection) as expected. |
-| 2026-10-01 | Chrome 154 | 1.6.32 | en-US | LTR | baseline (mark-as-read production validation) | pass | Self-test pass on signed-in list (24 unread rows). Open-on-hover/focus disabled: hover kept unread marker and URL unchanged. Mark-as-read pill and `Command+Shift+K` on a hovered unread row (while another read conversation stayed selected) cleared unread state and opened the pane via `a[data-e2e-conversation]`. |
+| 2026-10-01 | Chrome 154 | 1.6.33 | en-US | LTR | baseline (mark-as-read production validation) | pass | Self-test pass on signed-in list (24 unread rows). Open-on-hover/focus disabled: hover kept unread marker and URL unchanged. Mark-as-read pill and `Command+Shift+K` on a hovered unread row (while another read conversation stayed selected) cleared unread state and opened the pane via `a[data-e2e-conversation]`. |
 
 ## Selector evidence log
 
@@ -67,5 +67,8 @@ Use **pass** when `runCapabilitySelfTest()` returns `ok: true` (no DOM mutation,
 
 - Production self-test on main: `list.conversationLink` reports `dom-structure` supported when conversation rows and `a[data-e2e-conversation]` links are present.
 - Open-on-hover/focus disabled: manual hover on an unread row kept the unread marker and left the URL unchanged.
+
+### Live notes (2026-10-01, en-US, extension 1.6.33)
+
 - Mark-as-read pill on a hovered unread row cleared the unread marker and opened the message pane (manual pass).
-- Mark-as-read keyboard shortcut (`Command+Shift+K`) on a hovered unread row while another read conversation stayed selected: pass after target resolution fix (hovered, then focused, then selected).
+- Mark-as-read keyboard shortcut (`Command+Shift+K`) on a hovered unread row while another read conversation stayed selected: pass with hovered-then-focused-then-selected target resolution.
