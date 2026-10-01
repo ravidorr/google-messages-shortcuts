@@ -9,7 +9,10 @@ import {
   findConversationRow,
   findRowMenuButton
 } from './conversation-target.js';
-import { waitForConversationRead } from './conversation-read-state.js';
+import {
+  hasConversationNavigationStarted,
+  waitForConversationRead
+} from './conversation-read-state.js';
 import { MENU_TEXT, SELECTORS } from './google-messages-dom.js';
 import { beginMenuAction, endMenuAction } from './menu-action-overlay.js';
 import {
@@ -153,7 +156,7 @@ async function executeMenuClickAction(documentRoot, action, selectors) {
   );
 }
 
-async function executeOpenRowAction(conversationRow, selectors) {
+async function executeOpenRowAction(documentRoot, conversationRow, selectors) {
   const conversationLink = findConversationLink(conversationRow, selectors);
 
   if (!conversationLink) {
@@ -162,7 +165,21 @@ async function executeOpenRowAction(conversationRow, selectors) {
 
   conversationLink.click();
 
-  return waitForConversationRead(conversationRow, selectors);
+  const readResult = await waitForConversationRead(
+    documentRoot,
+    conversationRow,
+    selectors
+  );
+
+  if (readResult.ok) {
+    return readResult;
+  }
+
+  if (hasConversationNavigationStarted(documentRoot, conversationRow, selectors)) {
+    return { ok: true, readStatePending: true };
+  }
+
+  return readResult;
 }
 
 async function executeTrashWithConfirmAction(documentRoot, action, selectors, chromeApi) {
@@ -193,7 +210,7 @@ async function executeTrashWithConfirmAction(documentRoot, action, selectors, ch
 
 async function executeRowAction(documentRoot, action, selectors, chromeApi, conversationRow) {
   if (action.executionKind === EXECUTION_KIND_OPEN_ROW) {
-    return executeOpenRowAction(conversationRow, selectors);
+    return executeOpenRowAction(documentRoot, conversationRow, selectors);
   }
 
   if (action.executionKind === EXECUTION_KIND_TRASH_WITH_CONFIRM) {

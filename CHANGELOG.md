@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.6.37 - 2026-10-01
+
+### Fixed
+
+- Wait for delayed mark-as-read state changes and follow the conversation row when Google Messages rerenders it
+
 ## 1.6.36 - 2026-10-01
 
 ### Added

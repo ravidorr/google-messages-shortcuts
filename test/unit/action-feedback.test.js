@@ -45,6 +45,18 @@ describe('action-feedback', () => {
     });
   });
 
+  it('reports pending read state instead of success for mark-as-read', () => {
+    const localThis = getActionFeedbackMessage(
+      { ok: true, readStatePending: true },
+      COMMAND_MARK_READ
+    );
+
+    expect(localThis).toEqual({
+      kind: 'info',
+      message: 'Conversation opened. Unread status may still be updating.'
+    });
+  });
+
   it('maps failure reasons to safe recovery copy', () => {
     const reasons = [
       ['extension-paused', 'info'],
