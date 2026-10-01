@@ -33,6 +33,10 @@ export function getUnexpectedPackageEntries(entries, expectedEntries) {
     .filter((entry) => !normalizedExpectedEntries.has(entry));
 }
 
+export function getNonCanonicalPackageEntries(entries) {
+  return entries.filter((entry) => entry !== normalizeArchiveEntry(entry));
+}
+
 async function collectRelativeFiles(directory, baseDirectory = directory) {
   const entries = await readdir(directory, { withFileTypes: true });
   const files = await Promise.all(entries.map(async (entry) => {
@@ -53,6 +57,15 @@ export async function validatePackageArtifact(archivePath, distDirectory = path.
   const archive = await JSZip.loadAsync(archiveBuffer);
   const archiveEntries = Object.keys(archive.files).filter((entry) => !archive.files[entry].dir);
   const normalizedArchiveEntries = archiveEntries.map(normalizeArchiveEntry);
+  const nonCanonicalEntries = getNonCanonicalPackageEntries(archiveEntries);
+  const duplicateEntries = normalizedArchiveEntries.filter(
+    (entry, index) => normalizedArchiveEntries.indexOf(entry) !== index
+  );
+
+  if (nonCanonicalEntries.length > 0 || duplicateEntries.length > 0) {
+    throw new Error('Package artifact contains noncanonical or duplicate entries.');
+  }
+
   const missingRequiredEntries = getMissingPackageEntries(normalizedArchiveEntries);
 
   if (missingRequiredEntries.length > 0) {

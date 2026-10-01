@@ -7,6 +7,7 @@ import JSZip from 'jszip';
 import { afterEach, describe, expect, it } from 'vitest';
 import {
   getMissingPackageEntries,
+  getNonCanonicalPackageEntries,
   getUnexpectedPackageEntries,
   REQUIRED_PACKAGE_ENTRIES,
   validatePackageArtifact
@@ -63,6 +64,12 @@ describe('validate-package-artifact', () => {
 
     expect(getUnexpectedPackageEntries(localThis.entries, localThis.expectedEntries)).toEqual([
       'unexpected.js'
+    ]);
+  });
+
+  it('reports noncanonical archive entry paths', () => {
+    expect(getNonCanonicalPackageEntries(['icons\\icon16.png', 'background.js'])).toEqual([
+      'icons\\icon16.png'
     ]);
   });
 
@@ -134,6 +141,20 @@ describe('validate-package-artifact', () => {
 
     await expect(validatePackageArtifact(unexpectedArchivePath, distDirectory)).rejects.toThrow(
       'Package artifact contains unexpected entries: unexpected.js'
+    );
+
+    const nonCanonicalArchivePath = await createArchive(projectDirectory, {
+      ...Object.fromEntries(REQUIRED_PACKAGE_ENTRIES.map((entry) => [
+        entry,
+        entry.endsWith('.json') ? '{"manifest_version":3}' : entry
+      ])),
+      'src/background/command-listener.js': 'listener',
+      'src/background/command-router.js': 'router',
+      'icons\\icon16.png': 'alias'
+    });
+
+    await expect(validatePackageArtifact(nonCanonicalArchivePath, distDirectory)).rejects.toThrow(
+      'Package artifact contains noncanonical or duplicate entries.'
     );
   });
 
