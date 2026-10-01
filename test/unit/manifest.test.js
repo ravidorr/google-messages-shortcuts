@@ -39,11 +39,19 @@ describe('extension manifest', () => {
     });
     expect(manifest.permissions).toEqual(['storage', 'tabs']);
     expect(manifest.host_permissions).toBeUndefined();
-    expect(manifest.content_scripts).toEqual([{
-      matches: ['https://messages.google.com/web/*'],
-      js: ['content.js'],
-      run_at: 'document_idle'
-    }]);
+    expect(manifest.content_scripts).toEqual([
+      {
+        matches: ['https://messages.google.com/web/*'],
+        js: ['page-world-bridge.js'],
+        run_at: 'document_idle',
+        world: 'MAIN'
+      },
+      {
+        matches: ['https://messages.google.com/web/*'],
+        js: ['content.js'],
+        run_at: 'document_idle'
+      }
+    ]);
     expect(Object.keys(manifest.commands)).toEqual([
       COMMAND_ARCHIVE,
       COMMAND_TRASH,
@@ -67,6 +75,7 @@ describe('extension manifest', () => {
 
     await expectFileExists(path.join(outputDirectory, manifest.background.service_worker));
     await expectFileExists(path.join(outputDirectory, manifest.content_scripts[0].js[0]));
+    await expectFileExists(path.join(outputDirectory, manifest.content_scripts[1].js[0]));
     await expectFileExists(path.join(outputDirectory, manifest.action.default_popup));
 
     for (const iconPath of Object.values(manifest.icons)) {

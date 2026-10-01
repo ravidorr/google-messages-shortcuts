@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.6.29 - 2026-10-01
+
+### Fixed
+
+- Fail the capability self-test when required list or menu capabilities are unavailable, not only when they are unsafe
+- Treat missing row-menu and trash-dialog controls as unavailable when those surfaces are open instead of reporting contract-only support
+
+## 1.6.28 - 2026-10-01
+
+### Fixed
+
+- Expose `MessagesShortcuts.runCapabilitySelfTest()` to the Google Messages page console through a MAIN-world bridge script
+
+## 1.6.27 - 2026-10-01
+
+### Added
+
+- Phase 0 DOM discovery docs, page adapter contracts, sanitized list fixtures, and a non-destructive capability self-test exposed as `MessagesShortcuts.runCapabilitySelfTest()`
+
 ## 1.6.26 - 2026-10-01
 
 ### Fixed

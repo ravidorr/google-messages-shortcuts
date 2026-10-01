@@ -1,7 +1,17 @@
-import { cp, mkdir, rm } from 'node:fs/promises';
+import { access, cp, mkdir, rm } from 'node:fs/promises';
 import path from 'node:path';
 import { build } from 'esbuild';
 import { generateIcons } from './generate-icons.js';
+
+async function fileExists(filePath) {
+  try {
+    await access(filePath);
+
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 export const BUILD_PATHS = [
   'background.js',
@@ -22,13 +32,28 @@ export async function buildExtension(sourceDirectory, outputDirectory) {
     path.join(outputDirectory, buildPath),
     { recursive: true }
   )));
-  await build({
+  const bundledScripts = [
+    {
+      entryPoints: [path.join(sourceDirectory, 'content.js')],
+      outfile: path.join(outputDirectory, 'content.js')
+    }
+  ];
+  const pageWorldBridgeEntry = path.join(sourceDirectory, 'page-world-bridge-main.js');
+
+  if (await fileExists(pageWorldBridgeEntry)) {
+    bundledScripts.push({
+      entryPoints: [pageWorldBridgeEntry],
+      outfile: path.join(outputDirectory, 'page-world-bridge.js')
+    });
+  }
+
+  await Promise.all(bundledScripts.map((script) => build({
     bundle: true,
-    entryPoints: [path.join(sourceDirectory, 'content.js')],
+    entryPoints: script.entryPoints,
     format: 'iife',
-    outfile: path.join(outputDirectory, 'content.js'),
+    outfile: script.outfile,
     platform: 'browser'
-  });
+  })));
   await generateIcons(
     path.join(outputDirectory, 'icons'),
     path.join(sourceDirectory, 'icons', 'icon-source.png')

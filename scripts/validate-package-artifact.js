@@ -5,6 +5,7 @@ import JSZip from 'jszip';
 export const REQUIRED_PACKAGE_ENTRIES = [
   'background.js',
   'content.js',
+  'page-world-bridge.js',
   'manifest.json',
   'popup.css',
   'popup.html',

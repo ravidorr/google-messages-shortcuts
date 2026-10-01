@@ -52,6 +52,7 @@ describe('content entry helpers', () => {
   it('exposes handleCommand on the test namespace', () => {
     expect(typeof globalThis.MessagesShortcuts.handleCommand).toBe('function');
     expect(typeof globalThis.MessagesShortcuts.runConversationAction).toBe('function');
+    expect(typeof globalThis.MessagesShortcuts.runCapabilitySelfTest).toBe('function');
   });
 
   it('registers exactly one runtime message listener per content script load', () => {
@@ -70,7 +71,8 @@ describe('content entry helpers', () => {
     expect(globalThis.MessagesShortcuts).toMatchObject({
       existingProperty: true,
       handleCommand: expect.any(Function),
-      runConversationAction: expect.any(Function)
+      runConversationAction: expect.any(Function),
+      runCapabilitySelfTest: expect.any(Function)
     });
   });
 

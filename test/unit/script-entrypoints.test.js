@@ -176,6 +176,10 @@ async function createBuildProject() {
       path.join(projectDirectory, 'content.js'),
       "import { message } from './src/content/entry.js'; globalThis.contentMessage = message;"
     ),
+    writeFile(
+      path.join(projectDirectory, 'page-world-bridge-main.js'),
+      'globalThis.MessagesShortcuts = { __pageBridgeInstalled: true };'
+    ),
     writeFile(path.join(projectDirectory, 'manifest.json'), JSON.stringify({
       action: {
         default_icon: {
@@ -444,6 +448,7 @@ describe('script entrypoint coverage', () => {
     const distEntries = [
       'background.js',
       'content.js',
+      'page-world-bridge.js',
       'manifest.json',
       'popup.css',
       'popup.html',
