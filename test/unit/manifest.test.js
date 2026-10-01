@@ -11,7 +11,9 @@ import {
   COMMAND_ARCHIVE,
   COMMAND_MARK_READ,
   COMMAND_MARK_UNREAD,
-  COMMAND_TRASH
+  COMMAND_MUTE,
+  COMMAND_TRASH,
+  COMMAND_UNMUTE
 } from '../../src/shared/commands.js';
 
 const projectDirectory = fileURLToPath(new URL('../..', import.meta.url));
@@ -57,7 +59,9 @@ describe('extension manifest', () => {
       COMMAND_ARCHIVE,
       COMMAND_TRASH,
       COMMAND_MARK_UNREAD,
-      COMMAND_MARK_READ
+      COMMAND_MARK_READ,
+      COMMAND_MUTE,
+      COMMAND_UNMUTE
     ]);
     expect(manifest.icons).toEqual({
       16: 'icons/icon16.png',

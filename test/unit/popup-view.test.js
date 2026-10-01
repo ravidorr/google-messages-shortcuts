@@ -48,15 +48,17 @@ describe('popup-view', () => {
     });
   });
 
-  it('renders archive, trash, mark-read, and mark-unread rows', () => {
+  it('renders approved row action shortcut rows', () => {
     const rows = renderShortcutRows([
       { name: COMMAND_ARCHIVE, shortcut: 'Ctrl+Shift+Y' },
       { name: COMMAND_TRASH, shortcut: '' },
       { name: COMMAND_MARK_READ, shortcut: 'Ctrl+Shift+K' },
-      { name: COMMAND_MARK_UNREAD, shortcut: 'Ctrl+Shift+U' }
+      { name: COMMAND_MARK_UNREAD, shortcut: 'Ctrl+Shift+U' },
+      { name: 'mute-conversation', shortcut: 'Ctrl+Shift+M' },
+      { name: 'unmute-conversation', shortcut: 'Ctrl+Shift+N' }
     ]);
 
-    expect(rows).toHaveLength(4);
+    expect(rows).toHaveLength(6);
     expect(rows[0].shortcut).toBe('Ctrl+Shift+Y');
     expect(rows[1].shortcut).toBe('Not assigned');
     expect(rows[2].shortcut).toBe('Ctrl+Shift+K');
@@ -70,12 +72,14 @@ describe('popup-view', () => {
       { name: COMMAND_ARCHIVE, shortcut: 'Ctrl+Shift+Y' },
       { name: COMMAND_TRASH, shortcut: 'Ctrl+Shift+D' },
       { name: COMMAND_MARK_READ, shortcut: 'Ctrl+Shift+K' },
-      { name: COMMAND_MARK_UNREAD, shortcut: 'Ctrl+Shift+U' }
+      { name: COMMAND_MARK_UNREAD, shortcut: 'Ctrl+Shift+U' },
+      { name: 'mute-conversation', shortcut: 'Ctrl+Shift+M' },
+      { name: 'unmute-conversation', shortcut: 'Ctrl+Shift+N' }
     ]);
 
     const items = container.querySelectorAll('.shortcut-item');
 
-    expect(items).toHaveLength(4);
+    expect(items).toHaveLength(6);
     expect(items[0].querySelector('.shortcut-item__label').textContent)
       .toBe('Archive conversation');
     expect(items[1].querySelector('.shortcut-item__label').textContent)

@@ -2,7 +2,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   COMMAND_ARCHIVE,
   COMMAND_MARK_READ,
-  COMMAND_TRASH
+  COMMAND_MUTE,
+  COMMAND_TRASH,
+  COMMAND_UNMUTE
 } from '../../src/shared/commands.js';
 import * as rowActionRegistry from '../../src/content/row-action-registry.js';
 import {
@@ -30,6 +32,14 @@ describe('action-feedback', () => {
     expect(localThis).toEqual({
       kind: 'success',
       message: 'Conversation archived.'
+    });
+    expect(getActionFeedbackMessage({ ok: true }, COMMAND_MUTE)).toEqual({
+      kind: 'success',
+      message: 'Conversation muted.'
+    });
+    expect(getActionFeedbackMessage({ ok: true }, COMMAND_UNMUTE)).toEqual({
+      kind: 'success',
+      message: 'Conversation unmuted.'
     });
   });
 
@@ -63,6 +73,8 @@ describe('action-feedback', () => {
       ['no-target', 'info'],
       ['already-read', 'info'],
       ['already-unread', 'info'],
+      ['already-muted', 'info'],
+      ['not-muted', 'info'],
       ['action-in-progress', 'info'],
       ['capability-blocked', 'error'],
       ['menu-button-not-found', 'error'],

@@ -9,6 +9,7 @@ export const MENU_SELECTORS = {
   archiveMenuItem: 'button[data-e2e-conversation-menu-archive]',
   trashMenuItem: 'button[data-e2e-conversation-delete]',
   markUnreadMenuItem: 'button[data-e2e-conversation-menu-mark-unread]',
+  muteMenuItem: 'button[data-e2e-conversation-menu-mute]',
   trashConfirmButton: 'mat-dialog-container button[data-e2e-action-button-confirm]',
   menuItemFallback: '.mat-menu-item, .mat-mdc-menu-item',
   rowMenuPanel: '.conversation-actions-menu[role="menu"], [role="menu"].conversation-actions-menu'
@@ -17,13 +18,17 @@ export const MENU_SELECTORS = {
 export const MENU_TEXT = {
   archive: 'Archive',
   trash: 'Move to trash',
-  markUnread: 'Mark as unread'
+  markUnread: 'Mark as unread',
+  mute: 'Mute',
+  unmute: 'Unmute'
 };
 
 export const MENU_CAPABILITY_IDS = {
   archive: 'menu.archive',
   trash: 'menu.trash',
   markUnread: 'menu.markUnread',
+  mute: 'menu.mute',
+  unmute: 'menu.unmute',
   trashConfirm: 'menu.trashConfirm'
 };
 
@@ -35,6 +40,25 @@ export function isConversationRowMenuOpen(documentRoot, selectors = MENU_SELECTO
 
 function isTrashConfirmDialogOpen(documentRoot) {
   return Boolean(documentRoot.querySelector('mat-dialog-container'));
+}
+
+function normalizeMenuLabel(value) {
+  return value.replace(/\s+/g, ' ').trim();
+}
+
+export function findLabelMatchedMenuItem(
+  documentRoot,
+  primarySelector,
+  expectedLabel,
+  selectors = MENU_SELECTORS
+) {
+  const primaryItem = documentRoot.querySelector(primarySelector);
+
+  if (primaryItem && normalizeMenuLabel(primaryItem.textContent || '') === expectedLabel) {
+    return primaryItem;
+  }
+
+  return findFallbackMenuItemInOpenRowMenu(documentRoot, expectedLabel, selectors);
 }
 
 export function findFallbackMenuItemInOpenRowMenu(documentRoot, fallbackText, selectors) {
@@ -83,6 +107,26 @@ function assessMenuActionCapability(
   }
 
   if (matches.length === 1) {
+    if (isConversationRowMenuOpen(documentRoot, selectors) && fallbackText) {
+      const label = normalizeMenuLabel(matches[0].textContent || '');
+
+      if (label !== fallbackText) {
+        if (findFallbackMenuItemInOpenRowMenu(documentRoot, fallbackText, selectors)) {
+          return createCapabilityResult(
+            CAPABILITY_SUPPORTED,
+            `${actionLabel} menu item matched English fallback while the row menu is open.`,
+            'dom-query-fallback'
+          );
+        }
+
+        return createCapabilityResult(
+          CAPABILITY_UNAVAILABLE,
+          `${actionLabel} row menu is open but shows "${label}" instead of "${fallbackText}".`,
+          'dom-query'
+        );
+      }
+    }
+
     return createCapabilityResult(
       CAPABILITY_SUPPORTED,
       `${actionLabel} menu item is present in the document.`,
@@ -138,6 +182,22 @@ export function assessMenuCapabilities(documentRoot, listCapabilities, selectors
       selectors.markUnreadMenuItem,
       'Mark as unread',
       MENU_TEXT.markUnread,
+      listTargeting,
+      selectors
+    ),
+    [MENU_CAPABILITY_IDS.mute]: assessMenuActionCapability(
+      documentRoot,
+      selectors.muteMenuItem,
+      'Mute',
+      MENU_TEXT.mute,
+      listTargeting,
+      selectors
+    ),
+    [MENU_CAPABILITY_IDS.unmute]: assessMenuActionCapability(
+      documentRoot,
+      selectors.muteMenuItem,
+      'Unmute',
+      MENU_TEXT.unmute,
       listTargeting,
       selectors
     ),

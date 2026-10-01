@@ -2,7 +2,9 @@ import {
   COMMAND_ARCHIVE,
   COMMAND_MARK_READ,
   COMMAND_MARK_UNREAD,
-  COMMAND_TRASH
+  COMMAND_MUTE,
+  COMMAND_TRASH,
+  COMMAND_UNMUTE
 } from './commands.js';
 
 export const MESSAGE_GET_CONVERSATION_SHORTCUT_LABELS = 'get-conversation-shortcut-labels';
@@ -18,6 +20,8 @@ export function getConversationShortcutLabels(commands) {
     archive: getShortcutLabel(commands, COMMAND_ARCHIVE),
     trash: getShortcutLabel(commands, COMMAND_TRASH),
     markUnread: getShortcutLabel(commands, COMMAND_MARK_UNREAD),
-    markRead: getShortcutLabel(commands, COMMAND_MARK_READ)
+    markRead: getShortcutLabel(commands, COMMAND_MARK_READ),
+    mute: getShortcutLabel(commands, COMMAND_MUTE),
+    unmute: getShortcutLabel(commands, COMMAND_UNMUTE)
   };
 }

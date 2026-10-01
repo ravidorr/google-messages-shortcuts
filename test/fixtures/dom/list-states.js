@@ -61,6 +61,39 @@ export const menuItemsPresent = `
   <button data-e2e-conversation-menu-mark-unread class="mat-mdc-menu-item">
     <span class="mat-mdc-menu-item-text">Mark as unread</span>
   </button>
+  <button data-e2e-conversation-menu-mute class="mat-mdc-menu-item">
+    <span class="mat-mdc-menu-item-text">Mute</span>
+  </button>
+`;
+
+export const openRowMenuMuteFallbackOnly = `
+  ${selectedReadRow}
+  <div role="menu" class="conversation-actions-menu mat-mdc-menu-panel">
+    <button class="mat-mdc-menu-item">
+      <span class="mat-mdc-menu-item-text">Mute</span>
+    </button>
+  </div>
+`;
+
+export const openRowMenuMuteLabelMismatchWithFallback = `
+  ${selectedReadRow}
+  <div role="menu" class="conversation-actions-menu mat-mdc-menu-panel">
+    <button data-e2e-conversation-menu-mute class="mat-mdc-menu-item">
+      <span class="mat-mdc-menu-item-text">Unmute</span>
+    </button>
+    <button class="mat-mdc-menu-item">
+      <span class="mat-mdc-menu-item-text">Mute</span>
+    </button>
+  </div>
+`;
+
+export const openRowMenuMutedOnly = `
+  ${selectedReadRow}
+  <div role="menu" class="conversation-actions-menu mat-mdc-menu-panel">
+    <button data-e2e-conversation-menu-mute class="mat-mdc-menu-item">
+      <span class="mat-mdc-menu-item-text">Unmute</span>
+    </button>
+  </div>
 `;
 
 export const trashConfirmDialog = `
@@ -128,5 +161,8 @@ export const FIXTURE_EXPORT_NAMES = [
   'fullListActionSurface',
   'openRowMenuMarkUnreadFallbackOnly',
   'openRowMenuMissingArchiveControl',
-  'openTrashDialogMissingConfirmControl'
+  'openTrashDialogMissingConfirmControl',
+  'openRowMenuMutedOnly',
+  'openRowMenuMuteFallbackOnly',
+  'openRowMenuMuteLabelMismatchWithFallback'
 ];

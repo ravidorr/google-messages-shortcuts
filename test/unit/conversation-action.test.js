@@ -6,7 +6,9 @@ import {
   COMMAND_ARCHIVE,
   COMMAND_MARK_READ,
   COMMAND_MARK_UNREAD,
-  COMMAND_TRASH
+  COMMAND_MUTE,
+  COMMAND_TRASH,
+  COMMAND_UNMUTE
 } from '../../src/shared/commands.js';
 import * as waitForElement from '../../src/content/wait-for-element.js';
 import * as rowActionRegistry from '../../src/content/row-action-registry.js';
@@ -717,5 +719,164 @@ describe('runConversationAction', () => {
     expect(result).toEqual({ ok: false, reason: 'unknown-command' });
     expect(menuButton.click).not.toHaveBeenCalled();
     expect(document.documentElement.hasAttribute(MENU_ACTION_ATTRIBUTE)).toBe(false);
+  });
+
+  it('mutes the selected conversation when the menu shows Mute', async () => {
+    vi.useFakeTimers();
+    document.body.innerHTML = `
+      <mws-conversation-list-item>
+        <a aria-selected="true"></a>
+        <button aria-haspopup="menu"></button>
+      </mws-conversation-list-item>
+      <button data-e2e-conversation-menu-mute class="mat-mdc-menu-item">Mute</button>
+    `;
+    const row = document.querySelector('mws-conversation-list-item');
+    const menuButton = row.querySelector('button[aria-haspopup="menu"]');
+    const muteButton = document.querySelector('[data-e2e-conversation-menu-mute]');
+    vi.spyOn(menuButton, 'click');
+    vi.spyOn(muteButton, 'click').mockImplementation(() => {
+      muteButton.textContent = 'Unmute';
+    });
+
+    const resultPromise = runConversationAction(document, COMMAND_MUTE);
+    await vi.runAllTimersAsync();
+    const localThis = await resultPromise;
+
+    expect(localThis.ok).toBe(true);
+    expect(muteButton.click).toHaveBeenCalledTimes(1);
+    expect(menuButton.click).toHaveBeenCalledTimes(2);
+    vi.useRealTimers();
+  });
+
+  it('returns already-muted when the menu shows Unmute', async () => {
+    document.body.innerHTML = `
+      <mws-conversation-list-item>
+        <a aria-selected="true"></a>
+        <button aria-haspopup="menu"></button>
+      </mws-conversation-list-item>
+      <button data-e2e-conversation-menu-mute class="mat-mdc-menu-item">Unmute</button>
+    `;
+    const muteButton = document.querySelector('[data-e2e-conversation-menu-mute]');
+    vi.spyOn(muteButton, 'click');
+
+    const localThis = await runConversationAction(document, COMMAND_MUTE);
+
+    expect(localThis).toEqual({ ok: false, reason: 'already-muted' });
+    expect(muteButton.click).not.toHaveBeenCalled();
+  });
+
+  it('unmutes the selected conversation when the menu shows Unmute', async () => {
+    vi.useFakeTimers();
+    document.body.innerHTML = `
+      <mws-conversation-list-item>
+        <a aria-selected="true"></a>
+        <button aria-haspopup="menu"></button>
+      </mws-conversation-list-item>
+      <button data-e2e-conversation-menu-mute class="mat-mdc-menu-item">Unmute</button>
+    `;
+    const row = document.querySelector('mws-conversation-list-item');
+    const menuButton = row.querySelector('button[aria-haspopup="menu"]');
+    const muteButton = document.querySelector('[data-e2e-conversation-menu-mute]');
+    vi.spyOn(menuButton, 'click');
+    vi.spyOn(muteButton, 'click').mockImplementation(() => {
+      muteButton.textContent = 'Mute';
+    });
+
+    const resultPromise = runConversationAction(document, COMMAND_UNMUTE);
+    await vi.runAllTimersAsync();
+    const localThis = await resultPromise;
+
+    expect(localThis.ok).toBe(true);
+    expect(muteButton.click).toHaveBeenCalledTimes(1);
+    expect(menuButton.click).toHaveBeenCalledTimes(2);
+    vi.useRealTimers();
+  });
+
+  it('mutes via English fallback when the primary toggle selector is absent', async () => {
+    vi.useFakeTimers();
+    document.body.innerHTML = `
+      <mws-conversation-list-item>
+        <a aria-selected="true"></a>
+        <button aria-haspopup="menu"></button>
+      </mws-conversation-list-item>
+      <div role="menu" class="conversation-actions-menu">
+        <button class="mat-mdc-menu-item">Mute</button>
+      </div>
+    `;
+    const row = document.querySelector('mws-conversation-list-item');
+    const menuButton = row.querySelector('button[aria-haspopup="menu"]');
+    const muteButton = document.querySelector('.mat-mdc-menu-item');
+    vi.spyOn(menuButton, 'click');
+    vi.spyOn(muteButton, 'click').mockImplementation(() => {
+      muteButton.textContent = 'Unmute';
+      muteButton.setAttribute('data-e2e-conversation-menu-mute', '');
+    });
+
+    const resultPromise = runConversationAction(document, COMMAND_MUTE);
+    await vi.runAllTimersAsync();
+    const localThis = await resultPromise;
+
+    expect(localThis.ok).toBe(true);
+    expect(muteButton.click).toHaveBeenCalledTimes(1);
+    vi.useRealTimers();
+  });
+
+  it('returns menu-button-not-found when mute postcondition cannot reopen the menu', async () => {
+    vi.useFakeTimers();
+    document.body.innerHTML = `
+      <mws-conversation-list-item>
+        <a aria-selected="true"></a>
+        <button aria-haspopup="menu"></button>
+      </mws-conversation-list-item>
+      <button data-e2e-conversation-menu-mute class="mat-mdc-menu-item">Mute</button>
+    `;
+    const row = document.querySelector('mws-conversation-list-item');
+    const muteButton = document.querySelector('[data-e2e-conversation-menu-mute]');
+    vi.spyOn(muteButton, 'click').mockImplementation(() => {
+      muteButton.textContent = 'Unmute';
+      row.querySelector('button[aria-haspopup="menu"]').remove();
+    });
+
+    const resultPromise = runConversationAction(document, COMMAND_MUTE);
+    await vi.runAllTimersAsync();
+    const localThis = await resultPromise;
+
+    expect(localThis).toEqual({ ok: false, reason: 'menu-button-not-found' });
+    vi.useRealTimers();
+  });
+
+  it('returns not-muted when the menu shows Mute', async () => {
+    document.body.innerHTML = `
+      <mws-conversation-list-item>
+        <a aria-selected="true"></a>
+        <button aria-haspopup="menu"></button>
+      </mws-conversation-list-item>
+      <button data-e2e-conversation-menu-mute class="mat-mdc-menu-item">Mute</button>
+    `;
+    const muteButton = document.querySelector('[data-e2e-conversation-menu-mute]');
+    vi.spyOn(muteButton, 'click');
+
+    const localThis = await runConversationAction(document, COMMAND_UNMUTE);
+
+    expect(localThis).toEqual({ ok: false, reason: 'not-muted' });
+    expect(muteButton.click).not.toHaveBeenCalled();
+  });
+
+  it('returns a failure when label-matched menu items never render', async () => {
+    document.body.innerHTML = `
+      <mws-conversation-list-item>
+        <a aria-selected="true"></a>
+        <button aria-haspopup="menu"></button>
+      </mws-conversation-list-item>
+    `;
+    vi.spyOn(waitForElement, 'waitForElement')
+      .mockRejectedValueOnce(new Error('mute menu item missing'));
+
+    const localThis = await runConversationAction(document, COMMAND_MUTE);
+
+    expect(localThis).toEqual({
+      ok: false,
+      reason: 'mute menu item missing'
+    });
   });
 });

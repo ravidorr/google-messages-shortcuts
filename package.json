@@ -1,7 +1,7 @@
 {
   "name": "google-messages-shortcuts",
-  "version": "1.6.37",
-  "description": "Use shortcuts to Archive, Trash, Mark as read, or Mark as unread for active conversations in Google Messages.",
+  "version": "1.7.0",
+  "description": "Use shortcuts to Archive, Trash, Mute, Unmute, Mark as read, or Mark as unread for active conversations in Google Messages.",
   "type": "module",
   "scripts": {
     "build": "node scripts/build.js",

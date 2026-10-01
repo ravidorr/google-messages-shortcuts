@@ -2,7 +2,9 @@ import {
   COMMAND_ARCHIVE,
   COMMAND_MARK_READ,
   COMMAND_MARK_UNREAD,
-  COMMAND_TRASH
+  COMMAND_MUTE,
+  COMMAND_TRASH,
+  COMMAND_UNMUTE
 } from './commands.js';
 
 const COMMAND_ICONS = {
@@ -36,6 +38,21 @@ const COMMAND_ICONS = {
     paths: [
       'M21.2 8.4c.5.38.8.97.8 1.6v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V10a2 2 0 0 1 .8-1.6l8-6a2 2 0 0 1 2.4 0l8 6Z',
       'm22 10-8.97 6.76a2 2 0 0 1-2.06 0L2 10'
+    ]
+  },
+  [COMMAND_MUTE]: {
+    viewBox: '0 0 24 24',
+    paths: [
+      'M11 5 6 9H2v6h4l5 4V5Z',
+      'M16 9l6 6',
+      'M22 9l-6 6'
+    ]
+  },
+  [COMMAND_UNMUTE]: {
+    viewBox: '0 0 24 24',
+    paths: [
+      'M11 5 6 9H2v6h4l5 4V5Z',
+      'M15.54 8.46a5 5 0 0 1 0 7.07'
     ]
   }
 };

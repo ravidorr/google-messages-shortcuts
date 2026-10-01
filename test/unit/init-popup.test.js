@@ -42,7 +42,9 @@ describe('init-popup', () => {
       { name: 'archive-conversation', shortcut: 'Ctrl+Shift+Y' },
       { name: 'trash-conversation', shortcut: 'Ctrl+Shift+D' },
       { name: 'mark-read-conversation', shortcut: 'Ctrl+Shift+K' },
-      { name: 'mark-unread-conversation', shortcut: 'Ctrl+Shift+U' }
+      { name: 'mark-unread-conversation', shortcut: 'Ctrl+Shift+U' },
+      { name: 'mute-conversation', shortcut: 'Ctrl+Shift+M' },
+      { name: 'unmute-conversation', shortcut: 'Ctrl+Shift+N' }
     ]);
 
     expect(document.getElementById('shortcut-warning').hidden).toBe(true);
@@ -323,7 +325,9 @@ describe('init-popup', () => {
           { name: 'archive-conversation', shortcut: 'Ctrl+Shift+Y' },
           { name: 'trash-conversation', shortcut: 'Ctrl+Shift+D' },
           { name: 'mark-read-conversation', shortcut: 'Ctrl+Shift+K' },
-          { name: 'mark-unread-conversation', shortcut: 'Ctrl+Shift+U' }
+          { name: 'mark-unread-conversation', shortcut: 'Ctrl+Shift+U' },
+          { name: 'mute-conversation', shortcut: 'Ctrl+Shift+M' },
+          { name: 'unmute-conversation', shortcut: 'Ctrl+Shift+N' }
         ])
       },
       tabs: {
@@ -339,7 +343,7 @@ describe('init-popup', () => {
 
     await initializePopup(chromeApi, document);
 
-    expect(document.querySelectorAll('.shortcut-item')).toHaveLength(4);
+    expect(document.querySelectorAll('.shortcut-item')).toHaveLength(6);
     expect(document.getElementById('shortcut-warning').hidden).toBe(true);
     expect(document.getElementById('auto-confirm-trash').checked).toBe(true);
   });

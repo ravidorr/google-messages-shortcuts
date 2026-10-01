@@ -2,7 +2,9 @@ import {
   COMMAND_ARCHIVE,
   COMMAND_MARK_READ,
   COMMAND_MARK_UNREAD,
-  COMMAND_TRASH
+  COMMAND_MUTE,
+  COMMAND_TRASH,
+  COMMAND_UNMUTE
 } from '../shared/commands.js';
 import {
   isConversationRead,
@@ -15,6 +17,7 @@ export const ACTION_DECISION_APPROVE = 'approve';
 
 export const SELECTOR_STRATEGY_PRIMARY_THEN_FALLBACK = 'primary-then-fallback';
 export const SELECTOR_STRATEGY_FALLBACK_FIRST = 'fallback-first';
+export const SELECTOR_STRATEGY_LABEL_MATCHED = 'label-matched';
 
 export const EXECUTION_KIND_MENU_CLICK = 'menu-click';
 export const EXECUTION_KIND_OPEN_ROW = 'open-row';
@@ -81,6 +84,42 @@ export const APPROVED_ROW_ACTIONS = [
     popupLabel: 'Mark conversation as unread',
     shortcutKey: 'markUnread',
     showPillWhenReadOnly: true,
+    showPillWhenUnreadOnly: false
+  },
+  {
+    command: COMMAND_MUTE,
+    capabilityId: MENU_CAPABILITY_IDS.mute,
+    decision: ACTION_DECISION_APPROVE,
+    menuItemSelectorKey: 'muteMenuItem',
+    fallbackText: MENU_TEXT.mute,
+    selectorStrategy: SELECTOR_STRATEGY_LABEL_MATCHED,
+    executionKind: EXECUTION_KIND_MENU_CLICK,
+    postClickMenuLabel: MENU_TEXT.unmute,
+    wrongStateReason: 'already-muted',
+    precondition: () => true,
+    preconditionFailureReason: null,
+    pillLabel: 'Mute',
+    popupLabel: 'Mute conversation',
+    shortcutKey: 'mute',
+    showPillWhenReadOnly: false,
+    showPillWhenUnreadOnly: false
+  },
+  {
+    command: COMMAND_UNMUTE,
+    capabilityId: MENU_CAPABILITY_IDS.unmute,
+    decision: ACTION_DECISION_APPROVE,
+    menuItemSelectorKey: 'muteMenuItem',
+    fallbackText: MENU_TEXT.unmute,
+    selectorStrategy: SELECTOR_STRATEGY_LABEL_MATCHED,
+    executionKind: EXECUTION_KIND_MENU_CLICK,
+    postClickMenuLabel: MENU_TEXT.mute,
+    wrongStateReason: 'not-muted',
+    precondition: () => true,
+    preconditionFailureReason: null,
+    pillLabel: 'Unmute',
+    popupLabel: 'Unmute conversation',
+    shortcutKey: 'unmute',
+    showPillWhenReadOnly: false,
     showPillWhenUnreadOnly: false
   }
 ];
