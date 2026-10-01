@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.6.8 - 2026-09-30
+
+### Fixed
+
+- Reference-count conversation shortcut pill installations so partial cleanup no longer removes shared styles or active pills
+
 ## 1.6.7 - 2026-09-30
 
 ### Fixed

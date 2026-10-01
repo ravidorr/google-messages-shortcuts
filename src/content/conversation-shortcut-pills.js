@@ -12,6 +12,7 @@ import {
 const PILL_GROUP_SELECTOR = '[data-messages-shortcuts-pill-group]';
 const STYLE_SELECTOR = 'style[data-messages-shortcuts-pill-styles]';
 const PILL_HOST_ATTRIBUTE = 'data-messages-shortcuts-pill-host';
+const installationRegistry = new WeakMap();
 
 const BASE_PILL_DEFINITIONS = [
   { command: COMMAND_ARCHIVE, label: 'Archive', shortcutKey: 'archive' },
@@ -227,7 +228,34 @@ function createPillGroup(documentRoot, shortcutLabels, runAction, conversationRo
   return group;
 }
 
-export function installConversationShortcutPills({
+function createReleaseCallback(documentRoot, releaseToken) {
+  let released = false;
+
+  return () => {
+    if (released) {
+      return;
+    }
+
+    released = true;
+
+    const installation = installationRegistry.get(documentRoot);
+
+    if (!installation) {
+      return;
+    }
+
+    if (!installation.tokens.delete(releaseToken)) {
+      return;
+    }
+
+    if (installation.tokens.size === 0) {
+      installation.disconnect();
+      installationRegistry.delete(documentRoot);
+    }
+  };
+}
+
+function createInstallation({
   documentRoot = document,
   getShortcutLabels = () => chrome.runtime.sendMessage({
     type: MESSAGE_GET_CONVERSATION_SHORTCUT_LABELS
@@ -468,4 +496,36 @@ export function installConversationShortcutPills({
       style.remove();
     });
   };
+}
+
+export function resetConversationShortcutPillInstallationsForTests(documentRoot = document) {
+  const installation = installationRegistry.get(documentRoot);
+
+  if (!installation) {
+    return;
+  }
+
+  installation.disconnect();
+  installationRegistry.delete(documentRoot);
+}
+
+export function installConversationShortcutPills(options = {}) {
+  const documentRoot = options.documentRoot ?? document;
+  const releaseToken = Symbol('conversation-shortcut-pill-installation');
+  const existingInstallation = installationRegistry.get(documentRoot);
+
+  if (existingInstallation) {
+    existingInstallation.tokens.add(releaseToken);
+
+    return createReleaseCallback(documentRoot, releaseToken);
+  }
+
+  const disconnect = createInstallation(options);
+
+  installationRegistry.set(documentRoot, {
+    disconnect,
+    tokens: new Set([releaseToken])
+  });
+
+  return createReleaseCallback(documentRoot, releaseToken);
 }
