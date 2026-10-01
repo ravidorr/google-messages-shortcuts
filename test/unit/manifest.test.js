@@ -8,12 +8,8 @@ import { fileURLToPath } from 'node:url';
 import { afterEach, describe, expect, it } from 'vitest';
 import { buildExtension } from '../../scripts/build.js';
 import {
-  COMMAND_ARCHIVE,
-  COMMAND_MARK_READ,
-  COMMAND_MARK_UNREAD,
-  COMMAND_MUTE,
-  COMMAND_TRASH,
-  COMMAND_UNMUTE
+  MANIFEST_COMMANDS,
+  MAX_MANIFEST_COMMANDS
 } from '../../src/shared/commands.js';
 
 const projectDirectory = fileURLToPath(new URL('../..', import.meta.url));
@@ -55,14 +51,8 @@ describe('extension manifest', () => {
         run_at: 'document_idle'
       }
     ]);
-    expect(Object.keys(manifest.commands)).toEqual([
-      COMMAND_ARCHIVE,
-      COMMAND_TRASH,
-      COMMAND_MARK_UNREAD,
-      COMMAND_MARK_READ,
-      COMMAND_MUTE,
-      COMMAND_UNMUTE
-    ]);
+    expect(Object.keys(manifest.commands)).toEqual(MANIFEST_COMMANDS);
+    expect(Object.keys(manifest.commands).length).toBeLessThanOrEqual(MAX_MANIFEST_COMMANDS);
     expect(manifest.icons).toEqual({
       16: 'icons/icon16.png',
       32: 'icons/icon32.png',

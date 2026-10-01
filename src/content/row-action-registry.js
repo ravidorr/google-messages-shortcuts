@@ -101,6 +101,7 @@ export const APPROVED_ROW_ACTIONS = [
     pillLabel: 'Mute',
     popupLabel: 'Mute conversation',
     shortcutKey: 'mute',
+    pillOnly: true,
     showPillWhenReadOnly: false,
     showPillWhenUnreadOnly: false
   },
@@ -119,6 +120,7 @@ export const APPROVED_ROW_ACTIONS = [
     pillLabel: 'Unmute',
     popupLabel: 'Unmute conversation',
     shortcutKey: 'unmute',
+    pillOnly: true,
     showPillWhenReadOnly: false,
     showPillWhenUnreadOnly: false
   }
@@ -138,6 +140,10 @@ export function isApprovedRowAction(command) {
 
 export function getApprovedCommands() {
   return APPROVED_ROW_ACTIONS.map((action) => action.command);
+}
+
+export function getManifestEligibleActions() {
+  return APPROVED_ROW_ACTIONS.filter((action) => !action.pillOnly);
 }
 
 export function getPillDefinitionsForRow(conversationRow, selectors) {

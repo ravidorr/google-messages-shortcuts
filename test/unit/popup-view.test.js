@@ -48,14 +48,19 @@ describe('popup-view', () => {
     });
   });
 
+  it('marks pill-only actions without keyboard shortcuts', () => {
+    expect(getShortcutStatus('', { pillOnly: true })).toEqual({
+      label: 'Row pill only',
+      className: 'shortcut-status shortcut-status--pill-only'
+    });
+  });
+
   it('renders approved row action shortcut rows', () => {
     const rows = renderShortcutRows([
       { name: COMMAND_ARCHIVE, shortcut: 'Ctrl+Shift+Y' },
       { name: COMMAND_TRASH, shortcut: '' },
       { name: COMMAND_MARK_READ, shortcut: 'Ctrl+Shift+K' },
-      { name: COMMAND_MARK_UNREAD, shortcut: 'Ctrl+Shift+U' },
-      { name: 'mute-conversation', shortcut: 'Ctrl+Shift+M' },
-      { name: 'unmute-conversation', shortcut: 'Ctrl+Shift+N' }
+      { name: COMMAND_MARK_UNREAD, shortcut: 'Ctrl+Shift+U' }
     ]);
 
     expect(rows).toHaveLength(6);
@@ -63,6 +68,8 @@ describe('popup-view', () => {
     expect(rows[1].shortcut).toBe('Not assigned');
     expect(rows[2].shortcut).toBe('Ctrl+Shift+K');
     expect(rows[3].shortcut).toBe('Ctrl+Shift+U');
+    expect(rows[4].shortcut).toBe('Row pill only');
+    expect(rows[5].shortcut).toBe('Row pill only');
   });
 
   it('populates the shortcut list in the popup', () => {
@@ -72,9 +79,7 @@ describe('popup-view', () => {
       { name: COMMAND_ARCHIVE, shortcut: 'Ctrl+Shift+Y' },
       { name: COMMAND_TRASH, shortcut: 'Ctrl+Shift+D' },
       { name: COMMAND_MARK_READ, shortcut: 'Ctrl+Shift+K' },
-      { name: COMMAND_MARK_UNREAD, shortcut: 'Ctrl+Shift+U' },
-      { name: 'mute-conversation', shortcut: 'Ctrl+Shift+M' },
-      { name: 'unmute-conversation', shortcut: 'Ctrl+Shift+N' }
+      { name: COMMAND_MARK_UNREAD, shortcut: 'Ctrl+Shift+U' }
     ]);
 
     const items = container.querySelectorAll('.shortcut-item');
@@ -92,5 +97,13 @@ describe('popup-view', () => {
     expectLucideShortcutIcon(items[1], COMMAND_TRASH);
     expectLucideShortcutIcon(items[2], COMMAND_MARK_READ);
     expectLucideShortcutIcon(items[3], COMMAND_MARK_UNREAD);
+    expect(items[4].querySelector('.shortcut-item__label').textContent)
+      .toBe('Mute conversation');
+    expect(items[4].querySelector('.shortcut-status').textContent)
+      .toBe('Row pill only');
+    expect(items[5].querySelector('.shortcut-item__label').textContent)
+      .toBe('Unmute conversation');
+    expect(items[5].querySelector('.shortcut-status').textContent)
+      .toBe('Row pill only');
   });
 });

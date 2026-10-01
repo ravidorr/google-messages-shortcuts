@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.7.1 - 2026-10-01
+
+### Fixed
+
+- Remove mute and unmute from the manifest so the extension loads within Chrome's four-command limit
+
+### Changed
+
+- Expose mute and unmute as row pills only; the popup shows "Row pill only" for those actions
+
 ## 1.7.0 - 2026-10-01
 
 ### Added

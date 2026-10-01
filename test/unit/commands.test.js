@@ -6,6 +6,9 @@ import {
   COMMAND_MUTE,
   COMMAND_TRASH,
   COMMAND_UNMUTE,
+  MANIFEST_COMMANDS,
+  MAX_MANIFEST_COMMANDS,
+  isManifestCommand,
   isValidCommand
 } from '../../src/shared/commands.js';
 
@@ -21,5 +24,12 @@ describe('commands', () => {
 
   it('rejects unknown commands', () => {
     expect(isValidCommand('unknown-command')).toBe(false);
+  });
+
+  it('keeps manifest commands within the Chrome limit', () => {
+    expect(MANIFEST_COMMANDS).toHaveLength(MAX_MANIFEST_COMMANDS);
+    expect(isManifestCommand(COMMAND_MUTE)).toBe(false);
+    expect(isManifestCommand(COMMAND_UNMUTE)).toBe(false);
+    expect(isManifestCommand(COMMAND_ARCHIVE)).toBe(true);
   });
 });

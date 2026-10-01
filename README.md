@@ -10,9 +10,11 @@ Chrome extension that archives, trashes, marks as read, or marks as unread the s
 - Move the active conversation to trash with `Ctrl+Shift+D` (`Command+Shift+D` on macOS)
 - Mark the active unread conversation as read with `Ctrl+Shift+K` (`Command+Shift+K` on macOS)
 - Mark the active read conversation as unread with `Ctrl+Shift+U` (`Command+Shift+U` on macOS)
+- Mute or unmute the active conversation from row pills (Chrome allows only four keyboard shortcuts per extension)
 - Show Archive and Trash shortcut pills on hovered and focused conversations
 - Show a Mark as read pill on unread conversations
 - Show a Mark as unread pill on read conversations
+- Show Mute and Unmute pills on hovered and focused conversations
 - Optionally open conversations immediately when they are hovered or focused
 - Popup UI that shows the effective Chrome shortcut assignments
 - Configurable automatic confirmation for the native Move to trash dialog

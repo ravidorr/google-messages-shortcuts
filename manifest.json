@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Messages Shortcut Actions",
-  "version": "1.7.0",
-  "description": "Use shortcuts to Archive, Trash, Mute, Unmute, Mark as read, or Mark as unread for active conversations in Google Messages.",
+  "version": "1.7.1",
+  "description": "Use shortcuts to Archive, Trash, Mark as read, or Mark as unread, and row pills for Mute and Unmute in Google Messages.",
   "icons": {
     "16": "icons/icon16.png",
     "32": "icons/icon32.png",
@@ -76,20 +76,6 @@
         "mac": "Command+Shift+K"
       },
       "description": "Mark the selected or hovered Google Messages conversation as read"
-    },
-    "mute-conversation": {
-      "suggested_key": {
-        "default": "Ctrl+Shift+M",
-        "mac": "Command+Shift+M"
-      },
-      "description": "Mute the selected or hovered Google Messages conversation"
-    },
-    "unmute-conversation": {
-      "suggested_key": {
-        "default": "Ctrl+Shift+N",
-        "mac": "Command+Shift+N"
-      },
-      "description": "Unmute the selected or hovered Google Messages conversation"
     }
   }
 }

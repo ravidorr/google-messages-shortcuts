@@ -6,7 +6,14 @@ import {
 
 export const COMMAND_LABELS = getPopupLabelsByCommand();
 
-export function getShortcutStatus(shortcut) {
+export function getShortcutStatus(shortcut, { pillOnly = false } = {}) {
+  if (pillOnly) {
+    return {
+      label: 'Row pill only',
+      className: 'shortcut-status shortcut-status--pill-only'
+    };
+  }
+
   if (!shortcut) {
     return {
       label: 'Not assigned',
@@ -25,7 +32,9 @@ export function renderShortcutRows(commands) {
 
   for (const action of APPROVED_ROW_ACTIONS) {
     const command = commands.find((entry) => entry.name === action.command);
-    const status = getShortcutStatus(command?.shortcut || '');
+    const status = getShortcutStatus(command?.shortcut || '', {
+      pillOnly: action.pillOnly === true
+    });
 
     rows.push({
       commandName: action.command,
