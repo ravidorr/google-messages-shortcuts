@@ -1,11 +1,10 @@
-import { COMMAND_ARCHIVE, COMMAND_MARK_UNREAD, COMMAND_TRASH } from '../shared/commands.js';
 import { getCommandIcon } from '../shared/command-icons.js';
+import {
+  APPROVED_ROW_ACTIONS,
+  getPopupLabelsByCommand
+} from '../content/row-action-registry.js';
 
-export const COMMAND_LABELS = {
-  [COMMAND_ARCHIVE]: 'Archive conversation',
-  [COMMAND_TRASH]: 'Trash conversation',
-  [COMMAND_MARK_UNREAD]: 'Mark conversation as unread'
-};
+export const COMMAND_LABELS = getPopupLabelsByCommand();
 
 export function getShortcutStatus(shortcut) {
   if (!shortcut) {
@@ -24,13 +23,13 @@ export function getShortcutStatus(shortcut) {
 export function renderShortcutRows(commands) {
   const rows = [];
 
-  for (const commandName of [COMMAND_ARCHIVE, COMMAND_TRASH, COMMAND_MARK_UNREAD]) {
-    const command = commands.find((entry) => entry.name === commandName);
+  for (const action of APPROVED_ROW_ACTIONS) {
+    const command = commands.find((entry) => entry.name === action.command);
     const status = getShortcutStatus(command?.shortcut || '');
 
     rows.push({
-      commandName,
-      label: COMMAND_LABELS[commandName],
+      commandName: action.command,
+      label: COMMAND_LABELS[action.command],
       shortcut: status.label,
       className: status.className
     });

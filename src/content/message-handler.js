@@ -4,7 +4,8 @@ import { isValidCommand } from '../shared/commands.js';
 const STEP_LABELS = {
   'no-target': 'find the selected or hovered conversation row',
   'menu-button-not-found': 'find the conversation menu button',
-  'unknown-command': 'recognize the shortcut command'
+  'unknown-command': 'recognize the shortcut command',
+  'capability-blocked': 'run the action because a required DOM capability is unavailable or unsafe'
 };
 
 export function warnActionFailure(step, error) {

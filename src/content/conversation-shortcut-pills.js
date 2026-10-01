@@ -1,8 +1,12 @@
 import { runConversationAction } from './conversation-action.js';
 import { isConversationRead } from './conversation-read-state.js';
 import { SELECTORS } from './google-messages-dom.js';
-import { COMMAND_ARCHIVE, COMMAND_MARK_UNREAD, COMMAND_TRASH } from '../shared/commands.js';
+import { COMMAND_MARK_UNREAD } from '../shared/commands.js';
 import { getCommandIcon } from '../shared/command-icons.js';
+import {
+  getBasePillDefinitions,
+  getMarkUnreadPillDefinition
+} from './row-action-registry.js';
 import { isConversationOpeningEnabled } from '../shared/conversation-open-preference.js';
 import {
   MESSAGE_GET_CONVERSATION_SHORTCUT_LABELS,
@@ -13,17 +17,6 @@ const PILL_GROUP_SELECTOR = '[data-messages-shortcuts-pill-group]';
 const STYLE_SELECTOR = 'style[data-messages-shortcuts-pill-styles]';
 const PILL_HOST_ATTRIBUTE = 'data-messages-shortcuts-pill-host';
 const installationRegistry = new WeakMap();
-
-const BASE_PILL_DEFINITIONS = [
-  { command: COMMAND_ARCHIVE, label: 'Archive', shortcutKey: 'archive' },
-  { command: COMMAND_TRASH, label: 'Trash', shortcutKey: 'trash' }
-];
-
-const MARK_UNREAD_PILL_DEFINITION = {
-  command: COMMAND_MARK_UNREAD,
-  label: 'Mark as unread',
-  shortcutKey: 'markUnread'
-};
 
 function isDomRaceNotFoundError(error) {
   return error instanceof DOMException && error.name === 'NotFoundError';
@@ -42,10 +35,10 @@ export function safeDomMutation(operation) {
 }
 
 function getPillDefinitions(conversationRow) {
-  const definitions = [...BASE_PILL_DEFINITIONS];
+  const definitions = [...getBasePillDefinitions()];
 
   if (isConversationRead(conversationRow)) {
-    definitions.push(MARK_UNREAD_PILL_DEFINITION);
+    definitions.push(getMarkUnreadPillDefinition());
   }
 
   return definitions;

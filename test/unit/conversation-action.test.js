@@ -3,6 +3,13 @@ import { runConversationAction } from '../../src/content/conversation-action.js'
 import { MENU_ACTION_ATTRIBUTE } from '../../src/content/menu-action-overlay.js';
 import { COMMAND_ARCHIVE, COMMAND_MARK_UNREAD, COMMAND_TRASH } from '../../src/shared/commands.js';
 import * as waitForElement from '../../src/content/wait-for-element.js';
+import * as rowActionRegistry from '../../src/content/row-action-registry.js';
+import { SELECTOR_STRATEGY_FALLBACK_FIRST } from '../../src/content/row-action-registry.js';
+import {
+  duplicateArchiveMenuItems,
+  openRowMenuMarkUnreadFallbackOnly,
+  selectedReadRow
+} from '../fixtures/dom/list-states.js';
 
 function createConversationFixture() {
   document.body.innerHTML = `
@@ -379,23 +386,126 @@ describe('runConversationAction', () => {
     expect(document.documentElement.hasAttribute(MENU_ACTION_ATTRIBUTE)).toBe(false);
   });
 
-  it('falls back to English mark-unread menu text when data-e2e selectors are absent', async () => {
+  it('uses fallback-first mark-unread menu text when data-e2e selectors are absent', async () => {
+    document.body.innerHTML = openRowMenuMarkUnreadFallbackOnly;
+    const menuButton = document.querySelector('button[aria-haspopup="menu"]');
+    const fallbackButton = document.querySelector('.mat-mdc-menu-item');
+    vi.spyOn(menuButton, 'click');
+    vi.spyOn(fallbackButton, 'click');
+    const waitForSelectorSpy = vi.spyOn(waitForElement, 'waitForSelector');
+
+    const result = await runConversationAction(document, COMMAND_MARK_UNREAD);
+
+    expect(result.ok).toBe(true);
+    expect(menuButton.click).toHaveBeenCalledTimes(1);
+    expect(fallbackButton.click).toHaveBeenCalledTimes(1);
+    expect(waitForSelectorSpy).not.toHaveBeenCalled();
+  });
+
+  it('blocks archive before opening the row menu when capability is unsafe', async () => {
+    document.body.innerHTML = `
+      ${selectedReadRow}
+      ${duplicateArchiveMenuItems}
+    `;
+    const menuButton = document.querySelector('button[aria-haspopup="menu"]');
+    vi.spyOn(menuButton, 'click');
+
+    const result = await runConversationAction(document, COMMAND_ARCHIVE);
+
+    expect(result).toEqual({
+      ok: false,
+      reason: 'capability-blocked',
+      capabilityId: 'menu.archive',
+      capabilityState: 'unsafe'
+    });
+    expect(menuButton.click).not.toHaveBeenCalled();
+    expect(document.documentElement.hasAttribute(MENU_ACTION_ATTRIBUTE)).toBe(false);
+  });
+
+  it('blocks trash confirmation when the dialog is open without a confirm control', async () => {
+    document.body.innerHTML = `
+      ${selectedReadRow}
+      <button data-e2e-conversation-delete class="mat-mdc-menu-item">
+        <span class="mat-mdc-menu-item-text">Move to trash</span>
+      </button>
+      <mat-dialog-container>
+        <button>Cancel</button>
+      </mat-dialog-container>
+    `;
+    const menuButton = document.querySelector('button[aria-haspopup="menu"]');
+    const trashButton = document.querySelector('[data-e2e-conversation-delete]');
+    vi.spyOn(menuButton, 'click');
+    vi.spyOn(trashButton, 'click');
+
+    const result = await runConversationAction(document, COMMAND_TRASH);
+
+    expect(result).toEqual({
+      ok: false,
+      reason: 'capability-blocked',
+      capabilityId: 'menu.trashConfirm',
+      capabilityState: 'unavailable'
+    });
+    expect(menuButton.click).toHaveBeenCalledTimes(1);
+    expect(trashButton.click).toHaveBeenCalledTimes(1);
+    expect(document.documentElement.hasAttribute(MENU_ACTION_ATTRIBUTE)).toBe(false);
+  });
+
+  it('returns unknown-command when the registry has no action for a valid command id', async () => {
     document.body.innerHTML = `
       <mws-conversation-list-item>
         <a aria-selected="true"></a>
         <button aria-haspopup="menu"></button>
       </mws-conversation-list-item>
-      <button class="mat-mdc-menu-item">Mark as unread</button>
     `;
-    const fallbackButton = document.querySelector('.mat-mdc-menu-item');
-    vi.spyOn(fallbackButton, 'click');
+    vi.spyOn(rowActionRegistry, 'getRowAction').mockReturnValueOnce(null);
+
+    const result = await runConversationAction(document, COMMAND_ARCHIVE);
+
+    expect(result).toEqual({ ok: false, reason: 'unknown-command' });
+  });
+
+  it('returns unknown-command when the registry action has an unsupported execution kind', async () => {
+    document.body.innerHTML = `
+      <mws-conversation-list-item>
+        <a aria-selected="true"></a>
+        <button aria-haspopup="menu"></button>
+      </mws-conversation-list-item>
+      <button data-e2e-conversation-menu-archive class="mat-mdc-menu-item">Archive</button>
+    `;
+    vi.spyOn(rowActionRegistry, 'getRowAction').mockReturnValueOnce({
+      command: COMMAND_ARCHIVE,
+      capabilityId: 'menu.archive',
+      menuItemSelectorKey: 'archiveMenuItem',
+      fallbackText: 'Archive',
+      selectorStrategy: SELECTOR_STRATEGY_FALLBACK_FIRST,
+      executionKind: 'unsupported-kind',
+      precondition: () => true,
+      preconditionFailureReason: null
+    });
+
+    const result = await runConversationAction(document, COMMAND_ARCHIVE);
+
+    expect(result).toEqual({ ok: false, reason: 'unknown-command' });
+  });
+
+  it('returns a failure when fallback-first and primary selectors both fail', async () => {
+    document.body.innerHTML = `
+      <mws-conversation-list-item>
+        <a aria-selected="true"></a>
+        <button aria-haspopup="menu"></button>
+      </mws-conversation-list-item>
+    `;
+    vi.spyOn(waitForElement, 'waitForElement')
+      .mockRejectedValueOnce(new Error('fallback failed'));
     vi.spyOn(waitForElement, 'waitForSelector')
-      .mockRejectedValueOnce(new Error('mark-unread selector unavailable'));
+      .mockRejectedValueOnce(new Error('primary failed'));
 
     const result = await runConversationAction(document, COMMAND_MARK_UNREAD);
 
-    expect(result.ok).toBe(true);
-    expect(fallbackButton.click).toHaveBeenCalledTimes(1);
+    expect(result).toEqual({
+      ok: false,
+      reason: 'primary failed'
+    });
   });
 
   it('returns unknown-command for unsupported actions', async () => {
