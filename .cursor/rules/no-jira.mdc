@@ -1,0 +1,8 @@
+---
+description: This project does not use Jira
+alwaysApply: true
+---
+
+# No Jira
+
+Do not require, infer, create, link, or reference Jira tickets for work in this project.
