@@ -1,6 +1,8 @@
+import { showActionFeedback } from './action-feedback.js';
 import { runConversationAction } from './conversation-action.js';
 import { SELECTORS } from './google-messages-dom.js';
 import { getCommandIcon } from '../shared/command-icons.js';
+import { isPaused, PAUSE_STORAGE_KEY } from '../shared/pause-preference.js';
 import {
   getPillDefinitionsForRow,
   getRowAction
@@ -246,9 +248,27 @@ function createReleaseCallback(documentRoot, releaseToken) {
   };
 }
 
+function removeAllPills(documentRoot, removingPillsFromRows) {
+  for (const conversationRow of documentRoot.querySelectorAll(SELECTORS.conversationRow)) {
+    if (conversationRow.querySelector(PILL_GROUP_SELECTOR)) {
+      removingPillsFromRows.add(conversationRow);
+
+      try {
+        safeDomMutation(() => {
+          conversationRow.querySelector(PILL_GROUP_SELECTOR)?.remove();
+          conversationRow.removeAttribute(PILL_HOST_ATTRIBUTE);
+        });
+      } finally {
+        removingPillsFromRows.delete(conversationRow);
+      }
+    }
+  }
+}
+
 function createInstallation({
   documentRoot = document,
-  getShortcutLabels = () => chrome.runtime.sendMessage({
+  chromeApi = globalThis.chrome,
+  getShortcutLabels = () => chromeApi.runtime.sendMessage({
     type: MESSAGE_GET_CONVERSATION_SHORTCUT_LABELS
   }),
   runAction = (command, conversationRow) => runConversationAction(
@@ -257,13 +277,31 @@ function createInstallation({
     SELECTORS,
     conversationRow
   ),
-  isAutoOpenEnabled = isConversationOpeningEnabled
+  isAutoOpenEnabled = isConversationOpeningEnabled,
+  getPausedState = async () => {
+    if (typeof chromeApi?.storage?.local?.get !== 'function') {
+      return false;
+    }
+
+    return isPaused(chromeApi);
+  }
 } = {}) {
   const style = addStyles(documentRoot);
   const focusedRows = new WeakSet();
   const hoveredRows = new WeakSet();
   const removingPillsFromRows = new WeakSet();
   let shortcutLabelsPromise;
+  let paused = false;
+
+  async function refreshPausedState() {
+    paused = await getPausedState();
+
+    if (paused) {
+      removeAllPills(documentRoot, removingPillsFromRows);
+    }
+  }
+
+  void refreshPausedState();
 
   function getLabels() {
     if (!shortcutLabelsPromise) {
@@ -279,7 +317,7 @@ function createInstallation({
   }
 
   async function showPills(conversationRow) {
-    if (!conversationRow || conversationRow.querySelector(PILL_GROUP_SELECTOR)) {
+    if (paused || !conversationRow || conversationRow.querySelector(PILL_GROUP_SELECTOR)) {
       return;
     }
 
@@ -323,6 +361,8 @@ function createInstallation({
   async function runActionWithRefresh(command, conversationRow) {
     const result = await runAction(command, conversationRow);
     const action = getRowAction(command);
+
+    showActionFeedback(result, command, documentRoot);
 
     if (
       result?.ok
@@ -469,6 +509,20 @@ function createInstallation({
   documentRoot.addEventListener('focusin', handleFocusIn);
   documentRoot.addEventListener('focusout', handleFocusOut);
 
+  const handlePausePreferenceChange = (changes, areaName) => {
+    if (areaName !== 'local' || !changes[PAUSE_STORAGE_KEY]) {
+      return;
+    }
+
+    paused = changes[PAUSE_STORAGE_KEY].newValue === true;
+
+    if (paused) {
+      removeAllPills(documentRoot, removingPillsFromRows);
+    }
+  };
+
+  chromeApi.storage?.onChanged?.addListener(handlePausePreferenceChange);
+
   for (const conversationRow of documentRoot.querySelectorAll(
     `${SELECTORS.conversationRow}[is-focused="true"]`
   )) {
@@ -482,6 +536,7 @@ function createInstallation({
     documentRoot.removeEventListener('pointerout', handlePointerOut);
     documentRoot.removeEventListener('focusin', handleFocusIn);
     documentRoot.removeEventListener('focusout', handleFocusOut);
+    chromeApi.storage?.onChanged?.removeListener(handlePausePreferenceChange);
     documentRoot.querySelectorAll(PILL_GROUP_SELECTOR).forEach((group) => {
       safeDomMutation(() => {
         group.parentElement?.removeAttribute(PILL_HOST_ATTRIBUTE);

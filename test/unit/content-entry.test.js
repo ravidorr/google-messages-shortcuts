@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 function createChromeApi() {
   const listeners = [];
+  const storageListeners = [];
 
   return {
     runtime: {
@@ -24,6 +25,24 @@ function createChromeApi() {
         markRead: 'Ctrl+Shift+K',
         markUnread: 'Ctrl+Shift+U'
       }))
+    },
+    storage: {
+      local: {
+        get: vi.fn(async () => ({}))
+      },
+      onChanged: {
+        addListener: vi.fn((listener) => {
+          storageListeners.push(listener);
+        }),
+        removeListener: vi.fn((listener) => {
+          const listenerIndex = storageListeners.indexOf(listener);
+
+          if (listenerIndex >= 0) {
+            storageListeners.splice(listenerIndex, 1);
+          }
+        }),
+        listenerCount: () => storageListeners.length
+      }
     }
   };
 }

@@ -1,5 +1,9 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import * as conversationAction from '../../src/content/conversation-action.js';
+import {
+  FEEDBACK_MESSAGE_SELECTOR,
+  resetActionFeedbackForTests
+} from '../../src/content/action-feedback.js';
 import {
   handleCommand,
   installMessageListener,
@@ -34,10 +38,24 @@ function createConversationFixture() {
   `;
 }
 
+function createChromeApi({ paused = false } = {}) {
+  return {
+    storage: {
+      local: {
+        get: vi.fn(async () => (paused ? { extensionPaused: true } : {}))
+      }
+    }
+  };
+}
+
 describe('message-handler', () => {
   beforeEach(() => {
     document.body.innerHTML = '';
     vi.restoreAllMocks();
+  });
+
+  afterEach(() => {
+    resetActionFeedbackForTests();
   });
 
   it('warns with a readable step label', () => {
@@ -62,15 +80,31 @@ describe('message-handler', () => {
   it('handles archive commands', async () => {
     createConversationFixture();
 
-    const result = await handleCommand(COMMAND_ARCHIVE);
+    const result = await handleCommand(COMMAND_ARCHIVE, document, createChromeApi());
 
     expect(result.ok).toBe(true);
+    expect(document.querySelector(FEEDBACK_MESSAGE_SELECTOR)?.textContent)
+      .toBe('Conversation archived.');
+  });
+
+  it('blocks commands while the extension is paused', async () => {
+    createConversationFixture();
+
+    const result = await handleCommand(
+      COMMAND_ARCHIVE,
+      document,
+      createChromeApi({ paused: true })
+    );
+
+    expect(result).toEqual({ ok: false, reason: 'extension-paused' });
+    expect(document.querySelector(FEEDBACK_MESSAGE_SELECTOR)?.textContent)
+      .toContain('paused');
   });
 
   it('handles trash commands', async () => {
     createConversationFixture();
 
-    const result = await handleCommand(COMMAND_TRASH);
+    const result = await handleCommand(COMMAND_TRASH, document, createChromeApi());
 
     expect(result.ok).toBe(true);
   });
@@ -78,7 +112,7 @@ describe('message-handler', () => {
   it('handles mark-unread commands', async () => {
     createConversationFixture();
 
-    const result = await handleCommand(COMMAND_MARK_UNREAD);
+    const result = await handleCommand(COMMAND_MARK_UNREAD, document, createChromeApi());
 
     expect(result.ok).toBe(true);
   });
@@ -90,7 +124,7 @@ describe('message-handler', () => {
       conversationLink.removeAttribute('data-e2e-is-unread');
     });
 
-    const result = await handleCommand(COMMAND_MARK_READ);
+    const result = await handleCommand(COMMAND_MARK_READ, document, createChromeApi());
 
     expect(result.ok).toBe(true);
   });
@@ -99,7 +133,7 @@ describe('message-handler', () => {
     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
     createConversationFixture();
 
-    const result = await handleCommand(COMMAND_MARK_READ);
+    const result = await handleCommand(COMMAND_MARK_READ, document, createChromeApi());
 
     expect(result).toEqual({ ok: false, reason: 'already-read' });
     expect(warnSpy).not.toHaveBeenCalled();
@@ -115,7 +149,7 @@ describe('message-handler', () => {
       </mws-conversation-list-item>
     `;
 
-    const result = await handleCommand(COMMAND_MARK_UNREAD);
+    const result = await handleCommand(COMMAND_MARK_UNREAD, document, createChromeApi());
 
     expect(result).toEqual({ ok: false, reason: 'already-unread' });
     expect(warnSpy).not.toHaveBeenCalled();
@@ -124,7 +158,7 @@ describe('message-handler', () => {
   it('silently ignores a valid command when no conversation is available', async () => {
     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
-    const result = await handleCommand(COMMAND_ARCHIVE);
+    const result = await handleCommand(COMMAND_ARCHIVE, document, createChromeApi());
 
     expect(result).toEqual({ ok: false, reason: 'no-target' });
     expect(warnSpy).not.toHaveBeenCalled();
@@ -135,7 +169,7 @@ describe('message-handler', () => {
     vi.spyOn(conversationAction, 'runConversationAction')
       .mockResolvedValueOnce({ ok: false, reason: 'menu-button-not-found' });
 
-    const result = await handleCommand(COMMAND_ARCHIVE);
+    const result = await handleCommand(COMMAND_ARCHIVE, document, createChromeApi());
 
     expect(result).toEqual({ ok: false, reason: 'menu-button-not-found' });
     expect(warnSpy).toHaveBeenCalledWith(
@@ -145,7 +179,7 @@ describe('message-handler', () => {
   });
 
   it('returns unknown-command for invalid commands', async () => {
-    const result = await handleCommand('invalid');
+    const result = await handleCommand('invalid', document, createChromeApi());
 
     expect(result).toEqual({ ok: false, reason: 'unknown-command' });
   });
@@ -157,6 +191,7 @@ describe('message-handler', () => {
     const addListener = vi.fn();
     const removeListener = vi.fn();
     const chromeApi = {
+      ...createChromeApi(),
       runtime: {
         onMessage: {
           addListener,
@@ -180,7 +215,7 @@ describe('message-handler', () => {
     vi.spyOn(conversationAction, 'runConversationAction')
       .mockRejectedValueOnce(new Error('unexpected failure'));
 
-    const result = await handleCommand(COMMAND_ARCHIVE);
+    const result = await handleCommand(COMMAND_ARCHIVE, document, createChromeApi());
 
     expect(result).toEqual({
       ok: false,
@@ -193,7 +228,7 @@ describe('message-handler', () => {
     vi.spyOn(conversationAction, 'runConversationAction')
       .mockRejectedValueOnce('unexpected failure');
 
-    const result = await handleCommand(COMMAND_ARCHIVE);
+    const result = await handleCommand(COMMAND_ARCHIVE, document, createChromeApi());
 
     expect(result).toEqual({
       ok: false,

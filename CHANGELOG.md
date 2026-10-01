@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.6.36 - 2026-10-01
+
+### Added
+
+- Popup pause control that disables shortcut actions and conversation pills on Google Messages Web
+- Popup reset control that restores extension preferences without changing Google Messages data
+- In-page action feedback with a screen-reader-friendly status region and recovery guidance
+- Generic row postcondition wait helper for future gated list actions
+- Deferred-action validation console helper and expanded DOM discovery evidence fields
+
+### Changed
+
+- Document pause, reset, and feedback behavior in README and PRIVACY
+- Keep pin, mute, and unarchive deferred until live validation records bounded postconditions
+
 ## 1.6.35 - 2026-10-01
 
 ### Added

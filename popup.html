@@ -48,6 +48,24 @@
           Open conversations on hover or focus
         </label>
       </section>
+
+      <section class="popup__section" aria-labelledby="extension-controls-heading">
+        <h2 id="extension-controls-heading" class="popup__section-title">Extension controls</h2>
+        <label class="popup__checkbox-label" for="pause-extension">
+          <input id="pause-extension" type="checkbox" disabled>
+          Pause shortcut actions and pills
+        </label>
+        <p class="popup__help">
+          While paused, keyboard shortcuts and conversation pills do not run on Google Messages.
+        </p>
+        <button id="reset-extension-preferences" type="button" class="popup__button" disabled>
+          Reset extension preferences
+        </button>
+        <p class="popup__help">
+          Restores popup settings only. This does not change Google Messages or store conversation data.
+        </p>
+        <p id="reset-status" class="popup__status" role="status" aria-live="polite" hidden></p>
+      </section>
     </main>
     <script type="module" src="popup.js"></script>
   </body>

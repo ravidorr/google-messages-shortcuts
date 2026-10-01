@@ -1,11 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   bindConversationOpenPreference,
+  bindPausePreference,
+  bindResetExtensionPreferences,
   bindTrashConfirmationPreference,
   bindShortcutsLink,
   initializePopup,
   updateShortcutWarning
 } from '../../src/popup/init-popup.js';
+import { DEFAULT_EXTENSION_PREFERENCES } from '../../src/shared/reset-extension-preferences.js';
 
 describe('init-popup', () => {
   beforeEach(() => {
@@ -17,6 +20,10 @@ describe('init-popup', () => {
       <label for="auto-confirm-trash">Automatically confirm Move to trash</label>
       <input id="open-conversation-on-focus" type="checkbox" disabled>
       <label for="open-conversation-on-focus">Open conversations on hover or focus</label>
+      <input id="pause-extension" type="checkbox" disabled>
+      <label for="pause-extension">Pause shortcut actions and pills</label>
+      <button id="reset-extension-preferences" type="button" disabled>Reset extension preferences</button>
+      <p id="reset-status" hidden></p>
     `;
   });
 
@@ -208,6 +215,105 @@ describe('init-popup', () => {
 
     expect(checkbox.checked).toBe(true);
     expect(checkbox.disabled).toBe(false);
+  });
+
+  it('restores the pause preference when persistence fails', async () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const chromeApi = {
+      storage: {
+        local: {
+          get: vi.fn(async () => ({ extensionPaused: false })),
+          set: vi.fn(async () => {
+            throw new Error('storage unavailable');
+          })
+        }
+      }
+    };
+
+    await bindPausePreference(document, chromeApi);
+    const checkbox = document.getElementById('pause-extension');
+    checkbox.checked = true;
+    checkbox.dispatchEvent(new Event('change'));
+
+    await vi.waitFor(() => {
+      expect(warnSpy).toHaveBeenCalled();
+    });
+
+    expect(checkbox.checked).toBe(false);
+    expect(checkbox.disabled).toBe(false);
+  });
+
+  it('reports reset failures without changing Google Messages', async () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const chromeApi = {
+      storage: {
+        local: {
+          set: vi.fn(async () => {
+            throw new Error('storage unavailable');
+          })
+        }
+      }
+    };
+
+    await bindResetExtensionPreferences(document, chromeApi);
+    document.getElementById('reset-extension-preferences').click();
+
+    await vi.waitFor(() => {
+      expect(document.getElementById('reset-status').hidden).toBe(false);
+    });
+
+    expect(document.getElementById('reset-status').textContent)
+      .toContain('Could not reset extension preferences');
+    expect(warnSpy).toHaveBeenCalled();
+  });
+
+  it('loads and persists the pause preference', async () => {
+    const set = vi.fn(async () => {});
+    const chromeApi = {
+      storage: {
+        local: {
+          get: vi.fn(async () => ({ extensionPaused: true })),
+          set
+        }
+      }
+    };
+
+    await bindPausePreference(document, chromeApi);
+    const checkbox = document.getElementById('pause-extension');
+
+    expect(checkbox.checked).toBe(true);
+    expect(checkbox.disabled).toBe(false);
+    checkbox.checked = false;
+    checkbox.dispatchEvent(new Event('change'));
+    await Promise.resolve();
+
+    expect(set).toHaveBeenCalledWith({ extensionPaused: false });
+  });
+
+  it('resets extension preferences without touching Google Messages data', async () => {
+    const set = vi.fn(async () => {});
+    const chromeApi = {
+      storage: {
+        local: { set }
+      }
+    };
+
+    await bindResetExtensionPreferences(document, chromeApi);
+    document.getElementById('auto-confirm-trash').checked = false;
+    document.getElementById('open-conversation-on-focus').checked = true;
+    document.getElementById('pause-extension').checked = true;
+
+    document.getElementById('reset-extension-preferences').click();
+
+    await vi.waitFor(() => {
+      expect(document.getElementById('auto-confirm-trash').checked).toBe(true);
+    });
+
+    expect(set).toHaveBeenCalledWith(DEFAULT_EXTENSION_PREFERENCES);
+    expect(document.getElementById('auto-confirm-trash').checked).toBe(true);
+    expect(document.getElementById('open-conversation-on-focus').checked).toBe(false);
+    expect(document.getElementById('pause-extension').checked).toBe(false);
+    expect(document.getElementById('reset-status').hidden).toBe(false);
   });
 
   it('initializes the popup shortcut list', async () => {
