@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.6.11 - 2026-09-30
+
+### Added
+
+- Expand the manifest contract test to cover service worker wiring, content-script scope, commands, and built artifacts
+
 ## 1.6.10 - 2026-09-30
 
 ### Fixed
