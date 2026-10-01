@@ -25,6 +25,14 @@ export function getMissingPackageEntries(entries, requiredEntries = REQUIRED_PAC
   return requiredEntries.filter((entry) => !normalizedEntries.has(entry));
 }
 
+export function getUnexpectedPackageEntries(entries, expectedEntries) {
+  const normalizedExpectedEntries = new Set(expectedEntries.map(normalizeArchiveEntry));
+
+  return entries
+    .map(normalizeArchiveEntry)
+    .filter((entry) => !normalizedExpectedEntries.has(entry));
+}
+
 async function collectRelativeFiles(directory, baseDirectory = directory) {
   const entries = await readdir(directory, { withFileTypes: true });
   const files = await Promise.all(entries.map(async (entry) => {
@@ -53,9 +61,14 @@ export async function validatePackageArtifact(archivePath, distDirectory = path.
 
   const distFiles = await collectRelativeFiles(distDirectory);
   const missingDistFiles = getMissingPackageEntries(normalizedArchiveEntries, distFiles);
+  const unexpectedEntries = getUnexpectedPackageEntries(normalizedArchiveEntries, distFiles);
 
   if (missingDistFiles.length > 0) {
     throw new Error(`Package artifact is missing built distribution files: ${missingDistFiles.join(', ')}`);
+  }
+
+  if (unexpectedEntries.length > 0) {
+    throw new Error(`Package artifact contains unexpected entries: ${unexpectedEntries.join(', ')}`);
   }
 
   const mismatchedDistFiles = [];
