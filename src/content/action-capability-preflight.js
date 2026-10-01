@@ -4,6 +4,7 @@ import {
 } from './adapters/capability-states.js';
 import { assessPageCapabilities } from './adapters/page-adapter.js';
 import { MENU_CAPABILITY_IDS, MENU_TEXT } from './adapters/menu-adapter.js';
+import { EXECUTION_KIND_OPEN_ROW } from './row-action-registry.js';
 import { waitForElement, waitForSelector } from './wait-for-element.js';
 
 function isBlockingCapabilityState(state) {
@@ -57,6 +58,21 @@ function hasTrashConfirmControl(documentRoot, selectors) {
 
 export function assessRowActionCapability(documentRoot, action, selectors) {
   const capabilities = assessPageCapabilities(documentRoot, selectors);
+
+  if (action.executionKind === EXECUTION_KIND_OPEN_ROW) {
+    const listCapability = capabilities.list[action.capabilityId];
+
+    if (isBlockingCapabilityState(listCapability.state)) {
+      return createBlockedResult(
+        action.capabilityId,
+        listCapability.state,
+        listCapability.reason
+      );
+    }
+
+    return { allowed: true };
+  }
+
   const listTargeting = capabilities.list['list.targeting'];
 
   if (isBlockingCapabilityState(listTargeting.state)) {

@@ -21,6 +21,7 @@ function createChromeApi() {
       sendMessage: vi.fn(async () => ({
         archive: 'Ctrl+Shift+Y',
         trash: 'Ctrl+Shift+D',
+        markRead: 'Ctrl+Shift+K',
         markUnread: 'Ctrl+Shift+U'
       }))
     }

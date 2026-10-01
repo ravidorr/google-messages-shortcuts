@@ -13,10 +13,12 @@ describe('shortcut label listener', () => {
     expect(getConversationShortcutLabels([
       { name: 'archive-conversation', shortcut: 'Ctrl+Shift+Y' },
       { name: 'trash-conversation', shortcut: 'Ctrl+Shift+D' },
+      { name: 'mark-read-conversation', shortcut: 'Ctrl+Shift+K' },
       { name: 'mark-unread-conversation', shortcut: 'Ctrl+Shift+U' }
     ])).toEqual({
       archive: 'Ctrl+Shift+Y',
       trash: 'Ctrl+Shift+D',
+      markRead: 'Ctrl+Shift+K',
       markUnread: 'Ctrl+Shift+U'
     });
   });
@@ -25,6 +27,7 @@ describe('shortcut label listener', () => {
     expect(getConversationShortcutLabels([])).toEqual({
       archive: 'Not assigned',
       trash: 'Not assigned',
+      markRead: 'Not assigned',
       markUnread: 'Not assigned'
     });
   });
@@ -35,6 +38,7 @@ describe('shortcut label listener', () => {
         getAll: vi.fn(async () => [
           { name: 'archive-conversation', shortcut: 'Ctrl+Shift+Y' },
           { name: 'trash-conversation', shortcut: 'Ctrl+Shift+D' },
+          { name: 'mark-read-conversation', shortcut: 'Ctrl+Shift+K' },
           { name: 'mark-unread-conversation', shortcut: 'Ctrl+Shift+U' }
         ])
       }
@@ -43,6 +47,7 @@ describe('shortcut label listener', () => {
     await expect(getShortcutLabels(chromeApi)).resolves.toEqual({
       archive: 'Ctrl+Shift+Y',
       trash: 'Ctrl+Shift+D',
+      markRead: 'Ctrl+Shift+K',
       markUnread: 'Ctrl+Shift+U'
     });
   });
@@ -94,6 +99,7 @@ describe('shortcut label listener', () => {
       expect(sendResponse).toHaveBeenCalledWith({
         archive: 'Not assigned',
         trash: 'Not assigned',
+        markRead: 'Not assigned',
         markUnread: 'Not assigned'
       });
     });

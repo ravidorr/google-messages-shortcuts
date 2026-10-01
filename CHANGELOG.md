@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.6.32 - 2026-10-01
+
+### Added
+
+- Mark as read shortcut and pill for unread conversations via row-open execution (clicks the conversation link and waits for the unread marker to clear)
+- Row-menu mark-as-read documented as blocked; open-row path approved in Phase 1 decision log and compatibility matrix
+
+### Fixed
+
+- Use `Ctrl+Shift+K` / `Command+Shift+K` for mark-as-read because `Ctrl+Shift+R` is reserved for hard reload
+- Gate open-row actions on `list.conversationLink` instead of menu targeting so mark-as-read works when another row lacks a menu button
+- Use a distinct open-envelope icon for mark-as-read pills and popup shortcuts
+
 ## 1.6.31 - 2026-10-01
 
 ### Fixed

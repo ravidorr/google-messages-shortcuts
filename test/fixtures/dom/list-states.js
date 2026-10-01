@@ -13,10 +13,17 @@ export const selectedReadRow = `
 
 export const unreadRow = `
   <mws-conversation-list-item id="fixture-unread">
-    <a></a>
+    <a data-e2e-conversation data-e2e-is-unread="true"></a>
     <button aria-haspopup="menu"></button>
-    <div data-e2e-is-unread="true"></div>
     <span>Contact B</span>
+  </mws-conversation-list-item>
+`;
+
+export const selectedUnreadRow = `
+  <mws-conversation-list-item id="fixture-selected-unread">
+    <a aria-selected="true" data-e2e-conversation data-e2e-is-unread="true"></a>
+    <button aria-haspopup="menu"></button>
+    <span>Contact E</span>
   </mws-conversation-list-item>
 `;
 
@@ -32,6 +39,13 @@ export const rowMissingMenuButton = `
   <mws-conversation-list-item id="fixture-missing-menu">
     <a aria-selected="true"></a>
     <span>Contact D</span>
+  </mws-conversation-list-item>
+`;
+
+export const rowMissingConversationLink = `
+  <mws-conversation-list-item id="fixture-missing-link">
+    <button aria-haspopup="menu"></button>
+    <span>Contact F</span>
   </mws-conversation-list-item>
 `;
 
@@ -102,8 +116,10 @@ export const openTrashDialogMissingConfirmControl = `
 export const FIXTURE_EXPORT_NAMES = [
   'selectedReadRow',
   'unreadRow',
+  'selectedUnreadRow',
   'focusedRow',
   'rowMissingMenuButton',
+  'rowMissingConversationLink',
   'emptyConversationList',
   'menuItemsPresent',
   'trashConfirmDialog',

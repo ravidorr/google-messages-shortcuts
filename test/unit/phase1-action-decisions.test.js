@@ -14,9 +14,10 @@ describe('phase1 action decisions', () => {
     const localThis = await readFile(decisionsPath, 'utf8');
 
     expect(localThis).toContain('| Archive | **Approve** |');
-    expect(localThis).toContain('| Mark as read | **Defer** |');
+    expect(localThis).toContain('| Mark as read (row menu) | **Block** |');
+    expect(localThis).toContain('| Mark as read (open row) | **Approve** |');
     expect(localThis).toContain('| Block / report spam | **Defer** |');
     expect(localThis).toContain('Composer adapter | **Block**');
-    expect(getApprovedCommands()).toHaveLength(3);
+    expect(getApprovedCommands()).toHaveLength(4);
   });
 });

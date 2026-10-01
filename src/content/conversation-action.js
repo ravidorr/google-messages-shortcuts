@@ -4,11 +4,17 @@ import {
   assessRowActionCapability,
   assessTrashConfirmCapabilityAfterRender
 } from './action-capability-preflight.js';
-import { findConversationRow, findRowMenuButton } from './conversation-target.js';
+import {
+  findConversationLink,
+  findConversationRow,
+  findRowMenuButton
+} from './conversation-target.js';
+import { waitForConversationRead } from './conversation-read-state.js';
 import { MENU_TEXT, SELECTORS } from './google-messages-dom.js';
 import { beginMenuAction, endMenuAction } from './menu-action-overlay.js';
 import {
   EXECUTION_KIND_MENU_CLICK,
+  EXECUTION_KIND_OPEN_ROW,
   EXECUTION_KIND_TRASH_WITH_CONFIRM,
   getRowAction,
   SELECTOR_STRATEGY_FALLBACK_FIRST,
@@ -145,6 +151,18 @@ async function executeMenuClickAction(documentRoot, action, selectors) {
   );
 }
 
+async function executeOpenRowAction(conversationRow, selectors) {
+  const conversationLink = findConversationLink(conversationRow, selectors);
+
+  if (!conversationLink) {
+    return { ok: false, reason: 'conversation-link-not-found' };
+  }
+
+  conversationLink.click();
+
+  return waitForConversationRead(conversationRow, selectors);
+}
+
 async function executeTrashWithConfirmAction(documentRoot, action, selectors, chromeApi) {
   const trashResult = await clickMenuAction(
     documentRoot,
@@ -171,7 +189,11 @@ async function executeTrashWithConfirmAction(documentRoot, action, selectors, ch
   return confirmTrash(documentRoot);
 }
 
-async function executeRowAction(documentRoot, action, selectors, chromeApi) {
+async function executeRowAction(documentRoot, action, selectors, chromeApi, conversationRow) {
+  if (action.executionKind === EXECUTION_KIND_OPEN_ROW) {
+    return executeOpenRowAction(conversationRow, selectors);
+  }
+
   if (action.executionKind === EXECUTION_KIND_TRASH_WITH_CONFIRM) {
     return executeTrashWithConfirmAction(documentRoot, action, selectors, chromeApi);
   }
@@ -213,12 +235,6 @@ export async function runConversationAction(
       return { ok: false, reason: 'no-target' };
     }
 
-    const menuButton = findRowMenuButton(conversationRow, selectors);
-
-    if (!menuButton) {
-      return { ok: false, reason: 'menu-button-not-found' };
-    }
-
     if (!action.precondition(conversationRow, selectors)) {
       return { ok: false, reason: action.preconditionFailureReason };
     }
@@ -229,12 +245,34 @@ export async function runConversationAction(
       return createCapabilityBlockedResult(preflight);
     }
 
+    if (action.executionKind === EXECUTION_KIND_OPEN_ROW) {
+      return await executeRowAction(
+        documentRoot,
+        action,
+        selectors,
+        chromeApi,
+        conversationRow
+      );
+    }
+
+    const menuButton = findRowMenuButton(conversationRow, selectors);
+
+    if (!menuButton) {
+      return { ok: false, reason: 'menu-button-not-found' };
+    }
+
     beginMenuAction(documentRoot);
 
     try {
       menuButton.click();
 
-      return await executeRowAction(documentRoot, action, selectors, chromeApi);
+      return await executeRowAction(
+        documentRoot,
+        action,
+        selectors,
+        chromeApi,
+        conversationRow
+      );
     } finally {
       endMenuAction(documentRoot);
     }

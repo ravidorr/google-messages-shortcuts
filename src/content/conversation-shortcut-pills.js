@@ -1,11 +1,9 @@
 import { runConversationAction } from './conversation-action.js';
-import { isConversationRead } from './conversation-read-state.js';
 import { SELECTORS } from './google-messages-dom.js';
-import { COMMAND_MARK_UNREAD } from '../shared/commands.js';
 import { getCommandIcon } from '../shared/command-icons.js';
 import {
-  getBasePillDefinitions,
-  getMarkUnreadPillDefinition
+  getPillDefinitionsForRow,
+  getRowAction
 } from './row-action-registry.js';
 import { isConversationOpeningEnabled } from '../shared/conversation-open-preference.js';
 import {
@@ -35,13 +33,7 @@ export function safeDomMutation(operation) {
 }
 
 function getPillDefinitions(conversationRow) {
-  const definitions = [...getBasePillDefinitions()];
-
-  if (isConversationRead(conversationRow)) {
-    definitions.push(getMarkUnreadPillDefinition());
-  }
-
-  return definitions;
+  return getPillDefinitionsForRow(conversationRow, SELECTORS);
 }
 
 function addStyles(documentRoot) {
@@ -330,8 +322,13 @@ function createInstallation({
 
   async function runActionWithRefresh(command, conversationRow) {
     const result = await runAction(command, conversationRow);
+    const action = getRowAction(command);
 
-    if (command === COMMAND_MARK_UNREAD && result?.ok) {
+    if (
+      result?.ok
+      && action
+      && (action.showPillWhenReadOnly || action.showPillWhenUnreadOnly)
+    ) {
       await refreshPills(conversationRow);
     }
 

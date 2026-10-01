@@ -36,6 +36,7 @@ export function assessPageCapabilities(documentRoot, selectors = getPageSelector
     focusedConversationItem: selectors.focusedConversationItem,
     hoveredConversationItem: selectors.hoveredConversationItem,
     conversationRow: selectors.conversationRow,
+    conversationLink: selectors.conversationLink,
     rowMenuButton: selectors.rowMenuButton,
     unreadConversationMarker: selectors.unreadConversationMarker
   };

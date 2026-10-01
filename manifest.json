@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Messages Shortcut Actions",
-  "version": "1.6.31",
-  "description": "Use shortcuts to Archive, Trash, or Mark as unread for active conversations in Google Messages.",
+  "version": "1.6.32",
+  "description": "Use shortcuts to Archive, Trash, Mark as read, or Mark as unread for active conversations in Google Messages.",
   "icons": {
     "16": "icons/icon16.png",
     "32": "icons/icon32.png",
@@ -69,6 +69,13 @@
         "mac": "Command+Shift+U"
       },
       "description": "Mark the selected or hovered Google Messages conversation as unread"
+    },
+    "mark-read-conversation": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+K",
+        "mac": "Command+Shift+K"
+      },
+      "description": "Mark the selected or hovered Google Messages conversation as read"
     }
   }
 }

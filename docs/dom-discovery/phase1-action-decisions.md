@@ -13,7 +13,8 @@ States:
 | Archive | **Approve** | Live e2e + extension automation verified 2026-10-01 (en-US) | Row with menu button; menu opens | Row leaves active list | Maintain fixtures on DOM changes |
 | Move to trash | **Approve** | Live e2e + extension automation, confirm dialog, and cancel verified 2026-10-01 (en-US) | Row with menu button; confirm dialog | Row removed or trashed per native UI | Keep confirmation preference |
 | Mark as unread | **Approve** | Live en-US: primary e2e absent; English fallback + shortcut/pill verified 2026-10-01 on read row | Row is read | Unread marker present | Document fallback-first for this UI; recheck e2e on locale passes |
-| Mark as read | **Defer** | No selector in repository | Read/unread state detectable | Row shows read state | Live menu inspection; add fixture |
+| Mark as read (row menu) | **Block** | Live en-US 2026-10-01: no "Mark as read" item on read or unread row overflow menus | Row is unread | Row shows read state | Do not implement menu path |
+| Mark as read (open row) | **Approve** | Live en-US 2026-10-01: clicking `a[data-e2e-conversation]` on unread row clears unread marker | Row is unread | Unread marker absent | `EXECUTION_KIND_OPEN_ROW`; opens message pane natively |
 | Pin conversation | **Defer** | No selector in repository | Row menu exposes pin | Pin state visible in list | Live validation; confirm toggle behavior |
 | Unpin conversation | **Defer** | No selector in repository | Pinned row | Pin removed | Live validation |
 | Mute conversation | **Defer** | Live menu e2e `data-e2e-conversation-menu-mute` observed 2026-10-01; automation not exercised | Row menu exposes mute | Mute state visible | Exercise mute/unmute on disposable row; add fixture |

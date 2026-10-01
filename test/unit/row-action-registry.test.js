@@ -6,15 +6,15 @@ import { describe, expect, it } from 'vitest';
 import {
   APPROVED_ROW_ACTIONS,
   ACTION_DECISION_APPROVE,
+  EXECUTION_KIND_OPEN_ROW,
   getApprovedCommands,
-  getBasePillDefinitions,
-  getMarkUnreadPillDefinition,
   getPopupLabelsByCommand,
   getRowAction,
   isApprovedRowAction
 } from '../../src/content/row-action-registry.js';
 import {
   COMMAND_ARCHIVE,
+  COMMAND_MARK_READ,
   COMMAND_MARK_UNREAD,
   COMMAND_TRASH,
   VALID_COMMANDS
@@ -25,10 +25,11 @@ const decisionsPath = fileURLToPath(
 );
 
 describe('row-action-registry', () => {
-  it('registers the three matrix-approved row actions', () => {
+  it('registers the four matrix-approved row actions', () => {
     expect(getApprovedCommands()).toEqual([
       COMMAND_ARCHIVE,
       COMMAND_TRASH,
+      COMMAND_MARK_READ,
       COMMAND_MARK_UNREAD
     ]);
     expect(APPROVED_ROW_ACTIONS.every((action) => action.decision === ACTION_DECISION_APPROVE)).toBe(
@@ -44,21 +45,15 @@ describe('row-action-registry', () => {
     expect(getRowAction(COMMAND_ARCHIVE)?.capabilityId).toBe('menu.archive');
     expect(getRowAction(COMMAND_TRASH)?.executionKind).toBe('trash-with-confirm');
     expect(getRowAction(COMMAND_MARK_UNREAD)?.selectorStrategy).toBe('fallback-first');
+    expect(getRowAction(COMMAND_MARK_READ)?.executionKind).toBe(EXECUTION_KIND_OPEN_ROW);
     expect(isApprovedRowAction('unsupported')).toBe(false);
     expect(getRowAction('unsupported')).toBeNull();
   });
 
-  it('exposes pill and popup metadata', () => {
-    expect(getBasePillDefinitions()).toEqual([
-      { command: COMMAND_ARCHIVE, label: 'Archive', shortcutKey: 'archive' },
-      { command: COMMAND_TRASH, label: 'Trash', shortcutKey: 'trash' }
-    ]);
-    expect(getMarkUnreadPillDefinition()).toEqual({
-      command: COMMAND_MARK_UNREAD,
-      label: 'Mark as unread',
-      shortcutKey: 'markUnread'
-    });
+  it('exposes popup labels for every approved action', () => {
     expect(getPopupLabelsByCommand()[COMMAND_ARCHIVE]).toBe('Archive conversation');
+    expect(getPopupLabelsByCommand()[COMMAND_MARK_READ]).toBe('Mark conversation as read');
+    expect(getPopupLabelsByCommand()[COMMAND_MARK_UNREAD]).toBe('Mark conversation as unread');
   });
 
   it('matches phase1 approve rows in the decision doc', async () => {
@@ -66,7 +61,8 @@ describe('row-action-registry', () => {
     const approveRows = [
       'Archive',
       'Move to trash',
-      'Mark as unread'
+      'Mark as unread',
+      'Mark as read (open row)'
     ];
 
     for (const rowLabel of approveRows) {

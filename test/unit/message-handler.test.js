@@ -5,7 +5,13 @@ import {
   installMessageListener,
   warnActionFailure
 } from '../../src/content/message-handler.js';
-import { COMMAND_ARCHIVE, COMMAND_MARK_UNREAD, COMMAND_TRASH } from '../../src/shared/commands.js';
+import {
+  COMMAND_ARCHIVE,
+  COMMAND_MARK_READ,
+  COMMAND_MARK_UNREAD,
+  COMMAND_TRASH
+} from '../../src/shared/commands.js';
+import { selectedUnreadRow } from '../fixtures/dom/list-states.js';
 
 function createConversationFixture() {
   document.body.innerHTML = `
@@ -75,6 +81,28 @@ describe('message-handler', () => {
     const result = await handleCommand(COMMAND_MARK_UNREAD);
 
     expect(result.ok).toBe(true);
+  });
+
+  it('handles mark-read commands', async () => {
+    document.body.innerHTML = selectedUnreadRow;
+    const conversationLink = document.querySelector('a[data-e2e-conversation]');
+    vi.spyOn(conversationLink, 'click').mockImplementation(() => {
+      conversationLink.removeAttribute('data-e2e-is-unread');
+    });
+
+    const result = await handleCommand(COMMAND_MARK_READ);
+
+    expect(result.ok).toBe(true);
+  });
+
+  it('silently ignores mark-read when the conversation is already read', async () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    createConversationFixture();
+
+    const result = await handleCommand(COMMAND_MARK_READ);
+
+    expect(result).toEqual({ ok: false, reason: 'already-read' });
+    expect(warnSpy).not.toHaveBeenCalled();
   });
 
   it('silently ignores mark-unread when the conversation is already unread', async () => {

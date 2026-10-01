@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import {
+  findConversationLink,
   findConversationRow,
   findRowMenuButton
 } from '../../src/content/conversation-target.js';
@@ -102,5 +103,22 @@ describe('conversation-target', () => {
 
   it('returns null when the conversation row is missing', () => {
     expect(findRowMenuButton(null)).toBeNull();
+  });
+
+  it('finds the conversation link within the row', () => {
+    const { row, link } = createConversationRow({ selected: true });
+    link.setAttribute('data-e2e-conversation', '');
+
+    expect(findConversationLink(row)).toBe(link);
+  });
+
+  it('falls back to any anchor when the e2e conversation link is absent', () => {
+    const { row, link } = createConversationRow({ selected: true });
+
+    expect(findConversationLink(row)).toBe(link);
+  });
+
+  it('returns null when the conversation row is missing for link lookup', () => {
+    expect(findConversationLink(null)).toBeNull();
   });
 });

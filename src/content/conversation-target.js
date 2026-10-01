@@ -33,3 +33,12 @@ export function findRowMenuButton(conversationRow, selectors = SELECTORS) {
 
   return conversationRow.querySelector(selectors.rowMenuButton);
 }
+
+export function findConversationLink(conversationRow, selectors = SELECTORS) {
+  if (!conversationRow) {
+    return null;
+  }
+
+  return conversationRow.querySelector(selectors.conversationLink)
+    || conversationRow.querySelector('a');
+}

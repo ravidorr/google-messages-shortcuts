@@ -34,6 +34,7 @@ describe('init-popup', () => {
       { name: '_execute_action', shortcut: '' },
       { name: 'archive-conversation', shortcut: 'Ctrl+Shift+Y' },
       { name: 'trash-conversation', shortcut: 'Ctrl+Shift+D' },
+      { name: 'mark-read-conversation', shortcut: 'Ctrl+Shift+K' },
       { name: 'mark-unread-conversation', shortcut: 'Ctrl+Shift+U' }
     ]);
 
@@ -215,6 +216,7 @@ describe('init-popup', () => {
         getAll: vi.fn(async () => [
           { name: 'archive-conversation', shortcut: 'Ctrl+Shift+Y' },
           { name: 'trash-conversation', shortcut: 'Ctrl+Shift+D' },
+          { name: 'mark-read-conversation', shortcut: 'Ctrl+Shift+K' },
           { name: 'mark-unread-conversation', shortcut: 'Ctrl+Shift+U' }
         ])
       },
@@ -231,7 +233,7 @@ describe('init-popup', () => {
 
     await initializePopup(chromeApi, document);
 
-    expect(document.querySelectorAll('.shortcut-item')).toHaveLength(3);
+    expect(document.querySelectorAll('.shortcut-item')).toHaveLength(4);
     expect(document.getElementById('shortcut-warning').hidden).toBe(true);
     expect(document.getElementById('auto-confirm-trash').checked).toBe(true);
   });

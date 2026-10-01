@@ -6,14 +6,17 @@ import {
   findTrashConfirmFallbackControl
 } from '../../src/content/action-capability-preflight.js';
 import { getRowAction } from '../../src/content/row-action-registry.js';
-import { COMMAND_ARCHIVE, COMMAND_TRASH } from '../../src/shared/commands.js';
+import { COMMAND_ARCHIVE, COMMAND_MARK_READ, COMMAND_TRASH } from '../../src/shared/commands.js';
 import { SELECTORS } from '../../src/content/google-messages-dom.js';
 import { POLL_INTERVAL_MS } from '../../src/content/wait-for-element.js';
+import * as pageAdapter from '../../src/content/adapters/page-adapter.js';
 import {
   duplicateArchiveMenuItems,
   duplicateTrashConfirmDialog,
   openRowMenuMissingArchiveControl,
   openTrashDialogMissingConfirmControl,
+  rowMissingConversationLink,
+  rowMissingMenuButton,
   selectedReadRow,
   trashConfirmDialog
 } from '../fixtures/dom/list-states.js';
@@ -221,6 +224,83 @@ describe('action-capability-preflight', () => {
     `;
 
     expect(findTrashConfirmFallbackControl(document)).toBeNull();
+  });
+
+  it('allows mark-read when conversation links are supported', () => {
+    document.body.innerHTML = selectedReadRow;
+
+    const localThis = assessRowActionCapability(
+      document,
+      getRowAction(COMMAND_MARK_READ),
+      SELECTORS
+    );
+
+    expect(localThis).toEqual({ allowed: true });
+  });
+
+  it('allows mark-read when another row is missing a menu button but links remain available', () => {
+    document.body.innerHTML = rowMissingMenuButton;
+
+    const localThis = assessRowActionCapability(
+      document,
+      getRowAction(COMMAND_MARK_READ),
+      SELECTORS
+    );
+
+    expect(localThis).toEqual({ allowed: true });
+  });
+
+  it('blocks mark-read when list conversation links are unsafe', () => {
+    document.body.innerHTML = selectedReadRow;
+    vi.spyOn(pageAdapter, 'assessPageCapabilities').mockReturnValue({
+      list: {
+        'list.conversationLink': { state: 'unsafe', reason: 'Conversation link missing.' }
+      },
+      menu: {}
+    });
+
+    const localThis = assessRowActionCapability(
+      document,
+      getRowAction(COMMAND_MARK_READ),
+      SELECTORS
+    );
+
+    expect(localThis).toEqual({
+      allowed: false,
+      reason: 'capability-blocked',
+      capabilityId: 'list.conversationLink',
+      capabilityState: 'unsafe',
+      capabilityReason: 'Conversation link missing.'
+    });
+    vi.restoreAllMocks();
+  });
+
+  it('blocks mark-read when list conversation links are unavailable', () => {
+    document.body.innerHTML = '';
+
+    const localThis = assessRowActionCapability(
+      document,
+      getRowAction(COMMAND_MARK_READ),
+      SELECTORS
+    );
+
+    expect(localThis.allowed).toBe(false);
+    expect(localThis.capabilityId).toBe('list.conversationLink');
+    expect(localThis.capabilityState).toBe('unavailable');
+  });
+
+  it('blocks mark-read when a row is missing its conversation link', () => {
+    document.body.innerHTML = rowMissingConversationLink;
+
+    const localThis = assessRowActionCapability(
+      document,
+      getRowAction(COMMAND_MARK_READ),
+      SELECTORS
+    );
+
+    expect(localThis.allowed).toBe(false);
+    expect(localThis.capabilityId).toBe('list.conversationLink');
+    expect(localThis.capabilityState).toBe('unsafe');
   });
 
   it('blocks trash menu action when list targeting is unavailable', () => {

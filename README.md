@@ -1,13 +1,17 @@
 # Messages Shortcut Actions
 
-Chrome extension that archives, trashes, or marks as unread the selected or hovered conversation in [Google Messages Web](https://messages.google.com/web/).
+Chrome extension that archives, trashes, marks as read, or marks as unread the selected or hovered conversation in [Google Messages Web](https://messages.google.com/web/).
+
+[Install Messages Shortcut Actions from the Chrome Web Store](https://chromewebstore.google.com/detail/messages-shortcut-actions/dhdkppijmdfhgmbedgimkgenbmfhldjn).
 
 ## Features
 
 - Archive the active conversation with `Ctrl+Shift+Y` (`Command+Shift+Y` on macOS)
 - Move the active conversation to trash with `Ctrl+Shift+D` (`Command+Shift+D` on macOS)
+- Mark the active unread conversation as read with `Ctrl+Shift+K` (`Command+Shift+K` on macOS)
 - Mark the active read conversation as unread with `Ctrl+Shift+U` (`Command+Shift+U` on macOS)
 - Show Archive and Trash shortcut pills on hovered and focused conversations
+- Show a Mark as read pill on unread conversations
 - Show a Mark as unread pill on read conversations
 - Optionally open conversations immediately when they are hovered or focused
 - Popup UI that shows the effective Chrome shortcut assignments
@@ -46,6 +50,11 @@ these interactions display shortcut pills without marking unread conversations
 as read. Clicking a conversation or pressing Enter uses Google Messages'
 native behavior.
 
+The **Mark as read** shortcut is an explicit user action. It always clicks the
+conversation row link to clear unread state, even when open-on-hover/focus is
+disabled. That opens the message pane, which is Google Messages' native
+behavior for selecting a conversation.
+
 If Chrome or the operating system already uses a suggested shortcut, Chrome may leave that command unassigned until you choose a different key combination.
 
 ## How it works
@@ -54,13 +63,16 @@ If Chrome or the operating system already uses a suggested shortcut, Chrome may 
 2. The worker checks that the active tab is Google Messages.
 3. The worker sends the command to the content script.
 4. The content script finds the selected conversation row, or the hovered row if none is selected.
-5. The content script opens the row menu and clicks Archive, Move to trash, or Mark as unread.
-6. Trash actions confirm through Google Messages' native dialog.
-7. Mark as unread is available only for conversations that are currently read.
+5. Archive, trash, and mark-as-unread actions open the row menu and click the matching item.
+6. Mark as read clicks the conversation link on unread rows and waits for the unread marker to clear.
+7. Trash actions confirm through Google Messages' native dialog.
+8. Mark as unread is available only for conversations that are currently read.
+9. Mark as read is available only for conversations that are currently unread.
 
 ## Limitations
 
 - Google Messages owns its private DOM. Menu selectors may break after a UI update.
+- Mark as read has no row-menu control in the current en-US UI; the extension uses row-open instead.
 - The extension does not collect or transmit conversation data.
 - Shortcut automation depends on Google Messages accepting programmatic clicks in its UI.
 
@@ -68,7 +80,7 @@ If Chrome or the operating system already uses a suggested shortcut, Chrome may 
 
 Phase 0 adds a fail-closed page adapter and a non-destructive capability self-test. The self-test only queries the page; it does not open menus, change read state, or store conversation content.
 
-Phase 1 wires the three matrix-approved row actions (archive, trash, mark as unread) through a single action registry. Before opening a row menu, the content script runs the same capability assessment used by the self-test and blocks the action when list or menu selectors are unavailable or unsafe. Mark as unread prefers English menu fallback text when the primary e2e attribute is missing, matching live en-US validation.
+Phase 1 wires matrix-approved row actions through a single action registry. Before running an action, the content script runs the same capability assessment used by the self-test and blocks when list or menu selectors are unavailable or unsafe. Mark as unread prefers English menu fallback text when the primary e2e attribute is missing, matching live en-US validation. Mark as read uses open-row execution because the row menu does not expose a mark-as-read item.
 
 On Google Messages Web, rebuild and reload the unpacked extension from `dist/`, then open DevTools on the page console (not an extension context) and run:
 
