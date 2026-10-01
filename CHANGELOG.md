@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.6.13 - 2026-09-30
+
+### Added
+
+- Add browser-level coverage for Google Messages archive, trash, and mark-unread action flows
+
 ## 1.6.12 - 2026-09-30
 
 ### Added
