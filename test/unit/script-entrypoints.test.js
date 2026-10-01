@@ -403,6 +403,7 @@ describe('script entrypoint coverage', () => {
       'generate-icons.js',
       'package.js',
       'prevent-main-commit.js',
+      'update-package-lock.js',
       'validate-package-lock-version.js',
       'validate-package-artifact.js',
       'validate-release-metadata.js',
@@ -567,6 +568,38 @@ describe('script entrypoint coverage', () => {
 
     consoleError.mockRestore();
     processExit.mockRestore();
+  });
+
+  it('covers package-lock regeneration when package.json is unchanged', async () => {
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    await importEntrypoint('update-package-lock.js');
+
+    expect(consoleError).not.toHaveBeenCalled();
+
+    consoleError.mockRestore();
+  });
+
+  it('reports package-lock regeneration failures', async () => {
+    const projectDirectory = await mkdtemp(path.join(tmpdir(), 'package-lock-regeneration-'));
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const originalExitCode = process.exitCode;
+    temporaryDirectories.push(projectDirectory);
+
+    try {
+      await withWorkingDirectory(projectDirectory, async () => {
+        await importEntrypoint('update-package-lock.js');
+      });
+
+      expect(consoleError).toHaveBeenCalledWith(
+        'Failed to regenerate package-lock.json.',
+        expect.any(Error)
+      );
+      expect(process.exitCode).toBe(1);
+    } finally {
+      process.exitCode = originalExitCode;
+      consoleError.mockRestore();
+    }
   });
 
   it('covers version bump entrypoint execution in-process', async () => {
