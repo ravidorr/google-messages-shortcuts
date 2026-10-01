@@ -127,10 +127,12 @@ describe('message-handler', () => {
 
     const sendResponse = vi.fn();
     const addListener = vi.fn();
+    const removeListener = vi.fn();
     const chromeApi = {
       runtime: {
         onMessage: {
-          addListener
+          addListener,
+          removeListener
         }
       }
     };
@@ -175,10 +177,12 @@ describe('message-handler', () => {
   it('returns missing-command when no command is provided', () => {
     const sendResponse = vi.fn();
     const addListener = vi.fn();
+    const removeListener = vi.fn();
     const chromeApi = {
       runtime: {
         onMessage: {
-          addListener
+          addListener,
+          removeListener
         }
       }
     };
@@ -190,5 +194,25 @@ describe('message-handler', () => {
 
     expect(keepChannelOpen).toBe(false);
     expect(sendResponse).toHaveBeenCalledWith({ ok: false, reason: 'missing-command' });
+  });
+
+  it('removes the installed message listener when disconnected', () => {
+    const addListener = vi.fn();
+    const removeListener = vi.fn();
+    const chromeApi = {
+      runtime: {
+        onMessage: {
+          addListener,
+          removeListener
+        }
+      }
+    };
+
+    const disconnect = installMessageListener(chromeApi);
+    const listener = addListener.mock.calls[0][0];
+
+    disconnect();
+
+    expect(removeListener).toHaveBeenCalledWith(listener);
   });
 });

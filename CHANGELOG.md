@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.6.14 - 2026-09-30
+
+### Fixed
+
+- Isolate content-entry tests from retained listeners, observers, and shortcut pills
+
 ## 1.6.13 - 2026-09-30
 
 ### Added
