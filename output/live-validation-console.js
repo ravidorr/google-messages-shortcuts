@@ -1,7 +1,10 @@
 // Paste into Google Messages DevTools console (page context), then copy the printed JSON.
+// Requires at least two unread conversations: the pill test marks the first row read.
 (async () => {
   const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
   const MS = globalThis.MessagesShortcuts;
+  const MARK_READ_COMMAND = 'mark-read-conversation';
+  const MARK_READ_PILL_SELECTOR = `[data-messages-shortcuts-pill][data-command="${MARK_READ_COMMAND}"]`;
 
   if (!MS?.__pageBridgeInstalled) {
     console.log(JSON.stringify({ ok: false, error: 'MessagesShortcuts bridge not installed' }, null, 2));
@@ -12,6 +15,10 @@
   const rowSelector = 'mws-conversation-list-item';
   const getUnreadRows = () => [...document.querySelectorAll(rowSelector)]
     .filter((row) => row.querySelector(unreadSelector));
+
+  const dispatchRowPointerOver = (row) => {
+    row.dispatchEvent(new PointerEvent('pointerover', { bubbles: true }));
+  };
 
   const selfTest = await MS.runCapabilitySelfTest();
   const listConversationLink = selfTest.capabilities?.find(
@@ -34,57 +41,63 @@
     return;
   }
 
+  if (unreadRowsBefore.length < 2) {
+    console.log(JSON.stringify({
+      ok: false,
+      error: 'insufficient-unread-rows',
+      message: 'Need at least two unread conversations: the pill test marks the first row read.',
+      unreadRowsAvailableInitially: unreadRowsBefore.length,
+      selfTest: {
+        ok: selfTest.ok,
+        mutated: selfTest.mutated,
+        summary: selfTest.summary,
+        listConversationLink
+      }
+    }, null, 2));
+    return;
+  }
+
   const hoverRow = unreadRowsBefore[0];
+  const pillRow = unreadRowsBefore[0];
+  const shortcutRow = unreadRowsBefore[1];
   const urlBeforeHover = location.href;
-  hoverRow.dispatchEvent(new MouseEvent('mouseover', { bubbles: true }));
-  hoverRow.dispatchEvent(new PointerEvent('pointerover', { bubbles: true }));
+  dispatchRowPointerOver(hoverRow);
   await sleep(600);
 
   const hoverCheck = {
     unreadMarkerPersists: Boolean(hoverRow.querySelector(unreadSelector)),
     pillGroupPresent: Boolean(hoverRow.querySelector('[data-messages-shortcuts-pill-group]')),
-    markReadPillPresent: Boolean(
-      [...(hoverRow.querySelectorAll('[data-messages-shortcuts-pill]') || [])]
-        .some((pill) => pill.textContent?.includes('Mark as read'))
-    ),
+    markReadPillPresent: Boolean(hoverRow.querySelector(MARK_READ_PILL_SELECTOR)),
     urlUnchanged: location.href === urlBeforeHover
   };
 
-  const pillRow = getUnreadRows()[0];
   let pillResult = { attempted: false };
 
-  if (pillRow) {
-    pillRow.dispatchEvent(new MouseEvent('mouseover', { bubbles: true }));
-    await sleep(400);
+  dispatchRowPointerOver(pillRow);
+  await sleep(400);
 
-    const markReadPill = [...(pillRow.querySelectorAll('[data-messages-shortcuts-pill]') || [])]
-      .find((pill) => pill.textContent?.includes('Mark as read'));
+  const markReadPill = pillRow.querySelector(MARK_READ_PILL_SELECTOR);
 
-    if (markReadPill) {
-      const urlBeforePill = location.href;
-      markReadPill.click();
-      await sleep(2500);
+  if (markReadPill) {
+    const urlBeforePill = location.href;
+    markReadPill.click();
+    await sleep(2500);
 
-      pillResult = {
-        attempted: true,
-        unreadCleared: !pillRow.querySelector(unreadSelector),
-        paneOpened: location.href !== urlBeforePill
-          || Boolean(pillRow.querySelector('a[aria-selected="true"]'))
-      };
-    } else {
-      pillResult = { attempted: false, reason: 'mark-read-pill-not-visible' };
-    }
+    pillResult = {
+      attempted: true,
+      unreadCleared: !pillRow.querySelector(unreadSelector),
+      paneOpened: location.href !== urlBeforePill
+        || Boolean(pillRow.querySelector('a[aria-selected="true"]'))
+    };
+  } else {
+    pillResult = { attempted: false, reason: 'mark-read-pill-not-visible' };
   }
 
-  const shortcutRow = getUnreadRows()[0];
   let shortcutResult = { attempted: false };
 
-  if (shortcutRow) {
-    shortcutRow.dispatchEvent(new MouseEvent('mouseover', { bubbles: true }));
-    await sleep(400);
-
+  if (shortcutRow?.querySelector(unreadSelector)) {
     const urlBeforeShortcut = location.href;
-    const commandResult = await MS.handleCommand('mark-read-conversation');
+    const commandResult = await MS.runConversationAction(MARK_READ_COMMAND, undefined, shortcutRow);
     await sleep(2500);
 
     shortcutResult = {
@@ -95,6 +108,8 @@
         || Boolean(shortcutRow.querySelector('a[aria-selected="true"]')),
       reason: commandResult?.reason ?? null
     };
+  } else {
+    shortcutResult = { attempted: false, reason: 'shortcut-row-no-longer-unread' };
   }
 
   const allPassed = selfTest.ok
