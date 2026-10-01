@@ -38,7 +38,7 @@ describe('extension manifest', () => {
       type: 'module'
     });
     expect(manifest.permissions).toEqual(['storage', 'tabs']);
-    expect(manifest.host_permissions).toEqual(['https://messages.google.com/*']);
+    expect(manifest.host_permissions).toEqual(['https://messages.google.com/web/*']);
     expect(manifest.content_scripts).toEqual([{
       matches: ['https://messages.google.com/web/*'],
       js: ['content.js'],

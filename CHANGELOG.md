@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.6.22 - 2026-10-01
+
+### Fixed
+
+- Restrict extension host access to Google Messages Web
+
 ## 1.6.21 - 2026-10-01
 
 ### Fixed
