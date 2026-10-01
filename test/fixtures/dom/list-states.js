@@ -74,6 +74,31 @@ export const fullListActionSurface = `
   ${trashConfirmDialog}
 `;
 
+export const openRowMenuMarkUnreadFallbackOnly = `
+  ${selectedReadRow}
+  <div role="menu" class="conversation-actions-menu mat-mdc-menu-panel">
+    <button class="mat-mdc-menu-item">
+      <span class="mat-mdc-menu-item-text">Mark as unread</span>
+    </button>
+  </div>
+`;
+
+export const openRowMenuMissingArchiveControl = `
+  ${selectedReadRow}
+  <div role="menu" class="conversation-actions-menu mat-mdc-menu-panel">
+    <button class="mat-mdc-menu-item">
+      <span class="mat-mdc-menu-item-text">Move to trash</span>
+    </button>
+  </div>
+`;
+
+export const openTrashDialogMissingConfirmControl = `
+  ${selectedReadRow}
+  <mat-dialog-container>
+    <button>Cancel</button>
+  </mat-dialog-container>
+`;
+
 export const FIXTURE_EXPORT_NAMES = [
   'selectedReadRow',
   'unreadRow',
@@ -84,5 +109,8 @@ export const FIXTURE_EXPORT_NAMES = [
   'trashConfirmDialog',
   'duplicateArchiveMenuItems',
   'duplicateTrashConfirmDialog',
-  'fullListActionSurface'
+  'fullListActionSurface',
+  'openRowMenuMarkUnreadFallbackOnly',
+  'openRowMenuMissingArchiveControl',
+  'openTrashDialogMissingConfirmControl'
 ];

@@ -10,7 +10,8 @@ export const MENU_SELECTORS = {
   trashMenuItem: 'button[data-e2e-conversation-delete]',
   markUnreadMenuItem: 'button[data-e2e-conversation-menu-mark-unread]',
   trashConfirmButton: 'mat-dialog-container button[data-e2e-action-button-confirm]',
-  menuItemFallback: '.mat-menu-item, .mat-mdc-menu-item'
+  menuItemFallback: '.mat-menu-item, .mat-mdc-menu-item',
+  rowMenuPanel: '.conversation-actions-menu[role="menu"], [role="menu"].conversation-actions-menu'
 };
 
 export const MENU_TEXT = {
@@ -26,11 +27,42 @@ export const MENU_CAPABILITY_IDS = {
   trashConfirm: 'menu.trashConfirm'
 };
 
+export function isConversationRowMenuOpen(documentRoot, selectors = MENU_SELECTORS) {
+  const panelSelector = selectors.rowMenuPanel ?? MENU_SELECTORS.rowMenuPanel;
+
+  return Boolean(documentRoot.querySelector(panelSelector));
+}
+
+function isTrashConfirmDialogOpen(documentRoot) {
+  return Boolean(documentRoot.querySelector('mat-dialog-container'));
+}
+
+export function findFallbackMenuItemInOpenRowMenu(documentRoot, fallbackText, selectors) {
+  const panelSelector = selectors.rowMenuPanel ?? MENU_SELECTORS.rowMenuPanel;
+  const menu = documentRoot.querySelector(panelSelector);
+
+  if (!menu) {
+    return null;
+  }
+
+  const items = menu.querySelectorAll(selectors.menuItemFallback);
+
+  for (const item of items) {
+    if (item.textContent.trim() === fallbackText) {
+      return item;
+    }
+  }
+
+  return null;
+}
+
 function assessMenuActionCapability(
   documentRoot,
   primarySelector,
   actionLabel,
-  listTargeting
+  fallbackText,
+  listTargeting,
+  selectors
 ) {
   if (listTargeting.state !== CAPABILITY_SUPPORTED) {
     return createCapabilityResult(
@@ -58,6 +90,22 @@ function assessMenuActionCapability(
     );
   }
 
+  if (isConversationRowMenuOpen(documentRoot, selectors)) {
+    if (findFallbackMenuItemInOpenRowMenu(documentRoot, fallbackText, selectors)) {
+      return createCapabilityResult(
+        CAPABILITY_SUPPORTED,
+        `${actionLabel} menu item matched English fallback while the row menu is open.`,
+        'dom-query-fallback'
+      );
+    }
+
+    return createCapabilityResult(
+      CAPABILITY_UNAVAILABLE,
+      `${actionLabel} row menu is open but the control was not found.`,
+      'dom-query'
+    );
+  }
+
   return createCapabilityResult(
     CAPABILITY_SUPPORTED,
     `${actionLabel} primary selector is defined; the menu item appears after opening the row menu.`,
@@ -73,19 +121,25 @@ export function assessMenuCapabilities(documentRoot, listCapabilities, selectors
       documentRoot,
       selectors.archiveMenuItem,
       'Archive',
-      listTargeting
+      MENU_TEXT.archive,
+      listTargeting,
+      selectors
     ),
     [MENU_CAPABILITY_IDS.trash]: assessMenuActionCapability(
       documentRoot,
       selectors.trashMenuItem,
       'Move to trash',
-      listTargeting
+      MENU_TEXT.trash,
+      listTargeting,
+      selectors
     ),
     [MENU_CAPABILITY_IDS.markUnread]: assessMenuActionCapability(
       documentRoot,
       selectors.markUnreadMenuItem,
       'Mark as unread',
-      listTargeting
+      MENU_TEXT.markUnread,
+      listTargeting,
+      selectors
     ),
     [MENU_CAPABILITY_IDS.trashConfirm]: assessTrashConfirmCapability(
       documentRoot,
@@ -118,6 +172,14 @@ function assessTrashConfirmCapability(documentRoot, confirmSelector, listTargeti
     return createCapabilityResult(
       CAPABILITY_SUPPORTED,
       'Trash confirmation control is present in the document.',
+      'dom-query'
+    );
+  }
+
+  if (isTrashConfirmDialogOpen(documentRoot)) {
+    return createCapabilityResult(
+      CAPABILITY_UNAVAILABLE,
+      'Trash confirmation dialog is open but the confirm control was not found.',
       'dom-query'
     );
   }

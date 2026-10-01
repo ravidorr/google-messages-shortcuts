@@ -20,7 +20,7 @@ Record live validation results from [live-validation-checklist.md](./live-valida
 
 ### Capability self-test column
 
-Use **pass** when `runCapabilitySelfTest()` returns `ok: true` and no capability is `unsafe`. Use **fail** when `ok: false` or any capability state is `unsafe`. List `unavailable` states that are expected (composer, message pane, connection) in Notes.
+Use **pass** when `runCapabilitySelfTest()` returns `ok: true` (no DOM mutation, no `unsafe` capabilities, and no blocking `unavailable` capabilities outside composer/message pane/connection). Use **fail** when `ok: false`, any capability is `unsafe`, or `summary.blockingUnavailableCapabilityIds` is non-empty. List expected deferred `unavailable` states in Notes.
 
 ## Recorded results
 

@@ -1,7 +1,9 @@
 import {
+  CAPABILITY_UNAVAILABLE,
   CAPABILITY_UNSAFE,
   isCapabilityUnsafe
 } from './capability-states.js';
+import { isExpectedUnavailableCapability } from './expected-unavailable-capabilities.js';
 import { assessPageCapabilities } from './page-adapter.js';
 
 function captureDomSnapshot(documentRoot) {
@@ -31,15 +33,32 @@ function flattenCapabilities(capabilitiesByArea) {
   })));
 }
 
+function isBlockingCapability(entry) {
+  if (entry.state === CAPABILITY_UNSAFE) {
+    return true;
+  }
+
+  if (entry.state !== CAPABILITY_UNAVAILABLE) {
+    return false;
+  }
+
+  return !isExpectedUnavailableCapability(entry.capabilityId);
+}
+
 function buildSummary(flatCapabilities) {
   const unsafeCapabilities = flatCapabilities.filter((entry) => entry.state === CAPABILITY_UNSAFE);
+  const blockingUnavailableCapabilities = flatCapabilities.filter(
+    (entry) => entry.state === CAPABILITY_UNAVAILABLE && !isExpectedUnavailableCapability(entry.capabilityId)
+  );
 
   return {
     total: flatCapabilities.length,
     supported: flatCapabilities.filter((entry) => entry.state === 'supported').length,
     unavailable: flatCapabilities.filter((entry) => entry.state === 'unavailable').length,
     unsafe: unsafeCapabilities.length,
-    unsafeCapabilityIds: unsafeCapabilities.map((entry) => entry.capabilityId)
+    unsafeCapabilityIds: unsafeCapabilities.map((entry) => entry.capabilityId),
+    blockingUnavailable: blockingUnavailableCapabilities.length,
+    blockingUnavailableCapabilityIds: blockingUnavailableCapabilities.map((entry) => entry.capabilityId)
   };
 }
 
@@ -50,9 +69,10 @@ export function runCapabilitySelfTest(documentRoot = document, assessCapabilitie
   const capabilities = flattenCapabilities(capabilitiesByArea);
   const summary = buildSummary(capabilities);
   const mutated = mutation.bodyChanged || mutation.focusChanged;
+  const hasBlockingCapability = capabilities.some(isBlockingCapability);
 
   return {
-    ok: !mutated && summary.unsafe === 0,
+    ok: !mutated && !hasBlockingCapability,
     mutated,
     mutation,
     capabilitiesByArea,
@@ -63,4 +83,8 @@ export function runCapabilitySelfTest(documentRoot = document, assessCapabilitie
 
 export function hasUnsafeCapabilities(selfTestResult) {
   return selfTestResult.capabilities.some((entry) => isCapabilityUnsafe(entry));
+}
+
+export function hasBlockingUnavailableCapabilities(selfTestResult) {
+  return selfTestResult.summary.blockingUnavailable > 0;
 }

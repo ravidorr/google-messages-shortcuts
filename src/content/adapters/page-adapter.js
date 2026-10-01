@@ -44,7 +44,8 @@ export function assessPageCapabilities(documentRoot, selectors = getPageSelector
     trashMenuItem: selectors.trashMenuItem,
     markUnreadMenuItem: selectors.markUnreadMenuItem,
     trashConfirmButton: selectors.trashConfirmButton,
-    menuItemFallback: selectors.menuItemFallback
+    menuItemFallback: selectors.menuItemFallback,
+    rowMenuPanel: selectors.rowMenuPanel
   };
   const list = assessListCapabilities(documentRoot, listSelectors);
   const menu = assessMenuCapabilities(documentRoot, list, menuSelectors);

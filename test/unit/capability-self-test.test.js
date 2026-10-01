@@ -1,11 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
+  hasBlockingUnavailableCapabilities,
   hasUnsafeCapabilities,
   runCapabilitySelfTest
 } from '../../src/content/adapters/capability-self-test.js';
-import { CAPABILITY_UNSAFE } from '../../src/content/adapters/capability-states.js';
+import { CAPABILITY_UNAVAILABLE, CAPABILITY_UNSAFE } from '../../src/content/adapters/capability-states.js';
 import {
+  emptyConversationList,
   fullListActionSurface,
+  openRowMenuMissingArchiveControl,
   rowMissingMenuButton
 } from '../fixtures/dom/list-states.js';
 
@@ -31,6 +34,24 @@ describe('capability-self-test', () => {
     expect(localThis.ok).toBe(false);
     expect(localThis.summary.unsafe).toBeGreaterThan(0);
     expect(hasUnsafeCapabilities(localThis)).toBe(true);
+  });
+
+  it('returns not ok when required capabilities are unavailable', () => {
+    document.body.innerHTML = emptyConversationList;
+    const localThis = runCapabilitySelfTest(document);
+
+    expect(localThis.ok).toBe(false);
+    expect(localThis.summary.blockingUnavailable).toBeGreaterThan(0);
+    expect(hasBlockingUnavailableCapabilities(localThis)).toBe(true);
+    expect(localThis.summary.blockingUnavailableCapabilityIds).toContain('list.targeting');
+  });
+
+  it('returns not ok when the row menu is open but a shipped control is missing', () => {
+    document.body.innerHTML = openRowMenuMissingArchiveControl;
+    const localThis = runCapabilitySelfTest(document);
+
+    expect(localThis.ok).toBe(false);
+    expect(localThis.summary.blockingUnavailableCapabilityIds).toContain('menu.archive');
   });
 
   it('detects focus mutations during the self-test', () => {
@@ -144,5 +165,43 @@ describe('capability-self-test', () => {
     const localThis = runCapabilitySelfTest(document, assessCapabilities);
 
     expect(localThis.summary.unsafeCapabilityIds).toContain('list.targeting');
+  });
+
+  it('allows expected unavailable composer and message pane capabilities', () => {
+    const assessCapabilities = vi.fn(() => ({
+      list: {
+        'list.targeting': {
+          state: 'supported',
+          reason: 'test',
+          evidenceSource: 'test'
+        },
+        'list.unreadDetection': {
+          state: 'supported',
+          reason: 'test',
+          evidenceSource: 'test'
+        }
+      },
+      menu: {
+        'menu.archive': {
+          state: 'supported',
+          reason: 'test',
+          evidenceSource: 'contract'
+        }
+      },
+      composer: {
+        'composer.focus': {
+          state: CAPABILITY_UNAVAILABLE,
+          reason: 'pending',
+          evidenceSource: 'phase0'
+        }
+      },
+      messagePane: {},
+      connection: {}
+    }));
+
+    const localThis = runCapabilitySelfTest(document, assessCapabilities);
+
+    expect(localThis.ok).toBe(true);
+    expect(localThis.summary.blockingUnavailable).toBe(0);
   });
 });

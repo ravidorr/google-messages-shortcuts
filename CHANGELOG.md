@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.6.29 - 2026-10-01
+
+### Fixed
+
+- Fail the capability self-test when required list or menu capabilities are unavailable, not only when they are unsafe
+- Treat missing row-menu and trash-dialog controls as unavailable when those surfaces are open instead of reporting contract-only support
+
 ## 1.6.28 - 2026-10-01
 
 ### Fixed
