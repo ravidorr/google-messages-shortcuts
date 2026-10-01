@@ -10,6 +10,11 @@ import {
   setConversationOpeningEnabled
 } from '../shared/conversation-open-preference.js';
 import {
+  isPaused,
+  setPaused
+} from '../shared/pause-preference.js';
+import { resetExtensionPreferences } from '../shared/reset-extension-preferences.js';
+import {
   isTrashConfirmationEnabled,
   setTrashConfirmationEnabled
 } from '../shared/trash-confirmation-preference.js';
@@ -65,6 +70,63 @@ export async function bindTrashConfirmationPreference(
   checkbox.disabled = false;
 }
 
+export async function bindPausePreference(
+  documentRoot = document,
+  chromeApi = chrome
+) {
+  const checkbox = documentRoot.getElementById('pause-extension');
+
+  checkbox.checked = await isPaused(chromeApi);
+  checkbox.addEventListener('change', async () => {
+    const previousValue = !checkbox.checked;
+
+    checkbox.disabled = true;
+
+    try {
+      await setPaused(checkbox.checked, chromeApi);
+    } catch (error) {
+      checkbox.checked = previousValue;
+      console.warn('[Messages Shortcut Actions] Failed to save pause preference.', error);
+    } finally {
+      checkbox.disabled = false;
+    }
+  });
+  checkbox.disabled = false;
+}
+
+export async function bindResetExtensionPreferences(
+  documentRoot = document,
+  chromeApi = chrome
+) {
+  const resetButton = documentRoot.getElementById('reset-extension-preferences');
+  const status = documentRoot.getElementById('reset-status');
+  const trashCheckbox = documentRoot.getElementById('auto-confirm-trash');
+  const openCheckbox = documentRoot.getElementById('open-conversation-on-focus');
+  const pauseCheckbox = documentRoot.getElementById('pause-extension');
+
+  resetButton.addEventListener('click', async () => {
+    resetButton.disabled = true;
+    status.hidden = true;
+    status.textContent = '';
+
+    try {
+      await resetExtensionPreferences(chromeApi);
+      trashCheckbox.checked = true;
+      openCheckbox.checked = false;
+      pauseCheckbox.checked = false;
+      status.textContent = 'Extension preferences restored to defaults.';
+      status.hidden = false;
+    } catch (error) {
+      status.textContent = 'Could not reset extension preferences. Try again.';
+      status.hidden = false;
+      console.warn('[Messages Shortcut Actions] Failed to reset extension preferences.', error);
+    } finally {
+      resetButton.disabled = false;
+    }
+  });
+  resetButton.disabled = false;
+}
+
 export async function bindConversationOpenPreference(
   documentRoot = document,
   chromeApi = chrome
@@ -99,4 +161,6 @@ export async function initializePopup(chromeApi = chrome, documentRoot = documen
   updateShortcutWarning(commands, documentRoot);
   await bindTrashConfirmationPreference(documentRoot, chromeApi);
   await bindConversationOpenPreference(documentRoot, chromeApi);
+  await bindPausePreference(documentRoot, chromeApi);
+  await bindResetExtensionPreferences(documentRoot, chromeApi);
 }

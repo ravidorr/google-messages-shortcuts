@@ -197,7 +197,7 @@ describe('runConversationAction', () => {
       chromeApi
     );
 
-    expect(result).toEqual({ ok: true });
+    expect(result).toEqual({ ok: true, pendingTrashConfirmation: true });
     expect(fixture.trashButton.click).toHaveBeenCalledTimes(1);
     expect(fixture.confirmButton.click).not.toHaveBeenCalled();
     expect(fixture.confirmButton.focus).toHaveBeenCalledTimes(1);

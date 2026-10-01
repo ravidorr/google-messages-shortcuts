@@ -21,7 +21,8 @@ describe('popup markup', () => {
         'Keyboard shortcuts',
         'Change shortcuts',
         'Trash confirmation',
-        'Conversation opening'
+        'Conversation opening',
+        'Extension controls'
       ]);
   });
 });

@@ -16,6 +16,9 @@ Chrome extension that archives, trashes, marks as read, or marks as unread the s
 - Optionally open conversations immediately when they are hovered or focused
 - Popup UI that shows the effective Chrome shortcut assignments
 - Configurable automatic confirmation for the native Move to trash dialog
+- Pause shortcut actions and conversation pills without disabling the extension
+- Reset extension preferences from the popup without changing Google Messages
+- In-page success and failure feedback with a screen-reader-friendly status region
 - Language-agnostic menu targeting through Google Messages `data-e2e-*` attributes, with English text fallback
 
 ## Requirements
@@ -55,6 +58,15 @@ conversation row link to clear unread state, even when open-on-hover/focus is
 disabled. That opens the message pane, which is Google Messages' native
 behavior for selecting a conversation.
 
+## Pause or reset the extension
+
+The popup's **Pause shortcut actions and pills** setting disables keyboard
+shortcuts and conversation pills on Google Messages Web while leaving native
+Google Messages behavior unchanged.
+
+**Reset extension preferences** restores popup defaults only. It does not
+archive, trash, or modify conversations and does not store message content.
+
 If Chrome or the operating system already uses a suggested shortcut, Chrome may leave that command unassigned until you choose a different key combination.
 
 ## How it works
@@ -80,7 +92,7 @@ If Chrome or the operating system already uses a suggested shortcut, Chrome may 
 
 Phase 0 adds a fail-closed page adapter and a non-destructive capability self-test. The self-test only queries the page; it does not open menus, change read state, or store conversation content.
 
-Phase 1 wires matrix-approved row actions through a single action registry. Before running an action, the content script runs the same capability assessment used by the self-test and blocks when list or menu selectors are unavailable or unsafe. Mark as unread prefers English menu fallback text when the primary e2e attribute is missing, matching live en-US validation. Mark as read uses open-row execution because the row menu does not expose a mark-as-read item.
+Phase 1 wires matrix-approved row actions through a single action registry. Before running an action, the content script runs the same capability assessment used by the self-test and blocks when list or menu selectors are unavailable or unsafe. Mark as unread prefers English menu fallback text when the primary e2e attribute is missing, matching live en-US validation. Mark as read uses open-row execution because the row menu does not expose a mark-as-read item. Paused state, capability blocks, and action outcomes surface through an in-page status region with recovery guidance.
 
 On Google Messages Web, rebuild and reload the unpacked extension from `dist/`, then open DevTools on the page console (not an extension context) and run:
 

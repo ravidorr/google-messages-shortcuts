@@ -108,11 +108,13 @@ async function clickMenuAction(
 function handleTrashConfirmation(confirmButton, shouldConfirm) {
   if (shouldConfirm) {
     confirmButton.click();
-  } else {
-    confirmButton.focus();
+
+    return { ok: true };
   }
 
-  return { ok: true };
+  confirmButton.focus();
+
+  return { ok: true, pendingTrashConfirmation: true };
 }
 
 async function confirmTrash(documentRoot, shouldConfirm = true) {

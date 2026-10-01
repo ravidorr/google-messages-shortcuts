@@ -4,6 +4,7 @@ import {
   installConversationShortcutPills,
   resetConversationShortcutPillInstallationsForTests
 } from './src/content/conversation-shortcut-pills.js';
+import { resetActionFeedbackForTests } from './src/content/action-feedback.js';
 import { handleCommand, installMessageListener } from './src/content/message-handler.js';
 import {
   createDefaultPageWorldBridgeHandlers,
@@ -26,6 +27,7 @@ export function resetContentScriptForTests() {
   disconnectPills();
   disconnectPageWorldBridge();
   resetConversationShortcutPillInstallationsForTests();
+  resetActionFeedbackForTests();
 }
 
 globalThis.MessagesShortcuts = {

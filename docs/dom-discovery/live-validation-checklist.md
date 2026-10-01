@@ -48,13 +48,25 @@ Use this checklist against a signed-in Google Messages Web test account before c
 
 ### Row menu actions (Phase 1 candidates)
 
-For each action below, open the row menu on a disposable thread and record selectors, labels, and confirmation requirements. If no stable primary selector exists, mark the action **deferred** in [phase1-action-decisions.md](./phase1-action-decisions.md).
+For each action below, open the row menu on a disposable thread and record evidence using this field set in [compatibility-matrix.md](./compatibility-matrix.md):
 
-- [ ] Mark as read
+- target view (inbox, archived, group thread)
+- stable primary selector or tested fallback
+- source-state signal and precondition
+- bounded postcondition signal (not click-only success)
+- delayed render behavior
+- row reorder or virtualization behavior
+- cancellation or failure result
+
+If any field cannot be satisfied safely, mark the action **defer** or **block** in [phase1-action-decisions.md](./phase1-action-decisions.md) and do not implement it.
+
+- [ ] Mark as read (row menu path; open-row path already approved)
 - [ ] Pin / unpin
 - [ ] Mute / unmute
 - [ ] Unarchive (from archived view if available)
 - [ ] Block / report spam (note dialogs and irreversible effects)
+
+Optional helper: paste [output/deferred-action-validation-console.js](../../output/deferred-action-validation-console.js) into the Google Messages page console after the capability self-test. Copy only sanitized JSON back into the matrix.
 
 ### Account and thread context
 

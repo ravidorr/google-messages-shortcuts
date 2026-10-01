@@ -12,18 +12,21 @@ When you use a keyboard shortcut:
 
 1. The extension checks whether the active tab is Google Messages Web.
 2. The extension sends the shortcut command to the content script in that tab.
-3. The content script interacts with the Google Messages page DOM to archive, trash, or mark as unread the selected or hovered conversation.
+3. The content script interacts with the Google Messages page DOM to archive, trash, mark as read, or mark as unread the selected or hovered conversation.
 
 All of those steps happen on your device.
 
 ## Local preferences
 
-The extension stores two popup settings locally with `chrome.storage.local`:
+The extension stores three popup settings locally with `chrome.storage.local`:
 
 - `autoConfirmTrash`: whether trash shortcuts and pills automatically confirm Google Messages' native Move to trash dialog
 - `openConversationOnFocus`: whether hovering or focusing a conversation opens it immediately
+- `extensionPaused`: whether shortcut actions and conversation pills are disabled on Google Messages Web
 
 These preferences stay on your device. They are not synced or transmitted by this extension.
+
+Resetting extension preferences from the popup restores those defaults. It does not change Google Messages conversations or store message content.
 
 ## Network access
 
@@ -32,7 +35,7 @@ The extension requests host permission for `https://messages.google.com/*` so it
 ## Permissions
 
 - `tabs`: used to identify the active tab and forward shortcut commands to Google Messages Web
-- `storage`: used to persist the two local popup preferences described above
+- `storage`: used to persist the local popup preferences described above
 
 ## Contact
 

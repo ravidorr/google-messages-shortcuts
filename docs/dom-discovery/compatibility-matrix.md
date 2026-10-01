@@ -8,6 +8,22 @@ Record live validation results from [live-validation-checklist.md](./live-valida
 | ---- | ------- | --------- | ------ | --------- | -------- | -------------------- | ----- |
 | YYYY-MM-DD | Chrome x.y | x.y.z | en-US | LTR | Baseline list + archive/trash/unread | pass / fail | Link to issue or PR if selectors changed |
 
+### Deferred action evidence fields
+
+When validating pin/unpin, mute/unmute, or unarchive, add a short note per action covering:
+
+| Field | Example values |
+| ----- | ---------------- |
+| Target view | inbox, archived, group thread |
+| Primary selector | `button[data-e2e-conversation-menu-mute]` |
+| Source-state signal | muted icon present, pinned placement, archived row marker |
+| Postcondition | mute icon appears within 2s, row leaves archived list |
+| Delayed render | menu item appears after 300ms throttle |
+| Virtualization | row node replaced after pin reorder |
+| Failure mode | duplicate selector, missing control, stale target |
+
+Use **approve** only when automation can fail closed with a bounded postcondition. Otherwise keep **defer** or **block**.
+
 ### Scenario codes
 
 - `baseline`: signed-in list with read and unread rows

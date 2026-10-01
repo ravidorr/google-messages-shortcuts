@@ -32,6 +32,12 @@ States:
 
 These are not row actions but share the same gate: Phase 4 content features must not ship until corresponding spikes pass.
 
+## Foundation release (2026-10-01)
+
+- Pause/reset controls, in-page action feedback, and popup disclosures shipped in extension 1.6.36.
+- Pin/unpin, mute/unmute, and unarchive remain **defer** until live validation records bounded postconditions for each action in [compatibility-matrix.md](./compatibility-matrix.md).
+- Use [output/deferred-action-validation-console.js](../../output/deferred-action-validation-console.js) for sanitized selector evidence only; do not commit conversation content.
+
 ## Sign-off
 
 - Phase 0 code scaffold: adapter contracts, self-test, fixtures, and this decision log.

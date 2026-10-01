@@ -18,6 +18,16 @@ function createChromeMock() {
       query: vi.fn(async () => []),
       sendMessage: vi.fn(async () => ({})),
       create: vi.fn(async () => ({}))
+    },
+    storage: {
+      local: {
+        get: vi.fn(async () => ({})),
+        set: vi.fn(async () => {})
+      },
+      onChanged: {
+        addListener: vi.fn(),
+        removeListener: vi.fn()
+      }
     }
   };
 }

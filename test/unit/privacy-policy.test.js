@@ -10,10 +10,11 @@ describe('privacy policy', () => {
   it('documents local preference storage and supported shortcut actions', async () => {
     const privacyPolicy = await readFile(privacyPolicyPath, 'utf8');
 
-    expect(privacyPolicy).toContain('archive, trash, or mark as unread');
+    expect(privacyPolicy).toContain('mark as read');
     expect(privacyPolicy).toContain('`storage`');
     expect(privacyPolicy).toContain('`autoConfirmTrash`');
     expect(privacyPolicy).toContain('`openConversationOnFocus`');
+    expect(privacyPolicy).toContain('`extensionPaused`');
     expect(privacyPolicy).toMatch(/not synced or transmitted/i);
   });
 });
