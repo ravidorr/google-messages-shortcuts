@@ -331,7 +331,8 @@ function createInstallation({
     }
 
     if (
-      !conversationRow.isConnected
+      paused
+      || !conversationRow.isConnected
       || conversationRow.querySelector(PILL_GROUP_SELECTOR)
       || !shouldShowPills(conversationRow, focusedRows, hoveredRows)
     ) {

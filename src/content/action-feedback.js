@@ -93,6 +93,13 @@ function ensureFeedbackRoot(documentRoot) {
 
 export function getActionFeedbackMessage(result, command) {
   if (result?.ok) {
+    if (command === COMMAND_TRASH && result.pendingTrashConfirmation) {
+      return {
+        kind: 'info',
+        message: 'Confirm Move to trash in the Google Messages dialog to finish.'
+      };
+    }
+
     const action = getRowAction(command);
 
     return {

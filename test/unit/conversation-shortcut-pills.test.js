@@ -1566,6 +1566,48 @@ describe('conversation shortcut pills', () => {
     });
   });
 
+  it('does not show pills after labels load when pause state changed during fetch', async () => {
+    const row = createConversationRow({ focused: true });
+    const storageListeners = [];
+    let resolveLabels;
+    const chromeApi = {
+      storage: {
+        onChanged: {
+          addListener: vi.fn((listener) => {
+            storageListeners.push(listener);
+          }),
+          removeListener: vi.fn()
+        }
+      }
+    };
+
+    document.body.append(row);
+
+    disconnect = installConversationShortcutPills({
+      documentRoot: document,
+      chromeApi,
+      getShortcutLabels: vi.fn(() => new Promise((resolve) => {
+        resolveLabels = resolve;
+      })),
+      getPausedState: vi.fn(async () => false)
+    });
+
+    await vi.waitFor(() => {
+      expect(typeof resolveLabels).toBe('function');
+    });
+
+    storageListeners[0]({ extensionPaused: { newValue: true } }, 'local');
+    resolveLabels({
+      archive: 'Ctrl+Shift+Y',
+      trash: 'Ctrl+Shift+D',
+      markRead: 'Ctrl+Shift+K',
+      markUnread: 'Ctrl+Shift+U'
+    });
+    await Promise.resolve();
+
+    expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(0);
+  });
+
   it('removes pills when pause state changes in storage', async () => {
     const row = createConversationRow({ focused: true });
     const storageListeners = [];

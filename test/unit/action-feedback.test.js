@@ -33,6 +33,18 @@ describe('action-feedback', () => {
     });
   });
 
+  it('reports pending trash confirmation instead of success', () => {
+    const localThis = getActionFeedbackMessage(
+      { ok: true, pendingTrashConfirmation: true },
+      COMMAND_TRASH
+    );
+
+    expect(localThis).toEqual({
+      kind: 'info',
+      message: 'Confirm Move to trash in the Google Messages dialog to finish.'
+    });
+  });
+
   it('maps failure reasons to safe recovery copy', () => {
     const reasons = [
       ['extension-paused', 'info'],
