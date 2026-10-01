@@ -339,7 +339,7 @@ describe('init-popup', () => {
 
     await initializePopup(chromeApi, document);
 
-    expect(document.querySelectorAll('.shortcut-item')).toHaveLength(4);
+    expect(document.querySelectorAll('.shortcut-item')).toHaveLength(6);
     expect(document.getElementById('shortcut-warning').hidden).toBe(true);
     expect(document.getElementById('auto-confirm-trash').checked).toBe(true);
   });

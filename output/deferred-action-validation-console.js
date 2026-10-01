@@ -20,7 +20,7 @@
   const observedControls = [
     'button[data-e2e-conversation-menu-mute]',
     'button[data-e2e-conversation-menu-pin]',
-    'button[data-e2e-conversation-menu-unarchive]'
+    'button[data-e2e-unarchive-button]'
   ].map((selector) => ({
     selector,
     matchCount: document.querySelectorAll(selector).length
@@ -42,6 +42,15 @@
       menuPanelOpen: Boolean(document.querySelector(menuPanelSelector))
     },
     observedControls,
-    note: 'Sanitized structural evidence only. Exercise pin, mute, and unarchive manually on disposable threads before approving implementation.'
+    note: 'Sanitized structural evidence only. Exercise pin and mute via row overflow menu on disposable threads. Unarchive uses a separate Archived modal with inline Unarchive buttons (not conversation-actions-menu).'
   }, null, 2));
 })();
+
+// Archived modal probe (run with the "Archived" dialog open):
+// console.log(JSON.stringify({
+//   phase: 'archived-modal',
+//   dialogOpen: Boolean(document.querySelector('mat-dialog-container')),
+//   unarchiveButtonCount: document.querySelectorAll('button[data-e2e-unarchive-button]').length,
+//   unarchiveControls: [...document.querySelectorAll('button[data-e2e-unarchive-button]')].slice(0, 3)
+//     .map((el) => ({ label: el.textContent?.trim(), e2e: 'data-e2e-unarchive-button' }))
+// }, null, 2));

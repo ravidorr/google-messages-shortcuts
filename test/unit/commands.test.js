@@ -3,19 +3,33 @@ import {
   COMMAND_ARCHIVE,
   COMMAND_MARK_READ,
   COMMAND_MARK_UNREAD,
+  COMMAND_MUTE,
   COMMAND_TRASH,
+  COMMAND_UNMUTE,
+  MANIFEST_COMMANDS,
+  MAX_MANIFEST_COMMANDS,
+  isManifestCommand,
   isValidCommand
 } from '../../src/shared/commands.js';
 
 describe('commands', () => {
-  it('accepts archive, trash, mark-read, and mark-unread commands', () => {
+  it('accepts approved row action commands', () => {
     expect(isValidCommand(COMMAND_ARCHIVE)).toBe(true);
     expect(isValidCommand(COMMAND_TRASH)).toBe(true);
     expect(isValidCommand(COMMAND_MARK_UNREAD)).toBe(true);
     expect(isValidCommand(COMMAND_MARK_READ)).toBe(true);
+    expect(isValidCommand(COMMAND_MUTE)).toBe(true);
+    expect(isValidCommand(COMMAND_UNMUTE)).toBe(true);
   });
 
   it('rejects unknown commands', () => {
     expect(isValidCommand('unknown-command')).toBe(false);
+  });
+
+  it('keeps manifest commands within the Chrome limit', () => {
+    expect(MANIFEST_COMMANDS).toHaveLength(MAX_MANIFEST_COMMANDS);
+    expect(isManifestCommand(COMMAND_MUTE)).toBe(false);
+    expect(isManifestCommand(COMMAND_UNMUTE)).toBe(false);
+    expect(isManifestCommand(COMMAND_ARCHIVE)).toBe(true);
   });
 });

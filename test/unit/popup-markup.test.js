@@ -15,7 +15,7 @@ describe('popup markup', () => {
     const sections = [...document.querySelectorAll('.popup__section')];
 
     expect(document.querySelector('.popup__subtitle').textContent.trim())
-      .toBe('Archive, trash, or mark Google Messages conversations as unread.');
+      .toBe('Archive, trash, mute, or mark Google Messages conversations from the list.');
     expect(sections.map((section) => section.querySelector('.popup__section-title').textContent.trim()))
       .toEqual([
         'Keyboard shortcuts',

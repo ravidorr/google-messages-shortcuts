@@ -2,7 +2,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { runConversationAction } from '../../src/content/conversation-action.js';
 import { MENU_TEXT, SELECTORS } from '../../src/content/google-messages-dom.js';
 import { POLL_INTERVAL_MS } from '../../src/content/wait-for-element.js';
-import { COMMAND_ARCHIVE, COMMAND_MARK_UNREAD, COMMAND_TRASH } from '../../src/shared/commands.js';
+import {
+  COMMAND_ARCHIVE,
+  COMMAND_MARK_UNREAD,
+  COMMAND_MUTE,
+  COMMAND_TRASH
+} from '../../src/shared/commands.js';
 
 function createGoogleMessagesFixture() {
   document.body.innerHTML = `
@@ -206,5 +211,43 @@ describe('google messages action flows', () => {
     expect(localThis.targetMenu.click).toHaveBeenCalledTimes(1);
     expect(localThis.selectedMenu.click).not.toHaveBeenCalled();
     expect(clickedButtons.markUnread.click).toHaveBeenCalledTimes(1);
+  });
+
+  it('mutes only the supplied row when toggle menu items render later', async () => {
+    const localThis = createGoogleMessagesFixture();
+    const clickedButtons = {
+      mute: null
+    };
+
+    vi.spyOn(localThis.selectedMenu, 'click');
+    vi.spyOn(localThis.targetMenu, 'click');
+
+    const actionPromise = runConversationAction(
+      document,
+      COMMAND_MUTE,
+      SELECTORS,
+      localThis.targetRow
+    );
+
+    setTimeout(() => {
+      document.body.insertAdjacentHTML(
+        'beforeend',
+        `<div role="menu" class="conversation-actions-menu">
+          <button class="mat-mdc-menu-item">${MENU_TEXT.mute}</button>
+        </div>`
+      );
+      clickedButtons.mute = document.querySelector('.mat-mdc-menu-item');
+      vi.spyOn(clickedButtons.mute, 'click').mockImplementation(() => {
+        clickedButtons.mute.textContent = MENU_TEXT.unmute;
+        clickedButtons.mute.setAttribute('data-e2e-conversation-menu-mute', '');
+      });
+    }, POLL_INTERVAL_MS);
+
+    const result = await advanceUntilActionCompletes(actionPromise);
+
+    expect(result).toEqual({ ok: true });
+    expect(localThis.targetMenu.click).toHaveBeenCalledTimes(2);
+    expect(localThis.selectedMenu.click).not.toHaveBeenCalled();
+    expect(clickedButtons.mute.click).toHaveBeenCalledTimes(1);
   });
 });

@@ -8,6 +8,7 @@ import {
   ACTION_DECISION_APPROVE,
   EXECUTION_KIND_OPEN_ROW,
   getApprovedCommands,
+  getManifestEligibleActions,
   getPopupLabelsByCommand,
   getRowAction,
   isApprovedRowAction
@@ -16,7 +17,10 @@ import {
   COMMAND_ARCHIVE,
   COMMAND_MARK_READ,
   COMMAND_MARK_UNREAD,
+  COMMAND_MUTE,
   COMMAND_TRASH,
+  COMMAND_UNMUTE,
+  MANIFEST_COMMANDS,
   VALID_COMMANDS
 } from '../../src/shared/commands.js';
 
@@ -25,12 +29,14 @@ const decisionsPath = fileURLToPath(
 );
 
 describe('row-action-registry', () => {
-  it('registers the four matrix-approved row actions', () => {
+  it('registers the matrix-approved row actions', () => {
     expect(getApprovedCommands()).toEqual([
       COMMAND_ARCHIVE,
       COMMAND_TRASH,
       COMMAND_MARK_READ,
-      COMMAND_MARK_UNREAD
+      COMMAND_MARK_UNREAD,
+      COMMAND_MUTE,
+      COMMAND_UNMUTE
     ]);
     expect(APPROVED_ROW_ACTIONS.every((action) => action.decision === ACTION_DECISION_APPROVE)).toBe(
       true
@@ -41,10 +47,19 @@ describe('row-action-registry', () => {
     expect(new Set(getApprovedCommands())).toEqual(VALID_COMMANDS);
   });
 
+  it('limits manifest-eligible actions to the Chrome command cap', () => {
+    expect(new Set(getManifestEligibleActions().map((action) => action.command)))
+      .toEqual(new Set(MANIFEST_COMMANDS));
+    expect(getRowAction(COMMAND_MUTE)?.pillOnly).toBe(true);
+    expect(getRowAction(COMMAND_UNMUTE)?.pillOnly).toBe(true);
+  });
+
   it('resolves row actions by command id', () => {
     expect(getRowAction(COMMAND_ARCHIVE)?.capabilityId).toBe('menu.archive');
     expect(getRowAction(COMMAND_TRASH)?.executionKind).toBe('trash-with-confirm');
     expect(getRowAction(COMMAND_MARK_UNREAD)?.selectorStrategy).toBe('fallback-first');
+    expect(getRowAction(COMMAND_MUTE)?.selectorStrategy).toBe('label-matched');
+    expect(getRowAction(COMMAND_UNMUTE)?.menuItemSelectorKey).toBe('muteMenuItem');
     expect(getRowAction(COMMAND_MARK_READ)?.executionKind).toBe(EXECUTION_KIND_OPEN_ROW);
     expect(isApprovedRowAction('unsupported')).toBe(false);
     expect(getRowAction('unsupported')).toBeNull();
@@ -62,7 +77,9 @@ describe('row-action-registry', () => {
       'Archive',
       'Move to trash',
       'Mark as unread',
-      'Mark as read (open row)'
+      'Mark as read (open row)',
+      'Mute conversation',
+      'Unmute conversation'
     ];
 
     for (const rowLabel of approveRows) {

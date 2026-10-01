@@ -49,6 +49,14 @@ Use **pass** when `runCapabilitySelfTest()` returns `ok: true` (no DOM mutation,
 | 2026-10-01 | Chrome | 1.6.28 | en-US | LTR | baseline-trash-dialog-open | pass | Self-test with dialog open: `menu.trashConfirm` `dom-query`; `menu.archive`, `menu.trash`, and `menu.markUnread` `contract` (row menu not open). `ok: true`, `unsafe: 0`, `mutated: false`. |
 | 2026-10-01 | Chrome 154 | 1.6.32 | en-US | LTR | baseline | pass | `ok: true`, `unsafe: 0`, `mutated: false`. `list.conversationLink` `dom-structure` supported; seven capabilities supported; eight deferred unavailable (composer, message pane, connection) as expected. |
 | 2026-10-01 | Chrome 154 | 1.6.33 | en-US | LTR | baseline (mark-as-read production validation) | pass | Self-test pass on signed-in list (24 unread rows). Open-on-hover/focus disabled: hover kept unread marker and URL unchanged. Mark-as-read pill and `Command+Shift+K` on a hovered unread row (while another read conversation stayed selected) cleared unread state and opened the pane via `a[data-e2e-conversation]`. |
+| 2026-10-01 | Chrome 154.0.8037.93 | 1.6.37 | en | LTR | baseline (foundation smoke) | pass | Pause on/off, reset preferences, and mark-as-read on unread row verified. Mark-as-read shows success toast (`Conversation marked as read.`); no false error toast after rerender-timeout fix. |
+| 2026-10-01 | Chrome 154.0.8037.93 | 1.6.37 | en | LTR | baseline (deferred structural probe) | pass | [deferred-action-validation-console.js](../../output/deferred-action-validation-console.js): `ok: true`, `mutated: false`, 25 rows, `hasMenuButton: true`, `menuPanelOpen: false`. Pin/mute/unarchive e2e selectors `matchCount: 0` with menu closed (expected). |
+| 2026-10-01 | Chrome 154.0.8037.93 | 1.6.37 | en | LTR | baseline (row menu open, pin inspection) | n/a | Overflow menu on promo/business inbox row: Archive, Block & report spam, Move to trash, Mute only. No Pin or Unpin. |
+| 2026-10-01 | Chrome 154.0.8037.93 | 1.6.37 | en | LTR | baseline (row menu open, 1:1 SMS pin inspection) | n/a | Overflow menu on 1:1 SMS inbox row: same four items; no Pin or Unpin. Confirms missing control is not thread-type-specific on web. |
+| 2026-10-01 | Chrome 154.0.8037.93 | 1.6.37 | en | LTR | baseline (mute/unmute, disposable inbox row) | n/a | Pre-mute with menu open: `button[data-e2e-conversation-menu-mute]` `matchCount: 1`, label `Mute`. Menu items: Archive, Block & report spam, Move to trash, Mute, Mark as unread. Native mute and unmute exercised on same row. Post-mute list-row probes (`data-e2e-muted`, `.muted`, aria muted) all false (candidate signals not validated). Post-unmute probe run with menu closed (`menuLabel: null`). |
+| 2026-10-01 | Chrome 154.0.8037.93 | 1.6.37 | en | LTR | archived-view (unarchive attempt) | n/a | Archived UI is a **modal dialog** titled "Archived" with per-row inline **Unarchive** buttons (not row overflow menu). Menu-based probes (`conversation-actions-menu`, `data-e2e-conversation-menu-unarchive`) correctly returned empty. Native unarchive click succeeded; post-unarchive `backInInbox: true`. |
+| 2026-10-01 | Chrome 154.0.8037.93 | 1.6.37 | en | LTR | baseline (mute menu toggle) | n/a | After mute on disposable inbox row, menu reopen: `menuPanelOpen: true`, `button[data-e2e-conversation-menu-mute]` label `Unmute`. Bounded postcondition satisfied. |
+| 2026-10-01 | Chrome 154.0.8037.93 | 1.6.37 | en | LTR | archived-view (modal selector probe) | n/a | Archived modal open: `mat-dialog-container` present; `button[data-e2e-unarchive-button]` count 25; label `Unarchive`. Not `data-e2e-conversation-menu-unarchive`. |
 
 ## Selector evidence log
 
@@ -64,7 +72,11 @@ Use **pass** when `runCapabilitySelfTest()` returns `ok: true` (no DOM mutation,
 | Mark as read (open row) | `a[data-e2e-conversation]` inside `mws-conversation-list-item` | n/a | en-US live | 5 | 2026-10-01 |
 | Trash confirm | `mat-dialog-container button[data-e2e-action-button-confirm]` | English "Move to trash" | en-US live | 5 | 2026-10-01 |
 | Block and report spam | `button[data-e2e-conversation-menu-block]` | English "Block & report spam" | en-US live | 4 | 2026-10-01 |
-| Mute | `button[data-e2e-conversation-menu-mute]` | English "Mute" / "Unmute" (toggle not re-verified) | en-US live | 4 | 2026-10-01 |
+| Mute / unmute (menu toggle) | `button[data-e2e-conversation-menu-mute]` (same node; label `Mute` ↔ `Unmute`) | English "Mute" / "Unmute" | en live | 5 | 2026-10-01 |
+| Mute state (list row) | _not used_ (menu-label toggle is postcondition) | n/a | en live | n/a | 2026-10-01 |
+| Unarchive (archived modal) | `button[data-e2e-unarchive-button]` in `mat-dialog-container` | English "Unarchive" | en live | 5 | 2026-10-01 |
+| Pin (web row menu) | _not present_ | n/a | en live | 5 | 2026-10-01 |
+| Unpin (web row menu) | _not present_ | n/a | en live | 5 | 2026-10-01 |
 | Composer | _not validated_ | n/a | n/a | 1 | Phase 0 gate |
 | Message pane | _not validated_ | n/a | n/a | 1 | Phase 0 gate |
 | Connection status | _not validated_ | n/a | n/a | 1 | Phase 0 gate |
@@ -88,3 +100,11 @@ Use **pass** when `runCapabilitySelfTest()` returns `ok: true` (no DOM mutation,
 
 - Mark-as-read pill on a hovered unread row cleared the unread marker and opened the message pane (manual pass).
 - Mark-as-read keyboard shortcut (`Command+Shift+K`) on a hovered unread row while another read conversation stayed selected: pass with hovered-then-focused-then-selected target resolution.
+
+### Live notes (2026-10-01, en, extension 1.6.37, Chrome 154)
+
+- Foundation smoke pass: pause/reset controls, mark-as-read success feedback after 1.6.37 rerender-timeout fix (no false error toast when conversation opens).
+- Deferred structural probe: self-test `ok: true`, `mutated: false`; list row and menu button present; candidate pin/mute/unarchive e2e selectors only queried with menu closed.
+- Pin/unpin (web): row overflow menu inspected on promo/business and 1:1 SMS inbox rows. Menu items are Archive, Block & report spam, Move to trash, and Mute only. No Pin or Unpin control; `button[data-e2e-conversation-menu-pin]` not in DOM with menu open. Aligns with [Google Messages pin help](https://support.google.com/messages/answer/10930955) (pin/unpin action mobile-only; pinned rows may sync for display on web). Decision: **block** pin/unpin automation on Google Messages Web.
+- Mute/unmute: `button[data-e2e-conversation-menu-mute]` confirmed; label toggles `Mute` → `Unmute` after native mute (menu reopen probe). List-row mute icon not required; menu-label is bounded postcondition. Decision: **approve** for menu-action implementation.
+- Unarchive: Archived modal (title "Archived", Done footer) with inline `button[data-e2e-unarchive-button]` per row (`unarchiveCount: 25`). Not a row overflow menu item; do not use `data-e2e-conversation-menu-unarchive`. Native unarchive + `backInInbox: true` verified. Selector **approve**; coding **defer** until archived-modal execution kind exists.

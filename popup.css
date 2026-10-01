@@ -98,6 +98,11 @@ body {
   color: #174ea6;
 }
 
+.shortcut-status--pill-only {
+  background: #f1f3f4;
+  color: #5f6368;
+}
+
 .shortcut-status--missing {
   background: #fce8e6;
   color: #c5221f;
@@ -166,6 +171,11 @@ body {
   .shortcut-status--assigned {
     background: #174ea6;
     color: #e8f0fe;
+  }
+
+  .shortcut-status--pill-only {
+    background: #3c4043;
+    color: #bdc1c6;
   }
 
   .shortcut-status--missing {

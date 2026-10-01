@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.7.1 - 2026-10-01
+
+### Fixed
+
+- Remove mute and unmute from the manifest so the extension loads within Chrome's four-command limit
+
+### Changed
+
+- Expose mute and unmute as row pills only; the popup shows "Row pill only" for those actions
+
+## 1.7.0 - 2026-10-01
+
+### Added
+
+- Mute and unmute conversation shortcuts, popup entries, and row pills via the row overflow menu
+- Label-matched menu click strategy for toggle items that share one `data-e2e-*` selector
+- Menu-label postcondition polling after mute and unmute (`Mute` ↔ `Unmute`)
+
+### Changed
+
+- Record live validation evidence for mute/unmute approval and archived-modal unarchive selector discovery
+
 ## 1.6.37 - 2026-10-01
 
 ### Fixed

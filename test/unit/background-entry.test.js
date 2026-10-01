@@ -73,7 +73,9 @@ describe('background entry', () => {
         archive: 'Ctrl+Shift+Y',
         trash: 'Not assigned',
         markRead: 'Not assigned',
-        markUnread: 'Not assigned'
+        markUnread: 'Not assigned',
+        mute: 'Not assigned',
+        unmute: 'Not assigned'
       });
     });
   });

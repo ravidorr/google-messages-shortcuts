@@ -2,7 +2,9 @@ import {
   COMMAND_ARCHIVE,
   COMMAND_MARK_READ,
   COMMAND_MARK_UNREAD,
-  COMMAND_TRASH
+  COMMAND_MUTE,
+  COMMAND_TRASH,
+  COMMAND_UNMUTE
 } from '../shared/commands.js';
 import { getRowAction } from './row-action-registry.js';
 
@@ -16,7 +18,9 @@ const SUCCESS_MESSAGES = {
   [COMMAND_ARCHIVE]: 'Conversation archived.',
   [COMMAND_TRASH]: 'Conversation moved to trash.',
   [COMMAND_MARK_READ]: 'Conversation marked as read.',
-  [COMMAND_MARK_UNREAD]: 'Conversation marked as unread.'
+  [COMMAND_MARK_UNREAD]: 'Conversation marked as unread.',
+  [COMMAND_MUTE]: 'Conversation muted.',
+  [COMMAND_UNMUTE]: 'Conversation unmuted.'
 };
 
 let hideTimeoutId;
@@ -136,6 +140,16 @@ export function getActionFeedbackMessage(result, command) {
       return {
         kind: 'info',
         message: 'This conversation is already unread.'
+      };
+    case 'already-muted':
+      return {
+        kind: 'info',
+        message: 'This conversation is already muted.'
+      };
+    case 'not-muted':
+      return {
+        kind: 'info',
+        message: 'This conversation is not muted.'
       };
     case 'action-in-progress':
       return {

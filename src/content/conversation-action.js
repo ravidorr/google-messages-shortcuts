@@ -13,14 +13,17 @@ import {
   hasConversationNavigationStarted,
   waitForConversationRead
 } from './conversation-read-state.js';
+import { findLabelMatchedMenuItem } from './adapters/menu-adapter.js';
 import { MENU_TEXT, SELECTORS } from './google-messages-dom.js';
 import { beginMenuAction, endMenuAction } from './menu-action-overlay.js';
+import { waitForTargetRowPostcondition } from './row-postcondition.js';
 import {
   EXECUTION_KIND_MENU_CLICK,
   EXECUTION_KIND_OPEN_ROW,
   EXECUTION_KIND_TRASH_WITH_CONFIRM,
   getRowAction,
   SELECTOR_STRATEGY_FALLBACK_FIRST,
+  SELECTOR_STRATEGY_LABEL_MATCHED,
   SELECTOR_STRATEGY_PRIMARY_THEN_FALLBACK
 } from './row-action-registry.js';
 import { waitForElement, waitForSelector } from './wait-for-element.js';
@@ -68,13 +71,66 @@ async function clickFallbackMenuItem(documentRoot, selectors, fallbackText) {
   return { ok: true };
 }
 
+async function clickLabelMatchedMenuItem(
+  documentRoot,
+  primarySelector,
+  expectedLabel,
+  selectors,
+  wrongStateReason
+) {
+  const matchedItem = findLabelMatchedMenuItem(
+    documentRoot,
+    primarySelector,
+    expectedLabel,
+    selectors
+  );
+
+  if (matchedItem) {
+    matchedItem.click();
+
+    return { ok: true };
+  }
+
+  if (documentRoot.querySelector(primarySelector)) {
+    return { ok: false, reason: wrongStateReason };
+  }
+
+  try {
+    const fallbackItem = await waitForElement(
+      documentRoot,
+      selectors.menuItemFallback,
+      expectedLabel
+    );
+
+    fallbackItem.click();
+
+    return { ok: true };
+  } catch (error) {
+    return {
+      ok: false,
+      reason: error.message
+    };
+  }
+}
+
 async function clickMenuAction(
   documentRoot,
   primarySelector,
   fallbackText,
   selectors,
-  selectorStrategy = SELECTOR_STRATEGY_PRIMARY_THEN_FALLBACK
+  selectorStrategy = SELECTOR_STRATEGY_PRIMARY_THEN_FALLBACK,
+  wrongStateReason = null
 ) {
+  if (selectorStrategy === SELECTOR_STRATEGY_LABEL_MATCHED) {
+    return clickLabelMatchedMenuItem(
+      documentRoot,
+      primarySelector,
+      fallbackText,
+      selectors,
+      wrongStateReason
+    );
+  }
+
   if (selectorStrategy === SELECTOR_STRATEGY_FALLBACK_FIRST) {
     if (clickPrimaryMenuItemSync(documentRoot, primarySelector)) {
       return { ok: true };
@@ -146,14 +202,59 @@ async function confirmTrash(documentRoot, shouldConfirm = true) {
   }
 }
 
-async function executeMenuClickAction(documentRoot, action, selectors) {
-  return clickMenuAction(
+async function verifyPostClickMenuLabel(
+  documentRoot,
+  conversationRow,
+  action,
+  selectors
+) {
+  if (!action.postClickMenuLabel) {
+    return { ok: true };
+  }
+
+  const menuButton = findRowMenuButton(conversationRow, selectors);
+
+  if (!menuButton) {
+    return { ok: false, reason: 'menu-button-not-found' };
+  }
+
+  beginMenuAction(documentRoot);
+
+  try {
+    menuButton.click();
+
+    return await waitForTargetRowPostcondition({
+      conversationRow,
+      isSatisfied: () => Boolean(
+        findLabelMatchedMenuItem(
+          documentRoot,
+          selectors[action.menuItemSelectorKey],
+          action.postClickMenuLabel,
+          selectors
+        )
+      ),
+      timeoutMs: 2000
+    });
+  } finally {
+    endMenuAction(documentRoot);
+  }
+}
+
+async function executeMenuClickAction(documentRoot, action, selectors, conversationRow) {
+  const clickResult = await clickMenuAction(
     documentRoot,
     selectors[action.menuItemSelectorKey],
     action.fallbackText,
     selectors,
-    action.selectorStrategy
+    action.selectorStrategy,
+    action.wrongStateReason
   );
+
+  if (!clickResult.ok) {
+    return clickResult;
+  }
+
+  return verifyPostClickMenuLabel(documentRoot, conversationRow, action, selectors);
 }
 
 async function executeOpenRowAction(documentRoot, conversationRow, selectors) {
@@ -218,7 +319,7 @@ async function executeRowAction(documentRoot, action, selectors, chromeApi, conv
   }
 
   if (action.executionKind === EXECUTION_KIND_MENU_CLICK) {
-    return executeMenuClickAction(documentRoot, action, selectors);
+    return executeMenuClickAction(documentRoot, action, selectors, conversationRow);
   }
 
   return { ok: false, reason: 'unknown-command' };

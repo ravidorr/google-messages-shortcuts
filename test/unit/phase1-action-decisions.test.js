@@ -18,6 +18,6 @@ describe('phase1 action decisions', () => {
     expect(localThis).toContain('| Mark as read (open row) | **Approve** |');
     expect(localThis).toContain('| Block / report spam | **Defer** |');
     expect(localThis).toContain('Composer adapter | **Block**');
-    expect(getApprovedCommands()).toHaveLength(4);
+    expect(getApprovedCommands()).toHaveLength(6);
   });
 });

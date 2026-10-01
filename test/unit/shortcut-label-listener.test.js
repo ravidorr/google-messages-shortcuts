@@ -14,12 +14,16 @@ describe('shortcut label listener', () => {
       { name: 'archive-conversation', shortcut: 'Ctrl+Shift+Y' },
       { name: 'trash-conversation', shortcut: 'Ctrl+Shift+D' },
       { name: 'mark-read-conversation', shortcut: 'Ctrl+Shift+K' },
-      { name: 'mark-unread-conversation', shortcut: 'Ctrl+Shift+U' }
+      { name: 'mark-unread-conversation', shortcut: 'Ctrl+Shift+U' },
+      { name: 'mute-conversation', shortcut: 'Ctrl+Shift+M' },
+      { name: 'unmute-conversation', shortcut: 'Ctrl+Shift+N' }
     ])).toEqual({
       archive: 'Ctrl+Shift+Y',
       trash: 'Ctrl+Shift+D',
       markRead: 'Ctrl+Shift+K',
-      markUnread: 'Ctrl+Shift+U'
+      markUnread: 'Ctrl+Shift+U',
+      mute: 'Ctrl+Shift+M',
+      unmute: 'Ctrl+Shift+N'
     });
   });
 
@@ -28,7 +32,9 @@ describe('shortcut label listener', () => {
       archive: 'Not assigned',
       trash: 'Not assigned',
       markRead: 'Not assigned',
-      markUnread: 'Not assigned'
+      markUnread: 'Not assigned',
+      mute: 'Not assigned',
+      unmute: 'Not assigned'
     });
   });
 
@@ -48,7 +54,9 @@ describe('shortcut label listener', () => {
       archive: 'Ctrl+Shift+Y',
       trash: 'Ctrl+Shift+D',
       markRead: 'Ctrl+Shift+K',
-      markUnread: 'Ctrl+Shift+U'
+      markUnread: 'Ctrl+Shift+U',
+      mute: 'Not assigned',
+      unmute: 'Not assigned'
     });
   });
 
@@ -100,7 +108,9 @@ describe('shortcut label listener', () => {
         archive: 'Not assigned',
         trash: 'Not assigned',
         markRead: 'Not assigned',
-        markUnread: 'Not assigned'
+        markUnread: 'Not assigned',
+        mute: 'Not assigned',
+        unmute: 'Not assigned'
       });
     });
   });
