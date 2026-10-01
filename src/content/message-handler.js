@@ -43,7 +43,7 @@ export async function handleCommand(command, documentRoot = document) {
 }
 
 export function installMessageListener(chromeApi = chrome) {
-  chromeApi.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+  const listener = (message, _sender, sendResponse) => {
     if (!message?.command) {
       sendResponse({ ok: false, reason: 'missing-command' });
 
@@ -55,5 +55,11 @@ export function installMessageListener(chromeApi = chrome) {
     });
 
     return true;
-  });
+  };
+
+  chromeApi.runtime.onMessage.addListener(listener);
+
+  return () => {
+    chromeApi.runtime.onMessage.removeListener(listener);
+  };
 }
