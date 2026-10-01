@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.6.35 - 2026-10-01
+
+### Added
+
+- Product roadmap covering keyboard-first workflows, privacy boundaries, and delivery phases
+- Project guidance that confirms the repository does not use Jira
+
 ## 1.6.34 - 2026-10-01
 
 ### Added
