@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.6.31 - 2026-10-01
+
+### Fixed
+
+- Wait for trash confirmation controls to render before fail-closed preflight blocks auto-confirm
+- Prefer the primary mark-unread e2e selector when it is already present before English fallback polling
+
 ## 1.6.30 - 2026-10-01
 
 ### Added

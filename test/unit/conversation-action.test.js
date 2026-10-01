@@ -386,6 +386,20 @@ describe('runConversationAction', () => {
     expect(document.documentElement.hasAttribute(MENU_ACTION_ATTRIBUTE)).toBe(false);
   });
 
+  it('clicks the primary mark-unread control immediately when it is already present', async () => {
+    const fixture = createConversationFixture();
+    const markUnreadButton = document.querySelector('[data-e2e-conversation-menu-mark-unread]');
+    vi.spyOn(markUnreadButton, 'click');
+    const waitForElementSpy = vi.spyOn(waitForElement, 'waitForElement');
+
+    const result = await runConversationAction(document, COMMAND_MARK_UNREAD);
+
+    expect(result.ok).toBe(true);
+    expect(fixture.menuButton.click).toHaveBeenCalledTimes(1);
+    expect(markUnreadButton.click).toHaveBeenCalledTimes(1);
+    expect(waitForElementSpy).not.toHaveBeenCalled();
+  });
+
   it('uses fallback-first mark-unread menu text when data-e2e selectors are absent', async () => {
     document.body.innerHTML = openRowMenuMarkUnreadFallbackOnly;
     const menuButton = document.querySelector('button[aria-haspopup="menu"]');
@@ -423,6 +437,7 @@ describe('runConversationAction', () => {
   });
 
   it('blocks trash confirmation when the dialog is open without a confirm control', async () => {
+    vi.useFakeTimers();
     document.body.innerHTML = `
       ${selectedReadRow}
       <button data-e2e-conversation-delete class="mat-mdc-menu-item">
@@ -437,7 +452,11 @@ describe('runConversationAction', () => {
     vi.spyOn(menuButton, 'click');
     vi.spyOn(trashButton, 'click');
 
-    const result = await runConversationAction(document, COMMAND_TRASH);
+    const resultPromise = runConversationAction(document, COMMAND_TRASH);
+
+    await vi.runAllTimersAsync();
+
+    const result = await resultPromise;
 
     expect(result).toEqual({
       ok: false,
@@ -448,6 +467,7 @@ describe('runConversationAction', () => {
     expect(menuButton.click).toHaveBeenCalledTimes(1);
     expect(trashButton.click).toHaveBeenCalledTimes(1);
     expect(document.documentElement.hasAttribute(MENU_ACTION_ATTRIBUTE)).toBe(false);
+    vi.useRealTimers();
   });
 
   it('returns unknown-command when the registry has no action for a valid command id', async () => {

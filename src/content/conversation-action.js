@@ -2,7 +2,7 @@ import { isValidCommand } from '../shared/commands.js';
 import { isTrashConfirmationEnabled } from '../shared/trash-confirmation-preference.js';
 import {
   assessRowActionCapability,
-  assessTrashConfirmCapability
+  assessTrashConfirmCapabilityAfterRender
 } from './action-capability-preflight.js';
 import { findConversationRow, findRowMenuButton } from './conversation-target.js';
 import { MENU_TEXT, SELECTORS } from './google-messages-dom.js';
@@ -25,6 +25,18 @@ function createCapabilityBlockedResult(preflightResult) {
     capabilityId: preflightResult.capabilityId,
     capabilityState: preflightResult.capabilityState
   };
+}
+
+function clickPrimaryMenuItemSync(documentRoot, primarySelector) {
+  const primaryItem = documentRoot.querySelector(primarySelector);
+
+  if (!primaryItem) {
+    return false;
+  }
+
+  primaryItem.click();
+
+  return true;
 }
 
 async function clickPrimaryMenuItem(documentRoot, primarySelector) {
@@ -55,6 +67,10 @@ async function clickMenuAction(
   selectorStrategy = SELECTOR_STRATEGY_PRIMARY_THEN_FALLBACK
 ) {
   if (selectorStrategy === SELECTOR_STRATEGY_FALLBACK_FIRST) {
+    if (clickPrimaryMenuItemSync(documentRoot, primarySelector)) {
+      return { ok: true };
+    }
+
     try {
       return await clickFallbackMenuItem(documentRoot, selectors, fallbackText);
     } catch (_fallbackError) {
@@ -142,7 +158,7 @@ async function executeTrashWithConfirmAction(documentRoot, action, selectors, ch
     return trashResult;
   }
 
-  const confirmPreflight = assessTrashConfirmCapability(documentRoot, selectors);
+  const confirmPreflight = await assessTrashConfirmCapabilityAfterRender(documentRoot, selectors);
 
   if (!confirmPreflight.allowed) {
     return createCapabilityBlockedResult(confirmPreflight);

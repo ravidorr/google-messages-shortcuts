@@ -1,12 +1,14 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import {
   assessRowActionCapability,
   assessTrashConfirmCapability,
+  assessTrashConfirmCapabilityAfterRender,
   findTrashConfirmFallbackControl
 } from '../../src/content/action-capability-preflight.js';
 import { getRowAction } from '../../src/content/row-action-registry.js';
 import { COMMAND_ARCHIVE, COMMAND_TRASH } from '../../src/shared/commands.js';
 import { SELECTORS } from '../../src/content/google-messages-dom.js';
+import { POLL_INTERVAL_MS } from '../../src/content/wait-for-element.js';
 import {
   duplicateArchiveMenuItems,
   duplicateTrashConfirmDialog,
@@ -64,14 +66,106 @@ describe('action-capability-preflight', () => {
     expect(localThis.capabilityState).toBe('unavailable');
   });
 
-  it('blocks trash confirm when the dialog is open without a confirm control', () => {
+  it('does not synchronously block trash confirm when the dialog shell is open without controls', () => {
     document.body.innerHTML = openTrashDialogMissingConfirmControl;
 
     const localThis = assessTrashConfirmCapability(document, SELECTORS);
 
+    expect(localThis).toEqual({ allowed: true });
+  });
+
+  it('blocks trash confirm after waiting when the dialog stays without a confirm control', async () => {
+    document.body.innerHTML = openTrashDialogMissingConfirmControl;
+
+    const localThis = await assessTrashConfirmCapabilityAfterRender(document, SELECTORS, 50);
+
     expect(localThis.allowed).toBe(false);
     expect(localThis.capabilityId).toBe('menu.trashConfirm');
     expect(localThis.capabilityState).toBe('unavailable');
+  });
+
+  it('returns unsafe trash confirm assessment immediately without waiting', async () => {
+    document.body.innerHTML = `
+      ${selectedReadRow}
+      ${duplicateTrashConfirmDialog}
+    `;
+
+    const localThis = await assessTrashConfirmCapabilityAfterRender(document, SELECTORS, 50);
+
+    expect(localThis.allowed).toBe(false);
+    expect(localThis.capabilityState).toBe('unsafe');
+  });
+
+  it('allows trash confirm when no dialog is open yet', async () => {
+    document.body.innerHTML = selectedReadRow;
+
+    const localThis = await assessTrashConfirmCapabilityAfterRender(document, SELECTORS, 50);
+
+    expect(localThis).toEqual({ allowed: true });
+  });
+
+  it('allows trash confirm after fallback wait when only the English control appears', async () => {
+    vi.useFakeTimers();
+    document.body.innerHTML = `
+      ${selectedReadRow}
+      <mat-dialog-container></mat-dialog-container>
+    `;
+
+    const assessmentPromise = assessTrashConfirmCapabilityAfterRender(document, SELECTORS, 50);
+
+    setTimeout(() => {
+      document.querySelector('mat-dialog-container').innerHTML =
+        '<button class="mat-focus-indicator">Move to trash</button>';
+    }, POLL_INTERVAL_MS * 2);
+
+    const localThisPromise = assessmentPromise.then((result) => result);
+    await vi.runAllTimersAsync();
+
+    expect(await localThisPromise).toEqual({ allowed: true });
+    vi.useRealTimers();
+  });
+
+  it('allows trash confirm when the dialog closes before controls render', async () => {
+    vi.useFakeTimers();
+    document.body.innerHTML = `
+      ${selectedReadRow}
+      <mat-dialog-container></mat-dialog-container>
+    `;
+
+    const assessmentPromise = assessTrashConfirmCapabilityAfterRender(document, SELECTORS, 50);
+
+    setTimeout(() => {
+      document.querySelector('mat-dialog-container').remove();
+    }, POLL_INTERVAL_MS * 2);
+
+    const localThisPromise = assessmentPromise.then((result) => result);
+    await vi.runAllTimersAsync();
+
+    expect(await localThisPromise).toEqual({ allowed: true });
+    vi.useRealTimers();
+  });
+
+  it('allows trash confirm after waiting when the confirm control renders late', async () => {
+    vi.useFakeTimers();
+    document.body.innerHTML = `
+      ${selectedReadRow}
+      <mat-dialog-container></mat-dialog-container>
+    `;
+
+    const assessmentPromise = assessTrashConfirmCapabilityAfterRender(document, SELECTORS);
+
+    setTimeout(() => {
+      document.querySelector('mat-dialog-container').innerHTML =
+        '<button data-e2e-action-button-confirm>Move to trash</button>';
+    }, POLL_INTERVAL_MS);
+
+    const localThisPromise = assessmentPromise.then((result) => result);
+    await vi.runAllTimersAsync();
+
+    const localThis = await localThisPromise;
+
+    expect(localThis).toEqual({ allowed: true });
+    vi.useRealTimers();
   });
 
   it('allows trash confirm when the primary control is present', () => {
