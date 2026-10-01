@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { runConversationAction } from '../../src/content/conversation-action.js';
+import { READ_STATE_TIMEOUT_MS } from '../../src/content/conversation-read-state.js';
 import { MENU_ACTION_ATTRIBUTE } from '../../src/content/menu-action-overlay.js';
 import {
   COMMAND_ARCHIVE,
@@ -472,6 +473,49 @@ describe('runConversationAction', () => {
 
     expect(result).toEqual({ ok: true });
     expect(conversationLink.click).toHaveBeenCalledTimes(1);
+  });
+
+  it('returns a timeout failure when the unread marker never clears and navigation did not start', async () => {
+    vi.useFakeTimers();
+    document.body.innerHTML = `
+      <mws-conversation-list-item is-focused="true">
+        <a data-e2e-conversation data-e2e-is-unread="true"></a>
+        <button aria-haspopup="menu"></button>
+      </mws-conversation-list-item>
+    `;
+    const conversationLink = document.querySelector('a[data-e2e-conversation]');
+
+    vi.spyOn(conversationLink, 'click');
+
+    const resultPromise = runConversationAction(document, COMMAND_MARK_READ);
+
+    await vi.advanceTimersByTimeAsync(READ_STATE_TIMEOUT_MS);
+
+    const localThis = await resultPromise;
+
+    expect(localThis).toEqual({
+      ok: false,
+      reason: 'Timed out waiting for conversation to become read'
+    });
+    vi.useRealTimers();
+  });
+
+  it('returns readStatePending when navigation started before the unread marker clears', async () => {
+    vi.useFakeTimers();
+    document.body.innerHTML = selectedUnreadRow;
+    const conversationLink = document.querySelector('a[data-e2e-conversation]');
+
+    vi.spyOn(conversationLink, 'click');
+
+    const resultPromise = runConversationAction(document, COMMAND_MARK_READ);
+
+    await vi.advanceTimersByTimeAsync(READ_STATE_TIMEOUT_MS);
+
+    const localThis = await resultPromise;
+
+    expect(localThis).toEqual({ ok: true, readStatePending: true });
+    expect(conversationLink.click).toHaveBeenCalledTimes(1);
+    vi.useRealTimers();
   });
 
   it('returns already-read when the target conversation is read', async () => {

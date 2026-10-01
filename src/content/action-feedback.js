@@ -100,6 +100,13 @@ export function getActionFeedbackMessage(result, command) {
       };
     }
 
+    if (command === COMMAND_MARK_READ && result.readStatePending) {
+      return {
+        kind: 'info',
+        message: 'Conversation opened. Unread status may still be updating.'
+      };
+    }
+
     const action = getRowAction(command);
 
     return {
