@@ -73,7 +73,7 @@ describe('conversation shortcut pills', () => {
       getShortcutLabels: vi.fn(async () => ({
         archive: 'Ctrl+Shift+Y',
         trash: 'Not assigned',
-        markRead: 'Ctrl+Shift+R',
+        markRead: 'Ctrl+Shift+K',
         markUnread: 'Ctrl+Shift+U'
       }))
     });
@@ -133,7 +133,7 @@ describe('conversation shortcut pills', () => {
       getShortcutLabels: vi.fn(async () => ({
         archive: 'Ctrl+Shift+Y',
         trash: 'Ctrl+Shift+D',
-        markRead: 'Ctrl+Shift+R',
+        markRead: 'Ctrl+Shift+K',
         markUnread: 'Ctrl+Shift+U'
       }))
     });
@@ -164,7 +164,7 @@ describe('conversation shortcut pills', () => {
       getShortcutLabels: vi.fn(async () => ({
         archive: 'Ctrl+Shift+Y',
         trash: 'Ctrl+Shift+D',
-        markRead: 'Ctrl+Shift+R',
+        markRead: 'Ctrl+Shift+K',
         markUnread: 'Ctrl+Shift+U'
       }))
     });
@@ -187,7 +187,7 @@ describe('conversation shortcut pills', () => {
       getShortcutLabels: vi.fn(async () => ({
         archive: 'Ctrl+Shift+Y',
         trash: 'Ctrl+Shift+D',
-        markRead: 'Ctrl+Shift+R',
+        markRead: 'Ctrl+Shift+K',
         markUnread: 'Ctrl+Shift+U'
       })),
       runAction
@@ -214,7 +214,7 @@ describe('conversation shortcut pills', () => {
       getShortcutLabels: vi.fn(async () => ({
         archive: 'Ctrl+Shift+Y',
         trash: 'Ctrl+Shift+D',
-        markRead: 'Ctrl+Shift+R',
+        markRead: 'Ctrl+Shift+K',
         markUnread: 'Ctrl+Shift+U'
       })),
       runAction
@@ -248,7 +248,7 @@ describe('conversation shortcut pills', () => {
       getShortcutLabels: vi.fn(async () => ({
         archive: 'Ctrl+Shift+Y',
         trash: 'Ctrl+Shift+D',
-        markRead: 'Ctrl+Shift+R',
+        markRead: 'Ctrl+Shift+K',
         markUnread: 'Ctrl+Shift+U'
       })),
       runAction
@@ -364,7 +364,7 @@ describe('conversation shortcut pills', () => {
       getShortcutLabels: vi.fn(async () => ({
         archive: 'Ctrl+Shift+Y',
         trash: 'Ctrl+Shift+D',
-        markRead: 'Ctrl+Shift+R',
+        markRead: 'Ctrl+Shift+K',
         markUnread: 'Ctrl+Shift+U'
       }))
     });
@@ -393,7 +393,7 @@ describe('conversation shortcut pills', () => {
       getShortcutLabels: vi.fn(async () => ({
         archive: 'Ctrl+Shift+Y',
         trash: 'Ctrl+Shift+D',
-        markRead: 'Ctrl+Shift+R',
+        markRead: 'Ctrl+Shift+K',
         markUnread: 'Ctrl+Shift+U'
       }))
     });
@@ -420,7 +420,7 @@ describe('conversation shortcut pills', () => {
       getShortcutLabels: vi.fn(async () => ({
         archive: 'Ctrl+Shift+Y',
         trash: 'Ctrl+Shift+D',
-        markRead: 'Ctrl+Shift+R',
+        markRead: 'Ctrl+Shift+K',
         markUnread: 'Ctrl+Shift+U'
       }))
     });

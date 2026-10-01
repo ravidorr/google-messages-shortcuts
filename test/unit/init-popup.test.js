@@ -34,7 +34,7 @@ describe('init-popup', () => {
       { name: '_execute_action', shortcut: '' },
       { name: 'archive-conversation', shortcut: 'Ctrl+Shift+Y' },
       { name: 'trash-conversation', shortcut: 'Ctrl+Shift+D' },
-      { name: 'mark-read-conversation', shortcut: 'Ctrl+Shift+R' },
+      { name: 'mark-read-conversation', shortcut: 'Ctrl+Shift+K' },
       { name: 'mark-unread-conversation', shortcut: 'Ctrl+Shift+U' }
     ]);
 
@@ -216,7 +216,7 @@ describe('init-popup', () => {
         getAll: vi.fn(async () => [
           { name: 'archive-conversation', shortcut: 'Ctrl+Shift+Y' },
           { name: 'trash-conversation', shortcut: 'Ctrl+Shift+D' },
-          { name: 'mark-read-conversation', shortcut: 'Ctrl+Shift+R' },
+          { name: 'mark-read-conversation', shortcut: 'Ctrl+Shift+K' },
           { name: 'mark-unread-conversation', shortcut: 'Ctrl+Shift+U' }
         ])
       },

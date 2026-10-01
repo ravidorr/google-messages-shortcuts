@@ -56,7 +56,7 @@ export const APPROVED_ROW_ACTIONS = [
   },
   {
     command: COMMAND_MARK_READ,
-    capabilityId: LIST_CAPABILITY_IDS.unreadDetection,
+    capabilityId: LIST_CAPABILITY_IDS.conversationLink,
     decision: ACTION_DECISION_APPROVE,
     executionKind: EXECUTION_KIND_OPEN_ROW,
     precondition: (conversationRow, selectors) => isConversationUnread(conversationRow, selectors),

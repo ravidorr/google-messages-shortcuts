@@ -58,15 +58,6 @@ function hasTrashConfirmControl(documentRoot, selectors) {
 
 export function assessRowActionCapability(documentRoot, action, selectors) {
   const capabilities = assessPageCapabilities(documentRoot, selectors);
-  const listTargeting = capabilities.list['list.targeting'];
-
-  if (isBlockingCapabilityState(listTargeting.state)) {
-    return createBlockedResult(
-      'list.targeting',
-      listTargeting.state,
-      listTargeting.reason
-    );
-  }
 
   if (action.executionKind === EXECUTION_KIND_OPEN_ROW) {
     const listCapability = capabilities.list[action.capabilityId];
@@ -80,6 +71,16 @@ export function assessRowActionCapability(documentRoot, action, selectors) {
     }
 
     return { allowed: true };
+  }
+
+  const listTargeting = capabilities.list['list.targeting'];
+
+  if (isBlockingCapabilityState(listTargeting.state)) {
+    return createBlockedResult(
+      'list.targeting',
+      listTargeting.state,
+      listTargeting.reason
+    );
   }
 
   const menuCapability = capabilities.menu[action.capabilityId];

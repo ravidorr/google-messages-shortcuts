@@ -7,6 +7,7 @@ import {
 import { CAPABILITY_SUPPORTED, CAPABILITY_UNAVAILABLE, CAPABILITY_UNSAFE } from '../../src/content/adapters/capability-states.js';
 import {
   emptyConversationList,
+  rowMissingConversationLink,
   rowMissingMenuButton,
   selectedReadRow
 } from '../fixtures/dom/list-states.js';
@@ -21,6 +22,7 @@ describe('list-adapter', () => {
     const localThis = assessListCapabilities(document);
 
     expect(localThis[LIST_CAPABILITY_IDS.targeting].state).toBe(CAPABILITY_UNAVAILABLE);
+    expect(localThis[LIST_CAPABILITY_IDS.conversationLink].state).toBe(CAPABILITY_UNAVAILABLE);
     expect(localThis[LIST_CAPABILITY_IDS.unreadDetection].state).toBe(CAPABILITY_UNAVAILABLE);
   });
 
@@ -32,6 +34,7 @@ describe('list-adapter', () => {
       state: CAPABILITY_SUPPORTED,
       evidenceSource: 'dom-structure'
     });
+    expect(localThis[LIST_CAPABILITY_IDS.conversationLink].state).toBe(CAPABILITY_SUPPORTED);
     expect(localThis[LIST_CAPABILITY_IDS.unreadDetection].state).toBe(CAPABILITY_SUPPORTED);
   });
 
@@ -40,7 +43,30 @@ describe('list-adapter', () => {
     const localThis = assessListCapabilities(document);
 
     expect(localThis[LIST_CAPABILITY_IDS.targeting].state).toBe(CAPABILITY_UNSAFE);
+    expect(localThis[LIST_CAPABILITY_IDS.conversationLink].state).toBe(CAPABILITY_SUPPORTED);
     expect(localThis[LIST_CAPABILITY_IDS.unreadDetection].state).toBe(CAPABILITY_UNSAFE);
+  });
+
+  it('marks conversation links unsafe when a row is missing both menu and link', () => {
+    document.body.innerHTML = `
+      <mws-conversation-list-item>
+        <span>Contact G</span>
+      </mws-conversation-list-item>
+    `;
+    const localThis = assessListCapabilities(document);
+
+    expect(localThis[LIST_CAPABILITY_IDS.targeting].state).toBe(CAPABILITY_UNSAFE);
+    expect(localThis[LIST_CAPABILITY_IDS.conversationLink].state).toBe(CAPABILITY_UNSAFE);
+    expect(localThis[LIST_CAPABILITY_IDS.unreadDetection].state).toBe(CAPABILITY_UNSAFE);
+  });
+
+  it('marks conversation links unsafe when a row is missing its link', () => {
+    document.body.innerHTML = rowMissingConversationLink;
+    const localThis = assessListCapabilities(document);
+
+    expect(localThis[LIST_CAPABILITY_IDS.targeting].state).toBe(CAPABILITY_SUPPORTED);
+    expect(localThis[LIST_CAPABILITY_IDS.conversationLink].state).toBe(CAPABILITY_UNSAFE);
+    expect(localThis[LIST_CAPABILITY_IDS.unreadDetection].state).toBe(CAPABILITY_SUPPORTED);
   });
 
   it('accepts custom selector overrides', () => {

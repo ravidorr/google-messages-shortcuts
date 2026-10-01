@@ -42,6 +42,13 @@ export const rowMissingMenuButton = `
   </mws-conversation-list-item>
 `;
 
+export const rowMissingConversationLink = `
+  <mws-conversation-list-item id="fixture-missing-link">
+    <button aria-haspopup="menu"></button>
+    <span>Contact F</span>
+  </mws-conversation-list-item>
+`;
+
 export const emptyConversationList = '';
 
 export const menuItemsPresent = `
@@ -112,6 +119,7 @@ export const FIXTURE_EXPORT_NAMES = [
   'selectedUnreadRow',
   'focusedRow',
   'rowMissingMenuButton',
+  'rowMissingConversationLink',
   'emptyConversationList',
   'menuItemsPresent',
   'trashConfirmDialog',

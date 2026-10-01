@@ -52,14 +52,14 @@ describe('popup-view', () => {
     const rows = renderShortcutRows([
       { name: COMMAND_ARCHIVE, shortcut: 'Ctrl+Shift+Y' },
       { name: COMMAND_TRASH, shortcut: '' },
-      { name: COMMAND_MARK_READ, shortcut: 'Ctrl+Shift+R' },
+      { name: COMMAND_MARK_READ, shortcut: 'Ctrl+Shift+K' },
       { name: COMMAND_MARK_UNREAD, shortcut: 'Ctrl+Shift+U' }
     ]);
 
     expect(rows).toHaveLength(4);
     expect(rows[0].shortcut).toBe('Ctrl+Shift+Y');
     expect(rows[1].shortcut).toBe('Not assigned');
-    expect(rows[2].shortcut).toBe('Ctrl+Shift+R');
+    expect(rows[2].shortcut).toBe('Ctrl+Shift+K');
     expect(rows[3].shortcut).toBe('Ctrl+Shift+U');
   });
 
@@ -69,7 +69,7 @@ describe('popup-view', () => {
     populateShortcutList(container, [
       { name: COMMAND_ARCHIVE, shortcut: 'Ctrl+Shift+Y' },
       { name: COMMAND_TRASH, shortcut: 'Ctrl+Shift+D' },
-      { name: COMMAND_MARK_READ, shortcut: 'Ctrl+Shift+R' },
+      { name: COMMAND_MARK_READ, shortcut: 'Ctrl+Shift+K' },
       { name: COMMAND_MARK_UNREAD, shortcut: 'Ctrl+Shift+U' }
     ]);
 

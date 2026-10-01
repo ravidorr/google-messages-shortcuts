@@ -16,6 +16,7 @@ export const LIST_SELECTORS = {
 
 export const LIST_CAPABILITY_IDS = {
   targeting: 'list.targeting',
+  conversationLink: 'list.conversationLink',
   unreadDetection: 'list.unreadDetection'
 };
 
@@ -23,33 +24,50 @@ function findRowMenuButton(conversationRow, selectors) {
   return conversationRow.querySelector(selectors.rowMenuButton);
 }
 
-function countRowsWithoutMenuButton(documentRoot, selectors) {
+function findRowConversationLink(conversationRow, selectors) {
+  return conversationRow.querySelector(selectors.conversationLink)
+    || conversationRow.querySelector('a');
+}
+
+function countRowStructureIssues(documentRoot, selectors) {
   const rows = documentRoot.querySelectorAll(selectors.conversationRow);
   let missingMenuButtonCount = 0;
+  let missingConversationLinkCount = 0;
 
   for (const row of rows) {
     if (!findRowMenuButton(row, selectors)) {
       missingMenuButtonCount += 1;
     }
+
+    if (!findRowConversationLink(row, selectors)) {
+      missingConversationLinkCount += 1;
+    }
   }
 
   return {
     rowCount: rows.length,
-    missingMenuButtonCount
+    missingMenuButtonCount,
+    missingConversationLinkCount
   };
 }
 
 export function assessListCapabilities(documentRoot, selectors = LIST_SELECTORS) {
-  const { rowCount, missingMenuButtonCount } = countRowsWithoutMenuButton(
-    documentRoot,
-    selectors
-  );
+  const {
+    rowCount,
+    missingMenuButtonCount,
+    missingConversationLinkCount
+  } = countRowStructureIssues(documentRoot, selectors);
 
   if (rowCount === 0) {
     return {
       [LIST_CAPABILITY_IDS.targeting]: createCapabilityResult(
         CAPABILITY_UNAVAILABLE,
         'No conversation rows found in the document.',
+        'dom-query'
+      ),
+      [LIST_CAPABILITY_IDS.conversationLink]: createCapabilityResult(
+        CAPABILITY_UNAVAILABLE,
+        'No conversation rows found to verify conversation links.',
         'dom-query'
       ),
       [LIST_CAPABILITY_IDS.unreadDetection]: createCapabilityResult(
@@ -69,6 +87,17 @@ export function assessListCapabilities(documentRoot, selectors = LIST_SELECTORS)
         reason,
         'dom-structure'
       ),
+      [LIST_CAPABILITY_IDS.conversationLink]: missingConversationLinkCount > 0
+        ? createCapabilityResult(
+          CAPABILITY_UNSAFE,
+          `${missingConversationLinkCount} conversation row(s) are missing a conversation link.`,
+          'dom-structure'
+        )
+        : createCapabilityResult(
+          CAPABILITY_SUPPORTED,
+          'Conversation rows expose conversation links for open-row actions.',
+          'dom-structure'
+        ),
       [LIST_CAPABILITY_IDS.unreadDetection]: createCapabilityResult(
         CAPABILITY_UNSAFE,
         reason,
@@ -77,10 +106,37 @@ export function assessListCapabilities(documentRoot, selectors = LIST_SELECTORS)
     };
   }
 
+  if (missingConversationLinkCount > 0) {
+    const reason = `${missingConversationLinkCount} conversation row(s) are missing a conversation link.`;
+
+    return {
+      [LIST_CAPABILITY_IDS.targeting]: createCapabilityResult(
+        CAPABILITY_SUPPORTED,
+        'Conversation rows expose menu buttons for targeting.',
+        'dom-structure'
+      ),
+      [LIST_CAPABILITY_IDS.conversationLink]: createCapabilityResult(
+        CAPABILITY_UNSAFE,
+        reason,
+        'dom-structure'
+      ),
+      [LIST_CAPABILITY_IDS.unreadDetection]: createCapabilityResult(
+        CAPABILITY_SUPPORTED,
+        'Unread marker selector is defined and conversation rows are present.',
+        'contract'
+      )
+    };
+  }
+
   return {
     [LIST_CAPABILITY_IDS.targeting]: createCapabilityResult(
       CAPABILITY_SUPPORTED,
       'Conversation rows expose menu buttons for targeting.',
+      'dom-structure'
+    ),
+    [LIST_CAPABILITY_IDS.conversationLink]: createCapabilityResult(
+      CAPABILITY_SUPPORTED,
+      'Conversation rows expose conversation links for open-row actions.',
       'dom-structure'
     ),
     [LIST_CAPABILITY_IDS.unreadDetection]: createCapabilityResult(

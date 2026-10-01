@@ -395,6 +395,23 @@ describe('runConversationAction', () => {
     expect(markUnreadButton.click).toHaveBeenCalled();
   });
 
+  it('marks an unread conversation as read when the row has no menu button', async () => {
+    document.body.innerHTML = `
+      <mws-conversation-list-item>
+        <a aria-selected="true" data-e2e-conversation data-e2e-is-unread="true"></a>
+      </mws-conversation-list-item>
+    `;
+    const conversationLink = document.querySelector('a[data-e2e-conversation]');
+    vi.spyOn(conversationLink, 'click').mockImplementation(() => {
+      conversationLink.removeAttribute('data-e2e-is-unread');
+    });
+
+    const result = await runConversationAction(document, COMMAND_MARK_READ);
+
+    expect(result).toEqual({ ok: true });
+    expect(conversationLink.click).toHaveBeenCalledTimes(1);
+  });
+
   it('marks an unread conversation as read by clicking the conversation link', async () => {
     document.body.innerHTML = selectedUnreadRow;
     const row = document.querySelector('mws-conversation-list-item');
@@ -445,15 +462,14 @@ describe('runConversationAction', () => {
     expect(document.documentElement.hasAttribute(MENU_ACTION_ATTRIBUTE)).toBe(false);
   });
 
-  it('returns conversation-link-not-found when the unread row has no link', async () => {
-    document.body.innerHTML = `
-      <mws-conversation-list-item is-focused="true">
-        <span data-e2e-is-unread="true"></span>
-        <button aria-haspopup="menu"></button>
-      </mws-conversation-list-item>
-    `;
+  it('returns conversation-link-not-found when the supplied row has no link', async () => {
+    document.body.innerHTML = selectedReadRow;
+    const pillRow = document.createElement('mws-conversation-list-item');
+    const unreadMarker = document.createElement('span');
+    unreadMarker.setAttribute('data-e2e-is-unread', 'true');
+    pillRow.append(unreadMarker);
 
-    const result = await runConversationAction(document, COMMAND_MARK_READ);
+    const result = await runConversationAction(document, COMMAND_MARK_READ, undefined, pillRow);
 
     expect(result).toEqual({ ok: false, reason: 'conversation-link-not-found' });
   });

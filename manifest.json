@@ -72,8 +72,8 @@
     },
     "mark-read-conversation": {
       "suggested_key": {
-        "default": "Ctrl+Shift+R",
-        "mac": "Command+Shift+R"
+        "default": "Ctrl+Shift+K",
+        "mac": "Command+Shift+K"
       },
       "description": "Mark the selected or hovered Google Messages conversation as read"
     }
