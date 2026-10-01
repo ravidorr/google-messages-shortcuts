@@ -498,7 +498,7 @@ describe('script entrypoint coverage', () => {
     await stageReleaseFiles(projectDirectory);
 
     await withWorkingDirectory(projectDirectory, async () => {
-      await importEntrypoint('validate-release-metadata.js');
+      await importEntrypoint('validate-release-metadata.js', ['HEAD']);
     });
 
     expect(consoleError).not.toHaveBeenCalled();

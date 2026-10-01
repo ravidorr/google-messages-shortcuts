@@ -21,3 +21,4 @@ jobs:
           cache: npm
       - run: npm ci
       - run: node scripts/validate-version-bump.js origin/${{ github.base_ref }}
+      - run: node scripts/validate-release-metadata.js origin/${{ github.base_ref }}
