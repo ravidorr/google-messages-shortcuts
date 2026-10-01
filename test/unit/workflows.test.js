@@ -100,4 +100,13 @@ describe('GitHub workflow security', () => {
       }
     }
   });
+
+  it('skips coverage comment publication for fork pull requests', async () => {
+    const workflows = await readWorkflowFiles();
+    const coverageWorkflow = workflows.find(({ name }) => name === 'coverage-report.yml');
+
+    expect(coverageWorkflow?.content).toContain(
+      'if: github.event.pull_request.head.repo.full_name == github.repository'
+    );
+  });
 });

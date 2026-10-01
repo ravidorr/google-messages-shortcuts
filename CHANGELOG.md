@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.6.16 - 2026-10-01
+
+### Fixed
+
+- Skip coverage comment publication for fork pull requests
+
 ## 1.6.15 - 2026-10-01
 
 ### Fixed

@@ -22,6 +22,7 @@ jobs:
       - run: npm test
       - run: node scripts/format-coverage-report.js > coverage-report.md
       - uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        if: github.event.pull_request.head.repo.full_name == github.repository
         with:
           script: |
             const marker = '<!-- code-coverage-report -->';
