@@ -10,6 +10,7 @@ import {
 import * as waitForElement from '../../src/content/wait-for-element.js';
 import * as rowActionRegistry from '../../src/content/row-action-registry.js';
 import { SELECTOR_STRATEGY_FALLBACK_FIRST } from '../../src/content/row-action-registry.js';
+import { SELECTORS } from '../../src/content/google-messages-dom.js';
 import {
   duplicateArchiveMenuItems,
   openRowMenuMarkUnreadFallbackOnly,
@@ -428,6 +429,29 @@ describe('runConversationAction', () => {
     expect(conversationLink.click).toHaveBeenCalledTimes(1);
     expect(menuButton.click).not.toHaveBeenCalled();
     expect(document.documentElement.hasAttribute(MENU_ACTION_ATTRIBUTE)).toBe(false);
+  });
+
+  it('marks a hovered unread conversation as read when another conversation is selected', async () => {
+    document.body.innerHTML = `
+      ${selectedReadRow}
+      <mws-conversation-list-item class="hovered-unread-row">
+        <a data-e2e-conversation data-e2e-is-unread="true"></a>
+        <button aria-haspopup="menu"></button>
+      </mws-conversation-list-item>
+    `;
+    const hoveredRow = document.querySelector('.hovered-unread-row');
+    const conversationLink = hoveredRow.querySelector('a[data-e2e-conversation]');
+    vi.spyOn(conversationLink, 'click').mockImplementation(() => {
+      conversationLink.removeAttribute('data-e2e-is-unread');
+    });
+
+    const result = await runConversationAction(document, COMMAND_MARK_READ, {
+      ...SELECTORS,
+      hoveredConversationItem: 'mws-conversation-list-item.hovered-unread-row'
+    });
+
+    expect(result).toEqual({ ok: true });
+    expect(conversationLink.click).toHaveBeenCalledTimes(1);
   });
 
   it('marks an unread conversation as read from a shortcut pill row', async () => {

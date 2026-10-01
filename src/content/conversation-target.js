@@ -1,14 +1,10 @@
 import { SELECTORS } from './google-messages-dom.js';
 
 export function findConversationRow(documentRoot, selectors = SELECTORS) {
-  const selectedLink = documentRoot.querySelector(selectors.selectedConversationLink);
+  const hoveredRow = documentRoot.querySelector(selectors.hoveredConversationItem);
 
-  if (selectedLink) {
-    const selectedRow = selectedLink.closest(selectors.conversationRow);
-
-    if (selectedRow) {
-      return selectedRow;
-    }
+  if (hoveredRow) {
+    return hoveredRow;
   }
 
   const focusedRow = documentRoot.querySelector(selectors.focusedConversationItem);
@@ -17,10 +13,14 @@ export function findConversationRow(documentRoot, selectors = SELECTORS) {
     return focusedRow;
   }
 
-  const hoveredRow = documentRoot.querySelector(selectors.hoveredConversationItem);
+  const selectedLink = documentRoot.querySelector(selectors.selectedConversationLink);
 
-  if (hoveredRow) {
-    return hoveredRow;
+  if (selectedLink) {
+    const selectedRow = selectedLink.closest(selectors.conversationRow);
+
+    if (selectedRow) {
+      return selectedRow;
+    }
   }
 
   return null;
