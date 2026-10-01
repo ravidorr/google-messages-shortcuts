@@ -95,7 +95,11 @@ function readGitFile(revision, filePath) {
   }
 }
 
-function getBaseRevision() {
+function getBaseRevision(baseRevision = process.argv[2]) {
+  if (baseRevision) {
+    return baseRevision;
+  }
+
   try {
     return execFileSync('git', ['merge-base', 'HEAD', 'origin/main'], {
       encoding: 'utf8',

@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.6.18 - 2026-10-01
+
+### Fixed
+
+- Enforce changelog metadata validation in pull request CI
+
 ## 1.6.17 - 2026-10-01
 
 ### Fixed
