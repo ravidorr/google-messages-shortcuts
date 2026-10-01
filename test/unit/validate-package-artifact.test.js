@@ -7,6 +7,8 @@ import JSZip from 'jszip';
 import { afterEach, describe, expect, it } from 'vitest';
 import {
   getMissingPackageEntries,
+  getNonCanonicalPackageEntries,
+  getUnexpectedPackageEntries,
   REQUIRED_PACKAGE_ENTRIES,
   validatePackageArtifact
 } from '../../scripts/validate-package-artifact.js';
@@ -52,6 +54,23 @@ describe('validate-package-artifact', () => {
     expect(getMissingPackageEntries(localThis.entries)).toEqual(
       REQUIRED_PACKAGE_ENTRIES.filter((entry) => entry !== 'background.js' && entry !== 'icons/icon16.png')
     );
+  });
+
+  it('reports archive entries that are absent from the distribution', () => {
+    const localThis = {
+      entries: ['background.js', 'unexpected.js'],
+      expectedEntries: ['background.js']
+    };
+
+    expect(getUnexpectedPackageEntries(localThis.entries, localThis.expectedEntries)).toEqual([
+      'unexpected.js'
+    ]);
+  });
+
+  it('reports noncanonical archive entry paths', () => {
+    expect(getNonCanonicalPackageEntries(['icons\\icon16.png', 'background.js'])).toEqual([
+      'icons\\icon16.png'
+    ]);
   });
 
   it('rejects package artifacts missing required extension files', async () => {
@@ -109,6 +128,34 @@ describe('validate-package-artifact', () => {
       archivePath,
       distFileCount: REQUIRED_PACKAGE_ENTRIES.length + 2
     });
+
+    const unexpectedArchivePath = await createArchive(projectDirectory, {
+      ...Object.fromEntries(REQUIRED_PACKAGE_ENTRIES.map((entry) => [
+        entry,
+        entry.endsWith('.json') ? '{"manifest_version":3}' : entry
+      ])),
+      'src/background/command-listener.js': 'listener',
+      'src/background/command-router.js': 'router',
+      'unexpected.js': 'unexpected'
+    });
+
+    await expect(validatePackageArtifact(unexpectedArchivePath, distDirectory)).rejects.toThrow(
+      'Package artifact contains unexpected entries: unexpected.js'
+    );
+
+    const nonCanonicalArchivePath = await createArchive(projectDirectory, {
+      ...Object.fromEntries(REQUIRED_PACKAGE_ENTRIES.map((entry) => [
+        entry,
+        entry.endsWith('.json') ? '{"manifest_version":3}' : entry
+      ])),
+      'src/background/command-listener.js': 'listener',
+      'src/background/command-router.js': 'router',
+      'icons\\icon16.png': 'alias'
+    });
+
+    await expect(validatePackageArtifact(nonCanonicalArchivePath, distDirectory)).rejects.toThrow(
+      'Package artifact contains noncanonical or duplicate entries.'
+    );
   });
 
   it('rejects package artifacts whose contents differ from the built distribution', async () => {

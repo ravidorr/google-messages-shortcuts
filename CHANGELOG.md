@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.6.21 - 2026-10-01
+
+### Fixed
+
+- Reject package artifacts that contain files absent from the built distribution
+
 ## 1.6.20 - 2026-10-01
 
 ### Fixed
