@@ -400,9 +400,13 @@ describe('runConversationAction', () => {
         <button aria-haspopup="menu"></button>
       </mws-conversation-list-item>
     `;
+    const menuButton = document.querySelector('button[aria-haspopup="menu"]');
+    vi.spyOn(menuButton, 'click');
 
     const result = await runConversationAction(document, 'unsupported');
 
     expect(result).toEqual({ ok: false, reason: 'unknown-command' });
+    expect(menuButton.click).not.toHaveBeenCalled();
+    expect(document.documentElement.hasAttribute(MENU_ACTION_ATTRIBUTE)).toBe(false);
   });
 });

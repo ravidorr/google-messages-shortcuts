@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.6.25 - 2026-10-01
+
+### Fixed
+
+- Reject unsupported shortcuts before opening a conversation menu
+
 ## 1.6.24 - 2026-10-01
 
 ### Fixed
