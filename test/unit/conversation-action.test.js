@@ -84,6 +84,24 @@ describe('runConversationAction', () => {
     expect(archiveButton.click).toHaveBeenCalledTimes(1);
   });
 
+  it('rejects an action while another action is waiting for its menu item', async () => {
+    const fixture = createConversationFixture();
+    let resolveMenuItem;
+    vi.spyOn(waitForElement, 'waitForSelector').mockImplementationOnce(() => new Promise((resolve) => {
+      resolveMenuItem = resolve;
+    }));
+
+    const firstAction = runConversationAction(document, COMMAND_ARCHIVE);
+    const secondResult = await runConversationAction(document, COMMAND_ARCHIVE);
+
+    expect(secondResult).toEqual({ ok: false, reason: 'action-in-progress' });
+    expect(fixture.menuButton.click).toHaveBeenCalledTimes(1);
+
+    resolveMenuItem(fixture.archiveButton);
+
+    await expect(firstAction).resolves.toEqual({ ok: true });
+  });
+
   it('moves the selected conversation to trash and confirms when enabled', async () => {
     const fixture = createConversationFixture();
     const chromeApi = {
