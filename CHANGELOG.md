@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.6.12 - 2026-09-30
+
+### Added
+
+- Exercise popup initialization against the shipped HTML markup
+
 ## 1.6.11 - 2026-09-30
 
 ### Added
