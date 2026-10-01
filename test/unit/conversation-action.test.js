@@ -126,6 +126,44 @@ describe('runConversationAction', () => {
     expect(fixture.confirmButton.click).toHaveBeenCalled();
   });
 
+  it('keeps the action lock while waiting for trash confirmation', async () => {
+    const fixture = createConversationFixture();
+    const chromeApi = {
+      storage: {
+        local: {
+          get: vi.fn(async () => ({ autoConfirmTrash: true }))
+        }
+      }
+    };
+    let resolveConfirmation;
+    vi.spyOn(waitForElement, 'waitForSelector')
+      .mockResolvedValueOnce(fixture.trashButton)
+      .mockImplementationOnce(() => new Promise((resolve) => {
+        resolveConfirmation = resolve;
+      }))
+      .mockResolvedValueOnce(fixture.archiveButton);
+
+    const trashAction = runConversationAction(
+      document,
+      COMMAND_TRASH,
+      undefined,
+      undefined,
+      chromeApi
+    );
+    await vi.waitFor(() => {
+      expect(waitForElement.waitForSelector).toHaveBeenCalledTimes(2);
+    });
+
+    await expect(runConversationAction(document, COMMAND_ARCHIVE)).resolves.toEqual({
+      ok: false,
+      reason: 'action-in-progress'
+    });
+
+    resolveConfirmation(fixture.confirmButton);
+
+    await expect(trashAction).resolves.toEqual({ ok: true });
+  });
+
   it('leaves the native trash dialog visible when confirmation is disabled', async () => {
     const fixture = createConversationFixture();
     vi.spyOn(fixture.confirmButton, 'focus');

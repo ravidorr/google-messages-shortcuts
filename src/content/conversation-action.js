@@ -126,10 +126,10 @@ export async function runConversationAction(
         }
 
         if (!await isTrashConfirmationEnabled(chromeApi)) {
-          return confirmTrash(documentRoot, false);
+          return await confirmTrash(documentRoot, false);
         }
 
-        return confirmTrash(documentRoot);
+        return await confirmTrash(documentRoot);
       }
 
       if (command === COMMAND_MARK_UNREAD) {
