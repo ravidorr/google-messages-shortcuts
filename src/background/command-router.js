@@ -8,7 +8,9 @@ export function isGoogleMessagesUrl(url) {
   try {
     const parsedUrl = new URL(url);
 
-    return parsedUrl.hostname === 'messages.google.com';
+    return parsedUrl.protocol === 'https:'
+      && parsedUrl.hostname === 'messages.google.com'
+      && parsedUrl.pathname.startsWith('/web/');
   } catch (_error) {
     return false;
   }

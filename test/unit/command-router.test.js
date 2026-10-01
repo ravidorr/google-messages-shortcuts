@@ -6,8 +6,12 @@ import {
 import { COMMAND_ARCHIVE } from '../../src/shared/commands.js';
 
 describe('command-router', () => {
-  it('detects Google Messages URLs', () => {
+  it('detects Google Messages Web URLs that match the content-script scope', () => {
     expect(isGoogleMessagesUrl('https://messages.google.com/web/conversations')).toBe(true);
+    expect(isGoogleMessagesUrl('https://messages.google.com/web/')).toBe(true);
+    expect(isGoogleMessagesUrl('http://messages.google.com/web/conversations')).toBe(false);
+    expect(isGoogleMessagesUrl('https://messages.google.com/')).toBe(false);
+    expect(isGoogleMessagesUrl('https://messages.google.com/about')).toBe(false);
     expect(isGoogleMessagesUrl('https://example.com')).toBe(false);
     expect(isGoogleMessagesUrl(undefined)).toBe(false);
     expect(isGoogleMessagesUrl('not-a-valid-url')).toBe(false);
@@ -51,6 +55,20 @@ describe('command-router', () => {
     const result = await routeCommand(COMMAND_ARCHIVE, chromeApi);
 
     expect(result).toEqual({ ok: false, reason: 'not-google-messages-tab' });
+  });
+
+  it('returns not-google-messages-tab for unsupported Google Messages paths', async () => {
+    const chromeApi = {
+      tabs: {
+        query: vi.fn(async () => [{ id: 1, url: 'https://messages.google.com/' }]),
+        sendMessage: vi.fn()
+      }
+    };
+
+    const result = await routeCommand(COMMAND_ARCHIVE, chromeApi);
+
+    expect(result).toEqual({ ok: false, reason: 'not-google-messages-tab' });
+    expect(chromeApi.tabs.sendMessage).not.toHaveBeenCalled();
   });
 
   it('forwards valid commands to the active tab', async () => {
