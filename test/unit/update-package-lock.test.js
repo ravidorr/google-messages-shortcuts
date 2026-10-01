@@ -3,6 +3,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it, vi } from 'vitest';
 import {
+  npmCommandForPlatform,
   packageJsonIsStaged,
   runUpdatePackageLockCli,
   updatePackageLock
@@ -14,6 +15,11 @@ const changedPackageJsonError = Object.assign(new Error('package.json has staged
 });
 
 describe('update-package-lock', () => {
+  it('uses the Windows npm shim on Windows', () => {
+    expect(npmCommandForPlatform('win32')).toBe('npm.cmd');
+    expect(npmCommandForPlatform('darwin')).toBe('npm');
+  });
+
   it('detects whether package.json has staged changes', () => {
     const unchangedCommand = vi.fn();
     const changedCommand = vi.fn(() => {

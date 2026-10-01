@@ -1,6 +1,10 @@
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
+export function npmCommandForPlatform(platform = process.platform) {
+  return platform === 'win32' ? 'npm.cmd' : 'npm';
+}
+
 export function packageJsonIsStaged(command = execFileSync) {
   try {
     command('git', ['diff', '--cached', '--quiet', '--', 'package.json'], {
@@ -22,7 +26,7 @@ export function updatePackageLock(command = execFileSync) {
   }
 
   command('git', ['add', '--', 'package.json'], { stdio: 'inherit' });
-  command('npm', ['install'], { stdio: 'inherit' });
+  command(npmCommandForPlatform(), ['install'], { stdio: 'inherit' });
   command('git', ['add', '--', 'package-lock.json'], { stdio: 'inherit' });
   return true;
 }

@@ -1,7 +1,7 @@
 // @vitest-environment node
 
 import { execFile } from 'node:child_process';
-import { access, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { access, chmod, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -403,6 +403,7 @@ describe('script entrypoint coverage', () => {
       'generate-icons.js',
       'package.js',
       'prevent-main-commit.js',
+      'synchronize-package-lock-index.js',
       'update-package-lock.js',
       'validate-package-lock-version.js',
       'validate-package-artifact.js',
@@ -600,6 +601,68 @@ describe('script entrypoint coverage', () => {
       process.exitCode = originalExitCode;
       consoleError.mockRestore();
     }
+  });
+
+  it('synchronizes the real index after a path-limited package commit', async () => {
+    const projectDirectory = await mkdtemp(path.join(tmpdir(), 'package-lock-post-commit-'));
+    const gitHooksDirectory = path.join(projectDirectory, '.git', 'hooks');
+    temporaryDirectories.push(projectDirectory);
+
+    await runGit(projectDirectory, ['init', '--initial-branch=main']);
+    await Promise.all([
+      mkdir(gitHooksDirectory, { recursive: true }),
+      writeFile(path.join(projectDirectory, 'package.json'), packageFile('1.0.0')),
+      writeFile(path.join(projectDirectory, 'package-lock.json'), packageLockFile('1.0.0'))
+    ]);
+    await runGit(projectDirectory, ['add', 'package.json', 'package-lock.json']);
+    await runGit(projectDirectory, [
+      '-c',
+      'user.name=Test User',
+      '-c',
+      'user.email=test@example.com',
+      'commit',
+      '-m',
+      'Initial package metadata'
+    ]);
+
+    await Promise.all([
+      writeFile(path.join(projectDirectory, 'package.json'), packageFile('1.0.1')),
+      writeFile(path.join(projectDirectory, 'package-lock.json'), packageLockFile('1.0.1')),
+      writeFile(path.join(gitHooksDirectory, 'pre-commit'), '#!/bin/sh\ngit add -- package-lock.json\n'),
+      writeFile(
+        path.join(gitHooksDirectory, 'post-commit'),
+        `#!/bin/sh\n${process.execPath} ${scriptPath('synchronize-package-lock-index.js')}\n`
+      )
+    ]);
+    await Promise.all([
+      chmod(path.join(gitHooksDirectory, 'pre-commit'), 0o755),
+      chmod(path.join(gitHooksDirectory, 'post-commit'), 0o755)
+    ]);
+    await runGit(projectDirectory, ['add', 'package.json']);
+    await runGit(projectDirectory, [
+      '-c',
+      'user.name=Test User',
+      '-c',
+      'user.email=test@example.com',
+      'commit',
+      'package.json',
+      '-m',
+      'Update package metadata'
+    ]);
+
+    await expect(runGit(projectDirectory, ['status', '--short'])).resolves.toMatchObject({
+      stdout: ''
+    });
+  });
+
+  it('covers post-commit package-lock synchronization execution', async () => {
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    await importEntrypoint('synchronize-package-lock-index.js');
+
+    expect(consoleError).not.toHaveBeenCalled();
+
+    consoleError.mockRestore();
   });
 
   it('covers version bump entrypoint execution in-process', async () => {
