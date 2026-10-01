@@ -113,7 +113,7 @@ function shouldShowPills(conversationRow, focusedRows, hoveredRows) {
 }
 
 function getConversationRowFromNode(node) {
-  if (!(node instanceof Element)) {
+  if (node?.nodeType !== 1) {
     return null;
   }
 
@@ -124,15 +124,21 @@ function isUnreadMarkerElement(node) {
   return node?.nodeType === 1 && node.matches(SELECTORS.unreadConversationMarker);
 }
 
-function getConversationRowForUnreadMutation(record) {
+export function getConversationRowForUnreadMutation(record) {
+  const conversationRow = getConversationRowFromNode(record.target);
+
+  if (!conversationRow) {
+    return null;
+  }
+
   if (record.type === 'attributes' && record.attributeName === 'data-e2e-is-unread') {
-    return getConversationRowFromNode(record.target);
+    return conversationRow;
   }
 
   if (record.type === 'childList') {
     for (const node of [...record.addedNodes, ...record.removedNodes]) {
       if (isUnreadMarkerElement(node)) {
-        return getConversationRowFromNode(record.target);
+        return conversationRow;
       }
     }
   }
@@ -428,7 +434,7 @@ function createInstallation({
 
   const observer = new MutationObserver((records) => {
     for (const record of records) {
-      if (record.target instanceof Element) {
+      if (record.target?.nodeType === 1) {
         if (isFocusedConversationRow(record.target)) {
           if (!focusedRows.has(record.target) && !hoveredRows.has(record.target)) {
             void openConversation(record.target);
