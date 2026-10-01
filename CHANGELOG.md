@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.6.23 - 2026-10-01
+
+### Fixed
+
+- Verify shortcut-pill clicks do not propagate to conversation rows
+
 ## 1.6.22 - 2026-10-01
 
 ### Fixed

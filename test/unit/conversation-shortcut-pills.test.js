@@ -191,6 +191,33 @@ describe('conversation shortcut pills', () => {
     expect(runAction).toHaveBeenCalledWith(COMMAND_MARK_UNREAD, row);
   });
 
+  it('does not propagate shortcut pill clicks to the conversation row', async () => {
+    const row = createConversationRow({ focused: true, unread: false });
+    const rowClick = vi.fn();
+    const runAction = vi.fn(async () => ({ ok: true }));
+    row.addEventListener('click', rowClick);
+    document.body.append(row);
+
+    disconnect = installConversationShortcutPills({
+      documentRoot: document,
+      getShortcutLabels: vi.fn(async () => ({
+        archive: 'Ctrl+Shift+Y',
+        trash: 'Ctrl+Shift+D',
+        markUnread: 'Ctrl+Shift+U'
+      })),
+      runAction
+    });
+
+    await vi.waitFor(() => {
+      expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(3);
+    });
+
+    row.querySelector(`[data-command="${COMMAND_ARCHIVE}"]`).click();
+
+    expect(runAction).toHaveBeenCalledWith(COMMAND_ARCHIVE, row);
+    expect(rowClick).not.toHaveBeenCalled();
+  });
+
   it('removes the Mark as unread pill after a successful mark-unread action', async () => {
     const row = createConversationRow({ focused: true, unread: false });
     const runAction = vi.fn(async (command, conversationRow) => {
