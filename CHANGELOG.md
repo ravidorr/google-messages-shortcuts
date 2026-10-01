@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.6.10 - 2026-09-30
+
+### Fixed
+
+- Align background URL routing with the content-script scope for Google Messages Web
+
 ## 1.6.9 - 2026-09-30
 
 ### Fixed
