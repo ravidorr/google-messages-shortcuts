@@ -118,4 +118,13 @@ describe('GitHub workflow security', () => {
       "comment.user?.login === 'github-actions[bot]'"
     );
   });
+
+  it('validates release metadata in the version-bump workflow', async () => {
+    const workflows = await readWorkflowFiles();
+    const versionBumpWorkflow = workflows.find(({ name }) => name === 'version-bump.yml');
+
+    expect(versionBumpWorkflow?.content).toContain(
+      'node scripts/validate-release-metadata.js origin/${{ github.base_ref }}'
+    );
+  });
 });
