@@ -1,36 +1,95 @@
-import {
-  COMMAND_ARCHIVE,
-  COMMAND_MARK_UNREAD,
-  COMMAND_TRASH,
-  isValidCommand
-} from '../shared/commands.js';
-import { isConversationRead } from './conversation-read-state.js';
+import { isValidCommand } from '../shared/commands.js';
 import { isTrashConfirmationEnabled } from '../shared/trash-confirmation-preference.js';
+import {
+  assessRowActionCapability,
+  assessTrashConfirmCapabilityAfterRender
+} from './action-capability-preflight.js';
 import { findConversationRow, findRowMenuButton } from './conversation-target.js';
 import { MENU_TEXT, SELECTORS } from './google-messages-dom.js';
 import { beginMenuAction, endMenuAction } from './menu-action-overlay.js';
+import {
+  EXECUTION_KIND_MENU_CLICK,
+  EXECUTION_KIND_TRASH_WITH_CONFIRM,
+  getRowAction,
+  SELECTOR_STRATEGY_FALLBACK_FIRST,
+  SELECTOR_STRATEGY_PRIMARY_THEN_FALLBACK
+} from './row-action-registry.js';
 import { waitForElement, waitForSelector } from './wait-for-element.js';
 
 let actionInProgress = false;
 
-async function clickMenuAction(documentRoot, primarySelector, fallbackText) {
+function createCapabilityBlockedResult(preflightResult) {
+  return {
+    ok: false,
+    reason: preflightResult.reason,
+    capabilityId: preflightResult.capabilityId,
+    capabilityState: preflightResult.capabilityState
+  };
+}
+
+function clickPrimaryMenuItemSync(documentRoot, primarySelector) {
+  const primaryItem = documentRoot.querySelector(primarySelector);
+
+  if (!primaryItem) {
+    return false;
+  }
+
+  primaryItem.click();
+
+  return true;
+}
+
+async function clickPrimaryMenuItem(documentRoot, primarySelector) {
+  const primaryItem = await waitForSelector(documentRoot, primarySelector);
+
+  primaryItem.click();
+
+  return { ok: true };
+}
+
+async function clickFallbackMenuItem(documentRoot, selectors, fallbackText) {
+  const fallbackItem = await waitForElement(
+    documentRoot,
+    selectors.menuItemFallback,
+    fallbackText
+  );
+
+  fallbackItem.click();
+
+  return { ok: true };
+}
+
+async function clickMenuAction(
+  documentRoot,
+  primarySelector,
+  fallbackText,
+  selectors,
+  selectorStrategy = SELECTOR_STRATEGY_PRIMARY_THEN_FALLBACK
+) {
+  if (selectorStrategy === SELECTOR_STRATEGY_FALLBACK_FIRST) {
+    if (clickPrimaryMenuItemSync(documentRoot, primarySelector)) {
+      return { ok: true };
+    }
+
+    try {
+      return await clickFallbackMenuItem(documentRoot, selectors, fallbackText);
+    } catch (_fallbackError) {
+      try {
+        return await clickPrimaryMenuItem(documentRoot, primarySelector);
+      } catch (primaryError) {
+        return {
+          ok: false,
+          reason: primaryError.message
+        };
+      }
+    }
+  }
+
   try {
-    const primaryItem = await waitForSelector(documentRoot, primarySelector);
-
-    primaryItem.click();
-
-    return { ok: true };
+    return await clickPrimaryMenuItem(documentRoot, primarySelector);
   } catch (_primaryError) {
     try {
-      const fallbackItem = await waitForElement(
-        documentRoot,
-        SELECTORS.menuItemFallback,
-        fallbackText
-      );
-
-      fallbackItem.click();
-
-      return { ok: true };
+      return await clickFallbackMenuItem(documentRoot, selectors, fallbackText);
     } catch (fallbackError) {
       return {
         ok: false,
@@ -76,6 +135,54 @@ async function confirmTrash(documentRoot, shouldConfirm = true) {
   }
 }
 
+async function executeMenuClickAction(documentRoot, action, selectors) {
+  return clickMenuAction(
+    documentRoot,
+    selectors[action.menuItemSelectorKey],
+    action.fallbackText,
+    selectors,
+    action.selectorStrategy
+  );
+}
+
+async function executeTrashWithConfirmAction(documentRoot, action, selectors, chromeApi) {
+  const trashResult = await clickMenuAction(
+    documentRoot,
+    selectors[action.menuItemSelectorKey],
+    action.fallbackText,
+    selectors,
+    action.selectorStrategy
+  );
+
+  if (!trashResult.ok) {
+    return trashResult;
+  }
+
+  const confirmPreflight = await assessTrashConfirmCapabilityAfterRender(documentRoot, selectors);
+
+  if (!confirmPreflight.allowed) {
+    return createCapabilityBlockedResult(confirmPreflight);
+  }
+
+  if (!await isTrashConfirmationEnabled(chromeApi)) {
+    return confirmTrash(documentRoot, false);
+  }
+
+  return confirmTrash(documentRoot);
+}
+
+async function executeRowAction(documentRoot, action, selectors, chromeApi) {
+  if (action.executionKind === EXECUTION_KIND_TRASH_WITH_CONFIRM) {
+    return executeTrashWithConfirmAction(documentRoot, action, selectors, chromeApi);
+  }
+
+  if (action.executionKind === EXECUTION_KIND_MENU_CLICK) {
+    return executeMenuClickAction(documentRoot, action, selectors);
+  }
+
+  return { ok: false, reason: 'unknown-command' };
+}
+
 export async function runConversationAction(
   documentRoot,
   command,
@@ -84,6 +191,12 @@ export async function runConversationAction(
   chromeApi = chrome
 ) {
   if (!isValidCommand(command)) {
+    return { ok: false, reason: 'unknown-command' };
+  }
+
+  const action = getRowAction(command);
+
+  if (!action) {
     return { ok: false, reason: 'unknown-command' };
   }
 
@@ -106,8 +219,14 @@ export async function runConversationAction(
       return { ok: false, reason: 'menu-button-not-found' };
     }
 
-    if (command === COMMAND_MARK_UNREAD && !isConversationRead(conversationRow, selectors)) {
-      return { ok: false, reason: 'already-unread' };
+    if (!action.precondition(conversationRow, selectors)) {
+      return { ok: false, reason: action.preconditionFailureReason };
+    }
+
+    const preflight = assessRowActionCapability(documentRoot, action, selectors);
+
+    if (!preflight.allowed) {
+      return createCapabilityBlockedResult(preflight);
     }
 
     beginMenuAction(documentRoot);
@@ -115,37 +234,7 @@ export async function runConversationAction(
     try {
       menuButton.click();
 
-      if (command === COMMAND_ARCHIVE) {
-        return await clickMenuAction(
-          documentRoot,
-          selectors.archiveMenuItem,
-          MENU_TEXT.archive
-        );
-      }
-
-      if (command === COMMAND_TRASH) {
-        const trashResult = await clickMenuAction(
-          documentRoot,
-          selectors.trashMenuItem,
-          MENU_TEXT.trash
-        );
-
-        if (!trashResult.ok) {
-          return trashResult;
-        }
-
-        if (!await isTrashConfirmationEnabled(chromeApi)) {
-          return await confirmTrash(documentRoot, false);
-        }
-
-        return await confirmTrash(documentRoot);
-      }
-
-      return await clickMenuAction(
-        documentRoot,
-        selectors.markUnreadMenuItem,
-        MENU_TEXT.markUnread
-      );
+      return await executeRowAction(documentRoot, action, selectors, chromeApi);
     } finally {
       endMenuAction(documentRoot);
     }

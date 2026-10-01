@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.6.31 - 2026-10-01
+
+### Fixed
+
+- Wait for trash confirmation controls to render before fail-closed preflight blocks auto-confirm
+- Prefer the primary mark-unread e2e selector when it is already present before English fallback polling
+
+## 1.6.30 - 2026-10-01
+
+### Added
+
+- Phase 1 row-action registry for matrix-approved archive, trash, and mark-unread actions with shared pill and popup metadata
+
+### Changed
+
+- Dispatch row actions through the registry with runtime capability preflight that fails closed on unavailable or unsafe selectors
+- Mark as unread uses fallback-first menu targeting when the primary e2e selector is absent
+
 ## 1.6.29 - 2026-10-01
 
 ### Fixed

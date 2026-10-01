@@ -3,6 +3,7 @@
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
+import { getApprovedCommands } from '../../src/content/row-action-registry.js';
 
 const decisionsPath = fileURLToPath(
   new URL('../../docs/dom-discovery/phase1-action-decisions.md', import.meta.url)
@@ -16,5 +17,6 @@ describe('phase1 action decisions', () => {
     expect(localThis).toContain('| Mark as read | **Defer** |');
     expect(localThis).toContain('| Block / report spam | **Defer** |');
     expect(localThis).toContain('Composer adapter | **Block**');
+    expect(getApprovedCommands()).toHaveLength(3);
   });
 });

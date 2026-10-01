@@ -68,6 +68,8 @@ If Chrome or the operating system already uses a suggested shortcut, Chrome may 
 
 Phase 0 adds a fail-closed page adapter and a non-destructive capability self-test. The self-test only queries the page; it does not open menus, change read state, or store conversation content.
 
+Phase 1 wires the three matrix-approved row actions (archive, trash, mark as unread) through a single action registry. Before opening a row menu, the content script runs the same capability assessment used by the self-test and blocks the action when list or menu selectors are unavailable or unsafe. Mark as unread prefers English menu fallback text when the primary e2e attribute is missing, matching live en-US validation.
+
 On Google Messages Web, rebuild and reload the unpacked extension from `dist/`, then open DevTools on the page console (not an extension context) and run:
 
 ```javascript
