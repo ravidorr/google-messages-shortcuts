@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.6.24 - 2026-10-01
+
+### Fixed
+
+- Assert that English fallback actions activate their matching menu controls
+
 ## 1.6.23 - 2026-10-01
 
 ### Fixed

@@ -239,12 +239,15 @@ describe('runConversationAction', () => {
       </mws-conversation-list-item>
       <button class="mat-mdc-menu-item">Archive</button>
     `;
+    const fallbackButton = document.querySelector('.mat-mdc-menu-item');
+    vi.spyOn(fallbackButton, 'click');
     vi.spyOn(waitForElement, 'waitForSelector')
       .mockRejectedValueOnce(new Error('archive selector unavailable'));
 
     const result = await runConversationAction(document, COMMAND_ARCHIVE);
 
     expect(result.ok).toBe(true);
+    expect(fallbackButton.click).toHaveBeenCalledTimes(1);
   });
 
   it('falls back to English trash confirmation text', async () => {
@@ -379,12 +382,15 @@ describe('runConversationAction', () => {
       </mws-conversation-list-item>
       <button class="mat-mdc-menu-item">Mark as unread</button>
     `;
+    const fallbackButton = document.querySelector('.mat-mdc-menu-item');
+    vi.spyOn(fallbackButton, 'click');
     vi.spyOn(waitForElement, 'waitForSelector')
       .mockRejectedValueOnce(new Error('mark-unread selector unavailable'));
 
     const result = await runConversationAction(document, COMMAND_MARK_UNREAD);
 
     expect(result.ok).toBe(true);
+    expect(fallbackButton.click).toHaveBeenCalledTimes(1);
   });
 
   it('returns unknown-command for unsupported actions', async () => {
