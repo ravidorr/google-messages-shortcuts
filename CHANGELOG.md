@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.6.22 - 2026-10-01
+
+### Fixed
+
+- Remove redundant origin-wide host access from the extension manifest
+
 ## 1.6.21 - 2026-10-01
 
 ### Fixed
