@@ -64,6 +64,22 @@ If Chrome or the operating system already uses a suggested shortcut, Chrome may 
 - The extension does not collect or transmit conversation data.
 - Shortcut automation depends on Google Messages accepting programmatic clicks in its UI.
 
+## DOM discovery and selector health
+
+Phase 0 adds a fail-closed page adapter and a non-destructive capability self-test. The self-test only queries the page; it does not open menus, change read state, or store conversation content.
+
+On Google Messages Web, rebuild and reload the unpacked extension from `dist/`, then open DevTools on the page console (not an extension context) and run:
+
+```javascript
+await globalThis.MessagesShortcuts.runCapabilitySelfTest()
+```
+
+The capability self-test is exposed to the page through a small MAIN-world bridge script. Other console warnings from Google Messages, Grammarly, or service workers are unrelated to this extension.
+
+Contributors document live validation in [docs/dom-discovery/live-validation-checklist.md](docs/dom-discovery/live-validation-checklist.md), record results in [docs/dom-discovery/compatibility-matrix.md](docs/dom-discovery/compatibility-matrix.md), and follow [docs/dom-discovery/fixture-sanitization.md](docs/dom-discovery/fixture-sanitization.md) before adding DOM fixtures. Phase 1 row-action gates live in [docs/dom-discovery/phase1-action-decisions.md](docs/dom-discovery/phase1-action-decisions.md).
+
+Compose, loaded-message search, and connection diagnostics remain unavailable until live DOM discovery validates their selectors.
+
 ## Development
 
 ```bash
