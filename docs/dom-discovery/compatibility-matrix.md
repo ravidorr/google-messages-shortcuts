@@ -42,6 +42,8 @@ Use **pass** when `runCapabilitySelfTest()` returns `ok: true` (no DOM mutation,
 | Archive | `button[data-e2e-conversation-menu-archive]` | English "Archive" | en-US live | 5 | 2026-10-01 |
 | Trash | `button[data-e2e-conversation-delete]` | English "Move to trash" | en-US live | 5 | 2026-10-01 |
 | Mark unread | `button[data-e2e-conversation-menu-mark-unread]` (absent live) | English "Mark as unread" via `.mat-mdc-menu-item` | en-US live | 5 | 2026-10-01 |
+| Mark as read (menu) | _not present_ | n/a | en-US live | 5 | 2026-10-01 |
+| Mark as read (open row) | `a[data-e2e-conversation]` inside `mws-conversation-list-item` | n/a | en-US live | 5 | 2026-10-01 |
 | Trash confirm | `mat-dialog-container button[data-e2e-action-button-confirm]` | English "Move to trash" | en-US live | 5 | 2026-10-01 |
 | Block and report spam | `button[data-e2e-conversation-menu-block]` | English "Block & report spam" | en-US live | 4 | 2026-10-01 |
 | Mute | `button[data-e2e-conversation-menu-mute]` | English "Mute" / "Unmute" (toggle not re-verified) | en-US live | 4 | 2026-10-01 |
@@ -53,6 +55,7 @@ Use **pass** when `runCapabilitySelfTest()` returns `ok: true` (no DOM mutation,
 
 - Row overflow menu panel uses `role="menu"` and class `conversation-actions-menu`; overlay IDs (`cdk-overlay-*`, `mat-menu-panel-*`) are dynamic and must not be used as selectors.
 - Mark as unread: live menu item lacks `data-e2e-conversation-menu-mark-unread` (`primary: null`, `hasFallback: true`), but extension shortcut/pill on a disposable **read** row succeeded via English fallback.
+- Mark as read: no row-menu item on read or unread rows (menu path blocked). Open-row spike: programmatic click on `a[data-e2e-conversation]` on an unread row cleared the unread marker.
 - Archive and move to trash: extension automation succeeded on disposable rows (primary e2e selectors).
 - Trash: confirm dialog opens; cancel without trashing verified; auto-confirm path verified when enabled. Self-test with dialog open: `menu.trashConfirm` `dom-query` (primary confirm selector present in DOM).
 - Mark unread confidence **5** reflects verified automation on fallback path, not live primary e2e.

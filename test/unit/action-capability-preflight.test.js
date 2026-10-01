@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
+import * as pageAdapter from '../../src/content/adapters/page-adapter.js';
 import {
   assessRowActionCapability,
   assessTrashConfirmCapability,
@@ -6,7 +7,7 @@ import {
   findTrashConfirmFallbackControl
 } from '../../src/content/action-capability-preflight.js';
 import { getRowAction } from '../../src/content/row-action-registry.js';
-import { COMMAND_ARCHIVE, COMMAND_TRASH } from '../../src/shared/commands.js';
+import { COMMAND_ARCHIVE, COMMAND_MARK_READ, COMMAND_TRASH } from '../../src/shared/commands.js';
 import { SELECTORS } from '../../src/content/google-messages-dom.js';
 import { POLL_INTERVAL_MS } from '../../src/content/wait-for-element.js';
 import {
@@ -221,6 +222,58 @@ describe('action-capability-preflight', () => {
     `;
 
     expect(findTrashConfirmFallbackControl(document)).toBeNull();
+  });
+
+  it('allows mark-read when list unread detection is supported', () => {
+    document.body.innerHTML = selectedReadRow;
+
+    const localThis = assessRowActionCapability(
+      document,
+      getRowAction(COMMAND_MARK_READ),
+      SELECTORS
+    );
+
+    expect(localThis).toEqual({ allowed: true });
+  });
+
+  it('blocks mark-read when list unread detection is unsafe', () => {
+    document.body.innerHTML = selectedReadRow;
+    vi.spyOn(pageAdapter, 'assessPageCapabilities').mockReturnValue({
+      list: {
+        'list.targeting': { state: 'supported', reason: 'ok' },
+        'list.unreadDetection': { state: 'unsafe', reason: 'Unread detection failed.' }
+      },
+      menu: {}
+    });
+
+    const localThis = assessRowActionCapability(
+      document,
+      getRowAction(COMMAND_MARK_READ),
+      SELECTORS
+    );
+
+    expect(localThis).toEqual({
+      allowed: false,
+      reason: 'capability-blocked',
+      capabilityId: 'list.unreadDetection',
+      capabilityState: 'unsafe',
+      capabilityReason: 'Unread detection failed.'
+    });
+    vi.restoreAllMocks();
+  });
+
+  it('blocks mark-read when list unread detection is unavailable', () => {
+    document.body.innerHTML = '';
+
+    const localThis = assessRowActionCapability(
+      document,
+      getRowAction(COMMAND_MARK_READ),
+      SELECTORS
+    );
+
+    expect(localThis.allowed).toBe(false);
+    expect(localThis.capabilityId).toBe('list.targeting');
+    expect(localThis.capabilityState).toBe('unavailable');
   });
 
   it('blocks trash menu action when list targeting is unavailable', () => {

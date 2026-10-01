@@ -4,6 +4,7 @@ import {
 } from './adapters/capability-states.js';
 import { assessPageCapabilities } from './adapters/page-adapter.js';
 import { MENU_CAPABILITY_IDS, MENU_TEXT } from './adapters/menu-adapter.js';
+import { EXECUTION_KIND_OPEN_ROW } from './row-action-registry.js';
 import { waitForElement, waitForSelector } from './wait-for-element.js';
 
 function isBlockingCapabilityState(state) {
@@ -65,6 +66,20 @@ export function assessRowActionCapability(documentRoot, action, selectors) {
       listTargeting.state,
       listTargeting.reason
     );
+  }
+
+  if (action.executionKind === EXECUTION_KIND_OPEN_ROW) {
+    const listCapability = capabilities.list[action.capabilityId];
+
+    if (isBlockingCapabilityState(listCapability.state)) {
+      return createBlockedResult(
+        action.capabilityId,
+        listCapability.state,
+        listCapability.reason
+      );
+    }
+
+    return { allowed: true };
   }
 
   const menuCapability = capabilities.menu[action.capabilityId];

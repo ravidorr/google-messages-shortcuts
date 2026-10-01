@@ -4,7 +4,12 @@ import {
   populateShortcutList,
   renderShortcutRows
 } from '../../src/popup/popup-view.js';
-import { COMMAND_ARCHIVE, COMMAND_MARK_UNREAD, COMMAND_TRASH } from '../../src/shared/commands.js';
+import {
+  COMMAND_ARCHIVE,
+  COMMAND_MARK_READ,
+  COMMAND_MARK_UNREAD,
+  COMMAND_TRASH
+} from '../../src/shared/commands.js';
 import { getCommandIcon } from '../../src/shared/command-icons.js';
 
 function expectLucideShortcutIcon(item, commandName) {
@@ -43,17 +48,19 @@ describe('popup-view', () => {
     });
   });
 
-  it('renders archive, trash, and mark-unread rows', () => {
+  it('renders archive, trash, mark-read, and mark-unread rows', () => {
     const rows = renderShortcutRows([
       { name: COMMAND_ARCHIVE, shortcut: 'Ctrl+Shift+Y' },
       { name: COMMAND_TRASH, shortcut: '' },
+      { name: COMMAND_MARK_READ, shortcut: 'Ctrl+Shift+R' },
       { name: COMMAND_MARK_UNREAD, shortcut: 'Ctrl+Shift+U' }
     ]);
 
-    expect(rows).toHaveLength(3);
+    expect(rows).toHaveLength(4);
     expect(rows[0].shortcut).toBe('Ctrl+Shift+Y');
     expect(rows[1].shortcut).toBe('Not assigned');
-    expect(rows[2].shortcut).toBe('Ctrl+Shift+U');
+    expect(rows[2].shortcut).toBe('Ctrl+Shift+R');
+    expect(rows[3].shortcut).toBe('Ctrl+Shift+U');
   });
 
   it('populates the shortcut list in the popup', () => {
@@ -62,20 +69,24 @@ describe('popup-view', () => {
     populateShortcutList(container, [
       { name: COMMAND_ARCHIVE, shortcut: 'Ctrl+Shift+Y' },
       { name: COMMAND_TRASH, shortcut: 'Ctrl+Shift+D' },
+      { name: COMMAND_MARK_READ, shortcut: 'Ctrl+Shift+R' },
       { name: COMMAND_MARK_UNREAD, shortcut: 'Ctrl+Shift+U' }
     ]);
 
     const items = container.querySelectorAll('.shortcut-item');
 
-    expect(items).toHaveLength(3);
+    expect(items).toHaveLength(4);
     expect(items[0].querySelector('.shortcut-item__label').textContent)
       .toBe('Archive conversation');
     expect(items[1].querySelector('.shortcut-item__label').textContent)
       .toBe('Trash conversation');
     expect(items[2].querySelector('.shortcut-item__label').textContent)
+      .toBe('Mark conversation as read');
+    expect(items[3].querySelector('.shortcut-item__label').textContent)
       .toBe('Mark conversation as unread');
     expectLucideShortcutIcon(items[0], COMMAND_ARCHIVE);
     expectLucideShortcutIcon(items[1], COMMAND_TRASH);
-    expectLucideShortcutIcon(items[2], COMMAND_MARK_UNREAD);
+    expectLucideShortcutIcon(items[2], COMMAND_MARK_READ);
+    expectLucideShortcutIcon(items[3], COMMAND_MARK_UNREAD);
   });
 });

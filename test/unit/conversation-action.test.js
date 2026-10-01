@@ -1,14 +1,20 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { runConversationAction } from '../../src/content/conversation-action.js';
 import { MENU_ACTION_ATTRIBUTE } from '../../src/content/menu-action-overlay.js';
-import { COMMAND_ARCHIVE, COMMAND_MARK_UNREAD, COMMAND_TRASH } from '../../src/shared/commands.js';
+import {
+  COMMAND_ARCHIVE,
+  COMMAND_MARK_READ,
+  COMMAND_MARK_UNREAD,
+  COMMAND_TRASH
+} from '../../src/shared/commands.js';
 import * as waitForElement from '../../src/content/wait-for-element.js';
 import * as rowActionRegistry from '../../src/content/row-action-registry.js';
 import { SELECTOR_STRATEGY_FALLBACK_FIRST } from '../../src/content/row-action-registry.js';
 import {
   duplicateArchiveMenuItems,
   openRowMenuMarkUnreadFallbackOnly,
-  selectedReadRow
+  selectedReadRow,
+  selectedUnreadRow
 } from '../fixtures/dom/list-states.js';
 
 function createConversationFixture() {
@@ -226,7 +232,23 @@ describe('runConversationAction', () => {
     expect(result).toEqual({ ok: false, reason: 'no-target' });
   });
 
-  it('returns menu-button-not-found when the row has no menu control', async () => {
+  it('returns menu-button-not-found when a supplied row has no menu control', async () => {
+    document.body.innerHTML = `
+      <mws-conversation-list-item id="valid-row">
+        <a aria-selected="true"></a>
+        <button aria-haspopup="menu"></button>
+      </mws-conversation-list-item>
+      <button data-e2e-conversation-menu-archive class="mat-mdc-menu-item">Archive</button>
+    `;
+    const pillRow = document.createElement('mws-conversation-list-item');
+    pillRow.append(document.createElement('a'));
+
+    const result = await runConversationAction(document, COMMAND_ARCHIVE, undefined, pillRow);
+
+    expect(result).toEqual({ ok: false, reason: 'menu-button-not-found' });
+  });
+
+  it('blocks archive when list targeting is unsafe because the row has no menu control', async () => {
     document.body.innerHTML = `
       <mws-conversation-list-item>
         <a aria-selected="true"></a>
@@ -235,7 +257,12 @@ describe('runConversationAction', () => {
 
     const result = await runConversationAction(document, COMMAND_ARCHIVE);
 
-    expect(result).toEqual({ ok: false, reason: 'menu-button-not-found' });
+    expect(result).toEqual({
+      ok: false,
+      reason: 'capability-blocked',
+      capabilityId: 'list.targeting',
+      capabilityState: 'unsafe'
+    });
   });
 
   it('falls back to English menu text when data-e2e selectors are absent', async () => {
@@ -366,6 +393,69 @@ describe('runConversationAction', () => {
     expect(result.ok).toBe(true);
     expect(fixture.menuButton.click).toHaveBeenCalled();
     expect(markUnreadButton.click).toHaveBeenCalled();
+  });
+
+  it('marks an unread conversation as read by clicking the conversation link', async () => {
+    document.body.innerHTML = selectedUnreadRow;
+    const row = document.querySelector('mws-conversation-list-item');
+    const conversationLink = row.querySelector('a[data-e2e-conversation]');
+    const menuButton = row.querySelector('button[aria-haspopup="menu"]');
+    vi.spyOn(conversationLink, 'click').mockImplementation(() => {
+      conversationLink.removeAttribute('data-e2e-is-unread');
+    });
+    vi.spyOn(menuButton, 'click');
+
+    const result = await runConversationAction(document, COMMAND_MARK_READ);
+
+    expect(result).toEqual({ ok: true });
+    expect(conversationLink.click).toHaveBeenCalledTimes(1);
+    expect(menuButton.click).not.toHaveBeenCalled();
+    expect(document.documentElement.hasAttribute(MENU_ACTION_ATTRIBUTE)).toBe(false);
+  });
+
+  it('marks an unread conversation as read from a shortcut pill row', async () => {
+    document.body.innerHTML = `
+      ${selectedReadRow}
+      <mws-conversation-list-item id="fixture-pill-unread">
+        <a data-e2e-conversation data-e2e-is-unread="true"></a>
+        <button aria-haspopup="menu"></button>
+      </mws-conversation-list-item>
+    `;
+    const pillRow = document.getElementById('fixture-pill-unread');
+    const conversationLink = pillRow.querySelector('a[data-e2e-conversation]');
+    vi.spyOn(conversationLink, 'click').mockImplementation(() => {
+      conversationLink.removeAttribute('data-e2e-is-unread');
+    });
+
+    const result = await runConversationAction(document, COMMAND_MARK_READ, undefined, pillRow);
+
+    expect(result).toEqual({ ok: true });
+    expect(conversationLink.click).toHaveBeenCalledTimes(1);
+  });
+
+  it('returns already-read when the target conversation is read', async () => {
+    document.body.innerHTML = selectedReadRow;
+    const menuButton = document.querySelector('button[aria-haspopup="menu"]');
+    vi.spyOn(menuButton, 'click');
+
+    const result = await runConversationAction(document, COMMAND_MARK_READ);
+
+    expect(result).toEqual({ ok: false, reason: 'already-read' });
+    expect(menuButton.click).not.toHaveBeenCalled();
+    expect(document.documentElement.hasAttribute(MENU_ACTION_ATTRIBUTE)).toBe(false);
+  });
+
+  it('returns conversation-link-not-found when the unread row has no link', async () => {
+    document.body.innerHTML = `
+      <mws-conversation-list-item is-focused="true">
+        <span data-e2e-is-unread="true"></span>
+        <button aria-haspopup="menu"></button>
+      </mws-conversation-list-item>
+    `;
+
+    const result = await runConversationAction(document, COMMAND_MARK_READ);
+
+    expect(result).toEqual({ ok: false, reason: 'conversation-link-not-found' });
   });
 
   it('returns already-unread when the target conversation is unread', async () => {

@@ -7,6 +7,7 @@ function createChromeApi(overrides = {}) {
       getAll: vi.fn(async () => [
         { name: 'archive-conversation', shortcut: 'Ctrl+Shift+Y' },
         { name: 'trash-conversation', shortcut: '' },
+        { name: 'mark-read-conversation', shortcut: '' },
         { name: 'mark-unread-conversation', shortcut: '' }
       ])
     },
@@ -38,7 +39,7 @@ describe('popup entry', () => {
     await Promise.resolve();
     await Promise.resolve();
 
-    expect(document.querySelectorAll('.shortcut-item')).toHaveLength(3);
+    expect(document.querySelectorAll('.shortcut-item')).toHaveLength(4);
     expect(document.getElementById('shortcut-warning').hidden).toBe(false);
     expect(document.getElementById('auto-confirm-trash').checked).toBe(true);
     expect(document.getElementById('auto-confirm-trash').disabled).toBe(false);

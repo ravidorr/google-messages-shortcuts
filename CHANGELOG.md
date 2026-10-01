@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.6.32 - 2026-10-01
+
+### Added
+
+- Mark as read shortcut and pill for unread conversations via row-open execution (clicks the conversation link and waits for the unread marker to clear)
+- Row-menu mark-as-read documented as blocked; open-row path approved in Phase 1 decision log and compatibility matrix
+
 ## 1.6.31 - 2026-10-01
 
 ### Fixed

@@ -9,6 +9,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { buildExtension } from '../../scripts/build.js';
 import {
   COMMAND_ARCHIVE,
+  COMMAND_MARK_READ,
   COMMAND_MARK_UNREAD,
   COMMAND_TRASH
 } from '../../src/shared/commands.js';
@@ -55,7 +56,8 @@ describe('extension manifest', () => {
     expect(Object.keys(manifest.commands)).toEqual([
       COMMAND_ARCHIVE,
       COMMAND_TRASH,
-      COMMAND_MARK_UNREAD
+      COMMAND_MARK_UNREAD,
+      COMMAND_MARK_READ
     ]);
     expect(manifest.icons).toEqual({
       16: 'icons/icon16.png',

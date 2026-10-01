@@ -9,6 +9,7 @@ export const LIST_SELECTORS = {
   focusedConversationItem: 'mws-conversation-list-item[is-focused="true"]',
   hoveredConversationItem: 'mws-conversation-list-item:hover',
   conversationRow: 'mws-conversation-list-item',
+  conversationLink: 'a[data-e2e-conversation]',
   rowMenuButton: 'button[aria-haspopup="menu"], mws-menu-button button',
   unreadConversationMarker: '[data-e2e-is-unread="true"]'
 };

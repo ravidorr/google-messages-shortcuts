@@ -72,6 +72,7 @@ describe('background entry', () => {
       expect(sendResponse).toHaveBeenCalledWith({
         archive: 'Ctrl+Shift+Y',
         trash: 'Not assigned',
+        markRead: 'Not assigned',
         markUnread: 'Not assigned'
       });
     });
