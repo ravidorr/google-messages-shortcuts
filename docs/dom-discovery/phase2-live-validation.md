@@ -219,8 +219,8 @@ Phase2ValidationHelpers.readToast() // immediately after step 5
 
 1. Refresh tab → open one conversation with **Option+Enter** only → **Option+[** once.
 
-- [ ] **Pass:** Info toast: **"No previous extension-opened conversation is available to return to."**
-- [ ] **Pass:** The same conversation stays open.
+- [x] **Pass:** Info toast: **"No previous extension-opened conversation is available to return to."**
+- [x] **Pass:** The same conversation stays open.
 
 ### Row scrolled away
 
@@ -229,8 +229,8 @@ Phase2ValidationHelpers.readToast() // immediately after step 5
 3. Scroll the list until **A** is no longer in the loaded rows.
 4. **Option+[** once.
 
-- [ ] **Pass:** Info toast: **"The previous conversation is not uniquely available in the loaded list."**
-- [ ] **Pass:** **A** does not open.
+- [x] **Pass:** Info toast: **"The previous conversation is not uniquely available in the loaded list."**
+- [x] **Pass:** **A** does not open.
 
 ---
 
