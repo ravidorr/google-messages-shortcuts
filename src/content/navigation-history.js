@@ -38,6 +38,16 @@ export function consumePreviousConversationIdentity() {
   return returnHistory[returnHistory.length - 1];
 }
 
+export function finalizePreviousConversationReturn() {
+  if (returnHistory.length < 2) {
+    return false;
+  }
+
+  returnHistory.pop();
+
+  return true;
+}
+
 export function resetNavigationHistoryForTests() {
   returnHistory = [];
 }

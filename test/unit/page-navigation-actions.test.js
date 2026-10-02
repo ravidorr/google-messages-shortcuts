@@ -116,6 +116,43 @@ describe('page-navigation-actions', () => {
     expect(localThis.reason).toBe('return-not-found');
   });
 
+  it('preserves return history when the previous conversation cannot be reopened', async () => {
+    document.body.innerHTML = multiRowNavigationList;
+
+    await executePageNavigationCommand(
+      PAGE_COMMAND_OPEN_CONVERSATION,
+      document,
+      createChromeApi()
+    );
+    setCurrentCursorIdentity('href:/web/conversations/c');
+    await executePageNavigationCommand(
+      PAGE_COMMAND_OPEN_CONVERSATION,
+      document,
+      createChromeApi()
+    );
+
+    document.body.innerHTML = `
+      <mws-conversation-list-item>
+        <a href="/web/conversations/z" data-e2e-conversation></a>
+        <button aria-haspopup="menu"></button>
+      </mws-conversation-list-item>
+    `;
+
+    const firstAttempt = await executePageNavigationCommand(
+      PAGE_COMMAND_RETURN_PREVIOUS,
+      document,
+      createChromeApi()
+    );
+    const secondAttempt = await executePageNavigationCommand(
+      PAGE_COMMAND_RETURN_PREVIOUS,
+      document,
+      createChromeApi()
+    );
+
+    expect(firstAttempt.reason).toBe('return-not-found');
+    expect(secondAttempt.reason).toBe('return-not-found');
+  });
+
   it('reports return-not-found when the previous conversation is no longer loaded', async () => {
     document.body.innerHTML = multiRowNavigationList;
 

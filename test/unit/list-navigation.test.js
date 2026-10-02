@@ -174,6 +174,41 @@ describe('list-navigation', () => {
     expect(localThis.identity).toBe('href:/web/conversations/b');
   });
 
+  it('jumps to the last unread row when the cursor identity is missing and direction is previous', () => {
+    document.body.innerHTML = multiRowNavigationList;
+
+    const localThis = moveToAdjacentUnreadIdentity(
+      document,
+      'href:/web/conversations/missing',
+      'previous'
+    );
+
+    expect(localThis.ok).toBe(true);
+    expect(localThis.identity).toBe('href:/web/conversations/c');
+  });
+
+  it('reports an unread boundary when no unread rows exist after a read cursor', () => {
+    document.body.innerHTML = `
+      <mws-conversation-list-item>
+        <a href="/web/conversations/u1" data-e2e-conversation data-e2e-is-unread="true"></a>
+        <button aria-haspopup="menu"></button>
+      </mws-conversation-list-item>
+      <mws-conversation-list-item>
+        <a href="/web/conversations/r1" data-e2e-conversation></a>
+        <button aria-haspopup="menu"></button>
+      </mws-conversation-list-item>
+    `;
+
+    const localThis = moveToAdjacentUnreadIdentity(
+      document,
+      'href:/web/conversations/r1',
+      'next'
+    );
+
+    expect(localThis.ok).toBe(false);
+    expect(localThis.reason).toBe('unread-boundary');
+  });
+
   it('fails closed for ambiguous conversation link identities', () => {
     document.body.innerHTML = duplicateConversationLinkList;
     const identity = 'href:/web/conversations/shared';
@@ -233,7 +268,7 @@ describe('list-navigation', () => {
     expect(localThis.identity).toBe('href:/web/conversations/c');
   });
 
-  it('jumps to the last unread row when the cursor is on a read conversation', () => {
+  it('reports an unread boundary when no unread rows exist before a read cursor', () => {
     document.body.innerHTML = multiRowNavigationList;
 
     const localThis = moveToAdjacentUnreadIdentity(
@@ -242,7 +277,29 @@ describe('list-navigation', () => {
       'previous'
     );
 
-    expect(localThis.ok).toBe(true);
-    expect(localThis.identity).toBe('href:/web/conversations/c');
+    expect(localThis.ok).toBe(false);
+    expect(localThis.reason).toBe('unread-boundary');
+  });
+
+  it('moves to the nearest unread row relative to a read cursor', () => {
+    document.body.innerHTML = `
+      <mws-conversation-list-item>
+        <a href="/web/conversations/u1" data-e2e-conversation data-e2e-is-unread="true"></a>
+        <button aria-haspopup="menu"></button>
+      </mws-conversation-list-item>
+      <mws-conversation-list-item>
+        <a href="/web/conversations/r1" data-e2e-conversation></a>
+        <button aria-haspopup="menu"></button>
+      </mws-conversation-list-item>
+      <mws-conversation-list-item>
+        <a href="/web/conversations/u2" data-e2e-conversation data-e2e-is-unread="true"></a>
+        <button aria-haspopup="menu"></button>
+      </mws-conversation-list-item>
+    `;
+
+    expect(moveToAdjacentUnreadIdentity(document, 'href:/web/conversations/r1', 'next').identity)
+      .toBe('href:/web/conversations/u2');
+    expect(moveToAdjacentUnreadIdentity(document, 'href:/web/conversations/r1', 'previous').identity)
+      .toBe('href:/web/conversations/u1');
   });
 });

@@ -66,8 +66,11 @@ describe('keyboard-controller', () => {
   it('ignores navigation when paused or the target is editable', async () => {
     disconnect = installKeyboardController({
       documentRoot: document,
-      chromeApi: createChromeApi({ paused: true })
+      chromeApi: createChromeApi({ paused: true }),
+      getPausedState: async () => true
     });
+
+    await Promise.resolve();
 
     dispatchAltArrowDown();
 
@@ -91,6 +94,8 @@ describe('keyboard-controller', () => {
       documentRoot: document,
       chromeApi: createChromeApi()
     });
+
+    await Promise.resolve();
 
     document.body.dispatchEvent(new KeyboardEvent('keydown', {
       code: 'KeyP',
@@ -145,11 +150,62 @@ describe('keyboard-controller', () => {
     vi.useRealTimers();
   });
 
+  it('prevents default synchronously once pause state is loaded', async () => {
+    disconnect = installKeyboardController({
+      documentRoot: document,
+      chromeApi: createChromeApi()
+    });
+
+    await vi.waitFor(() => {
+      const event = new KeyboardEvent('keydown', {
+        code: 'ArrowDown',
+        altKey: true,
+        bubbles: true,
+        cancelable: true
+      });
+
+      document.body.dispatchEvent(event);
+
+      expect(event.defaultPrevented).toBe(true);
+    });
+  });
+
+  it('ignores palette and help shortcuts while the target is editable', async () => {
+    disconnect = installKeyboardController({
+      documentRoot: document,
+      chromeApi: createChromeApi()
+    });
+
+    const textarea = document.createElement('textarea');
+    document.body.append(textarea);
+
+    textarea.dispatchEvent(new KeyboardEvent('keydown', {
+      code: 'KeyP',
+      ctrlKey: true,
+      shiftKey: true,
+      bubbles: true,
+      cancelable: true
+    }));
+    textarea.dispatchEvent(new KeyboardEvent('keydown', {
+      code: 'Slash',
+      shiftKey: true,
+      bubbles: true,
+      cancelable: true
+    }));
+
+    await Promise.resolve();
+
+    expect(document.querySelector('[data-messages-shortcuts-command-palette]')).toBeNull();
+    expect(document.querySelector('[data-messages-shortcuts-shortcut-help]')).toBeNull();
+  });
+
   it('opens the command palette with the configured shortcut', async () => {
     disconnect = installKeyboardController({
       documentRoot: document,
       chromeApi: createChromeApi()
     });
+
+    await Promise.resolve();
 
     document.body.dispatchEvent(new KeyboardEvent('keydown', {
       code: 'KeyP',

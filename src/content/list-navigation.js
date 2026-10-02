@@ -266,30 +266,48 @@ export function moveToAdjacentUnreadIdentity(
     return { ok: false, reason: 'no-unread-loaded' };
   }
 
-  let currentUnreadIndex = -1;
+  let cursorRowIndex = -1;
 
   if (cursorIdentity) {
     const cursorRow = findUniqueConversationRowByIdentity(documentRoot, cursorIdentity, selectors);
 
     if (cursorRow) {
-      currentUnreadIndex = unreadRows.indexOf(cursorRow);
+      cursorRowIndex = rows.indexOf(cursorRow);
     }
   } else {
-    const nativeIndex = findNativeListRowIndex(documentRoot, rows, selectors);
-
-    if (nativeIndex >= 0) {
-      currentUnreadIndex = unreadRows.indexOf(rows[nativeIndex]);
-    }
+    cursorRowIndex = findNativeListRowIndex(documentRoot, rows, selectors);
   }
 
-  let nextUnreadIndex;
+  let nextUnreadIndex = -1;
 
-  if (currentUnreadIndex < 0) {
+  if (cursorRowIndex < 0) {
     nextUnreadIndex = direction === 'next' ? 0 : unreadRows.length - 1;
   } else {
-    nextUnreadIndex = direction === 'next'
-      ? currentUnreadIndex + 1
-      : currentUnreadIndex - 1;
+    const cursorRow = rows[cursorRowIndex];
+    const currentUnreadIndex = unreadRows.indexOf(cursorRow);
+
+    if (currentUnreadIndex >= 0) {
+      nextUnreadIndex = direction === 'next'
+        ? currentUnreadIndex + 1
+        : currentUnreadIndex - 1;
+    } else if (direction === 'next') {
+      const nextUnreadRow = rows
+        .slice(cursorRowIndex + 1)
+        .find((row) => isUnreadConversationRow(row, selectors));
+
+      if (nextUnreadRow) {
+        nextUnreadIndex = unreadRows.indexOf(nextUnreadRow);
+      }
+    } else {
+      const previousUnreadRow = rows
+        .slice(0, cursorRowIndex)
+        .reverse()
+        .find((row) => isUnreadConversationRow(row, selectors));
+
+      if (previousUnreadRow) {
+        nextUnreadIndex = unreadRows.indexOf(previousUnreadRow);
+      }
+    }
   }
 
   if (nextUnreadIndex < 0 || nextUnreadIndex >= unreadRows.length) {

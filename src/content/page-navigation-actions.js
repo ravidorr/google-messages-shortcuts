@@ -27,7 +27,8 @@ import {
   resolveCursorIdentity
 } from './list-navigation.js';
 import {
-  consumePreviousConversationIdentity,
+  finalizePreviousConversationReturn,
+  peekPreviousConversationIdentity,
   recordOpenedConversation
 } from './navigation-history.js';
 import { showNavigationFeedback } from './navigation-feedback.js';
@@ -117,7 +118,7 @@ export async function executePageNavigationCommand(
       break;
     }
     case PAGE_COMMAND_RETURN_PREVIOUS: {
-      const previousIdentity = consumePreviousConversationIdentity();
+      const previousIdentity = peekPreviousConversationIdentity();
 
       if (!previousIdentity) {
         result = { ok: false, reason: 'no-return-history' };
@@ -132,7 +133,7 @@ export async function executePageNavigationCommand(
         break;
       }
 
-      recordOpenedConversation(previousIdentity);
+      finalizePreviousConversationReturn();
       currentCursorIdentity = previousIdentity;
       break;
     }

@@ -26,18 +26,6 @@ import {
 
 const installationRegistry = new WeakMap();
 
-function allowsCommandDuringContext(command, context) {
-  if (command === PAGE_COMMAND_OPEN_PALETTE || command === PAGE_COMMAND_OPEN_HELP) {
-    if (context.isImeComposing || context.isRepeated || context.nativeDialogOpen) {
-      return false;
-    }
-
-    return true;
-  }
-
-  return !shouldIgnorePageCommand(context);
-}
-
 function createInstallation({
   documentRoot = document,
   chromeApi = globalThis.chrome,
@@ -53,16 +41,14 @@ function createInstallation({
     paused = await getPausedState();
   }
 
-  const pausedStateReady = refreshPausedState();
+  void refreshPausedState();
   const disconnectInitialListCursorWatcher = startInitialListCursorWatcher({
     documentRoot,
     chromeApi,
     establishInitialCursor
   });
 
-  async function handleKeydown(event) {
-    await pausedStateReady;
-
+  function handleKeydown(event) {
     if (paused) {
       return;
     }
@@ -79,7 +65,7 @@ function createInstallation({
 
     const context = createKeyboardContext(event, documentRoot);
 
-    if (!allowsCommandDuringContext(command, context)) {
+    if (shouldIgnorePageCommand(context)) {
       return;
     }
 
@@ -87,18 +73,18 @@ function createInstallation({
     event.stopPropagation();
 
     if (command === PAGE_COMMAND_OPEN_PALETTE) {
-      await openPalette(documentRoot, chromeApi);
+      void openPalette(documentRoot, chromeApi);
 
       return;
     }
 
     if (command === PAGE_COMMAND_OPEN_HELP) {
-      await openHelp(documentRoot, chromeApi);
+      void openHelp(documentRoot, chromeApi);
 
       return;
     }
 
-    await executeNavigationCommand(command, documentRoot, chromeApi);
+    void executeNavigationCommand(command, documentRoot, chromeApi);
   }
 
   documentRoot.addEventListener('keydown', handleKeydown, true);

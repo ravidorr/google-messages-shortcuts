@@ -303,6 +303,8 @@ describe('phase2 navigation coverage', () => {
     });
     const disconnect = installKeyboardController({ documentRoot: document, chromeApi });
 
+    await Promise.resolve();
+
     document.body.dispatchEvent(new KeyboardEvent('keydown', {
       code: 'KeyP',
       ctrlKey: true,
