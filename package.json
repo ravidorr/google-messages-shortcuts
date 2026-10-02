@@ -1,6 +1,6 @@
 {
   "name": "google-messages-shortcuts",
-  "version": "1.8.0",
+  "version": "1.8.1",
   "description": "Use shortcuts to Archive, Trash, Mark as read, or Mark as unread, row pills for Mute, Unmute, and Unarchive, and navigation shortcuts to open Archived in Google Messages.",
   "type": "module",
   "scripts": {

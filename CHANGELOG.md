@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.8.1 - 2026-10-02
+
+### Changed
+
+- Record locale matrix pass (en-US LTR and Hebrew RTL threads) and 1.8.0 live validation sign-off in DOM discovery docs
+
 ## 1.8.0 - 2026-10-02
 
 ### Added
