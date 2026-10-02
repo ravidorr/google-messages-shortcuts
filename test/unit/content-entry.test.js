@@ -100,7 +100,7 @@ describe('content entry helpers', () => {
     await vi.waitFor(() => {
       expect(
         document.querySelectorAll('[data-messages-shortcuts-pill]')
-      ).toHaveLength(5);
+      ).toHaveLength(6);
     });
   });
 
@@ -108,7 +108,7 @@ describe('content entry helpers', () => {
     await vi.waitFor(() => {
       expect(
         document.querySelectorAll('[data-messages-shortcuts-pill]')
-      ).toHaveLength(5);
+      ).toHaveLength(6);
     });
 
     resetContentScriptForTests();
@@ -127,7 +127,7 @@ describe('content entry helpers', () => {
     await vi.waitFor(() => {
       expect(
         document.querySelectorAll('[data-messages-shortcuts-pill]')
-      ).toHaveLength(5);
+      ).toHaveLength(6);
     });
   });
 });

@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   COMMAND_ARCHIVE,
+  COMMAND_BLOCK_REPORT_SPAM,
   COMMAND_MARK_READ,
   COMMAND_MUTE,
   COMMAND_OPEN_ARCHIVED,
@@ -58,6 +59,18 @@ describe('action-feedback', () => {
     }, COMMAND_OPEN_ARCHIVED)).toEqual({
       kind: 'info',
       message: 'Google Messages opened the Archived sidebar, not the unarchive dialog. Open Archived from the account menu or search overflow to reach the unarchive dialog.'
+    });
+  });
+
+  it('reports pending block confirmation instead of success', () => {
+    const localThis = getActionFeedbackMessage(
+      { ok: true, pendingBlockReportSpamConfirmation: true },
+      COMMAND_BLOCK_REPORT_SPAM
+    );
+
+    expect(localThis).toEqual({
+      kind: 'info',
+      message: 'Confirm Block / report spam in the Google Messages dialog to finish.'
     });
   });
 

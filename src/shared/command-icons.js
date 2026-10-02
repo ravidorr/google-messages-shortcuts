@@ -1,5 +1,6 @@
 import {
   COMMAND_ARCHIVE,
+  COMMAND_BLOCK_REPORT_SPAM,
   COMMAND_MARK_READ,
   COMMAND_MARK_UNREAD,
   COMMAND_MUTE,
@@ -26,6 +27,14 @@ const COMMAND_ICONS = {
       'M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2',
       'M10 11v6',
       'M14 11v6'
+    ]
+  },
+  [COMMAND_BLOCK_REPORT_SPAM]: {
+    viewBox: '0 0 24 24',
+    paths: [
+      'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10',
+      'M9 9h6',
+      'M12 6v6'
     ]
   },
   [COMMAND_MARK_UNREAD]: {

@@ -5,6 +5,7 @@ export const COMMAND_MARK_READ = 'mark-read-conversation';
 export const COMMAND_MUTE = 'mute-conversation';
 export const COMMAND_UNMUTE = 'unmute-conversation';
 export const COMMAND_UNARCHIVE = 'unarchive-conversation';
+export const COMMAND_BLOCK_REPORT_SPAM = 'block-report-spam-conversation';
 export const COMMAND_OPEN_ARCHIVED = 'open-archived';
 
 export const MANIFEST_COMMANDS = [
@@ -25,7 +26,8 @@ export const VALID_COMMANDS = new Set([
   ...NAVIGATION_COMMANDS,
   COMMAND_MUTE,
   COMMAND_UNMUTE,
-  COMMAND_UNARCHIVE
+  COMMAND_UNARCHIVE,
+  COMMAND_BLOCK_REPORT_SPAM
 ]);
 
 export function isValidCommand(command) {

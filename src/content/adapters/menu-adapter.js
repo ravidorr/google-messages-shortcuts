@@ -10,7 +10,9 @@ export const MENU_SELECTORS = {
   trashMenuItem: 'button[data-e2e-conversation-delete]',
   markUnreadMenuItem: 'button[data-e2e-conversation-menu-mark-unread]',
   muteMenuItem: 'button[data-e2e-conversation-menu-mute]',
+  blockReportSpamMenuItem: 'button[data-e2e-conversation-menu-block]',
   trashConfirmButton: 'mat-dialog-container button[data-e2e-action-button-confirm]',
+  blockReportSpamConfirmButton: 'mat-dialog-container button[data-e2e-action-button-confirm]',
   menuItemFallback: '.mat-menu-item, .mat-mdc-menu-item',
   rowMenuPanel: '.conversation-actions-menu[role="menu"], [role="menu"].conversation-actions-menu'
 };
@@ -20,7 +22,11 @@ export const MENU_TEXT = {
   trash: 'Move to trash',
   markUnread: 'Mark as unread',
   mute: 'Mute',
-  unmute: 'Unmute'
+  unmute: 'Unmute',
+  blockReportSpam: 'Block & report spam',
+  blockReportSpamConfirm: 'Block',
+  blockReportSpamConfirmAlternate: 'Block & report spam',
+  blockReportSpamConfirmOk: 'OK'
 };
 
 export const MENU_CAPABILITY_IDS = {
@@ -29,7 +35,9 @@ export const MENU_CAPABILITY_IDS = {
   markUnread: 'menu.markUnread',
   mute: 'menu.mute',
   unmute: 'menu.unmute',
-  trashConfirm: 'menu.trashConfirm'
+  trashConfirm: 'menu.trashConfirm',
+  blockReportSpam: 'menu.blockReportSpam',
+  blockReportSpamConfirm: 'menu.blockReportSpamConfirm'
 };
 
 export function isConversationRowMenuOpen(documentRoot, selectors = MENU_SELECTORS) {
@@ -44,6 +52,66 @@ function isTrashConfirmDialogOpen(documentRoot) {
 
 function normalizeMenuLabel(value) {
   return value.replace(/\s+/g, ' ').trim();
+}
+
+export function isBlockReportSpamConfirmLabel(label) {
+  const normalizedLabel = normalizeMenuLabel(label);
+
+  return normalizedLabel === MENU_TEXT.blockReportSpamConfirm
+    || normalizedLabel === MENU_TEXT.blockReportSpamConfirmAlternate
+    || normalizedLabel === MENU_TEXT.blockReportSpamConfirmOk;
+}
+
+function isTrashConfirmLabel(label) {
+  return normalizeMenuLabel(label) === MENU_TEXT.trash;
+}
+
+function isTrashConfirmControl(element) {
+  return isTrashConfirmLabel(element.textContent || '');
+}
+
+function isBlockReportSpamConfirmControl(element) {
+  return isBlockReportSpamConfirmLabel(element.textContent || '');
+}
+
+function hasTrashConfirmInOpenDialog(documentRoot, selectors = MENU_SELECTORS) {
+  const dialog = documentRoot.querySelector('mat-dialog-container');
+  const candidates = new Set([
+    documentRoot.querySelector(selectors.trashConfirmButton),
+    ...dialog.querySelectorAll('button, .mat-focus-indicator')
+  ].filter(Boolean));
+
+  return [...candidates].some(isTrashConfirmControl);
+}
+
+export function findBlockReportSpamConfirmFallbackControl(documentRoot) {
+  const dialog = documentRoot.querySelector('mat-dialog-container');
+
+  if (!dialog) {
+    return null;
+  }
+
+  return [...dialog.querySelectorAll('button, .mat-focus-indicator')].find(
+    isBlockReportSpamConfirmControl
+  ) ?? null;
+}
+
+export function findBlockReportSpamConfirmControl(
+  documentRoot,
+  selectors = MENU_SELECTORS
+) {
+  const primaryMatch = [...documentRoot.querySelectorAll(selectors.blockReportSpamConfirmButton)].find(
+    isBlockReportSpamConfirmControl
+  );
+
+  return primaryMatch ?? findBlockReportSpamConfirmFallbackControl(documentRoot);
+}
+
+export function hasBlockReportSpamConfirmControl(
+  documentRoot,
+  selectors = MENU_SELECTORS
+) {
+  return Boolean(findBlockReportSpamConfirmControl(documentRoot, selectors));
 }
 
 export function findLabelMatchedMenuItem(
@@ -201,10 +269,24 @@ export function assessMenuCapabilities(documentRoot, listCapabilities, selectors
       listTargeting,
       selectors
     ),
+    [MENU_CAPABILITY_IDS.blockReportSpam]: assessMenuActionCapability(
+      documentRoot,
+      selectors.blockReportSpamMenuItem,
+      'Block & report spam',
+      MENU_TEXT.blockReportSpam,
+      listTargeting,
+      selectors
+    ),
     [MENU_CAPABILITY_IDS.trashConfirm]: assessTrashConfirmCapability(
       documentRoot,
       selectors.trashConfirmButton,
       listTargeting
+    ),
+    [MENU_CAPABILITY_IDS.blockReportSpamConfirm]: assessBlockReportSpamConfirmCapability(
+      documentRoot,
+      selectors.blockReportSpamConfirmButton,
+      listTargeting,
+      selectors
     )
   };
 }
@@ -247,6 +329,70 @@ function assessTrashConfirmCapability(documentRoot, confirmSelector, listTargeti
   return createCapabilityResult(
     CAPABILITY_SUPPORTED,
     'Trash confirmation selector is defined; the dialog appears after choosing Move to trash.',
+    'contract'
+  );
+}
+
+function assessBlockReportSpamConfirmCapability(
+  documentRoot,
+  confirmSelector,
+  listTargeting,
+  selectors = MENU_SELECTORS
+) {
+  if (listTargeting.state !== CAPABILITY_SUPPORTED) {
+    return createCapabilityResult(
+      CAPABILITY_UNAVAILABLE,
+      `List targeting is ${listTargeting.state}: ${listTargeting.reason}`,
+      listTargeting.evidenceSource
+    );
+  }
+
+  const matchingConfirmControls = [...documentRoot.querySelectorAll(confirmSelector)]
+    .filter(isBlockReportSpamConfirmControl);
+
+  if (matchingConfirmControls.length > 1) {
+    return createCapabilityResult(
+      CAPABILITY_UNSAFE,
+      'Multiple block confirmation controls match the primary selector.',
+      'dom-query'
+    );
+  }
+
+  if (matchingConfirmControls.length === 1) {
+    return createCapabilityResult(
+      CAPABILITY_SUPPORTED,
+      'Block confirmation control is present in the document.',
+      'dom-query'
+    );
+  }
+
+  if (isTrashConfirmDialogOpen(documentRoot)) {
+    if (findBlockReportSpamConfirmFallbackControl(documentRoot)) {
+      return createCapabilityResult(
+        CAPABILITY_SUPPORTED,
+        'Block confirmation control matched English fallback while the dialog is open.',
+        'dom-query-fallback'
+      );
+    }
+
+    if (hasTrashConfirmInOpenDialog(documentRoot, selectors)) {
+      return createCapabilityResult(
+        CAPABILITY_SUPPORTED,
+        'Block confirmation selector is defined; a different confirmation dialog is open.',
+        'contract'
+      );
+    }
+
+    return createCapabilityResult(
+      CAPABILITY_UNAVAILABLE,
+      'Block confirmation dialog is open but the confirm control was not found.',
+      'dom-query'
+    );
+  }
+
+  return createCapabilityResult(
+    CAPABILITY_SUPPORTED,
+    'Block confirmation selector is defined; the dialog appears after choosing Block & report spam.',
     'contract'
   );
 }

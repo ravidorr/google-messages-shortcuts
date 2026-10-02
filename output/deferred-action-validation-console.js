@@ -18,6 +18,7 @@
   const menuButton = sampleRow?.querySelector(menuButtonSelector) ?? null;
 
   const observedControls = [
+    'button[data-e2e-conversation-menu-block]',
     'button[data-e2e-conversation-menu-mute]',
     'button[data-e2e-conversation-menu-pin]',
     'button[data-e2e-unarchive-button]',
@@ -52,6 +53,27 @@
     note: 'Sanitized structural evidence only. Open archived discovery order: data-e2e-archived-list-button, bottom-nav data-e2e-archived-button (sidebar route), account menu, search overflow, app header menu, Settings, then localized Archived labels.'
   }, null, 2));
 })();
+
+// Block / report spam dialog probe (run with the native dialog open after choosing the menu item):
+// console.log(JSON.stringify({
+//   phase: 'block-report-spam-dialog',
+//   dialogOpen: Boolean(document.querySelector('mat-dialog-container')),
+//   confirmButtonCount: document.querySelectorAll('mat-dialog-container button[data-e2e-action-button-confirm]').length,
+//   confirmControls: [...document.querySelectorAll('mat-dialog-container button[data-e2e-action-button-confirm]')].slice(0, 3)
+//     .map((el) => ({
+//       label: el.textContent?.trim(),
+//       e2e: el.getAttribute('data-e2e-action-button-confirm') !== null
+//         ? 'data-e2e-action-button-confirm'
+//         : null,
+//       role: el.getAttribute('role'),
+//       checked: el.getAttribute('aria-checked')
+//     })),
+//   dialogCheckboxes: [...document.querySelectorAll('mat-dialog-container input[type="checkbox"]')].slice(0, 3)
+//     .map((el) => ({
+//       label: el.getAttribute('aria-label') || el.closest('label')?.textContent?.trim() || null,
+//       checked: el.checked
+//     }))
+// }, null, 2));
 
 // Archived modal probe (run with the "Archived" dialog open):
 // console.log(JSON.stringify({

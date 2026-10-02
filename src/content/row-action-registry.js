@@ -1,6 +1,7 @@
 import {
   COMMAND_ARCHIVE,
   COMMAND_MARK_READ,
+  COMMAND_BLOCK_REPORT_SPAM,
   COMMAND_MARK_UNREAD,
   COMMAND_MUTE,
   COMMAND_TRASH,
@@ -27,6 +28,8 @@ export const SELECTOR_STRATEGY_LABEL_MATCHED = 'label-matched';
 export const EXECUTION_KIND_MENU_CLICK = 'menu-click';
 export const EXECUTION_KIND_OPEN_ROW = 'open-row';
 export const EXECUTION_KIND_TRASH_WITH_CONFIRM = 'trash-with-confirm';
+export const EXECUTION_KIND_BLOCK_REPORT_SPAM_WITH_NATIVE_CONFIRM =
+  'block-report-spam-with-native-confirm';
 export const EXECUTION_KIND_ARCHIVED_MODAL_CLICK = 'archived-modal-click';
 
 export const APPROVED_ROW_ACTIONS = [
@@ -126,6 +129,24 @@ export const APPROVED_ROW_ACTIONS = [
     pillLabel: 'Unmute',
     popupLabel: 'Unmute conversation',
     shortcutKey: 'unmute',
+    pillOnly: true,
+    showPillWhenReadOnly: false,
+    showPillWhenUnreadOnly: false
+  },
+  {
+    command: COMMAND_BLOCK_REPORT_SPAM,
+    capabilityId: MENU_CAPABILITY_IDS.blockReportSpam,
+    confirmCapabilityId: MENU_CAPABILITY_IDS.blockReportSpamConfirm,
+    decision: ACTION_DECISION_APPROVE,
+    menuItemSelectorKey: 'blockReportSpamMenuItem',
+    fallbackText: MENU_TEXT.blockReportSpam,
+    selectorStrategy: SELECTOR_STRATEGY_PRIMARY_THEN_FALLBACK,
+    executionKind: EXECUTION_KIND_BLOCK_REPORT_SPAM_WITH_NATIVE_CONFIRM,
+    precondition: () => true,
+    preconditionFailureReason: null,
+    pillLabel: 'Block / report spam',
+    popupLabel: 'Block / report spam conversation',
+    shortcutKey: 'blockReportSpam',
     pillOnly: true,
     showPillWhenReadOnly: false,
     showPillWhenUnreadOnly: false

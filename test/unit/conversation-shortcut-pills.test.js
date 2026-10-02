@@ -107,7 +107,7 @@ describe('conversation shortcut pills', () => {
     });
 
     await vi.waitFor(() => {
-      expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(5);
+      expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(6);
     });
 
     expect(row.hasAttribute('data-messages-shortcuts-pill-host')).toBe(true);
@@ -139,7 +139,7 @@ describe('conversation shortcut pills', () => {
     });
 
     await vi.waitFor(() => {
-      expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(5);
+      expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(6);
     });
 
     expect(row.querySelector(`[data-command="${COMMAND_MARK_UNREAD}"]`).textContent)
@@ -167,7 +167,7 @@ describe('conversation shortcut pills', () => {
     });
 
     await vi.waitFor(() => {
-      expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(5);
+      expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(6);
     });
 
     const markUnreadPill = row.querySelector(`[data-command="${COMMAND_MARK_UNREAD}"]`);
@@ -198,7 +198,7 @@ describe('conversation shortcut pills', () => {
     });
 
     await vi.waitFor(() => {
-      expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(5);
+      expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(6);
     });
 
     expect(row.querySelector(`[data-command="${COMMAND_MARK_UNREAD}"]`)).toBeNull();
@@ -250,7 +250,7 @@ describe('conversation shortcut pills', () => {
     });
 
     await vi.waitFor(() => {
-      expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(5);
+      expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(6);
     });
 
     row.querySelector(`[data-command="${COMMAND_ARCHIVE}"]`).click();
@@ -285,7 +285,7 @@ describe('conversation shortcut pills', () => {
     });
 
     await vi.waitFor(() => {
-      expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(5);
+      expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(6);
     });
 
     row.querySelector(`[data-command="${COMMAND_MARK_UNREAD}"]`).click();
@@ -294,7 +294,7 @@ describe('conversation shortcut pills', () => {
       expect(row.querySelector(`[data-command="${COMMAND_MARK_UNREAD}"]`)).toBeNull();
       expect(row.querySelector(`[data-command="${COMMAND_MARK_READ}"]`)).not.toBeNull();
     });
-    expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(5);
+    expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(6);
   });
 
   it('ignores unread mutation records outside conversation rows', () => {
@@ -368,7 +368,7 @@ describe('conversation shortcut pills', () => {
     });
 
     await vi.waitFor(() => {
-      expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(5);
+      expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(6);
     });
 
     getShortcutLabels.mockClear();
@@ -382,7 +382,7 @@ describe('conversation shortcut pills', () => {
     });
 
     expect(getShortcutLabels).not.toHaveBeenCalled();
-    expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(5);
+    expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(6);
   });
 
   it('refreshes pills when the unread marker is added to a visible row', async () => {
@@ -400,7 +400,7 @@ describe('conversation shortcut pills', () => {
     });
 
     await vi.waitFor(() => {
-      expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(5);
+      expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(6);
     });
 
     const unreadMarker = document.createElement('span');
@@ -411,7 +411,7 @@ describe('conversation shortcut pills', () => {
       expect(row.querySelector(`[data-command="${COMMAND_MARK_UNREAD}"]`)).toBeNull();
       expect(row.querySelector(`[data-command="${COMMAND_MARK_READ}"]`)).not.toBeNull();
     });
-    expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(5);
+    expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(6);
   });
 
   it('refreshes pills when the unread marker is removed from a visible row', async () => {
@@ -429,7 +429,7 @@ describe('conversation shortcut pills', () => {
     });
 
     await vi.waitFor(() => {
-      expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(5);
+      expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(6);
     });
 
     row.querySelector('[data-e2e-is-unread="true"]').remove();
@@ -438,7 +438,7 @@ describe('conversation shortcut pills', () => {
       expect(row.querySelector(`[data-command="${COMMAND_MARK_READ}"]`)).toBeNull();
       expect(row.querySelector(`[data-command="${COMMAND_MARK_UNREAD}"]`)).not.toBeNull();
     });
-    expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(5);
+    expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(6);
   });
 
   it('refreshes pills when the unread marker attribute changes', async () => {
@@ -456,7 +456,7 @@ describe('conversation shortcut pills', () => {
     });
 
     await vi.waitFor(() => {
-      expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(5);
+      expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(6);
     });
 
     row.querySelector('[data-e2e-is-unread="true"]').setAttribute('data-e2e-is-unread', 'false');
@@ -465,7 +465,7 @@ describe('conversation shortcut pills', () => {
       expect(row.querySelector(`[data-command="${COMMAND_MARK_READ}"]`)).toBeNull();
       expect(row.querySelector(`[data-command="${COMMAND_MARK_UNREAD}"]`)).not.toBeNull();
     });
-    expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(5);
+    expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(6);
   });
 
   it('skips pill refresh after mark-unread when the row is no longer active', async () => {
@@ -489,7 +489,7 @@ describe('conversation shortcut pills', () => {
     row.dispatchEvent(new Event('pointerover', { bubbles: true }));
 
     await vi.waitFor(() => {
-      expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(5);
+      expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(6);
     });
 
     row.querySelector(`[data-command="${COMMAND_MARK_UNREAD}"]`).click();
@@ -813,7 +813,7 @@ describe('conversation shortcut pills', () => {
     pillRow.dispatchEvent(new Event('pointerover', { bubbles: true }));
 
     await vi.waitFor(() => {
-      expect(pillRow.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(5);
+      expect(pillRow.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(6);
     });
 
     pillRow.querySelector(`[data-command="${COMMAND_ARCHIVE}"]`).click();
@@ -837,7 +837,7 @@ describe('conversation shortcut pills', () => {
     row.dispatchEvent(new Event('pointerover', { bubbles: true }));
 
     await vi.waitFor(() => {
-      expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(5);
+      expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(6);
     });
 
     row.dispatchEvent(new Event('pointerout', { bubbles: true }));
@@ -977,7 +977,7 @@ describe('conversation shortcut pills', () => {
     row.dispatchEvent(new Event('pointerover', { bubbles: true }));
 
     await vi.waitFor(() => {
-      expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(5);
+      expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(6);
     });
     row.querySelector('[data-messages-shortcuts-pill]').dispatchEvent(
       new Event('pointerout', { bubbles: true })
@@ -1000,7 +1000,7 @@ describe('conversation shortcut pills', () => {
     row.setAttribute('is-focused', 'true');
 
     await vi.waitFor(() => {
-      expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(5);
+      expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(6);
     });
   });
 
@@ -1019,7 +1019,7 @@ describe('conversation shortcut pills', () => {
     });
 
     await vi.waitFor(() => {
-      expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(5);
+      expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(6);
     });
     row.setAttribute('is-focused', 'false');
 
@@ -1042,14 +1042,14 @@ describe('conversation shortcut pills', () => {
     });
 
     await vi.waitFor(() => {
-      expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(5);
+      expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(6);
     });
     row.dispatchEvent(new Event('pointerover', { bubbles: true }));
     row.setAttribute('is-focused', 'false');
 
     await Promise.resolve();
 
-    expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(5);
+    expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(6);
     row.dispatchEvent(new Event('pointerout', { bubbles: true }));
 
     expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(0);
@@ -1070,7 +1070,7 @@ describe('conversation shortcut pills', () => {
     row.dispatchEvent(new Event('pointerover', { bubbles: true }));
 
     await vi.waitFor(() => {
-      expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(5);
+      expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(6);
     });
 
     row.querySelector('[data-messages-shortcuts-pill]').dispatchEvent(
@@ -1119,7 +1119,7 @@ describe('conversation shortcut pills', () => {
     link.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
 
     await vi.waitFor(() => {
-      expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(5);
+      expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(6);
     });
   });
 
@@ -1138,12 +1138,12 @@ describe('conversation shortcut pills', () => {
     link.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
 
     await vi.waitFor(() => {
-      expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(5);
+      expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(6);
     });
     row.dispatchEvent(new Event('pointerover', { bubbles: true }));
     row.dispatchEvent(new Event('pointerout', { bubbles: true }));
 
-    expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(5);
+    expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(6);
   });
 
   it('removes pills when focus leaves an unfocused conversation row', async () => {
@@ -1161,7 +1161,7 @@ describe('conversation shortcut pills', () => {
     link.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
 
     await vi.waitFor(() => {
-      expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(5);
+      expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(6);
     });
     link.dispatchEvent(new FocusEvent('focusout', { bubbles: true }));
 
@@ -1184,14 +1184,14 @@ describe('conversation shortcut pills', () => {
     link.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
 
     await vi.waitFor(() => {
-      expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(5);
+      expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(6);
     });
     link.dispatchEvent(new FocusEvent('focusout', {
       bubbles: true,
       relatedTarget: menuButton
     }));
 
-    expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(5);
+    expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(6);
   });
 
   it('keeps pills when browser focus leaves a Google Messages-focused row', async () => {
@@ -1209,11 +1209,11 @@ describe('conversation shortcut pills', () => {
     link.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
 
     await vi.waitFor(() => {
-      expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(5);
+      expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(6);
     });
     link.dispatchEvent(new FocusEvent('focusout', { bubbles: true }));
 
-    expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(5);
+    expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(6);
   });
 
   it('ignores mutation records whose target is not an element', () => {
@@ -1398,7 +1398,7 @@ describe('conversation shortcut pills', () => {
     row.dispatchEvent(new Event('pointerover', { bubbles: true }));
 
     await vi.waitFor(() => {
-      expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(5);
+      expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(6);
     });
 
     expect(getShortcutLabels).toHaveBeenCalledTimes(2);
@@ -1499,18 +1499,18 @@ describe('conversation shortcut pills', () => {
     });
 
     await vi.waitFor(() => {
-      expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(5);
+      expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(6);
     });
     row.dispatchEvent(new MouseEvent('pointerout', {
       bubbles: true,
       relatedTarget: link
     }));
 
-    expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(5);
+    expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(6);
     firstDisconnect();
 
     expect(document.querySelector('[data-messages-shortcuts-pill-styles]')).not.toBeNull();
-    expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(5);
+    expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(6);
     expect(row.hasAttribute('data-messages-shortcuts-pill-host')).toBe(true);
 
     disconnect();
@@ -1588,7 +1588,7 @@ describe('conversation shortcut pills', () => {
     });
 
     await vi.waitFor(() => {
-      expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(5);
+      expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(6);
     });
   });
 
@@ -1663,7 +1663,7 @@ describe('conversation shortcut pills', () => {
     });
 
     await vi.waitFor(() => {
-      expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(5);
+      expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(6);
     });
 
     storageListeners[0]({ extensionPaused: { newValue: true } }, 'local');

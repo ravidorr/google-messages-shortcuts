@@ -1,6 +1,7 @@
 import { isValidCommand } from '../shared/commands.js';
 import { isTrashConfirmationEnabled } from '../shared/trash-confirmation-preference.js';
 import {
+  assessBlockReportSpamConfirmCapabilityAfterRender,
   assessRowActionCapability,
   assessTrashConfirmCapabilityAfterRender
 } from './action-capability-preflight.js';
@@ -15,12 +16,16 @@ import {
   hasConversationNavigationStarted,
   waitForConversationRead
 } from './conversation-read-state.js';
-import { findLabelMatchedMenuItem } from './adapters/menu-adapter.js';
+import {
+  findBlockReportSpamConfirmControl,
+  findLabelMatchedMenuItem
+} from './adapters/menu-adapter.js';
 import { MENU_TEXT, SELECTORS } from './google-messages-dom.js';
 import { beginMenuAction, endMenuAction } from './menu-action-overlay.js';
 import { waitForTargetRowPostcondition } from './row-postcondition.js';
 import {
   EXECUTION_KIND_ARCHIVED_MODAL_CLICK,
+  EXECUTION_KIND_BLOCK_REPORT_SPAM_WITH_NATIVE_CONFIRM,
   EXECUTION_KIND_MENU_CLICK,
   EXECUTION_KIND_OPEN_ROW,
   EXECUTION_KIND_TRASH_WITH_CONFIRM,
@@ -179,6 +184,57 @@ function handleTrashConfirmation(confirmButton, shouldConfirm) {
   return { ok: true, pendingTrashConfirmation: true };
 }
 
+function focusBlockReportSpamConfirmation(confirmButton) {
+  confirmButton.focus();
+
+  return { ok: true, pendingBlockReportSpamConfirmation: true };
+}
+
+async function prepareBlockReportSpamConfirmation(documentRoot, selectors) {
+  let confirmButton = findBlockReportSpamConfirmControl(documentRoot, selectors);
+
+  if (confirmButton) {
+    return focusBlockReportSpamConfirmation(confirmButton);
+  }
+
+  try {
+    await waitForSelector(documentRoot, selectors.blockReportSpamConfirmButton);
+  } catch (_primaryError) {
+    // Fall through to label-based lookup.
+  }
+
+  confirmButton = findBlockReportSpamConfirmControl(documentRoot, selectors);
+
+  if (confirmButton) {
+    return focusBlockReportSpamConfirmation(confirmButton);
+  }
+
+  try {
+    const fallbackButton = await waitForElement(
+      documentRoot,
+      'mat-dialog-container button, mat-dialog-container .mat-focus-indicator',
+      MENU_TEXT.blockReportSpamConfirm
+    );
+
+    return focusBlockReportSpamConfirmation(fallbackButton);
+  } catch (_fallbackError) {
+    try {
+      const alternateButton = await waitForElement(
+        documentRoot,
+        'mat-dialog-container button, mat-dialog-container .mat-focus-indicator',
+        MENU_TEXT.blockReportSpamConfirmAlternate
+      );
+
+      return focusBlockReportSpamConfirmation(alternateButton);
+    } catch (alternateError) {
+      return {
+        ok: false,
+        reason: alternateError.message
+      };
+    }
+  }
+}
+
 async function confirmTrash(documentRoot, shouldConfirm = true) {
   try {
     const confirmButton = await waitForSelector(
@@ -286,6 +342,31 @@ async function executeOpenRowAction(documentRoot, conversationRow, selectors) {
   return readResult;
 }
 
+async function executeBlockReportSpamWithNativeConfirmAction(documentRoot, action, selectors) {
+  const blockResult = await clickMenuAction(
+    documentRoot,
+    selectors[action.menuItemSelectorKey],
+    action.fallbackText,
+    selectors,
+    action.selectorStrategy
+  );
+
+  if (!blockResult.ok) {
+    return blockResult;
+  }
+
+  const confirmPreflight = await assessBlockReportSpamConfirmCapabilityAfterRender(
+    documentRoot,
+    selectors
+  );
+
+  if (!confirmPreflight.allowed) {
+    return createCapabilityBlockedResult(confirmPreflight);
+  }
+
+  return prepareBlockReportSpamConfirmation(documentRoot, selectors);
+}
+
 async function executeTrashWithConfirmAction(documentRoot, action, selectors, chromeApi) {
   const trashResult = await clickMenuAction(
     documentRoot,
@@ -336,6 +417,10 @@ async function executeRowAction(documentRoot, action, selectors, chromeApi, conv
 
   if (action.executionKind === EXECUTION_KIND_TRASH_WITH_CONFIRM) {
     return executeTrashWithConfirmAction(documentRoot, action, selectors, chromeApi);
+  }
+
+  if (action.executionKind === EXECUTION_KIND_BLOCK_REPORT_SPAM_WITH_NATIVE_CONFIRM) {
+    return executeBlockReportSpamWithNativeConfirmAction(documentRoot, action, selectors);
   }
 
   if (action.executionKind === EXECUTION_KIND_ARCHIVED_MODAL_CLICK) {

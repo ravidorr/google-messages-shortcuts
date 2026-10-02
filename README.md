@@ -10,13 +10,13 @@ Chrome extension that archives, trashes, marks as read, or marks as unread the s
 - Move the active conversation to trash with `Ctrl+Shift+D` (`Command+Shift+D` on macOS)
 - Mark the active unread conversation as read with `Ctrl+Shift+K` (`Command+Shift+K` on macOS)
 - Mark the active read conversation as unread with `Ctrl+Shift+U` (`Command+Shift+U` on macOS)
-- Mute or unmute the active conversation from row pills (Chrome allows only four keyboard shortcuts per extension)
+- Mute, unmute, or block / report spam from row pills (Chrome allows only four keyboard shortcuts per extension)
 - Open the Archived dialog with `Ctrl+Shift+A` (`Command+Shift+A` on macOS) or the injected Archived FAB beside Start chat
 - Unarchive conversations from row pills inside the Archived dialog
 - Show Archive and Trash shortcut pills on hovered and focused conversations
 - Show a Mark as read pill on unread conversations
 - Show a Mark as unread pill on read conversations
-- Show Mute and Unmute pills on hovered and focused conversations
+- Show Mute, Unmute, and Block / report spam pills on hovered and focused conversations
 - Show an Unarchive pill on hovered and focused conversations inside the Archived dialog
 - Show an Archived FAB beside Start chat when Archived is not already open (modal or sidebar route)
 - Optionally open conversations immediately when they are hovered or focused
@@ -83,12 +83,13 @@ If Chrome or the operating system already uses a suggested shortcut, Chrome may 
 4. The content script finds the hovered conversation row, the keyboard-focused row, or the selected row when neither is present.
 5. Archive, trash, and mark-as-unread actions open the row menu and click the matching item.
 6. Mark as read clicks the conversation link on unread rows and waits for the unread marker to clear.
-7. Trash actions confirm through Google Messages' native dialog.
-8. Mark as unread is available only for conversations that are currently read.
-9. Mark as read is available only for conversations that are currently unread.
-10. Open Archived runs as a page-level shortcut because Chrome limits extensions to four manifest commands. It discovers the native entry through direct modal controls, bottom navigation, account menu, search overflow, app header menu, or Settings, then localized "Archived" labels.
-11. Open Archived succeeds when the Archived dialog shell appears, even if the conversation list is still loading inside the modal. Sidebar route navigation also counts as success but shows guidance to reach the unarchive modal.
-12. Unarchive runs only inside the Archived modal and does not use the row overflow menu.
+7. Trash actions confirm through Google Messages' native dialog when auto-confirm is enabled.
+8. Block / report spam opens Google Messages' native dialog and focuses the final confirmation control. You complete the block and any report-spam choice in the native UI.
+9. Mark as unread is available only for conversations that are currently read.
+10. Mark as read is available only for conversations that are currently unread.
+11. Open Archived runs as a page-level shortcut because Chrome limits extensions to four manifest commands. It discovers the native entry through direct modal controls, bottom navigation, account menu, search overflow, app header menu, or Settings, then localized "Archived" labels.
+12. Open Archived succeeds when the Archived dialog shell appears, even if the conversation list is still loading inside the modal. Sidebar route navigation also counts as success but shows guidance to reach the unarchive modal.
+13. Unarchive runs only inside the Archived modal and does not use the row overflow menu.
 
 ## Limitations
 

@@ -48,6 +48,8 @@ export function assessPageCapabilities(documentRoot, selectors = getPageSelector
     trashMenuItem: selectors.trashMenuItem,
     markUnreadMenuItem: selectors.markUnreadMenuItem,
     trashConfirmButton: selectors.trashConfirmButton,
+    blockReportSpamMenuItem: selectors.blockReportSpamMenuItem,
+    blockReportSpamConfirmButton: selectors.blockReportSpamConfirmButton,
     menuItemFallback: selectors.menuItemFallback,
     rowMenuPanel: selectors.rowMenuPanel
   };

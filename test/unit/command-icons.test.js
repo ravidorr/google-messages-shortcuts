@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { getCommandIcon } from '../../src/shared/command-icons.js';
 import {
   COMMAND_ARCHIVE,
+  COMMAND_BLOCK_REPORT_SPAM,
   COMMAND_MARK_READ,
   COMMAND_MARK_UNREAD,
   COMMAND_MUTE,
@@ -20,6 +21,7 @@ describe('command-icons', () => {
       COMMAND_MARK_UNREAD,
       COMMAND_MUTE,
       COMMAND_UNMUTE,
+      COMMAND_BLOCK_REPORT_SPAM,
       COMMAND_UNARCHIVE,
       COMMAND_OPEN_ARCHIVED
     ]) {

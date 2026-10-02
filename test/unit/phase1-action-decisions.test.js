@@ -16,9 +16,9 @@ describe('phase1 action decisions', () => {
     expect(localThis).toContain('| Archive | **Approve** |');
     expect(localThis).toContain('| Mark as read (row menu) | **Block** |');
     expect(localThis).toContain('| Mark as read (open row) | **Approve** |');
-    expect(localThis).toContain('| Block / report spam | **Defer** |');
+    expect(localThis).toContain('| Block / report spam | **Approve** |');
     expect(localThis).toContain('Composer adapter | **Block**');
     expect(localThis).toContain('| Unarchive | **Approve** |');
-    expect(getApprovedCommands()).toHaveLength(7);
+    expect(getApprovedCommands()).toHaveLength(8);
   });
 });
