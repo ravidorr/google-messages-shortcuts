@@ -6,11 +6,12 @@ import {
   COMMAND_MARK_UNREAD,
   COMMAND_MUTE,
   COMMAND_OPEN_ARCHIVED,
+  COMMAND_OPEN_SPAM_BLOCKED,
   COMMAND_START_CHAT,
+  DEFAULT_MANIFEST_COMMANDS,
   COMMAND_TRASH,
   COMMAND_UNARCHIVE,
   COMMAND_UNMUTE,
-  MANIFEST_COMMANDS,
   MAX_MANIFEST_COMMANDS,
   isManifestCommand,
   isNavigationCommand,
@@ -29,20 +30,22 @@ describe('commands', () => {
     expect(isValidCommand(COMMAND_BLOCK_REPORT_SPAM)).toBe(true);
     expect(isValidCommand(COMMAND_OPEN_ARCHIVED)).toBe(true);
     expect(isValidCommand(COMMAND_START_CHAT)).toBe(true);
+    expect(isValidCommand(COMMAND_OPEN_SPAM_BLOCKED)).toBe(true);
   });
 
   it('rejects unknown commands', () => {
     expect(isValidCommand('unknown-command')).toBe(false);
   });
 
-  it('keeps manifest commands within the Chrome limit', () => {
-    expect(MANIFEST_COMMANDS).toHaveLength(MAX_MANIFEST_COMMANDS);
+  it('limits suggested commands while allowing optional manifest commands', () => {
+    expect(DEFAULT_MANIFEST_COMMANDS).toHaveLength(MAX_MANIFEST_COMMANDS);
     expect(isManifestCommand(COMMAND_MUTE)).toBe(false);
     expect(isManifestCommand(COMMAND_UNMUTE)).toBe(false);
     expect(isManifestCommand(COMMAND_UNARCHIVE)).toBe(false);
     expect(isManifestCommand(COMMAND_BLOCK_REPORT_SPAM)).toBe(false);
-    expect(isManifestCommand(COMMAND_OPEN_ARCHIVED)).toBe(false);
-    expect(isManifestCommand(COMMAND_START_CHAT)).toBe(false);
+    expect(isManifestCommand(COMMAND_OPEN_ARCHIVED)).toBe(true);
+    expect(isManifestCommand(COMMAND_START_CHAT)).toBe(true);
+    expect(isManifestCommand(COMMAND_OPEN_SPAM_BLOCKED)).toBe(true);
     expect(isManifestCommand(COMMAND_ARCHIVE)).toBe(true);
     expect(isNavigationCommand(COMMAND_OPEN_ARCHIVED)).toBe(true);
     expect(isNavigationCommand(COMMAND_START_CHAT)).toBe(true);

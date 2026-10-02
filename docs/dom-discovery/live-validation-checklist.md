@@ -103,6 +103,22 @@ Optional helper: paste [output/deferred-action-validation-console.js](../../outp
 - [ ] Shortcut is ignored inside editable controls and while a native dialog is open
 - [x] Capability self-test reports `startChat.entry` as supported on the inbox (2026-10-02: `dom-query`, self-test `ok: true`)
 
+### Spam & blocked navigation (Epic C)
+
+For the shared native Spam & blocked dialog, record:
+
+- one visible, exact-label entry in the native navigation drawer
+- zero or multiple entry matches as a fail-closed state
+- one matching heading and one `mat-dialog-container` after opening
+- immediate and delayed postcondition checks, repeated after closing the dialog
+- normal and narrow layouts
+
+- [x] Inbox self-test is non-mutating and passes (2026-10-02, Chrome 154, extension 1.11.1, en LTR).
+- [x] Native drawer exposes one visible Spam & blocked `BUTTON`; no `data-e2e-*` entry selector observed.
+- [x] Native dialog postcondition is one heading plus one `mat-dialog-container`, immediately and after 1s, repeated twice.
+- [x] Narrow-layout dialog check passes.
+- [ ] Validate the exact fallback label in each additional supported locale before claiming locale support.
+
 ### Pill visibility (Epic A)
 
 - [x] With default **On hover or focus**, confirm pills appear on hover, browser keyboard focus, and Google Messages `is-focused="true"` rows.

@@ -3,7 +3,7 @@ import {
   populateShortcutList,
   renderExtensionVersion
 } from './popup-view.js';
-import { MANIFEST_COMMANDS } from '../shared/commands.js';
+import { DEFAULT_MANIFEST_COMMANDS } from '../shared/commands.js';
 import {
   isConversationOpeningEnabled,
   setConversationOpeningEnabled
@@ -23,7 +23,7 @@ import {
   setTrashConfirmationEnabled
 } from '../shared/trash-confirmation-preference.js';
 
-const SHORTCUT_COMMANDS = MANIFEST_COMMANDS;
+const SHORTCUT_COMMANDS = DEFAULT_MANIFEST_COMMANDS;
 
 export function updateShortcutWarning(commands, documentRoot = document) {
   const warning = documentRoot.getElementById('shortcut-warning');
@@ -194,7 +194,7 @@ export async function initializePopup(chromeApi = chrome, documentRoot = documen
   const commands = await chromeApi.commands.getAll();
 
   populateShortcutList(shortcutList, commands);
-  populateNavigationShortcutList(navigationShortcutList, documentRoot);
+  populateNavigationShortcutList(navigationShortcutList, commands, documentRoot);
   updateShortcutWarning(commands, documentRoot);
   await bindTrashConfirmationPreference(documentRoot, chromeApi);
   await bindConversationOpenPreference(documentRoot, chromeApi);

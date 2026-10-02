@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.12.0 - 2026-10-02
+
+### Added
+
+- Optional Chrome command and injected FAB for the shared native Spam & blocked dialog
+- Fail-closed English Main menu and drawer-label adapter with a unique dialog-heading postcondition
+
+### Changed
+
+- Open Archived and Start chat now use optional Chrome commands, alongside Spam & blocked; users assign or rebind them in `chrome://extensions/shortcuts`
+- Popup navigation shortcuts show Chrome’s actual assignment or **Not assigned**
+
 ## 1.11.1 - 2026-10-02
 
 ### Fixed

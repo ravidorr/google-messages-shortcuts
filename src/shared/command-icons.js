@@ -5,6 +5,7 @@ import {
   COMMAND_MARK_UNREAD,
   COMMAND_MUTE,
   COMMAND_OPEN_ARCHIVED,
+  COMMAND_OPEN_SPAM_BLOCKED,
   COMMAND_START_CHAT,
   COMMAND_TRASH,
   COMMAND_UNARCHIVE,
@@ -82,6 +83,14 @@ const COMMAND_ICONS = {
       'M3 3h18a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z',
       'M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8',
       'M10 12h4'
+    ]
+  },
+  [COMMAND_OPEN_SPAM_BLOCKED]: {
+    viewBox: '0 0 24 24',
+    paths: [
+      'M5 5l14 14',
+      'M19 5 5 19',
+      'M3 12a9 9 0 1 0 18 0 9 9 0 0 0-18 0Z'
     ]
   },
   [COMMAND_START_CHAT]: {

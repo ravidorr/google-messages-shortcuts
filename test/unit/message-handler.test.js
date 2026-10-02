@@ -14,11 +14,13 @@ import {
   COMMAND_MARK_READ,
   COMMAND_MARK_UNREAD,
   COMMAND_OPEN_ARCHIVED,
+  COMMAND_OPEN_SPAM_BLOCKED,
   COMMAND_START_CHAT,
   COMMAND_TRASH
 } from '../../src/shared/commands.js';
 import * as commands from '../../src/shared/commands.js';
 import * as openArchivedAction from '../../src/content/open-archived-action.js';
+import * as openSpamBlockedAction from '../../src/content/open-spam-blocked-action.js';
 import * as openStartChatAction from '../../src/content/open-start-chat-action.js';
 import { selectedUnreadRow } from '../fixtures/dom/list-states.js';
 
@@ -142,6 +144,17 @@ describe('message-handler', () => {
     expect(result).toEqual({ ok: true });
     expect(document.querySelector(FEEDBACK_MESSAGE_SELECTOR)?.textContent)
       .toBe('Start chat opened.');
+  });
+
+  it('handles Spam and blocked navigation commands', async () => {
+    vi.spyOn(openSpamBlockedAction, 'handleOpenSpamBlocked')
+      .mockResolvedValueOnce({ ok: true });
+
+    const localThis = await handleCommand(COMMAND_OPEN_SPAM_BLOCKED, document, createChromeApi());
+
+    expect(localThis).toEqual({ ok: true });
+    expect(document.querySelector(FEEDBACK_MESSAGE_SELECTOR)?.textContent)
+      .toBe('Spam & blocked opened.');
   });
 
   it('rejects unknown navigation commands without running row actions', async () => {
