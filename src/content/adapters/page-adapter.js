@@ -1,4 +1,5 @@
 import { assessArchivedCapabilities, ARCHIVED_SELECTORS } from './archived-adapter.js';
+import { assessStartChatCapabilities } from './start-chat-adapter.js';
 import { assessConnectionCapabilities } from './connection-adapter.js';
 import { assessComposerCapabilities } from './composer-adapter.js';
 import { assessListCapabilities, LIST_SELECTORS } from './list-adapter.js';
@@ -9,6 +10,7 @@ export const PAGE_ADAPTER_AREAS = [
   'list',
   'menu',
   'archived',
+  'startChat',
   'composer',
   'messagePane',
   'connection'
@@ -60,6 +62,7 @@ export function assessPageCapabilities(documentRoot, selectors = getPageSelector
     list,
     menu,
     archived: assessArchivedCapabilities(documentRoot, selectors),
+    startChat: assessStartChatCapabilities(documentRoot, selectors),
     composer: assessComposerCapabilities(),
     messagePane: assessMessagePaneCapabilities(),
     connection: assessConnectionCapabilities()

@@ -14,10 +14,12 @@ import {
   COMMAND_MARK_READ,
   COMMAND_MARK_UNREAD,
   COMMAND_OPEN_ARCHIVED,
+  COMMAND_START_CHAT,
   COMMAND_TRASH
 } from '../../src/shared/commands.js';
 import * as commands from '../../src/shared/commands.js';
 import * as openArchivedAction from '../../src/content/open-archived-action.js';
+import * as openStartChatAction from '../../src/content/open-start-chat-action.js';
 import { selectedUnreadRow } from '../fixtures/dom/list-states.js';
 
 function createConversationFixture() {
@@ -129,6 +131,17 @@ describe('message-handler', () => {
     expect(result).toEqual({ ok: true });
     expect(document.querySelector(FEEDBACK_MESSAGE_SELECTOR)?.textContent)
       .toBe('Archived opened.');
+  });
+
+  it('handles start-chat navigation commands', async () => {
+    vi.spyOn(openStartChatAction, 'handleOpenStartChat')
+      .mockResolvedValueOnce({ ok: true });
+
+    const result = await handleCommand(COMMAND_START_CHAT, document, createChromeApi());
+
+    expect(result).toEqual({ ok: true });
+    expect(document.querySelector(FEEDBACK_MESSAGE_SELECTOR)?.textContent)
+      .toBe('Start chat opened.');
   });
 
   it('rejects unknown navigation commands without running row actions', async () => {

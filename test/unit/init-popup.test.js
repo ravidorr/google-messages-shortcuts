@@ -435,9 +435,9 @@ describe('init-popup', () => {
     await initializePopup(chromeApi, document);
 
     expect(document.getElementById('extension-version').textContent).toBe('Version 1.8.0');
-    expect(document.querySelectorAll('.shortcut-item')).toHaveLength(8);
+    expect(document.querySelectorAll('.shortcut-item')).toHaveLength(9);
     expect(document.getElementById('navigation-shortcut-list').querySelectorAll('.shortcut-item'))
-      .toHaveLength(1);
+      .toHaveLength(2);
     expect(document.getElementById('shortcut-warning').hidden).toBe(true);
     expect(document.getElementById('auto-confirm-trash').checked).toBe(true);
   });

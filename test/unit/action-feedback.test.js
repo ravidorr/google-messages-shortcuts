@@ -5,6 +5,7 @@ import {
   COMMAND_MARK_READ,
   COMMAND_MUTE,
   COMMAND_OPEN_ARCHIVED,
+  COMMAND_START_CHAT,
   COMMAND_TRASH,
   COMMAND_UNARCHIVE,
   COMMAND_UNMUTE
@@ -51,6 +52,14 @@ describe('action-feedback', () => {
     expect(getActionFeedbackMessage({ ok: true, alreadyOpen: true }, COMMAND_OPEN_ARCHIVED)).toEqual({
       kind: 'info',
       message: 'Archived is already open.'
+    });
+    expect(getActionFeedbackMessage({ ok: true }, COMMAND_START_CHAT)).toEqual({
+      kind: 'success',
+      message: 'Start chat opened.'
+    });
+    expect(getActionFeedbackMessage({ ok: true, alreadyOpen: true }, COMMAND_START_CHAT)).toEqual({
+      kind: 'info',
+      message: 'Start chat is already open.'
     });
     expect(getActionFeedbackMessage({
       ok: true,
@@ -109,6 +118,10 @@ describe('action-feedback', () => {
       ['archived-modal-required', 'info'],
       ['archived-entry-not-found', 'error'],
       ['archived-modal-timeout', 'error'],
+      ['start-chat-not-found', 'error'],
+      ['start-chat-ambiguous', 'error'],
+      ['start-chat-timeout', 'error'],
+      ['native-dialog-open', 'info'],
       ['unarchive-button-not-found', 'error'],
       ['action-in-progress', 'info'],
       ['capability-blocked', 'error'],

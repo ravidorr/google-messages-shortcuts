@@ -34,6 +34,7 @@ Use **approve** only when automation can fail closed with a bounded postconditio
 - `slow-dom`: CPU throttling enabled
 - `baseline-trash-dialog-open`: Move to trash dialog visible (row menu typically closed)
 - `pill-visibility`: Epic A popup visibility modes on inbox rows plus Archived modal absence check
+- `start-chat`: Epic B page-level Start chat shortcut and native FAB selector validation
 
 ### Capability self-test column
 
@@ -43,6 +44,7 @@ Use **pass** when `runCapabilitySelfTest()` returns `ok: true` (no DOM mutation,
 
 | Date | Browser | Extension | Locale | Direction | Scenario | Capability self-test | Notes |
 | ---- | ------- | --------- | ------ | --------- | -------- | -------------------- | ----- |
+| 2026-10-02 | Chrome 154.0.0.0 | 1.11.0 | en | LTR | start-chat | pass | **Epic B pass (macOS Chrome).** Inbox self-test: `ok: true`, `mutated: false`, `blockingUnavailable: 0`, `startChat.entry` supported (`dom-query`). Structural probe: 24 rows, `a[data-e2e-start-button]` `matchCount: 1`, `href: /web/conversations/new`, visible. **Shortcut:** `Command+Shift+G` opens new-conversation view with no Chrome or Google Messages collision (after rebinding from Incognito `Command+Shift+N` and split-view `Command+Option+N`). Editable-target and dialog-suppression guards remain unit-tested; optional manual spot-check. PR #82. |
 | 2026-10-02 | Chrome 154.0.0.0 | 1.10.0 | en | LTR | pill-visibility | pass | **Epic A manual pass.** hover-or-focus (default): pills on hover, browser keyboard focus, and `is-focused="true"` rows. selected-row-only: hover and browser focus alone do not show pills; `is-focused="true"` rows do. hidden: no pills; keyboard shortcuts still work. Archived modal: no extension pills under any setting; native Unarchive button only (expected). Virtualized list: visibility policy holds after row rerender. Self-test on inbox: `ok: true`, `mutated: false`, `blockingUnavailable: 0`. environment: Chrome 154 / extension 1.10.0 / locale en / direction ltr. |
 | 2026-10-02 | Chrome 154 | 1.9.0 | en | LTR | baseline (block pill automation) | pass | Block / report spam pill opens native dialog, focuses `OK` confirm (`data-e2e-action-button-confirm`), does not auto-click. Cancel verified non-mutating. |
 | 2026-10-02 | Chrome 154 | 1.9.0 | en | LTR | baseline (block dialog open) | n/a | Dialog probe: `confirmButtonCount: 1`, confirm label `OK`, `Report spam` checkbox present. Matches `mat-dialog-container button[data-e2e-action-button-confirm]` contract. |
@@ -89,7 +91,9 @@ Use **pass** when `runCapabilitySelfTest()` returns `ok: true` (no DOM mutation,
 | Open archived (modal entry) | `button[data-e2e-archived-list-button], a[data-e2e-archived-list-button]` | Direct modal entry, bottom-nav route, account menu, search overflow, app header menu, Settings, then localized "Archived" labels | en + he (RTL threads) live | 5 | 2026-10-02 |
 | Open archived (dialog shell) | `mat-dialog-container` with heading "Archived" | Unarchive controls may render after spinner | en + he (RTL threads) live | 5 | 2026-10-02 |
 | Open archived (sidebar route) | `button[data-e2e-archived-button], a[data-e2e-archived-button]` | Any visible route control outside dialog; bottom navigation on narrow layouts | en live | 5 | 2026-10-01 |
-| Start chat FAB anchor | `a[data-e2e-start-button]` inside `mw-fab-link.start-chat` | n/a | en live (candidate) | 4 | 2026-10-01 |
+| Start chat FAB anchor | `a[data-e2e-start-button]` inside `mw-fab-link.start-chat` | n/a | en live | 5 | 2026-10-02 |
+| Start chat postcondition | URL path `/web/conversations/new` or `mws-new-conversation` / `[data-e2e-new-conversation-view]` | n/a | en live (macOS shortcut pass) | 5 | 2026-10-02 |
+| Start chat shortcut | `Ctrl+Shift+G` / `Command+Shift+G` (page-level) | n/a | en live macOS; no collision after rebinding from Incognito and split-view chords | 5 | 2026-10-02 |
 | Pin (web row menu) | _not present_ | n/a | en live | 5 | 2026-10-01 |
 | Unpin (web row menu) | _not present_ | n/a | en live | 5 | 2026-10-01 |
 | Composer | _not validated_ | n/a | n/a | 1 | Phase 0 gate |
@@ -125,6 +129,12 @@ Use **pass** when `runCapabilitySelfTest()` returns `ok: true` (no DOM mutation,
 - Unarchive: Archived modal (title "Archived", Done footer) with inline `button[data-e2e-unarchive-button]` per row (`unarchiveCount: 25`). Not a row overflow menu item; do not use `data-e2e-conversation-menu-unarchive`. Native unarchive + `backInInbox: true` verified. Selector **approve**; shipped in extension 1.8.0 via `EXECUTION_KIND_ARCHIVED_MODAL_CLICK`.
 - Open archived: bottom navigation `data-e2e-archived-button` opens the Archived **sidebar route**, not the unarchive modal. Extension discovery order: direct modal entry (`data-e2e-archived-list-button`), bottom-nav route, account menu, search overflow, app header menu, Settings, then localized "Archived" labels. Page-level shortcut `Ctrl+Shift+A` / `⇧⌘A` and the injected Archived FAB use that order. Modal success is detected when the dialog shell appears (`mat-dialog-container` + "Archived" heading), even before unarchive controls finish loading. Sidebar route success returns `archived-sidebar-only` feedback because unarchive pills require the modal.
 - Open archived (desktop manual pass, 2026-10-02): injected Archived FAB and page-level shortcut open the Archived modal on a wide desktop layout. Initial spinner state resolves without a false timeout once dialog-shell detection is used.
+
+### Live notes (2026-10-02, Epic B Start chat, extension 1.11.0, Chrome 154, en LTR)
+
+- Inbox capability self-test pass: `startChat.entry` supported via `dom-query`; `matchCount: 1` for `a[data-e2e-start-button]` with `href="/web/conversations/new"`, visible, not disabled.
+- **Shortcut collisions (macOS Chrome):** `Command+Shift+N` opens Incognito; `Command+Option+N` opens split view. Rebound to `Command+Shift+G` / `Ctrl+Shift+G` (same Shift+letter pattern as Open Archived).
+- **Live shortcut pass (macOS):** `Command+Shift+G` opens the new-conversation view without browser or Google Messages interception. Start chat moved to **Approve**.
 
 ### Live notes (2026-10-02, locale matrix sign-off, extension 1.8.0)
 

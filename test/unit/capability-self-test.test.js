@@ -24,7 +24,7 @@ describe('capability-self-test', () => {
     document.body.innerHTML = fullListActionSurface;
     const localThis = runCapabilitySelfTest(document, undefined, {
       runtime: {
-        getManifest: () => ({ version: '1.10.0' })
+        getManifest: () => ({ version: '1.11.0' })
       }
     });
 
@@ -34,7 +34,7 @@ describe('capability-self-test', () => {
     expect(localThis.capabilities.length).toBeGreaterThan(0);
     expect(localThis.environment).toEqual({
       browserVersion: navigator.userAgent,
-      extensionVersion: '1.10.0',
+      extensionVersion: '1.11.0',
       locale: 'en-US',
       direction: 'ltr'
     });

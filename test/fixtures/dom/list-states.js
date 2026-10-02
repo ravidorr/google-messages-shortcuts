@@ -154,6 +154,15 @@ export const duplicateArchiveMenuItems = `
   <button data-e2e-conversation-menu-archive>Archive B</button>
 `;
 
+export const startChatNewConversationSurface = `
+  <mws-new-conversation data-e2e-new-conversation-view></mws-new-conversation>
+`;
+
+export const duplicateStartChatButtons = `
+  <a data-e2e-start-button href="/web/conversations/new">Start chat A</a>
+  <a data-e2e-start-button href="/web/conversations/new">Start chat B</a>
+`;
+
 export const startChatFabSurface = `
   <mw-fab-link label="Start chat" class="start-chat">
     <a data-e2e-start-button class="mdc-button mat-mdc-button-base fab link mat-mdc-button mat-unthemed" href="/web/conversations/new">
@@ -265,5 +274,7 @@ export const FIXTURE_EXPORT_NAMES = [
   'openRowMenuMuteLabelMismatchWithFallback',
   'archivedEntryControl',
   'startChatFabSurface',
+  'startChatNewConversationSurface',
+  'duplicateStartChatButtons',
   'archivedModalSurface'
 ];

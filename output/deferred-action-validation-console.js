@@ -12,6 +12,8 @@
   const rowSelector = 'mws-conversation-list-item';
   const menuButtonSelector = 'button[aria-haspopup="menu"], mws-menu-button button';
   const menuPanelSelector = '.conversation-actions-menu[role="menu"], [role="menu"].conversation-actions-menu';
+  const startChatSelector = 'a[data-e2e-start-button]';
+  const startChatMatches = [...document.querySelectorAll(startChatSelector)];
 
   const rows = [...document.querySelectorAll(rowSelector)];
   const sampleRow = rows[0] ?? null;
@@ -28,10 +30,19 @@
     'button[aria-haspopup="menu"], button.menu-button, button.mat-mdc-icon-button',
     'button[data-e2e-account-button], button[data-e2e-user-menu-button], button[data-e2e-profile-button]',
     'header img, [role="banner"] img',
-    'a[data-e2e-start-button]'
+    startChatSelector
   ].map((selector) => ({
     selector,
     matchCount: document.querySelectorAll(selector).length
+  }));
+
+  const startChatProbe = startChatMatches.slice(0, 3).map((element) => ({
+    tagName: element.tagName,
+    href: element.getAttribute('href'),
+    hidden: element.hidden,
+    ariaDisabled: element.getAttribute('aria-disabled'),
+    display: getComputedStyle(element).display,
+    visibility: getComputedStyle(element).visibility
   }));
 
   console.log(JSON.stringify({
@@ -49,8 +60,17 @@
       hasMenuButton: Boolean(menuButton),
       menuPanelOpen: Boolean(document.querySelector(menuPanelSelector))
     },
+    startChat: {
+      selector: startChatSelector,
+      matchCount: startChatMatches.length,
+      pathname: location.pathname,
+      newConversationSurfaceCount: document.querySelectorAll(
+        'mws-new-conversation, [data-e2e-new-conversation], [data-e2e-new-conversation-view]'
+      ).length,
+      controls: startChatProbe
+    },
     observedControls,
-    note: 'Sanitized structural evidence only. Run with the row menu closed for a clean self-test pass. With the menu open on a non-muted row, menu.unmute may block self-test until the row is muted or the menu closes. Open archived discovery order: data-e2e-archived-list-button, bottom-nav data-e2e-archived-button (sidebar route), account menu, search overflow, app header menu, Settings, then localized Archived labels.'
+    note: 'Sanitized structural evidence only. Run with the row menu closed for a clean self-test pass. With the menu open on a non-muted row, menu.unmute may block self-test until the row is muted or the menu closes. Open archived discovery order: data-e2e-archived-list-button, bottom-nav data-e2e-archived-button (sidebar route), account menu, search overflow, app header menu, Settings, then localized Archived labels. Start chat postcondition: pathname includes /web/conversations/new or a validated new-conversation surface selector.'
   }, null, 2));
 })();
 

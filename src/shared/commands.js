@@ -7,6 +7,7 @@ export const COMMAND_UNMUTE = 'unmute-conversation';
 export const COMMAND_UNARCHIVE = 'unarchive-conversation';
 export const COMMAND_BLOCK_REPORT_SPAM = 'block-report-spam-conversation';
 export const COMMAND_OPEN_ARCHIVED = 'open-archived';
+export const COMMAND_START_CHAT = 'start-chat';
 
 export const MANIFEST_COMMANDS = [
   COMMAND_ARCHIVE,
@@ -18,7 +19,8 @@ export const MANIFEST_COMMANDS = [
 export const MAX_MANIFEST_COMMANDS = 4;
 
 export const NAVIGATION_COMMANDS = [
-  COMMAND_OPEN_ARCHIVED
+  COMMAND_OPEN_ARCHIVED,
+  COMMAND_START_CHAT
 ];
 
 export const VALID_COMMANDS = new Set([

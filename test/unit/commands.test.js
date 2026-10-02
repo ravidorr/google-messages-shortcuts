@@ -6,6 +6,7 @@ import {
   COMMAND_MARK_UNREAD,
   COMMAND_MUTE,
   COMMAND_OPEN_ARCHIVED,
+  COMMAND_START_CHAT,
   COMMAND_TRASH,
   COMMAND_UNARCHIVE,
   COMMAND_UNMUTE,
@@ -27,6 +28,7 @@ describe('commands', () => {
     expect(isValidCommand(COMMAND_UNARCHIVE)).toBe(true);
     expect(isValidCommand(COMMAND_BLOCK_REPORT_SPAM)).toBe(true);
     expect(isValidCommand(COMMAND_OPEN_ARCHIVED)).toBe(true);
+    expect(isValidCommand(COMMAND_START_CHAT)).toBe(true);
   });
 
   it('rejects unknown commands', () => {
@@ -40,7 +42,9 @@ describe('commands', () => {
     expect(isManifestCommand(COMMAND_UNARCHIVE)).toBe(false);
     expect(isManifestCommand(COMMAND_BLOCK_REPORT_SPAM)).toBe(false);
     expect(isManifestCommand(COMMAND_OPEN_ARCHIVED)).toBe(false);
+    expect(isManifestCommand(COMMAND_START_CHAT)).toBe(false);
     expect(isManifestCommand(COMMAND_ARCHIVE)).toBe(true);
     expect(isNavigationCommand(COMMAND_OPEN_ARCHIVED)).toBe(true);
+    expect(isNavigationCommand(COMMAND_START_CHAT)).toBe(true);
   });
 });
