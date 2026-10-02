@@ -20,7 +20,14 @@
   const observedControls = [
     'button[data-e2e-conversation-menu-mute]',
     'button[data-e2e-conversation-menu-pin]',
-    'button[data-e2e-unarchive-button]'
+    'button[data-e2e-unarchive-button]',
+    'button[data-e2e-archived-button], a[data-e2e-archived-button], button[data-e2e-archived-list-button]',
+    'button[data-e2e-settings-button], a[data-e2e-settings-button]',
+    'input[type="search"], input[type="text"], input[aria-label*="Search" i], input[placeholder*="Search" i]',
+    'button[aria-haspopup="menu"], button.menu-button, button.mat-mdc-icon-button',
+    'button[data-e2e-account-button], button[data-e2e-user-menu-button], button[data-e2e-profile-button]',
+    'header img, [role="banner"] img',
+    'a[data-e2e-start-button]'
   ].map((selector) => ({
     selector,
     matchCount: document.querySelectorAll(selector).length
@@ -42,7 +49,7 @@
       menuPanelOpen: Boolean(document.querySelector(menuPanelSelector))
     },
     observedControls,
-    note: 'Sanitized structural evidence only. Exercise pin and mute via row overflow menu on disposable threads. Unarchive uses a separate Archived modal with inline Unarchive buttons (not conversation-actions-menu).'
+    note: 'Sanitized structural evidence only. Open archived entry candidates: data-e2e-archived-list-button, account/header menu item labeled Archived, search overflow, Settings, or bottom-nav data-e2e-archived-button (sidebar route).'
   }, null, 2));
 })();
 

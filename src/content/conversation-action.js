@@ -5,10 +5,12 @@ import {
   assessTrashConfirmCapabilityAfterRender
 } from './action-capability-preflight.js';
 import {
+  findArchivedConversationRow,
   findConversationLink,
   findConversationRow,
   findRowMenuButton
 } from './conversation-target.js';
+import { findUnarchiveButtonForRow } from './adapters/archived-adapter.js';
 import {
   hasConversationNavigationStarted,
   waitForConversationRead
@@ -18,6 +20,7 @@ import { MENU_TEXT, SELECTORS } from './google-messages-dom.js';
 import { beginMenuAction, endMenuAction } from './menu-action-overlay.js';
 import { waitForTargetRowPostcondition } from './row-postcondition.js';
 import {
+  EXECUTION_KIND_ARCHIVED_MODAL_CLICK,
   EXECUTION_KIND_MENU_CLICK,
   EXECUTION_KIND_OPEN_ROW,
   EXECUTION_KIND_TRASH_WITH_CONFIRM,
@@ -309,6 +312,23 @@ async function executeTrashWithConfirmAction(documentRoot, action, selectors, ch
   return confirmTrash(documentRoot);
 }
 
+async function executeArchivedModalAction(documentRoot, selectors, conversationRow) {
+  const unarchiveButton = findUnarchiveButtonForRow(conversationRow, selectors);
+
+  if (!unarchiveButton) {
+    return { ok: false, reason: 'unarchive-button-not-found' };
+  }
+
+  unarchiveButton.click();
+
+  return waitForTargetRowPostcondition({
+    conversationRow,
+    isSatisfied: () => !conversationRow.isConnected
+      || !findUnarchiveButtonForRow(conversationRow, selectors),
+    timeoutMs: 2000
+  });
+}
+
 async function executeRowAction(documentRoot, action, selectors, chromeApi, conversationRow) {
   if (action.executionKind === EXECUTION_KIND_OPEN_ROW) {
     return executeOpenRowAction(documentRoot, conversationRow, selectors);
@@ -316,6 +336,10 @@ async function executeRowAction(documentRoot, action, selectors, chromeApi, conv
 
   if (action.executionKind === EXECUTION_KIND_TRASH_WITH_CONFIRM) {
     return executeTrashWithConfirmAction(documentRoot, action, selectors, chromeApi);
+  }
+
+  if (action.executionKind === EXECUTION_KIND_ARCHIVED_MODAL_CLICK) {
+    return executeArchivedModalAction(documentRoot, selectors, conversationRow);
   }
 
   if (action.executionKind === EXECUTION_KIND_MENU_CLICK) {
@@ -349,10 +373,18 @@ export async function runConversationAction(
   actionInProgress = true;
 
   try {
-    const conversationRow = targetConversationRow || findConversationRow(documentRoot, selectors);
+    const conversationRow = targetConversationRow
+      || (action.executionKind === EXECUTION_KIND_ARCHIVED_MODAL_CLICK
+        ? findArchivedConversationRow(documentRoot, selectors)
+        : findConversationRow(documentRoot, selectors));
 
     if (!conversationRow) {
-      return { ok: false, reason: 'no-target' };
+      return {
+        ok: false,
+        reason: action.executionKind === EXECUTION_KIND_ARCHIVED_MODAL_CLICK
+          ? 'archived-modal-required'
+          : 'no-target'
+      };
     }
 
     if (!action.precondition(conversationRow, selectors)) {
@@ -365,7 +397,10 @@ export async function runConversationAction(
       return createCapabilityBlockedResult(preflight);
     }
 
-    if (action.executionKind === EXECUTION_KIND_OPEN_ROW) {
+    if (
+      action.executionKind === EXECUTION_KIND_OPEN_ROW
+      || action.executionKind === EXECUTION_KIND_ARCHIVED_MODAL_CLICK
+    ) {
       return await executeRowAction(
         documentRoot,
         action,

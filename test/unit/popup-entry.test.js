@@ -20,6 +20,9 @@ function createChromeApi(overrides = {}) {
         set: vi.fn(async () => {})
       }
     },
+    runtime: {
+      getManifest: vi.fn(() => ({ version: '1.8.0' }))
+    },
     ...overrides
   };
 }
@@ -39,11 +42,12 @@ describe('popup entry', () => {
     await Promise.resolve();
     await Promise.resolve();
 
-    expect(document.querySelectorAll('.shortcut-item')).toHaveLength(6);
+    expect(document.querySelectorAll('.shortcut-item')).toHaveLength(8);
     expect(document.getElementById('shortcut-warning').hidden).toBe(false);
     expect(document.getElementById('auto-confirm-trash').checked).toBe(true);
     expect(document.getElementById('auto-confirm-trash').disabled).toBe(false);
     expect(document.getElementById('open-conversation-on-focus').disabled).toBe(false);
+    expect(document.getElementById('extension-version').textContent).toBe('Version 1.8.0');
   });
 
   it('opens Chrome shortcut settings from the shipped popup link', async () => {

@@ -16,9 +16,12 @@ describe('popup markup', () => {
 
     expect(document.querySelector('.popup__subtitle').textContent.trim())
       .toBe('Archive, trash, mute, or mark Google Messages conversations from the list.');
+    expect(document.getElementById('extension-version').className).toBe('popup__version');
+    expect(document.getElementById('extension-version').hidden).toBe(true);
     expect(sections.map((section) => section.querySelector('.popup__section-title').textContent.trim()))
       .toEqual([
         'Keyboard shortcuts',
+        'Navigation shortcuts',
         'Change shortcuts',
         'Trash confirmation',
         'Conversation opening',

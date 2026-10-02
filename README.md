@@ -11,12 +11,16 @@ Chrome extension that archives, trashes, marks as read, or marks as unread the s
 - Mark the active unread conversation as read with `Ctrl+Shift+K` (`Command+Shift+K` on macOS)
 - Mark the active read conversation as unread with `Ctrl+Shift+U` (`Command+Shift+U` on macOS)
 - Mute or unmute the active conversation from row pills (Chrome allows only four keyboard shortcuts per extension)
+- Open the Archived dialog with `Ctrl+Shift+A` (`Command+Shift+A` on macOS) or the injected Archived FAB beside Start chat
+- Unarchive conversations from row pills inside the Archived dialog
 - Show Archive and Trash shortcut pills on hovered and focused conversations
 - Show a Mark as read pill on unread conversations
 - Show a Mark as unread pill on read conversations
 - Show Mute and Unmute pills on hovered and focused conversations
+- Show an Unarchive pill on hovered and focused conversations inside the Archived dialog
+- Show an Archived FAB beside Start chat when the Archived dialog is closed
 - Optionally open conversations immediately when they are hovered or focused
-- Popup UI that shows the effective Chrome shortcut assignments
+- Popup UI that shows the effective Chrome shortcut assignments and page-level navigation shortcuts
 - Configurable automatic confirmation for the native Move to trash dialog
 - Pause shortcut actions and conversation pills without disabling the extension
 - Reset extension preferences from the popup without changing Google Messages
@@ -82,6 +86,9 @@ If Chrome or the operating system already uses a suggested shortcut, Chrome may 
 7. Trash actions confirm through Google Messages' native dialog.
 8. Mark as unread is available only for conversations that are currently read.
 9. Mark as read is available only for conversations that are currently unread.
+10. Open Archived runs as a page-level shortcut because Chrome limits extensions to four manifest commands. It discovers the native entry through direct controls, bottom navigation, account menu, search overflow, app header menu, or Settings, then localized "Archived" labels.
+11. Open Archived succeeds when the Archived dialog shell appears, even if the conversation list is still loading inside the modal.
+12. Unarchive runs only inside the Archived modal and does not use the row overflow menu.
 
 ## Limitations
 

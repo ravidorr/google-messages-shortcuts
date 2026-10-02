@@ -4,8 +4,13 @@ import {
   COMMAND_MARK_UNREAD,
   COMMAND_MUTE,
   COMMAND_TRASH,
+  COMMAND_UNARCHIVE,
   COMMAND_UNMUTE
 } from '../shared/commands.js';
+import {
+  ARCHIVED_CAPABILITY_IDS,
+  isRowInArchivedModal
+} from './adapters/archived-adapter.js';
 import {
   isConversationRead,
   isConversationUnread
@@ -22,6 +27,7 @@ export const SELECTOR_STRATEGY_LABEL_MATCHED = 'label-matched';
 export const EXECUTION_KIND_MENU_CLICK = 'menu-click';
 export const EXECUTION_KIND_OPEN_ROW = 'open-row';
 export const EXECUTION_KIND_TRASH_WITH_CONFIRM = 'trash-with-confirm';
+export const EXECUTION_KIND_ARCHIVED_MODAL_CLICK = 'archived-modal-click';
 
 export const APPROVED_ROW_ACTIONS = [
   {
@@ -123,6 +129,21 @@ export const APPROVED_ROW_ACTIONS = [
     pillOnly: true,
     showPillWhenReadOnly: false,
     showPillWhenUnreadOnly: false
+  },
+  {
+    command: COMMAND_UNARCHIVE,
+    capabilityId: ARCHIVED_CAPABILITY_IDS.unarchive,
+    decision: ACTION_DECISION_APPROVE,
+    executionKind: EXECUTION_KIND_ARCHIVED_MODAL_CLICK,
+    precondition: (conversationRow, selectors) => isRowInArchivedModal(conversationRow, selectors),
+    preconditionFailureReason: 'archived-modal-required',
+    pillLabel: 'Unarchive',
+    popupLabel: 'Unarchive conversation',
+    shortcutKey: 'unarchive',
+    pillOnly: true,
+    showPillWhenArchivedOnly: true,
+    showPillWhenReadOnly: false,
+    showPillWhenUnreadOnly: false
   }
 ];
 
@@ -147,10 +168,19 @@ export function getManifestEligibleActions() {
 }
 
 export function getPillDefinitionsForRow(conversationRow, selectors) {
+  const inArchivedModal = isRowInArchivedModal(conversationRow, selectors);
   const isRead = isConversationRead(conversationRow, selectors);
   const isUnread = !isRead;
 
   return APPROVED_ROW_ACTIONS.filter((action) => {
+    if (action.showPillWhenArchivedOnly) {
+      return inArchivedModal;
+    }
+
+    if (inArchivedModal) {
+      return false;
+    }
+
     if (action.showPillWhenReadOnly) {
       return isRead;
     }

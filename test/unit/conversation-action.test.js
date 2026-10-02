@@ -8,6 +8,7 @@ import {
   COMMAND_MARK_UNREAD,
   COMMAND_MUTE,
   COMMAND_TRASH,
+  COMMAND_UNARCHIVE,
   COMMAND_UNMUTE
 } from '../../src/shared/commands.js';
 import * as waitForElement from '../../src/content/wait-for-element.js';
@@ -17,6 +18,7 @@ import { SELECTORS } from '../../src/content/google-messages-dom.js';
 import {
   duplicateArchiveMenuItems,
   openRowMenuMarkUnreadFallbackOnly,
+  archivedModalSurface,
   selectedReadRow,
   selectedUnreadRow
 } from '../fixtures/dom/list-states.js';
@@ -879,4 +881,46 @@ describe('runConversationAction', () => {
       reason: 'mute menu item missing'
     });
   });
+
+  it('unarchives a conversation from the archived modal without opening the row menu', async () => {
+    document.body.innerHTML = archivedModalSurface;
+    const archivedRow = document.getElementById('fixture-archived-row');
+    const unarchiveButton = archivedRow.querySelector('[data-e2e-unarchive-button]');
+    vi.spyOn(unarchiveButton, 'click').mockImplementation(() => {
+      archivedRow.remove();
+    });
+
+    const localThis = await runConversationAction(document, COMMAND_UNARCHIVE, undefined, archivedRow);
+
+    expect(localThis.ok).toBe(true);
+    expect(unarchiveButton.click).toHaveBeenCalledTimes(1);
+  });
+
+  it('unarchive succeeds when the row stays mounted but loses its button', async () => {
+    document.body.innerHTML = archivedModalSurface;
+    const archivedRow = document.getElementById('fixture-archived-row');
+    const unarchiveButton = archivedRow.querySelector('[data-e2e-unarchive-button]');
+    vi.spyOn(unarchiveButton, 'click').mockImplementation(() => {
+      unarchiveButton.remove();
+    });
+
+    const localThis = await runConversationAction(
+      document,
+      COMMAND_UNARCHIVE,
+      undefined,
+      archivedRow
+    );
+
+    expect(localThis.ok).toBe(true);
+    expect(archivedRow.isConnected).toBe(true);
+  });
+
+  it('requires the archived modal for unarchive actions', async () => {
+    document.body.innerHTML = selectedReadRow;
+
+    const localThis = await runConversationAction(document, COMMAND_UNARCHIVE);
+
+    expect(localThis).toEqual({ ok: false, reason: 'archived-modal-required' });
+  });
+
 });

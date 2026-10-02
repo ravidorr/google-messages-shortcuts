@@ -42,6 +42,7 @@ Use **pass** when `runCapabilitySelfTest()` returns `ok: true` (no DOM mutation,
 
 | Date | Browser | Extension | Locale | Direction | Scenario | Capability self-test | Notes |
 | ---- | ------- | --------- | ------ | --------- | -------- | -------------------- | ----- |
+| 2026-10-02 | Chrome | 1.8.0 | en (UI) / he (threads) | LTR | archived-view (desktop FAB + shortcut) | n/a | Manual pass: injected Archived FAB and `Command+Shift+A` open the Archived modal on wide desktop layout. Dialog shell detected during spinner load; list and unarchive controls render afterward. |
 | 2026-10-01 | Chrome | 1.6.28 | en-US | LTR | baseline | pass | `ok: true`, `unsafe: 0`, `mutated: false`. List targeting `dom-structure`. Eight capabilities unavailable (composer, message pane, connection) as expected. |
 | 2026-10-01 | Chrome | 1.6.28 | en-US | LTR | baseline (row menu open) | pass | Same self-test with `div.conversation-actions-menu` open: `menu.archive` and `menu.trash` `dom-query`; `menu.markUnread` and `menu.trashConfirm` remain `contract` (no live mark-unread e2e; trash dialog not open). |
 | 2026-10-01 | Chrome | 1.6.28 | en-US | LTR | baseline (extension automation) | n/a | On disposable read rows: archive, move to trash, trash dialog open, trash cancel, and mark as unread (shortcut/pill) all succeeded. |
@@ -75,6 +76,10 @@ Use **pass** when `runCapabilitySelfTest()` returns `ok: true` (no DOM mutation,
 | Mute / unmute (menu toggle) | `button[data-e2e-conversation-menu-mute]` (same node; label `Mute` ↔ `Unmute`) | English "Mute" / "Unmute" | en live | 5 | 2026-10-01 |
 | Mute state (list row) | _not used_ (menu-label toggle is postcondition) | n/a | en live | n/a | 2026-10-01 |
 | Unarchive (archived modal) | `button[data-e2e-unarchive-button]` in `mat-dialog-container` | English "Unarchive" | en live | 5 | 2026-10-01 |
+| Open archived (modal entry) | `button[data-e2e-archived-list-button], a[data-e2e-archived-list-button]` | Account menu, app header menu, search overflow, Settings, then localized "Archived" labels | en live (candidate) | 4 | 2026-10-01 |
+| Open archived (dialog shell) | `mat-dialog-container` with heading "Archived" | Unarchive controls may render after spinner | en live (candidate) | 4 | 2026-10-02 |
+| Open archived (sidebar route) | `button[data-e2e-archived-button], a[data-e2e-archived-button]` | Any visible route control outside dialog; bottom navigation on narrow layouts | en live | 5 | 2026-10-01 |
+| Start chat FAB anchor | `a[data-e2e-start-button]` inside `mw-fab-link.start-chat` | n/a | en live (candidate) | 4 | 2026-10-01 |
 | Pin (web row menu) | _not present_ | n/a | en live | 5 | 2026-10-01 |
 | Unpin (web row menu) | _not present_ | n/a | en live | 5 | 2026-10-01 |
 | Composer | _not validated_ | n/a | n/a | 1 | Phase 0 gate |
@@ -107,4 +112,6 @@ Use **pass** when `runCapabilitySelfTest()` returns `ok: true` (no DOM mutation,
 - Deferred structural probe: self-test `ok: true`, `mutated: false`; list row and menu button present; candidate pin/mute/unarchive e2e selectors only queried with menu closed.
 - Pin/unpin (web): row overflow menu inspected on promo/business and 1:1 SMS inbox rows. Menu items are Archive, Block & report spam, Move to trash, and Mute only. No Pin or Unpin control; `button[data-e2e-conversation-menu-pin]` not in DOM with menu open. Aligns with [Google Messages pin help](https://support.google.com/messages/answer/10930955) (pin/unpin action mobile-only; pinned rows may sync for display on web). Decision: **block** pin/unpin automation on Google Messages Web.
 - Mute/unmute: `button[data-e2e-conversation-menu-mute]` confirmed; label toggles `Mute` → `Unmute` after native mute (menu reopen probe). List-row mute icon not required; menu-label is bounded postcondition. Decision: **approve** for menu-action implementation.
-- Unarchive: Archived modal (title "Archived", Done footer) with inline `button[data-e2e-unarchive-button]` per row (`unarchiveCount: 25`). Not a row overflow menu item; do not use `data-e2e-conversation-menu-unarchive`. Native unarchive + `backInInbox: true` verified. Selector **approve**; coding **defer** until archived-modal execution kind exists.
+- Unarchive: Archived modal (title "Archived", Done footer) with inline `button[data-e2e-unarchive-button]` per row (`unarchiveCount: 25`). Not a row overflow menu item; do not use `data-e2e-conversation-menu-unarchive`. Native unarchive + `backInInbox: true` verified. Selector **approve**; shipped in extension 1.8.0 via `EXECUTION_KIND_ARCHIVED_MODAL_CLICK`.
+- Open archived: bottom navigation `data-e2e-archived-button` opens the Archived **sidebar route**, not the unarchive modal. Extension opens the modal via `data-e2e-archived-list-button` when present, otherwise account menu, app header menu, search overflow, Settings, or localized "Archived" labels. Page-level shortcut `Ctrl+Shift+A` / `⇧⌘A` and the injected Archived FAB use that discovery order. Success is detected when the dialog shell appears (`mat-dialog-container` + "Archived" heading), even before unarchive controls finish loading.
+- Open archived (desktop manual pass, 2026-10-02): injected Archived FAB and page-level shortcut open the Archived modal on a wide desktop layout. Initial spinner state resolves without a false timeout once dialog-shell detection is used.

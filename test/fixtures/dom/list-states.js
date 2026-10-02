@@ -114,11 +114,64 @@ export const duplicateArchiveMenuItems = `
   <button data-e2e-conversation-menu-archive>Archive B</button>
 `;
 
+export const startChatFabSurface = `
+  <mw-fab-link label="Start chat" class="start-chat">
+    <a data-e2e-start-button class="mdc-button mat-mdc-button-base fab link mat-mdc-button mat-unthemed" href="/web/conversations/new">
+      <span class="mdc-button__label">
+        <div class="fab-icon-label-container">
+          <mws-icon class="fab-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
+              <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z" fill="currentColor"></path>
+            </svg>
+          </mws-icon>
+          <div class="fab-label">Start chat</div>
+        </div>
+      </span>
+    </a>
+  </mw-fab-link>
+`;
+
+export const archivedModalEntryControl = `
+  <button data-e2e-archived-list-button>Archived</button>
+`;
+
+export const archivedRouteControl = `
+  <mws-bottom-navigation>
+    <button data-e2e-home-button>Home</button>
+    <button data-e2e-archived-button aria-selected="true">Archived</button>
+    <button data-e2e-settings-button>Settings</button>
+  </mws-bottom-navigation>
+`;
+
+export const archivedSidebarView = `
+  ${archivedRouteControl}
+  ${startChatFabSurface}
+  <main>
+    <h2>Archived</h2>
+    <mws-conversation-list-item><span>cal</span></mws-conversation-list-item>
+  </main>
+`;
+
+export const archivedEntryControl = archivedModalEntryControl;
+
+export const archivedModalSurface = `
+  <mat-dialog-container>
+    <h2>Archived</h2>
+    <mws-conversation-list-item id="fixture-archived-row">
+      <a aria-selected="true"></a>
+      <span>Archived contact</span>
+      <button data-e2e-unarchive-button>Unarchive</button>
+    </mws-conversation-list-item>
+  </mat-dialog-container>
+`;
+
 export const fullListActionSurface = `
   ${selectedReadRow}
   ${unreadRow}
   ${menuItemsPresent}
   ${trashConfirmDialog}
+  ${archivedEntryControl}
+  ${startChatFabSurface}
 `;
 
 export const openRowMenuMarkUnreadFallbackOnly = `
@@ -164,5 +217,8 @@ export const FIXTURE_EXPORT_NAMES = [
   'openTrashDialogMissingConfirmControl',
   'openRowMenuMutedOnly',
   'openRowMenuMuteFallbackOnly',
-  'openRowMenuMuteLabelMismatchWithFallback'
+  'openRowMenuMuteLabelMismatchWithFallback',
+  'archivedEntryControl',
+  'startChatFabSurface',
+  'archivedModalSurface'
 ];

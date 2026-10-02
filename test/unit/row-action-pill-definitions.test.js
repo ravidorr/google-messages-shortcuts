@@ -6,8 +6,10 @@ import {
   COMMAND_MARK_UNREAD,
   COMMAND_MUTE,
   COMMAND_TRASH,
+  COMMAND_UNARCHIVE,
   COMMAND_UNMUTE
 } from '../../src/shared/commands.js';
+import { archivedModalSurface } from '../fixtures/dom/list-states.js';
 
 function createConversationRow({ unread = false } = {}) {
   const row = document.createElement('mws-conversation-list-item');
@@ -39,6 +41,15 @@ describe('row action pill definitions', () => {
       { command: COMMAND_MARK_READ, label: 'Mark as read', shortcutKey: 'markRead' },
       { command: COMMAND_MUTE, label: 'Mute', shortcutKey: 'mute' },
       { command: COMMAND_UNMUTE, label: 'Unmute', shortcutKey: 'unmute' }
+    ]);
+  });
+
+  it('shows only the unarchive pill inside the archived modal', () => {
+    document.body.innerHTML = archivedModalSurface;
+    const archivedRow = document.getElementById('fixture-archived-row');
+
+    expect(getPillDefinitionsForRow(archivedRow)).toEqual([
+      { command: COMMAND_UNARCHIVE, label: 'Unarchive', shortcutKey: 'unarchive' }
     ]);
   });
 });

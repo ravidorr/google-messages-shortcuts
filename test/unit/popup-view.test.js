@@ -1,7 +1,9 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import {
+  getExtensionVersion,
   getShortcutStatus,
   populateShortcutList,
+  renderExtensionVersion,
   renderShortcutRows
 } from '../../src/popup/popup-view.js';
 import {
@@ -31,7 +33,34 @@ function expectLucideShortcutIcon(item, commandName) {
 
 describe('popup-view', () => {
   beforeEach(() => {
-    document.body.innerHTML = '<ul id="shortcut-list"></ul>';
+    document.body.innerHTML = `
+      <p id="extension-version" class="popup__version" hidden></p>
+      <ul id="shortcut-list"></ul>
+    `;
+  });
+
+  it('renders the extension version from the manifest', () => {
+    renderExtensionVersion(document, {
+      runtime: {
+        getManifest: () => ({ version: '1.8.0' })
+      }
+    });
+
+    const versionElement = document.getElementById('extension-version');
+
+    expect(getExtensionVersion({
+      runtime: {
+        getManifest: () => ({ version: '1.8.0' })
+      }
+    })).toBe('1.8.0');
+    expect(versionElement.hidden).toBe(false);
+    expect(versionElement.textContent).toBe('Version 1.8.0');
+  });
+
+  it('leaves the version hidden when manifest metadata is unavailable', () => {
+    renderExtensionVersion(document, {});
+
+    expect(document.getElementById('extension-version').hidden).toBe(true);
   });
 
   it('marks missing shortcuts', () => {
@@ -63,13 +92,14 @@ describe('popup-view', () => {
       { name: COMMAND_MARK_UNREAD, shortcut: 'Ctrl+Shift+U' }
     ]);
 
-    expect(rows).toHaveLength(6);
+    expect(rows).toHaveLength(7);
     expect(rows[0].shortcut).toBe('Ctrl+Shift+Y');
     expect(rows[1].shortcut).toBe('Not assigned');
     expect(rows[2].shortcut).toBe('Ctrl+Shift+K');
     expect(rows[3].shortcut).toBe('Ctrl+Shift+U');
     expect(rows[4].shortcut).toBe('Row pill only');
     expect(rows[5].shortcut).toBe('Row pill only');
+    expect(rows[6].shortcut).toBe('Row pill only');
   });
 
   it('populates the shortcut list in the popup', () => {
@@ -84,7 +114,7 @@ describe('popup-view', () => {
 
     const items = container.querySelectorAll('.shortcut-item');
 
-    expect(items).toHaveLength(6);
+    expect(items).toHaveLength(7);
     expect(items[0].querySelector('.shortcut-item__label').textContent)
       .toBe('Archive conversation');
     expect(items[1].querySelector('.shortcut-item__label').textContent)
@@ -104,6 +134,10 @@ describe('popup-view', () => {
     expect(items[5].querySelector('.shortcut-item__label').textContent)
       .toBe('Unmute conversation');
     expect(items[5].querySelector('.shortcut-status').textContent)
+      .toBe('Row pill only');
+    expect(items[6].querySelector('.shortcut-item__label').textContent)
+      .toBe('Unarchive conversation');
+    expect(items[6].querySelector('.shortcut-status').textContent)
       .toBe('Row pill only');
   });
 });

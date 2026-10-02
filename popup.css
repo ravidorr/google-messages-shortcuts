@@ -39,6 +39,13 @@ body {
   color: #4a4a4a;
 }
 
+.popup__version {
+  margin: 4px 0 0;
+  font-size: 12px;
+  line-height: 1.4;
+  color: #5f6368;
+}
+
 .popup__section {
   margin-bottom: 16px;
 }
@@ -157,6 +164,10 @@ body {
   .popup__subtitle,
   .popup__help {
     color: #bdc1c6;
+  }
+
+  .popup__version {
+    color: #9aa0a6;
   }
 
   .shortcut-list {

@@ -1,4 +1,9 @@
+import { findArchivedConversationRow as findArchivedConversationRowInModal } from './adapters/archived-adapter.js';
 import { SELECTORS } from './google-messages-dom.js';
+
+export function findArchivedConversationRow(documentRoot, selectors = SELECTORS) {
+  return findArchivedConversationRowInModal(documentRoot, selectors);
+}
 
 export function findConversationRow(documentRoot, selectors = SELECTORS) {
   const hoveredRow = documentRoot.querySelector(selectors.hoveredConversationItem);

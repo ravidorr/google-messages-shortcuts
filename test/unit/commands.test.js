@@ -4,11 +4,14 @@ import {
   COMMAND_MARK_READ,
   COMMAND_MARK_UNREAD,
   COMMAND_MUTE,
+  COMMAND_OPEN_ARCHIVED,
   COMMAND_TRASH,
+  COMMAND_UNARCHIVE,
   COMMAND_UNMUTE,
   MANIFEST_COMMANDS,
   MAX_MANIFEST_COMMANDS,
   isManifestCommand,
+  isNavigationCommand,
   isValidCommand
 } from '../../src/shared/commands.js';
 
@@ -20,6 +23,8 @@ describe('commands', () => {
     expect(isValidCommand(COMMAND_MARK_READ)).toBe(true);
     expect(isValidCommand(COMMAND_MUTE)).toBe(true);
     expect(isValidCommand(COMMAND_UNMUTE)).toBe(true);
+    expect(isValidCommand(COMMAND_UNARCHIVE)).toBe(true);
+    expect(isValidCommand(COMMAND_OPEN_ARCHIVED)).toBe(true);
   });
 
   it('rejects unknown commands', () => {
@@ -30,6 +35,9 @@ describe('commands', () => {
     expect(MANIFEST_COMMANDS).toHaveLength(MAX_MANIFEST_COMMANDS);
     expect(isManifestCommand(COMMAND_MUTE)).toBe(false);
     expect(isManifestCommand(COMMAND_UNMUTE)).toBe(false);
+    expect(isManifestCommand(COMMAND_UNARCHIVE)).toBe(false);
+    expect(isManifestCommand(COMMAND_OPEN_ARCHIVED)).toBe(false);
     expect(isManifestCommand(COMMAND_ARCHIVE)).toBe(true);
+    expect(isNavigationCommand(COMMAND_OPEN_ARCHIVED)).toBe(true);
   });
 });

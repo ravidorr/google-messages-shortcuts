@@ -6,7 +6,12 @@ import {
   findTrashConfirmFallbackControl
 } from '../../src/content/action-capability-preflight.js';
 import { getRowAction } from '../../src/content/row-action-registry.js';
-import { COMMAND_ARCHIVE, COMMAND_MARK_READ, COMMAND_TRASH } from '../../src/shared/commands.js';
+import {
+  COMMAND_ARCHIVE,
+  COMMAND_MARK_READ,
+  COMMAND_TRASH,
+  COMMAND_UNARCHIVE
+} from '../../src/shared/commands.js';
 import { SELECTORS } from '../../src/content/google-messages-dom.js';
 import { POLL_INTERVAL_MS } from '../../src/content/wait-for-element.js';
 import * as pageAdapter from '../../src/content/adapters/page-adapter.js';
@@ -17,6 +22,7 @@ import {
   openTrashDialogMissingConfirmControl,
   rowMissingConversationLink,
   rowMissingMenuButton,
+  archivedModalSurface,
   selectedReadRow,
   trashConfirmDialog
 } from '../fixtures/dom/list-states.js';
@@ -315,5 +321,31 @@ describe('action-capability-preflight', () => {
     expect(localThis.allowed).toBe(false);
     expect(localThis.capabilityId).toBe('list.targeting');
     expect(localThis.capabilityState).toBe('unavailable');
+  });
+
+  it('blocks unarchive when the archived modal is closed', () => {
+    document.body.innerHTML = selectedReadRow;
+
+    const localThis = assessRowActionCapability(
+      document,
+      getRowAction(COMMAND_UNARCHIVE),
+      SELECTORS
+    );
+
+    expect(localThis.allowed).toBe(false);
+    expect(localThis.capabilityId).toBe('archived.unarchive');
+    expect(localThis.capabilityState).toBe('unavailable');
+  });
+
+  it('allows unarchive when the archived modal is open', () => {
+    document.body.innerHTML = archivedModalSurface;
+
+    const localThis = assessRowActionCapability(
+      document,
+      getRowAction(COMMAND_UNARCHIVE),
+      SELECTORS
+    );
+
+    expect(localThis).toEqual({ allowed: true });
   });
 });

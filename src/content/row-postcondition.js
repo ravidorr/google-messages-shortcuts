@@ -16,15 +16,15 @@ export async function waitForTargetRowPostcondition({
   const deadline = Date.now() + timeoutMs;
 
   while (Date.now() < deadline) {
+    if (isSatisfied(conversationRow)) {
+      return { ok: true };
+    }
+
     if (!conversationRow?.isConnected) {
       return {
         ok: false,
         reason: 'target-row-disconnected'
       };
-    }
-
-    if (isSatisfied(conversationRow)) {
-      return { ok: true };
     }
 
     await sleep(pollIntervalMs);

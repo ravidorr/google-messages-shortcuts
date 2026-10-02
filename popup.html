@@ -13,6 +13,7 @@
         <div>
           <h1 class="popup__title">Messages Shortcut Actions</h1>
           <p class="popup__subtitle">Archive, trash, mute, or mark Google Messages conversations from the list.</p>
+          <p id="extension-version" class="popup__version" hidden></p>
         </div>
       </header>
 
@@ -21,6 +22,14 @@
         <ul id="shortcut-list" class="shortcut-list"></ul>
         <p id="shortcut-warning" class="popup__warning" hidden>
           One or more shortcuts are not assigned. Open Chrome shortcut settings to configure them.
+        </p>
+      </section>
+
+      <section class="popup__section" aria-labelledby="navigation-shortcuts-heading">
+        <h2 id="navigation-shortcuts-heading" class="popup__section-title">Navigation shortcuts</h2>
+        <ul id="navigation-shortcut-list" class="shortcut-list"></ul>
+        <p class="popup__help">
+          Navigation shortcuts run on the Google Messages page. Unarchive is available from row pills inside the Archived dialog only.
         </p>
       </section>
 
