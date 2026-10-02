@@ -26,7 +26,7 @@
     'button[data-e2e-unarchive-button]',
     'button[data-e2e-archived-button], a[data-e2e-archived-button], button[data-e2e-archived-list-button]',
     'button[data-e2e-settings-button], a[data-e2e-settings-button]',
-    'input[type="text"], input[type="text"], input[aria-label*="Filter" i], input[placeholder*="Filter" i]',
+    'input[type="search"], input[type="text"], input[aria-label*="Filter" i], input[placeholder*="Filter" i]',
     'button[aria-haspopup="menu"], button.menu-button, button.mat-mdc-icon-button',
     'button[data-e2e-account-button], button[data-e2e-user-menu-button], button[data-e2e-profile-button]',
     'header img, [role="banner"] img',

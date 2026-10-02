@@ -54,9 +54,9 @@ describe('keyboard-controller', () => {
       chromeApi: createChromeApi()
     });
 
-    dispatchAltArrowDown();
-
     await vi.waitFor(() => {
+      dispatchAltArrowDown();
+
       expect(
         document.querySelector('[data-messages-shortcuts-navigation-feedback-message]')?.textContent
       ).toContain('Moved to another loaded conversation');
@@ -95,17 +95,15 @@ describe('keyboard-controller', () => {
       chromeApi: createChromeApi()
     });
 
-    await Promise.resolve();
-
-    document.body.dispatchEvent(new KeyboardEvent('keydown', {
-      code: 'KeyP',
-      ctrlKey: true,
-      shiftKey: true,
-      bubbles: true,
-      cancelable: true
-    }));
-
     await vi.waitFor(() => {
+      document.body.dispatchEvent(new KeyboardEvent('keydown', {
+        code: 'KeyP',
+        ctrlKey: true,
+        shiftKey: true,
+        bubbles: true,
+        cancelable: true
+      }));
+
       expect(document.querySelector('[data-messages-shortcuts-command-palette]')).not.toBeNull();
     });
 
@@ -148,6 +146,91 @@ describe('keyboard-controller', () => {
     await vi.advanceTimersByTimeAsync(4000);
     expect(establishInitialCursor).not.toHaveBeenCalled();
     vi.useRealTimers();
+  });
+
+  it('ignores unrelated keys once pause state is ready', async () => {
+    const getPausedState = vi.fn(async () => false);
+
+    disconnect = installKeyboardController({
+      documentRoot: document,
+      chromeApi: createChromeApi(),
+      getPausedState
+    });
+
+    await vi.waitFor(() => {
+      expect(getPausedState).toHaveBeenCalled();
+    });
+
+    document.body.dispatchEvent(new KeyboardEvent('keydown', {
+      code: 'KeyZ',
+      bubbles: true,
+      cancelable: true
+    }));
+
+    expect(document.querySelector('[data-messages-shortcuts-navigation-feedback-message]')).toBeNull();
+  });
+
+  it('ignores matched navigation shortcuts in editable targets after pause state loads', async () => {
+    const getPausedState = vi.fn(async () => false);
+
+    disconnect = installKeyboardController({
+      documentRoot: document,
+      chromeApi: createChromeApi(),
+      getPausedState
+    });
+
+    const input = document.createElement('input');
+    document.body.append(input);
+
+    await vi.waitFor(() => {
+      expect(getPausedState).toHaveBeenCalled();
+    });
+
+    dispatchAltArrowDown(input);
+
+    expect(document.querySelector('[data-messages-shortcuts-navigation-feedback-message]')).toBeNull();
+  });
+
+  it('does not intercept shortcuts until the pause preference has loaded', async () => {
+    let resolvePausedState;
+    const getPausedState = vi.fn(async () => new Promise((resolve) => {
+      resolvePausedState = resolve;
+    }));
+
+    disconnect = installKeyboardController({
+      documentRoot: document,
+      chromeApi: createChromeApi({ paused: true }),
+      getPausedState
+    });
+
+    const blockedEvent = new KeyboardEvent('keydown', {
+      code: 'ArrowDown',
+      altKey: true,
+      bubbles: true,
+      cancelable: true
+    });
+
+    document.body.dispatchEvent(blockedEvent);
+
+    expect(blockedEvent.defaultPrevented).toBe(false);
+    expect(document.querySelector('[data-messages-shortcuts-navigation-feedback-message]')).toBeNull();
+
+    resolvePausedState(true);
+    await vi.waitFor(() => {
+      expect(getPausedState).toHaveBeenCalled();
+    });
+
+    const pausedEvent = new KeyboardEvent('keydown', {
+      code: 'ArrowDown',
+      altKey: true,
+      bubbles: true,
+      cancelable: true
+    });
+
+    document.body.dispatchEvent(pausedEvent);
+
+    expect(pausedEvent.defaultPrevented).toBe(false);
+    expect(document.querySelector('[data-messages-shortcuts-navigation-feedback-message]')).toBeNull();
   });
 
   it('prevents default synchronously once pause state is loaded', async () => {
@@ -209,17 +292,15 @@ describe('keyboard-controller', () => {
       chromeApi: createChromeApi()
     });
 
-    await Promise.resolve();
-
-    document.body.dispatchEvent(new KeyboardEvent('keydown', {
-      code: 'KeyP',
-      ctrlKey: true,
-      shiftKey: true,
-      bubbles: true,
-      cancelable: true
-    }));
-
     await vi.waitFor(() => {
+      document.body.dispatchEvent(new KeyboardEvent('keydown', {
+        code: 'KeyP',
+        ctrlKey: true,
+        shiftKey: true,
+        bubbles: true,
+        cancelable: true
+      }));
+
       expect(document.querySelector('[data-messages-shortcuts-command-palette]')).not.toBeNull();
     });
   });

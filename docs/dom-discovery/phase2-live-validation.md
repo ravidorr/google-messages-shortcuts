@@ -101,7 +101,7 @@ If no row looks focused after a refresh, wait about one second for the list to f
 - [ ] No navigation toast appears
 - [ ] The command palette (Step 7) does **not** open
 - [ ] **Shift+/** may still type **`?`** in compose; that is expected. The shortcut help overlay should **not** open
-- [ ] **Command+Shift+P** may still open Google Messages **Select photos** in compose. That native collision is expected; record it in Step 9
+- [x] **Command+Shift+P** may still open Google Messages **Select photos** in compose. That native collision is expected; recorded in Step 9
 
 ### 3b. While a native dialog is open
 
@@ -265,20 +265,41 @@ The **command palette** is an extension popup panel: a white box over the page w
 
 ## Step 9: Check for shortcut collisions
 
+Press each shortcut **once**. Write **works**, **collision**, or **nothing**.
+
+### 9a. List focused
+
 **Where:** inbox view, conversation list focused (click a list row first), compose box **not** focused.
 
-Press each shortcut **once**. Write **works**, **collision**, or **nothing**:
+- [x] **Option+ArrowDown** — **works**
+- [x] **Option+ArrowUp** — **works**
+- [x] **Option+Enter** — **works**
+- [x] **Option+[** — **works**
+- [x] **Option+U** — **works**
+- [x] **Option+Shift+U** — **works**
+- [x] **Escape** (with a conversation open on the right) — **works**
+- [x] **Command+Shift+P** — **works** (extension command palette opens)
+- [x] **Shift+/** — **works** (extension shortcut help opens)
+- [x] **Option+M** — **works** (unavailable toast in 1.13.0; composer focus deferred)
 
-- [ ] **Option+ArrowDown**
-- [ ] **Option+ArrowUp**
-- [ ] **Option+Enter**
-- [ ] **Option+[**
-- [ ] **Option+U**
-- [ ] **Option+Shift+U**
-- [ ] **Escape** (with a conversation open on the right)
-- [ ] **Command+Shift+P**
-- [ ] **Shift+/**
-- [ ] **Option+M** (expect **unavailable** toast in 1.13.0)
+### 9b. Compose focused
+
+**Where:** any open conversation, **Type a message** / compose box focused (click inside it first).
+
+Extension navigation shortcuts and discovery overlays are blocked in compose (Step 3a). Re-check bindings that might still reach Google Messages native handlers:
+
+- [x] **Option+ArrowDown** — **nothing** (extension guard; list does not move)
+- [x] **Option+ArrowUp** — **nothing**
+- [x] **Option+Enter** — **nothing**
+- [x] **Option+[** — **nothing**
+- [x] **Option+U** — **nothing**
+- [x] **Option+Shift+U** — **nothing**
+- [x] **Escape** — **nothing** (native compose behavior only; extension does not escape to list)
+- [x] **Command+Shift+P** — **collision** (Google Messages **Select photos** opens; extension palette stays closed)
+- [x] **Shift+/** — **nothing** (`?` typed in compose; extension help stays closed)
+- [x] **Option+M** — **nothing** (unavailable toast suppressed in compose)
+
+**Step 9 matrix note:** `Command+Shift+P` is the only Phase 2 binding with a live native collision. It occurs when compose is focused. The extension intentionally does not suppress Google Messages **Select photos**.
 
 ---
 

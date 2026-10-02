@@ -15,6 +15,7 @@ export const COMMAND_PALETTE_STYLE_SELECTOR = 'style[data-messages-shortcuts-com
 let isOpen = false;
 let previousActiveElement = null;
 let keydownListener = null;
+let openPromise = null;
 
 async function fetchBrowserCommandLabels(chromeApi = chrome) {
   try {
@@ -193,11 +194,7 @@ export function closeCommandPalette(documentRoot = document) {
   isOpen = false;
 }
 
-export async function openCommandPalette(documentRoot = document, chromeApi = chrome) {
-  if (isOpen) {
-    closeCommandPalette(documentRoot);
-  }
-
+async function mountCommandPalette(documentRoot, chromeApi) {
   ensureStyles(documentRoot);
   previousActiveElement = documentRoot.activeElement;
 
@@ -246,8 +243,25 @@ export async function openCommandPalette(documentRoot = document, chromeApi = ch
   isOpen = true;
 }
 
+export async function openCommandPalette(documentRoot = document, chromeApi = chrome) {
+  if (isOpen) {
+    closeCommandPalette(documentRoot);
+  }
+
+  if (openPromise) {
+    return openPromise;
+  }
+
+  openPromise = mountCommandPalette(documentRoot, chromeApi).finally(() => {
+    openPromise = null;
+  });
+
+  return openPromise;
+}
+
 export function resetCommandPaletteForTests(documentRoot = document) {
   closeCommandPalette(documentRoot);
+  openPromise = null;
 }
 
 export function simulateCommandPaletteOpenWithoutListenerForTests() {

@@ -28,6 +28,13 @@ describe('deferred action validation console', () => {
     expect(localThis).toContain('uniqueDestinationDialog');
   });
 
+  it('probes search-type list-header inputs alongside text filters', async () => {
+    const localThis = await readFile(consoleProbePath, 'utf8');
+
+    expect(localThis).toContain('input[type="search"]');
+    expect(localThis).not.toContain('input[type="text"], input[type="text"]');
+  });
+
   it('does not automate navigation or change page focus', async () => {
     const localThis = await readFile(consoleProbePath, 'utf8');
 

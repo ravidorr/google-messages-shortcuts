@@ -36,9 +36,11 @@ function createInstallation({
   getPausedState = async () => isPaused(chromeApi)
 } = {}) {
   let paused = false;
+  let pauseStateReady = false;
 
   async function refreshPausedState() {
     paused = await getPausedState();
+    pauseStateReady = true;
   }
 
   void refreshPausedState();
@@ -49,7 +51,7 @@ function createInstallation({
   });
 
   function handleKeydown(event) {
-    if (paused) {
+    if (!pauseStateReady || paused) {
       return;
     }
 

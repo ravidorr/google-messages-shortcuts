@@ -303,26 +303,27 @@ describe('phase2 navigation coverage', () => {
     });
     const disconnect = installKeyboardController({ documentRoot: document, chromeApi });
 
-    await Promise.resolve();
+    await vi.waitFor(() => {
+      document.body.dispatchEvent(new KeyboardEvent('keydown', {
+        code: 'KeyP',
+        ctrlKey: true,
+        shiftKey: true,
+        isComposing: true,
+        bubbles: true,
+        cancelable: true
+      }));
 
-    document.body.dispatchEvent(new KeyboardEvent('keydown', {
-      code: 'KeyP',
-      ctrlKey: true,
-      shiftKey: true,
-      isComposing: true,
-      bubbles: true,
-      cancelable: true
-    }));
-    expect(isCommandPaletteOpen()).toBe(false);
-
-    document.body.dispatchEvent(new KeyboardEvent('keydown', {
-      code: 'Slash',
-      shiftKey: true,
-      bubbles: true,
-      cancelable: true
-    }));
+      expect(isCommandPaletteOpen()).toBe(false);
+    });
 
     await vi.waitFor(() => {
+      document.body.dispatchEvent(new KeyboardEvent('keydown', {
+        code: 'Slash',
+        shiftKey: true,
+        bubbles: true,
+        cancelable: true
+      }));
+
       expect(document.querySelector('[data-messages-shortcuts-shortcut-help]')).not.toBeNull();
     });
 

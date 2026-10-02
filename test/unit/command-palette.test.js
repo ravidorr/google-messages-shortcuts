@@ -106,6 +106,28 @@ describe('command-palette', () => {
     closeCommandPalette(document);
   });
 
+  it('serializes concurrent open calls while browser labels are loading', async () => {
+    let resolveLabels;
+    const chromeApi = {
+      runtime: {
+        sendMessage: vi.fn(() => new Promise((resolve) => {
+          resolveLabels = resolve;
+        }))
+      }
+    };
+
+    const firstOpen = openCommandPalette(document, chromeApi);
+    const secondOpen = openCommandPalette(document, chromeApi);
+
+    expect(document.querySelectorAll('[data-messages-shortcuts-command-palette]').length).toBe(0);
+
+    resolveLabels({});
+    await Promise.all([firstOpen, secondOpen]);
+
+    expect(document.querySelectorAll('[data-messages-shortcuts-command-palette]').length).toBe(1);
+    closeCommandPalette(document);
+  });
+
   it('closes safely when open without an attached keydown listener', () => {
     simulateCommandPaletteOpenWithoutListenerForTests();
     closeCommandPalette(document);

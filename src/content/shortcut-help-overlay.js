@@ -14,6 +14,7 @@ export const SHORTCUT_HELP_STYLE_SELECTOR = 'style[data-messages-shortcuts-short
 let isOpen = false;
 let previousActiveElement = null;
 let keydownListener = null;
+let openPromise = null;
 
 async function fetchBrowserCommandLabels(chromeApi = chrome) {
   try {
@@ -160,11 +161,7 @@ export function closeShortcutHelpOverlay(documentRoot = document) {
   isOpen = false;
 }
 
-export async function openShortcutHelpOverlay(documentRoot = document, chromeApi = chrome) {
-  if (isOpen) {
-    closeShortcutHelpOverlay(documentRoot);
-  }
-
+async function mountShortcutHelpOverlay(documentRoot, chromeApi) {
   ensureStyles(documentRoot);
   previousActiveElement = documentRoot.activeElement;
 
@@ -205,8 +202,25 @@ export async function openShortcutHelpOverlay(documentRoot = document, chromeApi
   isOpen = true;
 }
 
+export async function openShortcutHelpOverlay(documentRoot = document, chromeApi = chrome) {
+  if (isOpen) {
+    closeShortcutHelpOverlay(documentRoot);
+  }
+
+  if (openPromise) {
+    return openPromise;
+  }
+
+  openPromise = mountShortcutHelpOverlay(documentRoot, chromeApi).finally(() => {
+    openPromise = null;
+  });
+
+  return openPromise;
+}
+
 export function resetShortcutHelpForTests(documentRoot = document) {
   closeShortcutHelpOverlay(documentRoot);
+  openPromise = null;
 }
 
 export function simulateShortcutHelpOpenWithoutListenerForTests() {
