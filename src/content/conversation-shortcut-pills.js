@@ -215,13 +215,13 @@ function createPill(documentRoot, definition, shortcut, runAction, conversationR
   return pill;
 }
 
-function createPillGroup(documentRoot, shortcutLabels, runAction, conversationRow) {
+function createPillGroup(documentRoot, shortcutLabels, runAction, conversationRow, pillDefinitions) {
   const group = documentRoot.createElement('div');
   group.setAttribute('data-messages-shortcuts-pill-group', '');
   group.setAttribute('role', 'group');
   group.setAttribute('aria-label', 'Conversation shortcuts');
 
-  for (const definition of getPillDefinitions(conversationRow)) {
+  for (const definition of pillDefinitions) {
     group.append(createPill(
       documentRoot,
       definition,
@@ -313,6 +313,7 @@ function createInstallation({
   let shortcutLabelsPromise;
   let paused = false;
   let pillVisibility = DEFAULT_PILL_VISIBILITY;
+  let receivedPillVisibilityStorageChange = false;
 
   async function refreshPausedState() {
     paused = await getPausedState();
@@ -323,7 +324,13 @@ function createInstallation({
   }
 
   async function refreshPillVisibilityState() {
-    pillVisibility = await getPillVisibilityState();
+    const initialPillVisibility = await getPillVisibilityState();
+
+    if (receivedPillVisibilityStorageChange) {
+      return;
+    }
+
+    pillVisibility = initialPillVisibility;
     await applyPillVisibilityState();
   }
 
@@ -387,13 +394,20 @@ function createInstallation({
       return;
     }
 
+    const pillDefinitions = getPillDefinitions(conversationRow);
+
+    if (pillDefinitions.length === 0) {
+      return;
+    }
+
     safeDomMutation(() => {
       conversationRow.setAttribute(PILL_HOST_ATTRIBUTE, '');
       conversationRow.append(createPillGroup(
         documentRoot,
         shortcutLabels,
         runActionWithRefresh,
-        conversationRow
+        conversationRow,
+        pillDefinitions
       ));
     });
   }
@@ -578,6 +592,7 @@ function createInstallation({
     }
 
     if (changes[PILL_VISIBILITY_STORAGE_KEY]) {
+      receivedPillVisibilityStorageChange = true;
       pillVisibility = normalizePillVisibility(changes[PILL_VISIBILITY_STORAGE_KEY].newValue);
       void applyPillVisibilityState();
     }
