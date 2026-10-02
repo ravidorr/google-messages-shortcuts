@@ -25,6 +25,7 @@ describe('popup markup', () => {
         'Change shortcuts',
         'Trash confirmation',
         'Conversation opening',
+        'Pill visibility',
         'Extension controls'
       ]);
   });

@@ -45,6 +45,53 @@ function isBlockingCapability(entry) {
   return !isExpectedUnavailableCapability(entry.capabilityId);
 }
 
+function normalizeDirection(value) {
+  const normalized = String(value || '').trim().toLowerCase();
+
+  if (normalized === 'ltr' || normalized === 'rtl') {
+    return normalized;
+  }
+
+  return 'unknown';
+}
+
+export function getSelfTestEnvironment(
+  documentRoot = document,
+  chromeApi = globalThis.chrome
+) {
+  const htmlElement = documentRoot.documentElement;
+  const locale = htmlElement?.getAttribute?.('lang')
+    || htmlElement?.lang
+    || globalThis.navigator?.language
+    || 'unknown';
+  let direction = normalizeDirection(htmlElement?.getAttribute?.('dir') || htmlElement?.dir);
+
+  if (
+    direction === 'unknown'
+    && htmlElement
+    && typeof documentRoot.defaultView?.getComputedStyle === 'function'
+  ) {
+    direction = normalizeDirection(
+      documentRoot.defaultView.getComputedStyle(htmlElement).direction
+    );
+  }
+
+  let extensionVersion = 'unknown';
+
+  try {
+    extensionVersion = chromeApi?.runtime?.getManifest?.()?.version ?? 'unknown';
+  } catch {
+    extensionVersion = 'unknown';
+  }
+
+  return {
+    browserVersion: globalThis.navigator?.userAgent || 'unknown',
+    extensionVersion,
+    locale,
+    direction
+  };
+}
+
 function buildSummary(flatCapabilities) {
   const unsafeCapabilities = flatCapabilities.filter((entry) => entry.state === CAPABILITY_UNSAFE);
   const blockingUnavailableCapabilities = flatCapabilities.filter(
@@ -62,7 +109,11 @@ function buildSummary(flatCapabilities) {
   };
 }
 
-export function runCapabilitySelfTest(documentRoot = document, assessCapabilities = assessPageCapabilities) {
+export function runCapabilitySelfTest(
+  documentRoot = document,
+  assessCapabilities = assessPageCapabilities,
+  chromeApi = globalThis.chrome
+) {
   const beforeSnapshot = captureDomSnapshot(documentRoot);
   const capabilitiesByArea = assessCapabilities(documentRoot);
   const mutation = detectDomMutation(documentRoot, beforeSnapshot);
@@ -75,6 +126,7 @@ export function runCapabilitySelfTest(documentRoot = document, assessCapabilitie
     ok: !mutated && !hasBlockingCapability,
     mutated,
     mutation,
+    environment: getSelfTestEnvironment(documentRoot, chromeApi),
     capabilitiesByArea,
     capabilities,
     summary

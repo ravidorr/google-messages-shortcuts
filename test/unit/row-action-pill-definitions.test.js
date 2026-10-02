@@ -7,7 +7,6 @@ import {
   COMMAND_MARK_UNREAD,
   COMMAND_MUTE,
   COMMAND_TRASH,
-  COMMAND_UNARCHIVE,
   COMMAND_UNMUTE
 } from '../../src/shared/commands.js';
 import { archivedModalSurface } from '../fixtures/dom/list-states.js';
@@ -55,12 +54,10 @@ describe('row action pill definitions', () => {
     ]);
   });
 
-  it('shows only the unarchive pill inside the archived modal', () => {
+  it('does not show extension pills inside the archived modal', () => {
     document.body.innerHTML = archivedModalSurface;
     const archivedRow = document.getElementById('fixture-archived-row');
 
-    expect(getPillDefinitionsForRow(archivedRow)).toEqual([
-      { command: COMMAND_UNARCHIVE, label: 'Unarchive', shortcutKey: 'unarchive' }
-    ]);
+    expect(getPillDefinitionsForRow(archivedRow)).toEqual([]);
   });
 });

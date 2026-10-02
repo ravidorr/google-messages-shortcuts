@@ -33,6 +33,7 @@ Use **approve** only when automation can fail closed with a bounded postconditio
 - `non-en-ltr`: non-English LTR interface
 - `slow-dom`: CPU throttling enabled
 - `baseline-trash-dialog-open`: Move to trash dialog visible (row menu typically closed)
+- `pill-visibility`: Epic A popup visibility modes on inbox rows plus Archived modal absence check
 
 ### Capability self-test column
 
@@ -42,6 +43,7 @@ Use **pass** when `runCapabilitySelfTest()` returns `ok: true` (no DOM mutation,
 
 | Date | Browser | Extension | Locale | Direction | Scenario | Capability self-test | Notes |
 | ---- | ------- | --------- | ------ | --------- | -------- | -------------------- | ----- |
+| 2026-10-02 | Chrome 154.0.0.0 | 1.10.0 | en | LTR | pill-visibility | pass | **Epic A manual pass.** hover-or-focus (default): pills on hover, browser keyboard focus, and `is-focused="true"` rows. selected-row-only: hover and browser focus alone do not show pills; `is-focused="true"` rows do. hidden: no pills; keyboard shortcuts still work. Archived modal: no extension pills under any setting; native Unarchive button only (expected). Virtualized list: visibility policy holds after row rerender. Self-test on inbox: `ok: true`, `mutated: false`, `blockingUnavailable: 0`. environment: Chrome 154 / extension 1.10.0 / locale en / direction ltr. |
 | 2026-10-02 | Chrome 154 | 1.9.0 | en | LTR | baseline (block pill automation) | pass | Block / report spam pill opens native dialog, focuses `OK` confirm (`data-e2e-action-button-confirm`), does not auto-click. Cancel verified non-mutating. |
 | 2026-10-02 | Chrome 154 | 1.9.0 | en | LTR | baseline (block dialog open) | n/a | Dialog probe: `confirmButtonCount: 1`, confirm label `OK`, `Report spam` checkbox present. Matches `mat-dialog-container button[data-e2e-action-button-confirm]` contract. |
 | 2026-10-02 | Chrome 154 | 1.9.0 | en | LTR | baseline (row menu open, block menu item) | n/a | `menuOpen: true`, `button[data-e2e-conversation-menu-block]` `matchCount: 1`. |

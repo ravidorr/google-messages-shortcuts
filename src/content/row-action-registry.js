@@ -158,11 +158,8 @@ export const APPROVED_ROW_ACTIONS = [
     executionKind: EXECUTION_KIND_ARCHIVED_MODAL_CLICK,
     precondition: (conversationRow, selectors) => isRowInArchivedModal(conversationRow, selectors),
     preconditionFailureReason: 'archived-modal-required',
-    pillLabel: 'Unarchive',
     popupLabel: 'Unarchive conversation',
-    shortcutKey: 'unarchive',
-    pillOnly: true,
-    showPillWhenArchivedOnly: true,
+    supportsPill: false,
     showPillWhenReadOnly: false,
     showPillWhenUnreadOnly: false
   }
@@ -185,20 +182,19 @@ export function getApprovedCommands() {
 }
 
 export function getManifestEligibleActions() {
-  return APPROVED_ROW_ACTIONS.filter((action) => !action.pillOnly);
+  return APPROVED_ROW_ACTIONS.filter((action) => !action.pillOnly && action.supportsPill !== false);
 }
 
 export function getPillDefinitionsForRow(conversationRow, selectors) {
-  const inArchivedModal = isRowInArchivedModal(conversationRow, selectors);
+  if (isRowInArchivedModal(conversationRow, selectors)) {
+    return [];
+  }
+
   const isRead = isConversationRead(conversationRow, selectors);
   const isUnread = !isRead;
 
   return APPROVED_ROW_ACTIONS.filter((action) => {
-    if (action.showPillWhenArchivedOnly) {
-      return inArchivedModal;
-    }
-
-    if (inArchivedModal) {
+    if (action.supportsPill === false) {
       return false;
     }
 

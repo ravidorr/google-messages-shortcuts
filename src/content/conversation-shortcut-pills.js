@@ -9,6 +9,14 @@ import {
 } from './row-action-registry.js';
 import { isConversationOpeningEnabled } from '../shared/conversation-open-preference.js';
 import {
+  DEFAULT_PILL_VISIBILITY,
+  getPillVisibility,
+  normalizePillVisibility,
+  PILL_VISIBILITY_HIDDEN,
+  PILL_VISIBILITY_SELECTED_ROW_ONLY,
+  PILL_VISIBILITY_STORAGE_KEY
+} from '../shared/pill-visibility-preference.js';
+import {
   MESSAGE_GET_CONVERSATION_SHORTCUT_LABELS,
   UNASSIGNED_SHORTCUT_LABEL
 } from '../shared/shortcut-labels.js';
@@ -93,7 +101,11 @@ function isFocusedConversationRow(conversationRow) {
   return conversationRow.getAttribute('is-focused') === 'true';
 }
 
-function shouldShowPills(conversationRow, focusedRows, hoveredRows) {
+function shouldShowPills(conversationRow, focusedRows, hoveredRows, pillVisibility) {
+  if (pillVisibility === PILL_VISIBILITY_SELECTED_ROW_ONLY) {
+    return isFocusedConversationRow(conversationRow);
+  }
+
   return isFocusedConversationRow(conversationRow)
     || focusedRows.has(conversationRow)
     || hoveredRows.has(conversationRow);
@@ -174,8 +186,9 @@ function createPillIcon(documentRoot, commandName) {
 
 function createPill(documentRoot, definition, shortcut, runAction, conversationRow) {
   const pill = documentRoot.createElement('button');
-  const hasShortcut = shortcut !== UNASSIGNED_SHORTCUT_LABEL;
-  const ariaLabel = `${definition.label} conversation${hasShortcut ? `, ${shortcut}` : ''}`;
+  const resolvedShortcut = shortcut ?? UNASSIGNED_SHORTCUT_LABEL;
+  const hasShortcut = resolvedShortcut !== UNASSIGNED_SHORTCUT_LABEL;
+  const ariaLabel = `${definition.label} conversation${hasShortcut ? `, ${resolvedShortcut}` : ''}`;
 
   pill.type = 'button';
   pill.setAttribute('data-messages-shortcuts-pill', '');
@@ -188,7 +201,7 @@ function createPill(documentRoot, definition, shortcut, runAction, conversationR
     const shortcutLabel = documentRoot.createElement('span');
 
     shortcutLabel.setAttribute('data-messages-shortcuts-pill-shortcut', '');
-    shortcutLabel.textContent = shortcut;
+    shortcutLabel.textContent = resolvedShortcut;
     pill.append(shortcutLabel);
   }
   pill.addEventListener('click', (event) => {
@@ -284,6 +297,13 @@ function createInstallation({
     }
 
     return isPaused(chromeApi);
+  },
+  getPillVisibilityState = async () => {
+    if (typeof chromeApi?.storage?.local?.get !== 'function') {
+      return DEFAULT_PILL_VISIBILITY;
+    }
+
+    return getPillVisibility(chromeApi);
   }
 } = {}) {
   const style = addStyles(documentRoot);
@@ -292,6 +312,7 @@ function createInstallation({
   const removingPillsFromRows = new WeakSet();
   let shortcutLabelsPromise;
   let paused = false;
+  let pillVisibility = DEFAULT_PILL_VISIBILITY;
 
   async function refreshPausedState() {
     paused = await getPausedState();
@@ -301,7 +322,28 @@ function createInstallation({
     }
   }
 
+  async function refreshPillVisibilityState() {
+    pillVisibility = await getPillVisibilityState();
+    await applyPillVisibilityState();
+  }
+
+  async function applyPillVisibilityState() {
+    if (pillVisibility === PILL_VISIBILITY_HIDDEN || paused) {
+      removeAllPills(documentRoot, removingPillsFromRows);
+      return;
+    }
+
+    for (const conversationRow of documentRoot.querySelectorAll(SELECTORS.conversationRow)) {
+      if (shouldShowPills(conversationRow, focusedRows, hoveredRows, pillVisibility)) {
+        await showPills(conversationRow);
+      } else {
+        removePills(conversationRow);
+      }
+    }
+  }
+
   void refreshPausedState();
+  void refreshPillVisibilityState();
 
   function getLabels() {
     if (!shortcutLabelsPromise) {
@@ -317,7 +359,12 @@ function createInstallation({
   }
 
   async function showPills(conversationRow) {
-    if (paused || !conversationRow || conversationRow.querySelector(PILL_GROUP_SELECTOR)) {
+    if (
+      paused
+      || pillVisibility === PILL_VISIBILITY_HIDDEN
+      || !conversationRow
+      || conversationRow.querySelector(PILL_GROUP_SELECTOR)
+    ) {
       return;
     }
 
@@ -332,9 +379,10 @@ function createInstallation({
 
     if (
       paused
+      || pillVisibility === PILL_VISIBILITY_HIDDEN
       || !conversationRow.isConnected
       || conversationRow.querySelector(PILL_GROUP_SELECTOR)
-      || !shouldShowPills(conversationRow, focusedRows, hoveredRows)
+      || !shouldShowPills(conversationRow, focusedRows, hoveredRows, pillVisibility)
     ) {
       return;
     }
@@ -351,7 +399,10 @@ function createInstallation({
   }
 
   async function refreshPills(conversationRow) {
-    if (!conversationRow || !shouldShowPills(conversationRow, focusedRows, hoveredRows)) {
+    if (
+      !conversationRow
+      || !shouldShowPills(conversationRow, focusedRows, hoveredRows, pillVisibility)
+    ) {
       return;
     }
 
@@ -431,7 +482,7 @@ function createInstallation({
     if (conversationRow && !isWithinConversationRow(event, conversationRow)) {
       hoveredRows.delete(conversationRow);
 
-      if (!isFocusedConversationRow(conversationRow) && !focusedRows.has(conversationRow)) {
+      if (!shouldShowPills(conversationRow, focusedRows, hoveredRows, pillVisibility)) {
         removePills(conversationRow);
       }
     }
@@ -457,7 +508,7 @@ function createInstallation({
     if (conversationRow && !isWithinConversationRow(event, conversationRow)) {
       focusedRows.delete(conversationRow);
 
-      if (!isFocusedConversationRow(conversationRow) && !hoveredRows.has(conversationRow)) {
+      if (!shouldShowPills(conversationRow, focusedRows, hoveredRows, pillVisibility)) {
         removePills(conversationRow);
       }
     }
@@ -472,7 +523,7 @@ function createInstallation({
           }
 
           void showPills(record.target);
-        } else if (!focusedRows.has(record.target) && !hoveredRows.has(record.target)) {
+        } else if (!shouldShowPills(record.target, focusedRows, hoveredRows, pillVisibility)) {
           removePills(record.target);
         }
       }
@@ -510,19 +561,29 @@ function createInstallation({
   documentRoot.addEventListener('focusin', handleFocusIn);
   documentRoot.addEventListener('focusout', handleFocusOut);
 
-  const handlePausePreferenceChange = (changes, areaName) => {
-    if (areaName !== 'local' || !changes[PAUSE_STORAGE_KEY]) {
+  const handleStoragePreferenceChange = (changes, areaName) => {
+    if (areaName !== 'local') {
       return;
     }
 
-    paused = changes[PAUSE_STORAGE_KEY].newValue === true;
+    if (changes[PAUSE_STORAGE_KEY]) {
+      paused = changes[PAUSE_STORAGE_KEY].newValue === true;
 
-    if (paused) {
-      removeAllPills(documentRoot, removingPillsFromRows);
+      if (paused) {
+        removeAllPills(documentRoot, removingPillsFromRows);
+        return;
+      }
+
+      void applyPillVisibilityState();
+    }
+
+    if (changes[PILL_VISIBILITY_STORAGE_KEY]) {
+      pillVisibility = normalizePillVisibility(changes[PILL_VISIBILITY_STORAGE_KEY].newValue);
+      void applyPillVisibilityState();
     }
   };
 
-  chromeApi.storage?.onChanged?.addListener(handlePausePreferenceChange);
+  chromeApi.storage?.onChanged?.addListener(handleStoragePreferenceChange);
 
   for (const conversationRow of documentRoot.querySelectorAll(
     `${SELECTORS.conversationRow}[is-focused="true"]`
@@ -537,7 +598,7 @@ function createInstallation({
     documentRoot.removeEventListener('pointerout', handlePointerOut);
     documentRoot.removeEventListener('focusin', handleFocusIn);
     documentRoot.removeEventListener('focusout', handleFocusOut);
-    chromeApi.storage?.onChanged?.removeListener(handlePausePreferenceChange);
+    chromeApi.storage?.onChanged?.removeListener(handleStoragePreferenceChange);
     documentRoot.querySelectorAll(PILL_GROUP_SELECTOR).forEach((group) => {
       safeDomMutation(() => {
         group.parentElement?.removeAttribute(PILL_HOST_ATTRIBUTE);

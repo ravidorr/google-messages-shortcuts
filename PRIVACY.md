@@ -20,10 +20,11 @@ All of those steps happen on your device.
 
 ## Local preferences
 
-The extension stores three popup settings locally with `chrome.storage.local`:
+The extension stores four popup settings locally with `chrome.storage.local`:
 
 - `autoConfirmTrash`: whether trash shortcuts and pills automatically confirm Google Messages' native Move to trash dialog
 - `openConversationOnFocus`: whether hovering or focusing a conversation opens it immediately
+- `pillVisibility`: when conversation shortcut pills appear (`hover-or-focus`, `selected-row-only`, or `hidden`)
 - `extensionPaused`: whether shortcut actions and conversation pills are disabled on Google Messages Web
 
 These preferences stay on your device. They are not synced or transmitted by this extension.

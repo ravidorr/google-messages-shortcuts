@@ -75,7 +75,8 @@ describe('background entry', () => {
         markRead: 'Not assigned',
         markUnread: 'Not assigned',
         mute: 'Not assigned',
-        unmute: 'Not assigned'
+        unmute: 'Not assigned',
+        blockReportSpam: 'Not assigned'
       });
     });
   });

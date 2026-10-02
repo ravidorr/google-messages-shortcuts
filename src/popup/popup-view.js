@@ -52,6 +52,10 @@ export function renderShortcutRows(commands) {
   const rows = [];
 
   for (const action of APPROVED_ROW_ACTIONS) {
+    if (action.supportsPill === false) {
+      continue;
+    }
+
     const command = commands.find((entry) => entry.name === action.command);
     const status = getShortcutStatus(command?.shortcut || '', {
       pillOnly: action.pillOnly === true

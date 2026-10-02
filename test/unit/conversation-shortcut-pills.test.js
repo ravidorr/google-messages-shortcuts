@@ -2,12 +2,17 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   COMMAND_ARCHIVE,
   COMMAND_MARK_READ,
+  COMMAND_BLOCK_REPORT_SPAM,
   COMMAND_MARK_UNREAD,
-  COMMAND_TRASH,
-  COMMAND_UNARCHIVE
+  COMMAND_TRASH
 } from '../../src/shared/commands.js';
 import { getCommandIcon } from '../../src/shared/command-icons.js';
 import { resetActionFeedbackForTests } from '../../src/content/action-feedback.js';
+import {
+  PILL_VISIBILITY_HIDDEN,
+  PILL_VISIBILITY_HOVER_OR_FOCUS,
+  PILL_VISIBILITY_SELECTED_ROW_ONLY
+} from '../../src/shared/pill-visibility-preference.js';
 import {
   getConversationRowForUnreadMutation,
   installConversationShortcutPills,
@@ -68,7 +73,7 @@ describe('conversation shortcut pills', () => {
     resetActionFeedbackForTests();
   });
 
-  it('renders only the unarchive pill inside the archived modal', async () => {
+  it('does not render extension pills inside the archived modal', async () => {
     document.body.innerHTML = archivedModalSurface;
     const row = document.getElementById('fixture-archived-row');
     row.setAttribute('is-focused', 'true');
@@ -83,13 +88,38 @@ describe('conversation shortcut pills', () => {
       }))
     });
 
-    await vi.waitFor(() => {
-      expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(1);
+    row.dispatchEvent(new Event('pointerover', { bubbles: true }));
+
+    await Promise.resolve();
+
+    expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(0);
+  });
+
+  it('renders pill-only actions without undefined shortcut labels in tooltips', async () => {
+    const row = createConversationRow({ focused: true });
+    document.body.append(row);
+
+    disconnect = installConversationShortcutPills({
+      documentRoot: document,
+      getShortcutLabels: vi.fn(async () => ({
+        archive: 'Ctrl+Shift+Y',
+        trash: 'Ctrl+Shift+D',
+        markRead: 'Ctrl+Shift+K',
+        markUnread: 'Ctrl+Shift+U',
+        mute: 'Not assigned',
+        unmute: 'Not assigned'
+      }))
     });
 
-    expect(row.querySelector(`[data-command="${COMMAND_UNARCHIVE}"]`)).not.toBeNull();
-    expect(row.querySelector(`[data-command="${COMMAND_ARCHIVE}"]`)).toBeNull();
-    expect(row.querySelector(`[data-command="${COMMAND_TRASH}"]`)).toBeNull();
+    await vi.waitFor(() => {
+      expect(row.querySelector(`[data-command="${COMMAND_BLOCK_REPORT_SPAM}"]`)).not.toBeNull();
+    });
+
+    const blockPill = row.querySelector(`[data-command="${COMMAND_BLOCK_REPORT_SPAM}"]`);
+
+    expect(blockPill.getAttribute('aria-label')).toBe('Block / report spam conversation');
+    expect(blockPill.getAttribute('title')).toBe('Block / report spam conversation');
+    expect(blockPill.textContent).toBe('');
   });
 
   it('renders compact icon-and-shortcut pills for the focused row', async () => {
@@ -1669,6 +1699,288 @@ describe('conversation shortcut pills', () => {
     storageListeners[0]({ extensionPaused: { newValue: true } }, 'local');
 
     expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(0);
+  });
+
+  it('suppresses pills when visibility is hidden', async () => {
+    const row = createConversationRow({ focused: true });
+    document.body.append(row);
+
+    disconnect = installConversationShortcutPills({
+      documentRoot: document,
+      getShortcutLabels: vi.fn(async () => ({
+        archive: 'Ctrl+Shift+Y',
+        trash: 'Ctrl+Shift+D',
+        markRead: 'Ctrl+Shift+K',
+        markUnread: 'Ctrl+Shift+U'
+      })),
+      getPillVisibilityState: vi.fn(async () => PILL_VISIBILITY_HIDDEN)
+    });
+
+    await Promise.resolve();
+
+    expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(0);
+  });
+
+  it('shows pills only on Google Messages focused rows in selected-row-only mode', async () => {
+    const focusedRow = createConversationRow({ focused: true });
+    const hoveredRow = createConversationRow();
+    document.body.append(focusedRow, hoveredRow);
+
+    disconnect = installConversationShortcutPills({
+      documentRoot: document,
+      getShortcutLabels: vi.fn(async () => ({
+        archive: 'Ctrl+Shift+Y',
+        trash: 'Ctrl+Shift+D',
+        markRead: 'Ctrl+Shift+K',
+        markUnread: 'Ctrl+Shift+U'
+      })),
+      getPillVisibilityState: vi.fn(async () => PILL_VISIBILITY_SELECTED_ROW_ONLY)
+    });
+
+    hoveredRow.dispatchEvent(new Event('pointerover', { bubbles: true }));
+
+    await vi.waitFor(() => {
+      expect(focusedRow.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(6);
+    });
+    expect(hoveredRow.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(0);
+  });
+
+  it('removes pills when Google Messages focus leaves in selected-row-only mode even while hovered', async () => {
+    const row = createConversationRow({ focused: true });
+    document.body.append(row);
+
+    disconnect = installConversationShortcutPills({
+      documentRoot: document,
+      getShortcutLabels: vi.fn(async () => ({
+        archive: 'Ctrl+Shift+Y',
+        trash: 'Ctrl+Shift+D',
+        markRead: 'Ctrl+Shift+K',
+        markUnread: 'Ctrl+Shift+U'
+      })),
+      getPillVisibilityState: vi.fn(async () => PILL_VISIBILITY_SELECTED_ROW_ONLY)
+    });
+
+    await vi.waitFor(() => {
+      expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(6);
+    });
+    row.dispatchEvent(new Event('pointerover', { bubbles: true }));
+    row.setAttribute('is-focused', 'false');
+
+    await vi.waitFor(() => {
+      expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(0);
+    });
+  });
+
+  it('ignores browser keyboard focus in selected-row-only mode', async () => {
+    const row = createConversationRow();
+    const link = row.querySelector('a');
+    document.body.append(row);
+
+    disconnect = installConversationShortcutPills({
+      documentRoot: document,
+      getShortcutLabels: vi.fn(async () => ({
+        archive: 'Ctrl+Shift+Y',
+        trash: 'Ctrl+Shift+D',
+        markRead: 'Ctrl+Shift+K',
+        markUnread: 'Ctrl+Shift+U'
+      })),
+      getPillVisibilityState: vi.fn(async () => PILL_VISIBILITY_SELECTED_ROW_ONLY)
+    });
+    link.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
+
+    await Promise.resolve();
+
+    expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(0);
+  });
+
+  it('removes hover pills when visibility changes to selected-row-only in storage', async () => {
+    const row = createConversationRow();
+    const storageListeners = [];
+    const chromeApi = {
+      storage: {
+        onChanged: {
+          addListener: vi.fn((listener) => {
+            storageListeners.push(listener);
+          }),
+          removeListener: vi.fn()
+        }
+      }
+    };
+
+    document.body.append(row);
+
+    disconnect = installConversationShortcutPills({
+      documentRoot: document,
+      chromeApi,
+      getShortcutLabels: vi.fn(async () => ({
+        archive: 'Ctrl+Shift+Y',
+        trash: 'Ctrl+Shift+D',
+        markRead: 'Ctrl+Shift+K',
+        markUnread: 'Ctrl+Shift+U'
+      })),
+      getPillVisibilityState: vi.fn(async () => PILL_VISIBILITY_HOVER_OR_FOCUS)
+    });
+    row.dispatchEvent(new Event('pointerover', { bubbles: true }));
+
+    await vi.waitFor(() => {
+      expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(6);
+    });
+
+    storageListeners[0]({ pillVisibility: { newValue: PILL_VISIBILITY_SELECTED_ROW_ONLY } }, 'local');
+
+    expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(0);
+  });
+
+  it('removes all pills when visibility changes to hidden in storage', async () => {
+    const row = createConversationRow({ focused: true });
+    const storageListeners = [];
+    const chromeApi = {
+      storage: {
+        onChanged: {
+          addListener: vi.fn((listener) => {
+            storageListeners.push(listener);
+          }),
+          removeListener: vi.fn()
+        }
+      }
+    };
+
+    document.body.append(row);
+
+    disconnect = installConversationShortcutPills({
+      documentRoot: document,
+      chromeApi,
+      getShortcutLabels: vi.fn(async () => ({
+        archive: 'Ctrl+Shift+Y',
+        trash: 'Ctrl+Shift+D',
+        markRead: 'Ctrl+Shift+K',
+        markUnread: 'Ctrl+Shift+U'
+      })),
+      getPillVisibilityState: vi.fn(async () => PILL_VISIBILITY_HOVER_OR_FOCUS)
+    });
+
+    await vi.waitFor(() => {
+      expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(6);
+    });
+
+    storageListeners[0]({ pillVisibility: { newValue: PILL_VISIBILITY_HIDDEN } }, 'local');
+
+    expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(0);
+  });
+
+  it('shows hover pills after visibility changes from hidden to hover-or-focus', async () => {
+    const row = createConversationRow();
+    const storageListeners = [];
+    const chromeApi = {
+      storage: {
+        onChanged: {
+          addListener: vi.fn((listener) => {
+            storageListeners.push(listener);
+          }),
+          removeListener: vi.fn()
+        }
+      }
+    };
+
+    document.body.append(row);
+
+    disconnect = installConversationShortcutPills({
+      documentRoot: document,
+      chromeApi,
+      getShortcutLabels: vi.fn(async () => ({
+        archive: 'Ctrl+Shift+Y',
+        trash: 'Ctrl+Shift+D',
+        markRead: 'Ctrl+Shift+K',
+        markUnread: 'Ctrl+Shift+U'
+      })),
+      getPillVisibilityState: vi.fn(async () => PILL_VISIBILITY_HIDDEN)
+    });
+    row.dispatchEvent(new Event('pointerover', { bubbles: true }));
+
+    await Promise.resolve();
+
+    expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(0);
+
+    storageListeners[0]({ pillVisibility: { newValue: PILL_VISIBILITY_HOVER_OR_FOCUS } }, 'local');
+    row.dispatchEvent(new Event('pointerover', { bubbles: true }));
+
+    await vi.waitFor(() => {
+      expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(6);
+    });
+  });
+
+  it('does not show pills after labels load when visibility changed to hidden during fetch', async () => {
+    const row = createConversationRow();
+    const storageListeners = [];
+    let resolveLabels;
+    const chromeApi = {
+      storage: {
+        onChanged: {
+          addListener: vi.fn((listener) => {
+            storageListeners.push(listener);
+          }),
+          removeListener: vi.fn()
+        }
+      }
+    };
+
+    document.body.append(row);
+
+    disconnect = installConversationShortcutPills({
+      documentRoot: document,
+      chromeApi,
+      getShortcutLabels: vi.fn(() => new Promise((resolve) => {
+        resolveLabels = resolve;
+      })),
+      getPillVisibilityState: vi.fn(async () => PILL_VISIBILITY_HOVER_OR_FOCUS)
+    });
+    row.dispatchEvent(new Event('pointerover', { bubbles: true }));
+
+    await vi.waitFor(() => {
+      expect(typeof resolveLabels).toBe('function');
+    });
+
+    storageListeners[0]({ pillVisibility: { newValue: PILL_VISIBILITY_HIDDEN } }, 'local');
+    resolveLabels({
+      archive: 'Ctrl+Shift+Y',
+      trash: 'Ctrl+Shift+D',
+      markRead: 'Ctrl+Shift+K',
+      markUnread: 'Ctrl+Shift+U'
+    });
+    await Promise.resolve();
+
+    expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(0);
+  });
+
+  it('ignores unrelated storage changes for visibility handling', async () => {
+    const storageListeners = [];
+    const chromeApi = {
+      storage: {
+        onChanged: {
+          addListener: vi.fn((listener) => {
+            storageListeners.push(listener);
+          }),
+          removeListener: vi.fn()
+        }
+      }
+    };
+
+    disconnect = installConversationShortcutPills({
+      documentRoot: document,
+      chromeApi,
+      getShortcutLabels: vi.fn(async () => ({
+        archive: 'Ctrl+Shift+Y',
+        trash: 'Ctrl+Shift+D',
+        markRead: 'Ctrl+Shift+K',
+        markUnread: 'Ctrl+Shift+U'
+      })),
+      getPillVisibilityState: vi.fn(async () => PILL_VISIBILITY_HOVER_OR_FOCUS)
+    });
+
+    storageListeners[0]({ autoConfirmTrash: { newValue: false } }, 'local');
+    storageListeners[0]({ pillVisibility: { newValue: 'unsupported' } }, 'local');
+
+    expect(storageListeners).toHaveLength(1);
   });
 
   it('logs an action failure without propagating the click event', async () => {
