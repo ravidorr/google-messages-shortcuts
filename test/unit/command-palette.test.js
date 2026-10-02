@@ -106,6 +106,24 @@ describe('command-palette', () => {
     closeCommandPalette(document);
   });
 
+  it('cancels palette mounting when closed before browser labels finish loading', async () => {
+    let resolveLabels;
+    const chromeApi = {
+      runtime: {
+        sendMessage: vi.fn(() => new Promise((resolve) => {
+          resolveLabels = resolve;
+        }))
+      }
+    };
+
+    const open = openCommandPalette(document, chromeApi);
+    closeCommandPalette(document);
+    resolveLabels({});
+    await open;
+
+    expect(document.querySelector('[data-messages-shortcuts-command-palette]')).toBeNull();
+  });
+
   it('serializes concurrent open calls while browser labels are loading', async () => {
     let resolveLabels;
     const chromeApi = {

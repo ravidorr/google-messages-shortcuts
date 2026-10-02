@@ -116,7 +116,7 @@ describe('phase2 navigation coverage', () => {
 
     const link = document.createElement('a');
     link.setAttribute('data-e2e-conversation', '');
-    expect(getConversationLinkIdentity(link)).toBe('e2e:conversation');
+    expect(getConversationLinkIdentity(link)).toBeNull();
     expect(getConversationLinkIdentity(document.createElement('span'))).toBeNull();
 
     document.body.innerHTML = `

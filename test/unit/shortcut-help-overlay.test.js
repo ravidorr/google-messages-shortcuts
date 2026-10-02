@@ -65,6 +65,24 @@ describe('shortcut-help-overlay', () => {
     closeShortcutHelpOverlay(document);
   });
 
+  it('cancels help overlay mounting when closed before browser labels finish loading', async () => {
+    let resolveLabels;
+    const chromeApi = {
+      runtime: {
+        sendMessage: vi.fn(() => new Promise((resolve) => {
+          resolveLabels = resolve;
+        }))
+      }
+    };
+
+    const open = openShortcutHelpOverlay(document, chromeApi);
+    closeShortcutHelpOverlay(document);
+    resolveLabels({});
+    await open;
+
+    expect(document.querySelector('[data-messages-shortcuts-shortcut-help]')).toBeNull();
+  });
+
   it('serializes concurrent open calls while browser labels are loading', async () => {
     let resolveLabels;
     const chromeApi = {

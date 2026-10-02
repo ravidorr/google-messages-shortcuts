@@ -16,6 +16,7 @@ let isOpen = false;
 let previousActiveElement = null;
 let keydownListener = null;
 let openPromise = null;
+let openGeneration = 0;
 
 async function fetchBrowserCommandLabels(chromeApi = chrome) {
   try {
@@ -179,6 +180,8 @@ export function isCommandPaletteOpen() {
 }
 
 export function closeCommandPalette(documentRoot = document) {
+  openGeneration += 1;
+
   if (!isOpen) {
     return;
   }
@@ -195,10 +198,17 @@ export function closeCommandPalette(documentRoot = document) {
 }
 
 async function mountCommandPalette(documentRoot, chromeApi) {
+  const generation = openGeneration;
+
   ensureStyles(documentRoot);
   previousActiveElement = documentRoot.activeElement;
 
   const browserLabels = await fetchBrowserCommandLabels(chromeApi);
+
+  if (generation !== openGeneration) {
+    return;
+  }
+
   const entries = getCommandRegistryEntries(documentRoot);
 
   const root = documentRoot.createElement('div');
@@ -262,6 +272,7 @@ export async function openCommandPalette(documentRoot = document, chromeApi = ch
 export function resetCommandPaletteForTests(documentRoot = document) {
   closeCommandPalette(documentRoot);
   openPromise = null;
+  openGeneration = 0;
 }
 
 export function simulateCommandPaletteOpenWithoutListenerForTests() {

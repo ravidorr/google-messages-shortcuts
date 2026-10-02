@@ -32,6 +32,31 @@ describe('list-navigation', () => {
     expect(getConversationLinkIdentity(link)).toBe('href:/web/conversations/a');
   });
 
+  it('rejects conversation links that only expose data-e2e-conversation without href', () => {
+    const link = document.createElement('a');
+    link.setAttribute('data-e2e-conversation', '');
+
+    expect(getConversationLinkIdentity(link)).toBeNull();
+  });
+
+  it('fails closed when loaded rows lack unique href identities', () => {
+    document.body.innerHTML = `
+      <mws-conversation-list-item>
+        <a data-e2e-conversation></a>
+        <button aria-haspopup="menu"></button>
+      </mws-conversation-list-item>
+      <mws-conversation-list-item>
+        <a data-e2e-conversation></a>
+        <button aria-haspopup="menu"></button>
+      </mws-conversation-list-item>
+    `;
+
+    const localThis = moveToAdjacentRowIdentity(document, null, 'next');
+
+    expect(localThis.ok).toBe(false);
+    expect(localThis.reason).toBe('missing-link-identity');
+  });
+
   it('moves across loaded rows and focuses the conversation link', () => {
     document.body.innerHTML = multiRowNavigationList;
 

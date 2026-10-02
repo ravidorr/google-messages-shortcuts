@@ -15,6 +15,7 @@ let isOpen = false;
 let previousActiveElement = null;
 let keydownListener = null;
 let openPromise = null;
+let openGeneration = 0;
 
 async function fetchBrowserCommandLabels(chromeApi = chrome) {
   try {
@@ -146,6 +147,8 @@ export function isShortcutHelpOpen() {
 }
 
 export function closeShortcutHelpOverlay(documentRoot = document) {
+  openGeneration += 1;
+
   if (!isOpen) {
     return;
   }
@@ -162,10 +165,17 @@ export function closeShortcutHelpOverlay(documentRoot = document) {
 }
 
 async function mountShortcutHelpOverlay(documentRoot, chromeApi) {
+  const generation = openGeneration;
+
   ensureStyles(documentRoot);
   previousActiveElement = documentRoot.activeElement;
 
   const browserLabels = await fetchBrowserCommandLabels(chromeApi);
+
+  if (generation !== openGeneration) {
+    return;
+  }
+
   const entries = getCommandRegistryEntries(documentRoot);
 
   const root = documentRoot.createElement('div');
@@ -221,6 +231,7 @@ export async function openShortcutHelpOverlay(documentRoot = document, chromeApi
 export function resetShortcutHelpForTests(documentRoot = document) {
   closeShortcutHelpOverlay(documentRoot);
   openPromise = null;
+  openGeneration = 0;
 }
 
 export function simulateShortcutHelpOpenWithoutListenerForTests() {

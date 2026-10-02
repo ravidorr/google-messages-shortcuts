@@ -20,10 +20,6 @@ export function getConversationLinkIdentity(link) {
     return `href:${href}`;
   }
 
-  if (link.hasAttribute('data-e2e-conversation')) {
-    return 'e2e:conversation';
-  }
-
   return null;
 }
 
