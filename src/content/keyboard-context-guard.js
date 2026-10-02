@@ -3,15 +3,31 @@ const EDITABLE_SELECTOR = [
   'textarea',
   'select',
   '[contenteditable="true"]',
-  '[contenteditable=""]'
+  '[contenteditable=""]',
+  '[contenteditable="plaintext-only"]',
+  '[contenteditable]:not([contenteditable="false"])',
+  '[role="textbox"]'
 ].join(', ');
 
-export function isEditableTarget(element) {
+export const COMPOSER_CONTAINER_SELECTOR = 'mws-message-input';
+
+function isEditableElement(element) {
   if (!element?.closest) {
     return false;
   }
 
-  return Boolean(element.closest(EDITABLE_SELECTOR));
+  if (element.closest(EDITABLE_SELECTOR)) {
+    return true;
+  }
+
+  return element.matches?.(COMPOSER_CONTAINER_SELECTOR)
+    || element.closest(COMPOSER_CONTAINER_SELECTOR) !== null;
+}
+
+export function isEditableTarget(element, documentRoot = document) {
+  const candidates = [element, documentRoot.activeElement].filter(Boolean);
+
+  return candidates.some((candidate) => isEditableElement(candidate));
 }
 
 export function isImeComposing(event) {
@@ -41,7 +57,7 @@ export function createKeyboardContext(event, documentRoot = document) {
     event,
     documentRoot,
     target: event.target,
-    isEditable: isEditableTarget(event.target),
+    isEditable: isEditableTarget(event.target, documentRoot),
     isImeComposing: isImeComposing(event),
     hasTextSelection: hasNonCollapsibleTextSelection(documentRoot.defaultView),
     isRepeated: isRepeatedKeyEvent(event),

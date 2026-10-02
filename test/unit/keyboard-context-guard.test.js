@@ -20,6 +20,46 @@ describe('keyboard-context-guard', () => {
 
     expect(isEditableTarget(input)).toBe(true);
     expect(isEditableTarget(document.body)).toBe(false);
+    expect(isEditableTarget(null)).toBe(false);
+    expect(isEditableTarget({})).toBe(false);
+  });
+
+  it('detects plaintext-only editors, textbox roles, and composer containers', () => {
+    const plaintextEditor = document.createElement('div');
+    plaintextEditor.setAttribute('contenteditable', 'plaintext-only');
+    document.body.append(plaintextEditor);
+
+    expect(isEditableTarget(plaintextEditor)).toBe(true);
+
+    const textbox = document.createElement('div');
+    textbox.setAttribute('role', 'textbox');
+    document.body.append(textbox);
+
+    expect(isEditableTarget(textbox)).toBe(true);
+
+    const composerHost = document.createElement('mws-message-input');
+    document.body.append(composerHost);
+
+    expect(isEditableTarget(composerHost)).toBe(true);
+  });
+
+  it('uses the active element when the event target is retargeted', () => {
+    document.body.innerHTML = `
+      <div id="wrapper">
+        <textarea aria-label="Message"></textarea>
+      </div>
+    `;
+    const textarea = document.body.querySelector('textarea');
+    textarea.focus();
+
+    const event = {
+      target: document.getElementById('wrapper'),
+      isComposing: false,
+      keyCode: 0,
+      repeat: false
+    };
+
+    expect(createKeyboardContext(event, document).isEditable).toBe(true);
   });
 
   it('detects IME composition and repeated keys', () => {
