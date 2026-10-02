@@ -5,6 +5,7 @@ import {
   getSpamBlockedDialog,
   isSpamBlockedDialogOpen,
   openSpamBlocked,
+  resetOpenSpamBlockedInFlightForTests,
   SPAM_BLOCKED_CAPABILITY_IDS
 } from '../../src/content/adapters/spam-blocked-adapter.js';
 import {
@@ -16,6 +17,7 @@ import {
 describe('spam-blocked-adapter', () => {
   beforeEach(() => {
     document.body.innerHTML = '';
+    resetOpenSpamBlockedInFlightForTests();
   });
 
   afterEach(() => {
@@ -32,6 +34,8 @@ describe('spam-blocked-adapter', () => {
         <button aria-hidden="true">Spam &amp; blocked</button>
         <button aria-disabled="true">Spam &amp; blocked</button>
         <button style="display: none">Spam &amp; blocked</button>
+        <div aria-hidden="true"><button>Spam &amp; blocked</button></div>
+        <div style="visibility: hidden"><button>Spam &amp; blocked</button></div>
       </aside>
       <mat-dialog-container><button>Spam &amp; blocked</button></mat-dialog-container>
     `;
@@ -161,5 +165,24 @@ describe('spam-blocked-adapter', () => {
       reason: 'spam-blocked-dialog-timeout'
     });
     vi.useRealTimers();
+  });
+
+  it('serializes concurrent open attempts', async () => {
+    document.body.innerHTML = '<button aria-label="Main menu">Menu</button><aside></aside>';
+    let releaseFirstAttempt;
+    const firstAttempt = openSpamBlocked(document, undefined, {
+      timeoutMs: 0,
+      delayFn: () => new Promise((resolve) => {
+        releaseFirstAttempt = resolve;
+      })
+    });
+
+    await expect(openSpamBlocked(document)).resolves.toEqual({
+      ok: false,
+      reason: 'action-in-progress'
+    });
+
+    releaseFirstAttempt();
+    await firstAttempt;
   });
 });

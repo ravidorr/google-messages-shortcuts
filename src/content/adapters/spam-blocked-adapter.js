@@ -29,17 +29,27 @@ function matchesSpamBlockedText(element) {
 }
 
 function isVisibleAndEnabled(element) {
-  if (!element || element.closest('[hidden]') || element.getAttribute('aria-hidden') === 'true') {
-    return false;
-  }
-
   if (element.hasAttribute('disabled') || element.getAttribute('aria-disabled') === 'true') {
     return false;
   }
 
-  const style = element.ownerDocument?.defaultView?.getComputedStyle?.(element);
+  let current = element;
 
-  return style?.display !== 'none' && style?.visibility !== 'hidden';
+  while (current && current.nodeType === 1) {
+    if (current.hasAttribute('hidden') || current.getAttribute('aria-hidden') === 'true') {
+      return false;
+    }
+
+    const style = element.ownerDocument?.defaultView?.getComputedStyle?.(current);
+
+    if (style?.display === 'none' || style?.visibility === 'hidden') {
+      return false;
+    }
+
+    current = current.parentElement;
+  }
+
+  return true;
 }
 
 export function findSpamBlockedDrawerEntries(
@@ -104,10 +114,34 @@ function delay(delayMs) {
   return new Promise((resolve) => setTimeout(resolve, delayMs));
 }
 
+let openSpamBlockedInFlight = false;
+
+export function resetOpenSpamBlockedInFlightForTests() {
+  openSpamBlockedInFlight = false;
+}
+
 export async function openSpamBlocked(
   documentRoot,
   selectors = SPAM_BLOCKED_SELECTORS,
   options = {}
+) {
+  if (openSpamBlockedInFlight) {
+    return { ok: false, reason: 'action-in-progress' };
+  }
+
+  openSpamBlockedInFlight = true;
+
+  try {
+    return await openSpamBlockedInternal(documentRoot, selectors, options);
+  } finally {
+    openSpamBlockedInFlight = false;
+  }
+}
+
+async function openSpamBlockedInternal(
+  documentRoot,
+  selectors,
+  options
 ) {
   const timeoutMs = options.timeoutMs ?? 2000;
   const delayFn = options.delayFn ?? delay;

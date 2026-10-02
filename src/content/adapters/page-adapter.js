@@ -5,7 +5,10 @@ import { assessComposerCapabilities } from './composer-adapter.js';
 import { assessListCapabilities, LIST_SELECTORS } from './list-adapter.js';
 import { assessMenuCapabilities, MENU_SELECTORS } from './menu-adapter.js';
 import { assessMessagePaneCapabilities } from './message-pane-adapter.js';
-import { assessSpamBlockedCapabilities } from './spam-blocked-adapter.js';
+import {
+  assessSpamBlockedCapabilities,
+  SPAM_BLOCKED_SELECTORS
+} from './spam-blocked-adapter.js';
 
 export const PAGE_ADAPTER_AREAS = [
   'list',
@@ -33,6 +36,7 @@ export function getPageSelectors(overrides = {}) {
     ...LIST_SELECTORS,
     ...MENU_SELECTORS,
     ...ARCHIVED_SELECTORS,
+    ...SPAM_BLOCKED_SELECTORS,
     ...overrides
   };
 }
