@@ -21,7 +21,7 @@ Use this checklist against a signed-in Google Messages Web test account before c
 
    If `MessagesShortcuts` is undefined, confirm the extension is enabled on `messages.google.com/web/*` and that `page-world-bridge.js` loaded (Sources > Content scripts).
 
-5. Save capability states and reasons in the compatibility matrix. Do not paste conversation content.
+5. Save capability states, reasons, and the self-test `environment` block (`browserVersion`, `extensionVersion`, `locale`, `direction`) in the compatibility matrix. Do not paste conversation content.
 
 ## Checklist
 
@@ -83,6 +83,14 @@ Run the full checklist for:
 - [ ] One RTL interface
 
 For each locale, verify `data-e2e-*` selectors still match before relying on English fallback labels.
+
+### Pill visibility (Epic A)
+
+- [ ] With default **On hover or focus**, confirm pills appear on hover, browser keyboard focus, and Google Messages `is-focused="true"` rows.
+- [ ] Switch to **On selected row only**; confirm hover and browser focus alone do not show pills, but `is-focused="true"` rows do.
+- [ ] Switch to **Hidden**; confirm no pills render while keyboard shortcuts still work.
+- [ ] Repeat in the Archived modal: unarchive pills follow the same visibility policy.
+- [ ] Scroll the virtualized list; confirm visibility policy holds after row rerenders.
 
 ### Slow and partial DOM
 

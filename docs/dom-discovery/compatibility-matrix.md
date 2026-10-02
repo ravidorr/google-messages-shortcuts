@@ -42,6 +42,7 @@ Use **pass** when `runCapabilitySelfTest()` returns `ok: true` (no DOM mutation,
 
 | Date | Browser | Extension | Locale | Direction | Scenario | Capability self-test | Notes |
 | ---- | ------- | --------- | ------ | --------- | -------- | -------------------- | ----- |
+| 2026-10-02 | Chrome | 1.10.0 | en-US | LTR | pill-visibility | pending | Epic A: validate hover-or-focus (default), selected-row-only (`is-focused="true"`), hidden, archived-modal unarchive, and virtualized-list rerender behavior per [live-validation-checklist.md](./live-validation-checklist.md). |
 | 2026-10-02 | Chrome 154 | 1.9.0 | en | LTR | baseline (block pill automation) | pass | Block / report spam pill opens native dialog, focuses `OK` confirm (`data-e2e-action-button-confirm`), does not auto-click. Cancel verified non-mutating. |
 | 2026-10-02 | Chrome 154 | 1.9.0 | en | LTR | baseline (block dialog open) | n/a | Dialog probe: `confirmButtonCount: 1`, confirm label `OK`, `Report spam` checkbox present. Matches `mat-dialog-container button[data-e2e-action-button-confirm]` contract. |
 | 2026-10-02 | Chrome 154 | 1.9.0 | en | LTR | baseline (row menu open, block menu item) | n/a | `menuOpen: true`, `button[data-e2e-conversation-menu-block]` `matchCount: 1`. |

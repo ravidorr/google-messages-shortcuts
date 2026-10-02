@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   bindConversationOpenPreference,
+  bindPillVisibilityPreference,
   bindPausePreference,
   bindResetExtensionPreferences,
   bindTrashConfirmationPreference,
@@ -22,6 +23,12 @@ describe('init-popup', () => {
       <label for="auto-confirm-trash">Automatically confirm Move to trash</label>
       <input id="open-conversation-on-focus" type="checkbox" disabled>
       <label for="open-conversation-on-focus">Open conversations on hover or focus</label>
+      <label for="pill-visibility">Show shortcut pills</label>
+      <select id="pill-visibility" disabled>
+        <option value="hover-or-focus">On hover or focus</option>
+        <option value="selected-row-only">On selected row only</option>
+        <option value="hidden">Hidden</option>
+      </select>
       <input id="pause-extension" type="checkbox" disabled>
       <label for="pause-extension">Pause shortcut actions and pills</label>
       <button id="reset-extension-preferences" type="button" disabled>Reset extension preferences</button>
@@ -292,6 +299,55 @@ describe('init-popup', () => {
     expect(set).toHaveBeenCalledWith({ extensionPaused: false });
   });
 
+  it('loads and persists the pill visibility preference', async () => {
+    const set = vi.fn(async () => {});
+    const chromeApi = {
+      storage: {
+        local: {
+          get: vi.fn(async () => ({ pillVisibility: 'selected-row-only' })),
+          set
+        }
+      }
+    };
+
+    await bindPillVisibilityPreference(document, chromeApi);
+    const select = document.getElementById('pill-visibility');
+
+    expect(select.value).toBe('selected-row-only');
+    expect(select.disabled).toBe(false);
+    select.value = 'hidden';
+    select.dispatchEvent(new Event('change'));
+    await Promise.resolve();
+
+    expect(set).toHaveBeenCalledWith({ pillVisibility: 'hidden' });
+  });
+
+  it('restores the pill visibility preference when persistence fails', async () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const chromeApi = {
+      storage: {
+        local: {
+          get: vi.fn(async () => ({ pillVisibility: 'hover-or-focus' })),
+          set: vi.fn(async () => {
+            throw new Error('storage unavailable');
+          })
+        }
+      }
+    };
+
+    await bindPillVisibilityPreference(document, chromeApi);
+    const select = document.getElementById('pill-visibility');
+    select.value = 'hidden';
+    select.dispatchEvent(new Event('change'));
+
+    await vi.waitFor(() => {
+      expect(warnSpy).toHaveBeenCalled();
+    });
+
+    expect(select.value).toBe('hover-or-focus');
+    expect(select.disabled).toBe(false);
+  });
+
   it('resets extension preferences without touching Google Messages data', async () => {
     const set = vi.fn(async () => {});
     const chromeApi = {
@@ -303,6 +359,7 @@ describe('init-popup', () => {
     await bindResetExtensionPreferences(document, chromeApi);
     document.getElementById('auto-confirm-trash').checked = false;
     document.getElementById('open-conversation-on-focus').checked = true;
+    document.getElementById('pill-visibility').value = 'hidden';
     document.getElementById('pause-extension').checked = true;
 
     document.getElementById('reset-extension-preferences').click();
@@ -314,6 +371,7 @@ describe('init-popup', () => {
     expect(set).toHaveBeenCalledWith(DEFAULT_EXTENSION_PREFERENCES);
     expect(document.getElementById('auto-confirm-trash').checked).toBe(true);
     expect(document.getElementById('open-conversation-on-focus').checked).toBe(false);
+    expect(document.getElementById('pill-visibility').value).toBe('hover-or-focus');
     expect(document.getElementById('pause-extension').checked).toBe(false);
     expect(document.getElementById('reset-status').hidden).toBe(false);
   });

@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.10.0 - 2026-10-02
+
+### Added
+
+- Configurable pill visibility preference with three modes: on hover or focus (default), on selected row only, and hidden
+- Popup select control for pill visibility with reset support and live updates in open Google Messages tabs
+
+### Changed
+
+- Selected-row-only mode shows pills only when Google Messages marks the row `is-focused="true"`; browser hover and keyboard focus no longer qualify
+- Archived modal unarchive pills follow the same visibility policy as inbox pills
+
 ## 1.9.2 - 2026-10-02
 
 ### Changed

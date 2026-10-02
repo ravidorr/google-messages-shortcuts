@@ -23,7 +23,9 @@ describe('shortcut label listener', () => {
       markRead: 'Ctrl+Shift+K',
       markUnread: 'Ctrl+Shift+U',
       mute: 'Ctrl+Shift+M',
-      unmute: 'Ctrl+Shift+N'
+      unmute: 'Ctrl+Shift+N',
+      blockReportSpam: 'Not assigned',
+      unarchive: 'Not assigned'
     });
   });
 
@@ -34,7 +36,9 @@ describe('shortcut label listener', () => {
       markRead: 'Not assigned',
       markUnread: 'Not assigned',
       mute: 'Not assigned',
-      unmute: 'Not assigned'
+      unmute: 'Not assigned',
+      blockReportSpam: 'Not assigned',
+      unarchive: 'Not assigned'
     });
   });
 
@@ -56,7 +60,9 @@ describe('shortcut label listener', () => {
       markRead: 'Ctrl+Shift+K',
       markUnread: 'Ctrl+Shift+U',
       mute: 'Not assigned',
-      unmute: 'Not assigned'
+      unmute: 'Not assigned',
+      blockReportSpam: 'Not assigned',
+      unarchive: 'Not assigned'
     });
   });
 
@@ -110,7 +116,9 @@ describe('shortcut label listener', () => {
         markRead: 'Not assigned',
         markUnread: 'Not assigned',
         mute: 'Not assigned',
-        unmute: 'Not assigned'
+        unmute: 'Not assigned',
+        blockReportSpam: 'Not assigned',
+        unarchive: 'Not assigned'
       });
     });
   });

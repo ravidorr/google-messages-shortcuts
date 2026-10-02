@@ -22,6 +22,8 @@ export function getConversationShortcutLabels(commands) {
     markUnread: getShortcutLabel(commands, COMMAND_MARK_UNREAD),
     markRead: getShortcutLabel(commands, COMMAND_MARK_READ),
     mute: getShortcutLabel(commands, COMMAND_MUTE),
-    unmute: getShortcutLabel(commands, COMMAND_UNMUTE)
+    unmute: getShortcutLabel(commands, COMMAND_UNMUTE),
+    blockReportSpam: UNASSIGNED_SHORTCUT_LABEL,
+    unarchive: UNASSIGNED_SHORTCUT_LABEL
   };
 }

@@ -58,6 +58,21 @@
         </label>
       </section>
 
+      <section class="popup__section" aria-labelledby="pill-visibility-heading">
+        <h2 id="pill-visibility-heading" class="popup__section-title">Pill visibility</h2>
+        <label class="popup__select-label" for="pill-visibility">
+          Show shortcut pills
+        </label>
+        <select id="pill-visibility" class="popup__select" disabled>
+          <option value="hover-or-focus">On hover or focus</option>
+          <option value="selected-row-only">On selected row only</option>
+          <option value="hidden">Hidden</option>
+        </select>
+        <p class="popup__help">
+          Selected row means the conversation Google Messages marks with keyboard focus in the list. Keyboard shortcuts still work when pills are hidden.
+        </p>
+      </section>
+
       <section class="popup__section" aria-labelledby="extension-controls-heading">
         <h2 id="extension-controls-heading" class="popup__section-title">Extension controls</h2>
         <label class="popup__checkbox-label" for="pause-extension">

@@ -9,6 +9,11 @@ import {
   setConversationOpeningEnabled
 } from '../shared/conversation-open-preference.js';
 import {
+  DEFAULT_PILL_VISIBILITY,
+  getPillVisibility,
+  setPillVisibility
+} from '../shared/pill-visibility-preference.js';
+import {
   isPaused,
   setPaused
 } from '../shared/pause-preference.js';
@@ -96,6 +101,7 @@ export async function bindResetExtensionPreferences(
   const status = documentRoot.getElementById('reset-status');
   const trashCheckbox = documentRoot.getElementById('auto-confirm-trash');
   const openCheckbox = documentRoot.getElementById('open-conversation-on-focus');
+  const pillVisibilitySelect = documentRoot.getElementById('pill-visibility');
   const pauseCheckbox = documentRoot.getElementById('pause-extension');
 
   resetButton.addEventListener('click', async () => {
@@ -107,6 +113,7 @@ export async function bindResetExtensionPreferences(
       await resetExtensionPreferences(chromeApi);
       trashCheckbox.checked = true;
       openCheckbox.checked = false;
+      pillVisibilitySelect.value = DEFAULT_PILL_VISIBILITY;
       pauseCheckbox.checked = false;
       status.textContent = 'Extension preferences restored to defaults.';
       status.hidden = false;
@@ -119,6 +126,32 @@ export async function bindResetExtensionPreferences(
     }
   });
   resetButton.disabled = false;
+}
+
+export async function bindPillVisibilityPreference(
+  documentRoot = document,
+  chromeApi = chrome
+) {
+  const select = documentRoot.getElementById('pill-visibility');
+  let currentValue = await getPillVisibility(chromeApi);
+
+  select.value = currentValue;
+  select.addEventListener('change', async () => {
+    const previousValue = currentValue;
+
+    select.disabled = true;
+
+    try {
+      await setPillVisibility(select.value, chromeApi);
+      currentValue = select.value;
+    } catch (error) {
+      select.value = previousValue;
+      console.warn('[Messages Shortcut Actions] Failed to save pill visibility preference.', error);
+    } finally {
+      select.disabled = false;
+    }
+  });
+  select.disabled = false;
 }
 
 export async function bindConversationOpenPreference(
@@ -158,6 +191,7 @@ export async function initializePopup(chromeApi = chrome, documentRoot = documen
   updateShortcutWarning(commands, documentRoot);
   await bindTrashConfirmationPreference(documentRoot, chromeApi);
   await bindConversationOpenPreference(documentRoot, chromeApi);
+  await bindPillVisibilityPreference(documentRoot, chromeApi);
   await bindPausePreference(documentRoot, chromeApi);
   await bindResetExtensionPreferences(documentRoot, chromeApi);
 }
