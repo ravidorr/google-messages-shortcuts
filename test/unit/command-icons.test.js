@@ -5,7 +5,9 @@ import {
   COMMAND_MARK_READ,
   COMMAND_MARK_UNREAD,
   COMMAND_MUTE,
+  COMMAND_OPEN_ARCHIVED,
   COMMAND_TRASH,
+  COMMAND_UNARCHIVE,
   COMMAND_UNMUTE
 } from '../../src/shared/commands.js';
 
@@ -17,7 +19,9 @@ describe('command-icons', () => {
       COMMAND_MARK_READ,
       COMMAND_MARK_UNREAD,
       COMMAND_MUTE,
-      COMMAND_UNMUTE
+      COMMAND_UNMUTE,
+      COMMAND_UNARCHIVE,
+      COMMAND_OPEN_ARCHIVED
     ]) {
       expect(getCommandIcon(command)).toMatchObject({
         paths: expect.any(Array),

@@ -3,8 +3,29 @@ import {
   APPROVED_ROW_ACTIONS,
   getPopupLabelsByCommand
 } from '../content/row-action-registry.js';
+import {
+  getNavigationPopupLabelsByCommand,
+  getNavigationShortcutLabel,
+  NAVIGATION_ACTIONS
+} from '../shared/navigation-actions.js';
 
 export const COMMAND_LABELS = getPopupLabelsByCommand();
+
+export function getExtensionVersion(chromeApi = chrome) {
+  return chromeApi.runtime?.getManifest?.()?.version ?? '';
+}
+
+export function renderExtensionVersion(documentRoot = document, chromeApi = chrome) {
+  const versionElement = documentRoot.getElementById('extension-version');
+  const version = getExtensionVersion(chromeApi);
+
+  if (!versionElement || !version) {
+    return;
+  }
+
+  versionElement.textContent = `Version ${version}`;
+  versionElement.hidden = false;
+}
 
 export function getShortcutStatus(shortcut, { pillOnly = false } = {}) {
   if (pillOnly) {
@@ -68,6 +89,37 @@ function createShortcutIcon(documentRoot, commandName) {
   }
 
   return svg;
+}
+
+export function renderNavigationShortcutRows(platform = navigator.platform) {
+  return NAVIGATION_ACTIONS.map((action) => ({
+    commandName: action.command,
+    label: getNavigationPopupLabelsByCommand()[action.command],
+    shortcut: getNavigationShortcutLabel(action, platform),
+    className: 'shortcut-status shortcut-status--assigned'
+  }));
+}
+
+export function populateNavigationShortcutList(container, documentRoot = document, platform = navigator.platform) {
+  const rows = renderNavigationShortcutRows(platform);
+
+  container.replaceChildren();
+
+  for (const row of rows) {
+    const item = documentRoot.createElement('li');
+    item.className = 'shortcut-item';
+
+    const title = documentRoot.createElement('span');
+    title.className = 'shortcut-item__label';
+    title.append(createShortcutIcon(documentRoot, row.commandName), row.label);
+
+    const shortcut = documentRoot.createElement('span');
+    shortcut.className = row.className;
+    shortcut.textContent = row.shortcut;
+
+    item.append(title, shortcut);
+    container.append(item);
+  }
 }
 
 export function populateShortcutList(container, commands, documentRoot = document) {

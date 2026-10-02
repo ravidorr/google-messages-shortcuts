@@ -1,3 +1,4 @@
+import { assessArchivedCapabilities, ARCHIVED_SELECTORS } from './archived-adapter.js';
 import { assessConnectionCapabilities } from './connection-adapter.js';
 import { assessComposerCapabilities } from './composer-adapter.js';
 import { assessListCapabilities, LIST_SELECTORS } from './list-adapter.js';
@@ -7,6 +8,7 @@ import { assessMessagePaneCapabilities } from './message-pane-adapter.js';
 export const PAGE_ADAPTER_AREAS = [
   'list',
   'menu',
+  'archived',
   'composer',
   'messagePane',
   'connection'
@@ -26,6 +28,7 @@ export function getPageSelectors(overrides = {}) {
   return {
     ...LIST_SELECTORS,
     ...MENU_SELECTORS,
+    ...ARCHIVED_SELECTORS,
     ...overrides
   };
 }
@@ -54,6 +57,7 @@ export function assessPageCapabilities(documentRoot, selectors = getPageSelector
   return {
     list,
     menu,
+    archived: assessArchivedCapabilities(documentRoot, selectors),
     composer: assessComposerCapabilities(),
     messagePane: assessMessagePaneCapabilities(),
     connection: assessConnectionCapabilities()

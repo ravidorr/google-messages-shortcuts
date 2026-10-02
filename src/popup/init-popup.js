@@ -1,4 +1,8 @@
-import { populateShortcutList } from './popup-view.js';
+import {
+  populateNavigationShortcutList,
+  populateShortcutList,
+  renderExtensionVersion
+} from './popup-view.js';
 import { MANIFEST_COMMANDS } from '../shared/commands.js';
 import {
   isConversationOpeningEnabled,
@@ -143,11 +147,14 @@ export async function bindConversationOpenPreference(
 
 export async function initializePopup(chromeApi = chrome, documentRoot = document) {
   bindShortcutsLink(documentRoot, chromeApi);
+  renderExtensionVersion(documentRoot, chromeApi);
 
   const shortcutList = documentRoot.getElementById('shortcut-list');
+  const navigationShortcutList = documentRoot.getElementById('navigation-shortcut-list');
   const commands = await chromeApi.commands.getAll();
 
   populateShortcutList(shortcutList, commands);
+  populateNavigationShortcutList(navigationShortcutList, documentRoot);
   updateShortcutWarning(commands, documentRoot);
   await bindTrashConfirmationPreference(documentRoot, chromeApi);
   await bindConversationOpenPreference(documentRoot, chromeApi);

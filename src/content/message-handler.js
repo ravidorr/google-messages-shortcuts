@@ -1,7 +1,12 @@
-import { isValidCommand } from '../shared/commands.js';
+import {
+  COMMAND_OPEN_ARCHIVED,
+  isNavigationCommand,
+  isValidCommand
+} from '../shared/commands.js';
 import { isPaused } from '../shared/pause-preference.js';
 import { showActionFeedback } from './action-feedback.js';
 import { runConversationAction } from './conversation-action.js';
+import { handleOpenArchived } from './open-archived-action.js';
 
 const STEP_LABELS = {
   'no-target': 'find the selected or hovered conversation row',
@@ -45,6 +50,33 @@ export async function handleCommand(
     showActionFeedback(result, command, documentRoot);
 
     return result;
+  }
+
+  if (isNavigationCommand(command)) {
+    try {
+      const result = command === COMMAND_OPEN_ARCHIVED
+        ? await handleOpenArchived(documentRoot, chromeApi)
+        : { ok: false, reason: 'unknown-command' };
+
+      if (shouldWarnActionFailure(result)) {
+        warnActionFailure(result.reason, result.reason);
+      }
+
+      showActionFeedback(result, command, documentRoot);
+
+      return result;
+    } catch (error) {
+      warnActionFailure('execute-action', error);
+
+      const result = {
+        ok: false,
+        reason: 'execute-action-failed',
+        error: error instanceof Error ? error.message : String(error)
+      };
+      showActionFeedback(result, command, documentRoot);
+
+      return result;
+    }
   }
 
   try {

@@ -3,7 +3,9 @@ import {
   COMMAND_ARCHIVE,
   COMMAND_MARK_READ,
   COMMAND_MUTE,
+  COMMAND_OPEN_ARCHIVED,
   COMMAND_TRASH,
+  COMMAND_UNARCHIVE,
   COMMAND_UNMUTE
 } from '../../src/shared/commands.js';
 import * as rowActionRegistry from '../../src/content/row-action-registry.js';
@@ -41,6 +43,22 @@ describe('action-feedback', () => {
       kind: 'success',
       message: 'Conversation unmuted.'
     });
+    expect(getActionFeedbackMessage({ ok: true }, COMMAND_UNARCHIVE)).toEqual({
+      kind: 'success',
+      message: 'Conversation unarchived.'
+    });
+    expect(getActionFeedbackMessage({ ok: true, alreadyOpen: true }, COMMAND_OPEN_ARCHIVED)).toEqual({
+      kind: 'info',
+      message: 'Archived is already open.'
+    });
+    expect(getActionFeedbackMessage({
+      ok: true,
+      reason: 'archived-sidebar-only',
+      openedRoute: true
+    }, COMMAND_OPEN_ARCHIVED)).toEqual({
+      kind: 'info',
+      message: 'Google Messages opened the Archived sidebar, not the unarchive dialog. Open Archived from the account menu or search overflow to reach the unarchive dialog.'
+    });
   });
 
   it('reports pending trash confirmation instead of success', () => {
@@ -75,6 +93,10 @@ describe('action-feedback', () => {
       ['already-unread', 'info'],
       ['already-muted', 'info'],
       ['not-muted', 'info'],
+      ['archived-modal-required', 'info'],
+      ['archived-entry-not-found', 'error'],
+      ['archived-modal-timeout', 'error'],
+      ['unarchive-button-not-found', 'error'],
       ['action-in-progress', 'info'],
       ['capability-blocked', 'error'],
       ['menu-button-not-found', 'error'],

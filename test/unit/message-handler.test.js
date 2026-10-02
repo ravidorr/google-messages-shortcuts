@@ -13,8 +13,11 @@ import {
   COMMAND_ARCHIVE,
   COMMAND_MARK_READ,
   COMMAND_MARK_UNREAD,
+  COMMAND_OPEN_ARCHIVED,
   COMMAND_TRASH
 } from '../../src/shared/commands.js';
+import * as commands from '../../src/shared/commands.js';
+import * as openArchivedAction from '../../src/content/open-archived-action.js';
 import { selectedUnreadRow } from '../fixtures/dom/list-states.js';
 
 function createConversationFixture() {
@@ -115,6 +118,53 @@ describe('message-handler', () => {
     const result = await handleCommand(COMMAND_MARK_UNREAD, document, createChromeApi());
 
     expect(result.ok).toBe(true);
+  });
+
+  it('handles open-archived navigation commands', async () => {
+    vi.spyOn(openArchivedAction, 'handleOpenArchived')
+      .mockResolvedValueOnce({ ok: true });
+
+    const result = await handleCommand(COMMAND_OPEN_ARCHIVED, document, createChromeApi());
+
+    expect(result).toEqual({ ok: true });
+    expect(document.querySelector(FEEDBACK_MESSAGE_SELECTOR)?.textContent)
+      .toBe('Archived opened.');
+  });
+
+  it('rejects unknown navigation commands without running row actions', async () => {
+    vi.spyOn(commands, 'isNavigationCommand').mockReturnValue(true);
+    vi.spyOn(conversationAction, 'runConversationAction');
+
+    const result = await handleCommand(COMMAND_ARCHIVE, document, createChromeApi());
+
+    expect(result).toEqual({ ok: false, reason: 'unknown-command' });
+    expect(conversationAction.runConversationAction).not.toHaveBeenCalled();
+  });
+
+  it('returns execute-action-failed for navigation command errors', async () => {
+    vi.spyOn(openArchivedAction, 'handleOpenArchived')
+      .mockRejectedValueOnce(new Error('navigation failed'));
+
+    const result = await handleCommand(COMMAND_OPEN_ARCHIVED, document, createChromeApi());
+
+    expect(result).toEqual({
+      ok: false,
+      reason: 'execute-action-failed',
+      error: 'navigation failed'
+    });
+  });
+
+  it('stringifies non-Error navigation failures', async () => {
+    vi.spyOn(openArchivedAction, 'handleOpenArchived')
+      .mockRejectedValueOnce('navigation failed');
+
+    const result = await handleCommand(COMMAND_OPEN_ARCHIVED, document, createChromeApi());
+
+    expect(result).toEqual({
+      ok: false,
+      reason: 'execute-action-failed',
+      error: 'navigation failed'
+    });
   });
 
   it('handles mark-read commands', async () => {

@@ -3,7 +3,9 @@ import {
   COMMAND_MARK_READ,
   COMMAND_MARK_UNREAD,
   COMMAND_MUTE,
+  COMMAND_OPEN_ARCHIVED,
   COMMAND_TRASH,
+  COMMAND_UNARCHIVE,
   COMMAND_UNMUTE
 } from '../shared/commands.js';
 import { getRowAction } from './row-action-registry.js';
@@ -20,7 +22,9 @@ const SUCCESS_MESSAGES = {
   [COMMAND_MARK_READ]: 'Conversation marked as read.',
   [COMMAND_MARK_UNREAD]: 'Conversation marked as unread.',
   [COMMAND_MUTE]: 'Conversation muted.',
-  [COMMAND_UNMUTE]: 'Conversation unmuted.'
+  [COMMAND_UNMUTE]: 'Conversation unmuted.',
+  [COMMAND_UNARCHIVE]: 'Conversation unarchived.',
+  [COMMAND_OPEN_ARCHIVED]: 'Archived opened.'
 };
 
 let hideTimeoutId;
@@ -111,6 +115,20 @@ export function getActionFeedbackMessage(result, command) {
       };
     }
 
+    if (command === COMMAND_OPEN_ARCHIVED && result.alreadyOpen) {
+      return {
+        kind: 'info',
+        message: 'Archived is already open.'
+      };
+    }
+
+    if (command === COMMAND_OPEN_ARCHIVED && result.reason === 'archived-sidebar-only') {
+      return {
+        kind: 'info',
+        message: 'Google Messages opened the Archived sidebar, not the unarchive dialog. Open Archived from the account menu or search overflow to reach the unarchive dialog.'
+      };
+    }
+
     const action = getRowAction(command);
 
     return {
@@ -130,6 +148,26 @@ export function getActionFeedbackMessage(result, command) {
       return {
         kind: 'info',
         message: 'Select or hover a conversation first.'
+      };
+    case 'archived-modal-required':
+      return {
+        kind: 'info',
+        message: 'Open the Archived dialog to unarchive conversations.'
+      };
+    case 'archived-entry-not-found':
+      return {
+        kind: 'error',
+        message: 'Could not find the Archived entry control. Try the account menu, header menu, bottom navigation, search overflow, or Settings, then Archived.'
+      };
+    case 'archived-modal-timeout':
+      return {
+        kind: 'error',
+        message: 'The Archived dialog did not open in time. Try again.'
+      };
+    case 'unarchive-button-not-found':
+      return {
+        kind: 'error',
+        message: 'Could not find the unarchive control for this conversation.'
       };
     case 'already-read':
       return {

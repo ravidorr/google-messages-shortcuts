@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.8.0 - 2026-10-02
+
+### Added
+
+- Unarchive row pill inside the Archived modal via `EXECUTION_KIND_ARCHIVED_MODAL_CLICK`
+- Injected Archived FAB beside Start chat that opens the native Archived dialog
+- Page-level Open Archived shortcut (`Ctrl+Shift+A` / `Command+Shift+A`) and popup Navigation shortcuts section
+- Archived adapter with entry discovery, modal shell detection, and row-scoped unarchive button lookup
+- Account menu, app header menu, and localized Archived label fallbacks for opening Archived on desktop layouts
+
+### Changed
+
+- Context-aware row pills: inbox actions hide in the Archived modal; unarchive shows only there
+- Open Archived treats the dialog shell (title visible, list still loading) as success instead of waiting for unarchive controls
+- Document archived entry selectors and navigation roadmap items for Start chat and Spam and blocked
+
+### Fixed
+
+- Archived FAB and shortcut false timeout when the Archived dialog opens slowly with a loading spinner
+- Archived entry discovery on desktop layouts that expose Archived through account or header menus rather than search overflow
+
 ## 1.7.1 - 2026-10-01
 
 ### Fixed

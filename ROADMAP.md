@@ -23,7 +23,7 @@ flowchart LR
   Popup[Extension popup] --> LocalPrefs[chrome.storage.local]
 ```
 
-- [manifest.json](manifest.json) permits only `storage`, `tabs`, and `https://messages.google.com/*`; it defines three browser-level commands.
+- [manifest.json](manifest.json) permits only `storage`, `tabs`, and `https://messages.google.com/*`; it defines four browser-level commands (Open Archived is page-level because of Chrome's command limit).
 - [src/content/conversation-action.js](src/content/conversation-action.js) serializes row-menu actions, with safe archive, trash confirmation, and mark-unread flows.
 - [src/content/google-messages-dom.js](src/content/google-messages-dom.js) is the private-DOM contract. It currently knows only list-row selectors and English fallback menu labels.
 - [src/content/conversation-shortcut-pills.js](src/content/conversation-shortcut-pills.js) injects pills and observes focus/read-state changes only in the conversation list.
@@ -53,9 +53,12 @@ Scores use 1–5. **Impact** is expected value for the target user. **Difficulty
 | Add a searchable command palette with visible bindings and a `?` shortcut reference | 5 | 4 | Gives users discovery before memorization and unifies list, compose, and content commands. |
 | Add next/previous conversation, open, return-to-previous, focus search, focus composer, and escape-to-list | 5 | 4 | Closes the current mouse-dependent navigation gap. |
 | Add next/previous unread and an unloaded-list coverage indicator | 5 | 4 | Directly addresses unread processing while avoiding false claims of complete coverage. |
-| Add mark-read, pin/unpin, and mute/unmute after live selector validation | 4 | 2 | These likely extend the existing menu-action pattern and provide high-value inbox triage. |
+| Add mark-read and mute/unmute after live selector validation | 4 | 2 | These extend the existing menu-action pattern and provide high-value inbox triage. |
 | Add configurable pill visibility and selected-row-only targeting | 3 | 2 | Lets keyboard-first users reduce visual noise and accidental hover targeting. |
-| Add block/report-spam and restore/unarchive only with confirmation and capability checks | 3 | 3 | Useful but higher consequence and dependent on context-specific dialogs. |
+| Add block/report-spam only with confirmation and capability checks | 3 | 3 | Useful but higher consequence and dependent on context-specific dialogs. |
+| Add injected Archived FAB beside Start chat and page-level shortcut to open Archived (shipped with unarchive in 1.8.0) | 4 | 3 | Reduces navigation friction to the archived modal before unarchive pills run. |
+| Future: injected FAB and page-level shortcut for Spam and blocked (same pattern as Archived) | 3 | 3 | Deferred until native entry selectors are validated. |
+| Future: page-level keyboard shortcut for native Start chat (`a[data-e2e-start-button]`) | 3 | 2 | Deferred until keyboard collision checks pass in live validation. |
 | Defer keyboard bulk operations until Google’s native multi-select state can be reliably inspected | 4 | 5 | The current single-row engine cannot safely generalize to queued destructive actions. |
 
 ### Compose and message-content expansion
@@ -86,7 +89,8 @@ Scores use 1–5. **Impact** is expected value for the target user. **Difficulty
 
 ### Feasible now or after live DOM validation
 
-- Additional conversation-row menu actions: mark read, pin/unpin, mute/unmute, unarchive, and potentially block/report spam.
+- Additional conversation-row menu actions: mark read, mute/unmute, unarchive (archived modal), and potentially block/report spam.
+- Navigation shortcuts: open Archived (page-level); future Start chat and Spam and blocked entry points.
 - Command palette, keyboard help, list focus/navigation, improved feedback, preference controls, and a selector-health check.
 - Templates, loaded-message search, and draft recovery **only after** the compose/message feasibility spikes demonstrate stable DOM anchors and account/conversation identity.
 - Local-only storage using `chrome.storage.local` or IndexedDB, with explicit consent and data lifecycle controls.
@@ -122,7 +126,7 @@ Scores use 1–5. **Impact** is expected value for the target user. **Difficulty
 2. Refactor [src/content/conversation-action.js](src/content/conversation-action.js) into an action registry so new actions declare selector, fallback label, precondition, confirmation rule, and postcondition.
 3. Add an on-page action-feedback component, a pause/reset control, and a capability self-test. Unknown or unsupported actions must not open a menu.
 4. Narrow permissions if Phase 0 confirms `/web/*` is sufficient. Update contract tests for the manifest.
-5. Add mark-read, pin/unpin, and mute/unmute only where Phase 0 confirms correct selectors and state detection. Include test fixtures and confirmation behavior for each destructive action.
+5. Add mark-read and mute/unmute only where Phase 0 confirms correct selectors and state detection. Include test fixtures and confirmation behavior for each destructive action.
 6. Update [README.md](README.md), [PRIVACY.md](PRIVACY.md), popup text, and release notes to state precise supported behaviors.
 
 ### Phase 2: keyboard-first navigation and discovery
@@ -178,7 +182,7 @@ Reject any spike that cannot satisfy fail-closed behavior, account isolation, a 
 ## Open inputs to validate during Phase 0
 
 - Exact native keyboard bindings and conflict behavior in current Google Messages Web.
-- Available `data-e2e-*` selectors for mark-read, pin, mute, unarchive, composer, messages, and connection state.
+- Available `data-e2e-*` selectors for mark-read, mute, unarchive, composer, messages, and connection state.
 - Whether message and thread identity can be made stable without recording sensitive content.
 - The side effects of loading older history, opening a conversation, and observing the composer.
 - The priority locales for initial international support.

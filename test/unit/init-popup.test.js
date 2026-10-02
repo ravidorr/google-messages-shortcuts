@@ -14,6 +14,8 @@ describe('init-popup', () => {
   beforeEach(() => {
     document.body.innerHTML = `
       <ul id="shortcut-list"></ul>
+      <ul id="navigation-shortcut-list"></ul>
+      <p id="extension-version" class="popup__version" hidden></p>
       <p id="shortcut-warning" hidden></p>
       <a id="shortcuts-link" href="#">shortcuts</a>
       <input id="auto-confirm-trash" type="checkbox" checked disabled>
@@ -326,6 +328,9 @@ describe('init-popup', () => {
           { name: 'mark-unread-conversation', shortcut: 'Ctrl+Shift+U' }
         ])
       },
+      runtime: {
+        getManifest: vi.fn(() => ({ version: '1.8.0' }))
+      },
       tabs: {
         create: vi.fn(async () => ({}))
       },
@@ -339,7 +344,10 @@ describe('init-popup', () => {
 
     await initializePopup(chromeApi, document);
 
-    expect(document.querySelectorAll('.shortcut-item')).toHaveLength(6);
+    expect(document.getElementById('extension-version').textContent).toBe('Version 1.8.0');
+    expect(document.querySelectorAll('.shortcut-item')).toHaveLength(8);
+    expect(document.getElementById('navigation-shortcut-list').querySelectorAll('.shortcut-item'))
+      .toHaveLength(1);
     expect(document.getElementById('shortcut-warning').hidden).toBe(true);
     expect(document.getElementById('auto-confirm-trash').checked).toBe(true);
   });

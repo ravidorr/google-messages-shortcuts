@@ -19,8 +19,10 @@ import {
   COMMAND_MARK_UNREAD,
   COMMAND_MUTE,
   COMMAND_TRASH,
+  COMMAND_UNARCHIVE,
   COMMAND_UNMUTE,
   MANIFEST_COMMANDS,
+  NAVIGATION_COMMANDS,
   VALID_COMMANDS
 } from '../../src/shared/commands.js';
 
@@ -36,15 +38,18 @@ describe('row-action-registry', () => {
       COMMAND_MARK_READ,
       COMMAND_MARK_UNREAD,
       COMMAND_MUTE,
-      COMMAND_UNMUTE
+      COMMAND_UNMUTE,
+      COMMAND_UNARCHIVE
     ]);
     expect(APPROVED_ROW_ACTIONS.every((action) => action.decision === ACTION_DECISION_APPROVE)).toBe(
       true
     );
   });
 
-  it('syncs approved commands with VALID_COMMANDS', () => {
-    expect(new Set(getApprovedCommands())).toEqual(VALID_COMMANDS);
+  it('includes approved row and navigation commands in VALID_COMMANDS', () => {
+    for (const command of [...getApprovedCommands(), ...NAVIGATION_COMMANDS]) {
+      expect(VALID_COMMANDS.has(command)).toBe(true);
+    }
   });
 
   it('limits manifest-eligible actions to the Chrome command cap', () => {
@@ -60,6 +65,8 @@ describe('row-action-registry', () => {
     expect(getRowAction(COMMAND_MARK_UNREAD)?.selectorStrategy).toBe('fallback-first');
     expect(getRowAction(COMMAND_MUTE)?.selectorStrategy).toBe('label-matched');
     expect(getRowAction(COMMAND_UNMUTE)?.menuItemSelectorKey).toBe('muteMenuItem');
+    expect(getRowAction(COMMAND_UNARCHIVE)?.executionKind).toBe('archived-modal-click');
+    expect(getRowAction(COMMAND_UNARCHIVE)?.pillOnly).toBe(true);
     expect(getRowAction(COMMAND_MARK_READ)?.executionKind).toBe(EXECUTION_KIND_OPEN_ROW);
     expect(isApprovedRowAction('unsupported')).toBe(false);
     expect(getRowAction('unsupported')).toBeNull();
@@ -79,7 +86,8 @@ describe('row-action-registry', () => {
       'Mark as unread',
       'Mark as read (open row)',
       'Mute conversation',
-      'Unmute conversation'
+      'Unmute conversation',
+      'Unarchive'
     ];
 
     for (const rowLabel of approveRows) {
