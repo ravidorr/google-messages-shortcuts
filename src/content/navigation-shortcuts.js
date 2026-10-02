@@ -1,12 +1,15 @@
-import { COMMAND_OPEN_ARCHIVED } from '../shared/commands.js';
+import { COMMAND_OPEN_ARCHIVED, COMMAND_START_CHAT } from '../shared/commands.js';
 import {
   isEditableTarget,
-  matchesOpenArchivedShortcut
+  matchesOpenArchivedShortcut,
+  matchesStartChatShortcut
 } from '../shared/navigation-shortcut-bindings.js';
 import { isPaused, PAUSE_STORAGE_KEY } from '../shared/pause-preference.js';
 import { isArchivedDialogShellVisible } from './adapters/archived-adapter.js';
+import { isNativeDialogOpen } from './adapters/start-chat-adapter.js';
 import { showActionFeedback } from './action-feedback.js';
 import { handleOpenArchived } from './open-archived-action.js';
+import { handleOpenStartChat } from './open-start-chat-action.js';
 import { SELECTORS } from './google-messages-dom.js';
 
 const installationRegistry = new WeakMap();
@@ -16,7 +19,9 @@ function createInstallation({
   chromeApi = globalThis.chrome,
   selectors = SELECTORS,
   openArchived = handleOpenArchived,
-  matchesShortcut = matchesOpenArchivedShortcut,
+  openStartChat = handleOpenStartChat,
+  matchesArchivedShortcut = matchesOpenArchivedShortcut,
+  matchesStartChat = matchesStartChatShortcut,
   getPausedState = async () => {
     if (typeof chromeApi?.storage?.local?.get !== 'function') {
       return false;
@@ -34,21 +39,36 @@ function createInstallation({
   void refreshPausedState();
 
   async function handleKeydown(event) {
-    if (
-      paused
-      || !matchesShortcut(event)
-      || isEditableTarget(event.target)
-      || isArchivedDialogShellVisible(documentRoot, selectors)
-    ) {
+    if (paused || isEditableTarget(event.target)) {
       return;
     }
 
-    event.preventDefault();
-    event.stopPropagation();
+    if (matchesArchivedShortcut(event)) {
+      if (isArchivedDialogShellVisible(documentRoot, selectors)) {
+        return;
+      }
 
-    const result = await openArchived(documentRoot, chromeApi, selectors);
+      event.preventDefault();
+      event.stopPropagation();
 
-    showActionFeedback(result, COMMAND_OPEN_ARCHIVED, documentRoot);
+      const result = await openArchived(documentRoot, chromeApi, selectors);
+
+      showActionFeedback(result, COMMAND_OPEN_ARCHIVED, documentRoot);
+      return;
+    }
+
+    if (matchesStartChat(event)) {
+      if (isNativeDialogOpen(documentRoot, selectors)) {
+        return;
+      }
+
+      event.preventDefault();
+      event.stopPropagation();
+
+      const result = await openStartChat(documentRoot, chromeApi, selectors);
+
+      showActionFeedback(result, COMMAND_START_CHAT, documentRoot);
+    }
   }
 
   documentRoot.addEventListener('keydown', handleKeydown, true);

@@ -1,6 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { PAUSE_STORAGE_KEY } from '../../src/shared/pause-preference.js';
-import { matchesOpenArchivedShortcut } from '../../src/shared/navigation-shortcut-bindings.js';
+import {
+  matchesOpenArchivedShortcut,
+  matchesStartChatShortcut
+} from '../../src/shared/navigation-shortcut-bindings.js';
+import { resetOpenStartChatInFlightForTests } from '../../src/content/adapters/start-chat-adapter.js';
 import {
   openArchivedModal,
   resetOpenArchivedModalInFlightForTests
@@ -9,12 +13,14 @@ import {
   installNavigationShortcuts,
   resetNavigationShortcutInstallationsForTests
 } from '../../src/content/navigation-shortcuts.js';
+import * as openStartChatAction from '../../src/content/open-start-chat-action.js';
 import { archivedEntryControl, archivedModalSurface } from '../fixtures/dom/list-states.js';
 
 describe('navigation-shortcuts', () => {
   beforeEach(() => {
     resetNavigationShortcutInstallationsForTests(document);
     resetOpenArchivedModalInFlightForTests();
+    resetOpenStartChatInFlightForTests();
     document.body.innerHTML = '';
   });
 
@@ -30,7 +36,7 @@ describe('navigation-shortcuts', () => {
         }
       },
       openArchived,
-      matchesShortcut: (event) => matchesOpenArchivedShortcut(event, 'MacIntel')
+      matchesArchivedShortcut: (event) => matchesOpenArchivedShortcut(event, 'MacIntel')
     });
 
     document.dispatchEvent(new KeyboardEvent('keydown', {
@@ -339,5 +345,192 @@ describe('navigation-shortcuts', () => {
 
     resolveWait(document.querySelector('mat-dialog-container'));
     await Promise.resolve();
+  });
+
+  it('opens start chat from the page-level shortcut', async () => {
+    const openStartChat = vi.fn(async () => ({ ok: true }));
+
+    installNavigationShortcuts({
+      documentRoot: document,
+      chromeApi: {
+        storage: {
+          local: { get: vi.fn(async () => ({})) },
+          onChanged: { addListener: vi.fn(), removeListener: vi.fn() }
+        }
+      },
+      openStartChat
+    });
+
+    document.dispatchEvent(new KeyboardEvent('keydown', {
+      key: 'n',
+      ctrlKey: true,
+      shiftKey: true,
+      bubbles: true
+    }));
+
+    await Promise.resolve();
+
+    expect(openStartChat).toHaveBeenCalledWith(document, expect.any(Object), expect.any(Object));
+  });
+
+  it('ignores start chat when a native dialog is open', async () => {
+    document.body.innerHTML = '<mat-dialog-container></mat-dialog-container>';
+    const openStartChat = vi.fn(async () => ({ ok: true }));
+
+    installNavigationShortcuts({
+      documentRoot: document,
+      chromeApi: {
+        storage: {
+          local: { get: vi.fn(async () => ({})) },
+          onChanged: { addListener: vi.fn(), removeListener: vi.fn() }
+        }
+      },
+      openStartChat
+    });
+
+    document.dispatchEvent(new KeyboardEvent('keydown', {
+      key: 'n',
+      ctrlKey: true,
+      shiftKey: true,
+      bubbles: true
+    }));
+
+    await Promise.resolve();
+
+    expect(openStartChat).not.toHaveBeenCalled();
+  });
+
+  it('shows start chat feedback from the default installation path', async () => {
+    vi.spyOn(openStartChatAction, 'handleOpenStartChat')
+      .mockResolvedValueOnce({ ok: true });
+
+    installNavigationShortcuts({
+      documentRoot: document,
+      chromeApi: {
+        storage: {
+          local: { get: vi.fn(async () => ({})) },
+          onChanged: { addListener: vi.fn(), removeListener: vi.fn() }
+        }
+      }
+    });
+
+    document.dispatchEvent(new KeyboardEvent('keydown', {
+      key: 'n',
+      ctrlKey: true,
+      shiftKey: true,
+      bubbles: true
+    }));
+
+    await Promise.resolve();
+
+    expect(openStartChatAction.handleOpenStartChat).toHaveBeenCalled();
+  });
+
+  it('ignores start chat while paused', async () => {
+    let pauseListener;
+    let paused = true;
+    const openStartChat = vi.fn(async () => ({ ok: true }));
+    const chromeApi = {
+      storage: {
+        local: { get: vi.fn(async () => ({ extensionPaused: paused })) },
+        onChanged: {
+          addListener: vi.fn((listener) => {
+            pauseListener = listener;
+          }),
+          removeListener: vi.fn()
+        }
+      }
+    };
+
+    installNavigationShortcuts({
+      documentRoot: document,
+      chromeApi,
+      openStartChat,
+      getPausedState: async () => paused
+    });
+
+    await Promise.resolve();
+
+    document.dispatchEvent(new KeyboardEvent('keydown', {
+      key: 'n',
+      ctrlKey: true,
+      shiftKey: true,
+      bubbles: true
+    }));
+
+    expect(openStartChat).not.toHaveBeenCalled();
+
+    paused = false;
+    pauseListener({ [PAUSE_STORAGE_KEY]: { newValue: false } }, 'local');
+
+    document.dispatchEvent(new KeyboardEvent('keydown', {
+      key: 'n',
+      ctrlKey: true,
+      shiftKey: true,
+      bubbles: true
+    }));
+
+    await Promise.resolve();
+
+    expect(openStartChat).toHaveBeenCalledTimes(1);
+  });
+
+  it('ignores keydown events that do not match a navigation shortcut', async () => {
+    const openArchived = vi.fn(async () => ({ ok: true }));
+    const openStartChat = vi.fn(async () => ({ ok: true }));
+
+    installNavigationShortcuts({
+      documentRoot: document,
+      chromeApi: {
+        storage: {
+          local: { get: vi.fn(async () => ({})) },
+          onChanged: { addListener: vi.fn(), removeListener: vi.fn() }
+        }
+      },
+      openArchived,
+      openStartChat,
+      matchesArchivedShortcut: () => false,
+      matchesStartChat: () => false
+    });
+
+    document.dispatchEvent(new KeyboardEvent('keydown', {
+      key: 'n',
+      ctrlKey: true,
+      shiftKey: true,
+      bubbles: true
+    }));
+
+    await Promise.resolve();
+
+    expect(openArchived).not.toHaveBeenCalled();
+    expect(openStartChat).not.toHaveBeenCalled();
+  });
+
+  it('opens start chat from the Mac page-level shortcut', async () => {
+    const openStartChat = vi.fn(async () => ({ ok: true }));
+
+    installNavigationShortcuts({
+      documentRoot: document,
+      chromeApi: {
+        storage: {
+          local: { get: vi.fn(async () => ({})) },
+          onChanged: { addListener: vi.fn(), removeListener: vi.fn() }
+        }
+      },
+      openStartChat,
+      matchesStartChat: (event) => matchesStartChatShortcut(event, 'MacIntel')
+    });
+
+    document.dispatchEvent(new KeyboardEvent('keydown', {
+      key: 'n',
+      metaKey: true,
+      shiftKey: true,
+      ctrlKey: false,
+      bubbles: true
+    }));
+
+    await Promise.resolve();
+
+    expect(openStartChat).toHaveBeenCalledWith(document, expect.any(Object), expect.any(Object));
   });
 });

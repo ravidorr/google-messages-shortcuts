@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.11.0 - 2026-10-02
+
+### Added
+
+- Page-level Start chat shortcut (`Ctrl+Shift+N` / `Command+Shift+N`) that clicks the native `a[data-e2e-start-button]` control
+- Fail-closed Start chat adapter with capability self-test coverage, bounded postcondition checks, and native-dialog suppression
+- Popup Navigation shortcuts entry for Start chat
+- Sanitized Start chat structural probe in `output/deferred-action-validation-console.js`
+
+### Changed
+
+- Navigation shortcut handler dispatches both Open Archived and Start chat page-level chords with editable-target, pause, and dialog guards
+- DOM discovery docs and Phase 1 decision log record Start chat validation requirements before release sign-off
+
 ## 1.10.0 - 2026-10-02
 
 ### Added

@@ -5,6 +5,7 @@ import {
   COMMAND_MARK_UNREAD,
   COMMAND_MUTE,
   COMMAND_OPEN_ARCHIVED,
+  COMMAND_START_CHAT,
   COMMAND_TRASH,
   COMMAND_UNARCHIVE,
   COMMAND_UNMUTE
@@ -25,7 +26,8 @@ const SUCCESS_MESSAGES = {
   [COMMAND_MUTE]: 'Conversation muted.',
   [COMMAND_UNMUTE]: 'Conversation unmuted.',
   [COMMAND_UNARCHIVE]: 'Conversation unarchived.',
-  [COMMAND_OPEN_ARCHIVED]: 'Archived opened.'
+  [COMMAND_OPEN_ARCHIVED]: 'Archived opened.',
+  [COMMAND_START_CHAT]: 'Start chat opened.'
 };
 
 let hideTimeoutId;
@@ -137,6 +139,13 @@ export function getActionFeedbackMessage(result, command) {
       };
     }
 
+    if (command === COMMAND_START_CHAT && result.alreadyOpen) {
+      return {
+        kind: 'info',
+        message: 'Start chat is already open.'
+      };
+    }
+
     const action = getRowAction(command);
 
     return {
@@ -171,6 +180,26 @@ export function getActionFeedbackMessage(result, command) {
       return {
         kind: 'error',
         message: 'The Archived dialog did not open in time. Try again.'
+      };
+    case 'start-chat-not-found':
+      return {
+        kind: 'error',
+        message: 'Could not find the Start chat control. Try again after the conversation list finishes loading.'
+      };
+    case 'start-chat-ambiguous':
+      return {
+        kind: 'error',
+        message: 'Multiple Start chat controls matched. The extension blocked the action for safety.'
+      };
+    case 'start-chat-timeout':
+      return {
+        kind: 'error',
+        message: 'Start chat did not open in time. Try again.'
+      };
+    case 'native-dialog-open':
+      return {
+        kind: 'info',
+        message: 'Close the open Google Messages dialog before starting a new chat.'
       };
     case 'unarchive-button-not-found':
       return {

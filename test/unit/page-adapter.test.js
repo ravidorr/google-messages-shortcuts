@@ -28,6 +28,7 @@ describe('page-adapter', () => {
     expect(Object.keys(localThis).sort()).toEqual(PAGE_ADAPTER_AREAS.sort());
     expect(localThis.list['list.targeting'].state).toBe(CAPABILITY_SUPPORTED);
     expect(localThis.menu['menu.archive'].state).toBe(CAPABILITY_SUPPORTED);
+    expect(localThis.startChat['startChat.entry'].state).toBe(CAPABILITY_SUPPORTED);
     expect(localThis.composer[COMPOSER_CAPABILITY_IDS.focus].state).toBe(CAPABILITY_UNAVAILABLE);
   });
 

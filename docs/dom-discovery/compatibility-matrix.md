@@ -34,6 +34,7 @@ Use **approve** only when automation can fail closed with a bounded postconditio
 - `slow-dom`: CPU throttling enabled
 - `baseline-trash-dialog-open`: Move to trash dialog visible (row menu typically closed)
 - `pill-visibility`: Epic A popup visibility modes on inbox rows plus Archived modal absence check
+- `start-chat`: Epic B page-level Start chat shortcut and native FAB selector validation
 
 ### Capability self-test column
 
@@ -43,6 +44,7 @@ Use **pass** when `runCapabilitySelfTest()` returns `ok: true` (no DOM mutation,
 
 | Date | Browser | Extension | Locale | Direction | Scenario | Capability self-test | Notes |
 | ---- | ------- | --------- | ------ | --------- | -------- | -------------------- | ----- |
+| pending | Chrome | 1.11.0 | en-US | LTR | start-chat | pending | **Epic B gate (required before 1.11.0 release).** Run [live-validation-checklist.md](./live-validation-checklist.md) Start chat section on a disposable inbox. Record selector count, shortcut collision outcome, postcondition (`/web/conversations/new` or validated compose surface), dialog suppression, and editable-target guard. Paste sanitized JSON from [deferred-action-validation-console.js](../../output/deferred-action-validation-console.js). Upgrade [phase1-action-decisions.md](./phase1-action-decisions.md) Start chat row from **Defer** to **Approve** only after pass. |
 | 2026-10-02 | Chrome 154.0.0.0 | 1.10.0 | en | LTR | pill-visibility | pass | **Epic A manual pass.** hover-or-focus (default): pills on hover, browser keyboard focus, and `is-focused="true"` rows. selected-row-only: hover and browser focus alone do not show pills; `is-focused="true"` rows do. hidden: no pills; keyboard shortcuts still work. Archived modal: no extension pills under any setting; native Unarchive button only (expected). Virtualized list: visibility policy holds after row rerender. Self-test on inbox: `ok: true`, `mutated: false`, `blockingUnavailable: 0`. environment: Chrome 154 / extension 1.10.0 / locale en / direction ltr. |
 | 2026-10-02 | Chrome 154 | 1.9.0 | en | LTR | baseline (block pill automation) | pass | Block / report spam pill opens native dialog, focuses `OK` confirm (`data-e2e-action-button-confirm`), does not auto-click. Cancel verified non-mutating. |
 | 2026-10-02 | Chrome 154 | 1.9.0 | en | LTR | baseline (block dialog open) | n/a | Dialog probe: `confirmButtonCount: 1`, confirm label `OK`, `Report spam` checkbox present. Matches `mat-dialog-container button[data-e2e-action-button-confirm]` contract. |
@@ -90,6 +92,8 @@ Use **pass** when `runCapabilitySelfTest()` returns `ok: true` (no DOM mutation,
 | Open archived (dialog shell) | `mat-dialog-container` with heading "Archived" | Unarchive controls may render after spinner | en + he (RTL threads) live | 5 | 2026-10-02 |
 | Open archived (sidebar route) | `button[data-e2e-archived-button], a[data-e2e-archived-button]` | Any visible route control outside dialog; bottom navigation on narrow layouts | en live | 5 | 2026-10-01 |
 | Start chat FAB anchor | `a[data-e2e-start-button]` inside `mw-fab-link.start-chat` | n/a | en live (candidate) | 4 | 2026-10-01 |
+| Start chat postcondition | URL path `/web/conversations/new` or `mws-new-conversation` / `[data-e2e-new-conversation-view]` | n/a | pending live validation | 3 | Epic B gate |
+| Start chat shortcut | `Ctrl+Shift+N` / `Command+Shift+N` (page-level) | n/a | pending collision check | 3 | Epic B gate |
 | Pin (web row menu) | _not present_ | n/a | en live | 5 | 2026-10-01 |
 | Unpin (web row menu) | _not present_ | n/a | en live | 5 | 2026-10-01 |
 | Composer | _not validated_ | n/a | n/a | 1 | Phase 0 gate |

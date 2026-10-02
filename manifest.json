@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Messages Shortcut Actions",
-  "version": "1.10.0",
-  "description": "Use shortcuts to Archive, Trash, Mark as read, or Mark as unread, row pills for Mute, Unmute, and Block / report spam, and navigation shortcuts to open Archived in Google Messages.",
+  "version": "1.11.0",
+  "description": "Use shortcuts to Archive, Trash, Mark as read, or Mark as unread, row pills for Mute, Unmute, and Block / report spam, and page-level navigation shortcuts to open Archived or Start chat in Google Messages.",
   "icons": {
     "16": "icons/icon16.png",
     "32": "icons/icon32.png",

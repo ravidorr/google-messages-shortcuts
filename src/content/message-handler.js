@@ -1,5 +1,6 @@
 import {
   COMMAND_OPEN_ARCHIVED,
+  COMMAND_START_CHAT,
   isNavigationCommand,
   isValidCommand
 } from '../shared/commands.js';
@@ -7,6 +8,7 @@ import { isPaused } from '../shared/pause-preference.js';
 import { showActionFeedback } from './action-feedback.js';
 import { runConversationAction } from './conversation-action.js';
 import { handleOpenArchived } from './open-archived-action.js';
+import { handleOpenStartChat } from './open-start-chat-action.js';
 
 const STEP_LABELS = {
   'no-target': 'find the selected or hovered conversation row',
@@ -54,9 +56,15 @@ export async function handleCommand(
 
   if (isNavigationCommand(command)) {
     try {
-      const result = command === COMMAND_OPEN_ARCHIVED
-        ? await handleOpenArchived(documentRoot, chromeApi)
-        : { ok: false, reason: 'unknown-command' };
+      let result;
+
+      if (command === COMMAND_OPEN_ARCHIVED) {
+        result = await handleOpenArchived(documentRoot, chromeApi);
+      } else if (command === COMMAND_START_CHAT) {
+        result = await handleOpenStartChat(documentRoot, chromeApi);
+      } else {
+        result = { ok: false, reason: 'unknown-command' };
+      }
 
       if (shouldWarnActionFailure(result)) {
         warnActionFailure(result.reason, result.reason);

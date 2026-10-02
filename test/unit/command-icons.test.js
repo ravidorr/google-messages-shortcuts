@@ -7,6 +7,7 @@ import {
   COMMAND_MARK_UNREAD,
   COMMAND_MUTE,
   COMMAND_OPEN_ARCHIVED,
+  COMMAND_START_CHAT,
   COMMAND_TRASH,
   COMMAND_UNARCHIVE,
   COMMAND_UNMUTE
@@ -23,7 +24,8 @@ describe('command-icons', () => {
       COMMAND_UNMUTE,
       COMMAND_BLOCK_REPORT_SPAM,
       COMMAND_UNARCHIVE,
-      COMMAND_OPEN_ARCHIVED
+      COMMAND_OPEN_ARCHIVED,
+      COMMAND_START_CHAT
     ]) {
       expect(getCommandIcon(command)).toMatchObject({
         paths: expect.any(Array),

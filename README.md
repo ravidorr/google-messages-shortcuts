@@ -1,6 +1,6 @@
 # Messages Shortcut Actions
 
-Chrome extension for keyboard shortcuts and row pills that automate conversation-list actions in [Google Messages Web](https://messages.google.com/web/): archive, trash, read/unread, mute/unmute, block / report spam, open Archived, and unarchive.
+Chrome extension for keyboard shortcuts and row pills that automate conversation-list actions in [Google Messages Web](https://messages.google.com/web/): archive, trash, read/unread, mute/unmute, block / report spam, open Archived, start chat, and unarchive.
 
 [Install Messages Shortcut Actions from the Chrome Web Store](https://chromewebstore.google.com/detail/messages-shortcut-actions/dhdkppijmdfhgmbedgimkgenbmfhldjn).
 
@@ -12,6 +12,7 @@ Chrome extension for keyboard shortcuts and row pills that automate conversation
 - Mark the active read conversation as unread with `Ctrl+Shift+U` (`Command+Shift+U` on macOS)
 - Mute, unmute, or block / report spam from row pills (Chrome allows only four keyboard shortcuts per extension)
 - Open the Archived dialog with `Ctrl+Shift+A` (`Command+Shift+A` on macOS) or the injected Archived FAB beside Start chat
+- Start a new chat with `Ctrl+Shift+N` (`Command+Shift+N` on macOS) via the native Start chat FAB
 - Rely on Google Messages' native Unarchive controls inside the Archived dialog
 - Show Archive and Trash shortcut pills on hovered and focused conversations
 - Show a Mark as read pill on unread conversations
@@ -20,7 +21,7 @@ Chrome extension for keyboard shortcuts and row pills that automate conversation
 - Do not show extension pills inside the Archived dialog; use Google Messages' native Unarchive controls there
 - Show an Archived FAB beside Start chat when Archived is not already open (modal or sidebar route)
 - Optionally open conversations immediately when they are hovered or focused
-- Popup UI that shows the effective Chrome shortcut assignments and page-level navigation shortcuts
+- Popup UI that shows the effective Chrome shortcut assignments and page-level navigation shortcuts (Open Archived and Start chat)
 - Configurable automatic confirmation for the native Move to trash dialog
 - Configurable pill visibility: on hover or focus (default), on selected row only, or hidden
 - Pause shortcut actions and conversation pills without disabling the extension
@@ -104,7 +105,8 @@ If Chrome or the operating system already uses a suggested shortcut, Chrome may 
 10. Mark as read is available only for conversations that are currently unread.
 11. Open Archived runs as a page-level shortcut because Chrome limits extensions to four manifest commands. It discovers the native entry through direct modal controls, bottom navigation, account menu, search overflow, app header menu, or Settings, then localized "Archived" labels.
 12. Open Archived succeeds when the Archived dialog shell appears, even if the conversation list is still loading inside the modal. Sidebar route navigation also counts as success but shows guidance to reach the unarchive modal.
-13. The Archived modal does not show extension pills; unarchive there uses Google Messages' native controls.
+13. Start chat runs as a page-level shortcut. It clicks the native `a[data-e2e-start-button]` control when exactly one visible match is present, waits for the new-conversation view, and fails closed when a native dialog is open or the selector is missing or ambiguous.
+14. The Archived modal does not show extension pills; unarchive there uses Google Messages' native controls.
 
 ## Limitations
 
@@ -122,7 +124,7 @@ Phase 1 row actions are implemented and documented through extension **1.9.1**:
 
 - **Keyboard shortcuts (manifest):** Archive, trash, mark as read, mark as unread
 - **Row pills:** Mute, unmute, block / report spam (inbox rows only; Archived modal uses native Unarchive)
-- **Page-level navigation:** Open Archived (shortcut + injected FAB beside Start chat)
+- **Page-level navigation:** Open Archived (shortcut + injected FAB beside Start chat) and Start chat (`Ctrl+Shift+N` / `Command+Shift+N`)
 
 Live validation covers en-US inbox rows, group-thread row menus (group labels may read **Report spam** instead of **Block & report spam**), RTL thread labels with English UI chrome, and the Archived modal. See [docs/dom-discovery/phase1-action-decisions.md](docs/dom-discovery/phase1-action-decisions.md) for approve/defer/block gates.
 

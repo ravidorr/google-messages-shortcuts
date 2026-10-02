@@ -4,10 +4,10 @@ import {
   CAPABILITY_UNSAFE,
   createCapabilityResult
 } from './capability-states.js';
+import { START_CHAT_SELECTORS } from './start-chat-adapter.js';
 
 export const ARCHIVED_SELECTORS = {
-  startChatFab: 'a[data-e2e-start-button]',
-  startChatFabContainer: 'mw-fab-link.start-chat',
+  ...START_CHAT_SELECTORS,
   archivedModalEntryControl:
     'button[data-e2e-archived-list-button], a[data-e2e-archived-list-button]',
   archivedRouteControl: 'button[data-e2e-archived-button], a[data-e2e-archived-button]',

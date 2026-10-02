@@ -58,7 +58,7 @@ Scores use 1–5. **Impact** is expected value for the target user. **Difficulty
 | Add block/report-spam only with confirmation and capability checks (shipped in 1.9.0) | 3 | 3 | Pill-only action opens the native dialog and focuses the final confirm control without auto-clicking; live en-US `OK` confirm label validated. |
 | Add injected Archived FAB beside Start chat and page-level shortcut to open Archived (shipped with unarchive in 1.8.0) | 4 | 3 | Reduces navigation friction to the archived modal before unarchive pills run. |
 | Future: injected FAB and page-level shortcut for Spam and blocked (same pattern as Archived) | 3 | 3 | Deferred until native entry selectors are validated. |
-| Future: page-level keyboard shortcut for native Start chat (`a[data-e2e-start-button]`) | 3 | 2 | Deferred until keyboard collision checks pass in live validation. |
+| ~~Page-level keyboard shortcut for native Start chat (`a[data-e2e-start-button]`)~~ **Complete (1.11.0):** `Ctrl+Shift+N` / `Command+Shift+N` clicks the native Start chat FAB with fail-closed capability checks | 3 | 2 | Live validation required before release sign-off; see compatibility matrix. |
 | Defer keyboard bulk operations until Google’s native multi-select state can be reliably inspected | 4 | 5 | The current single-row engine cannot safely generalize to queued destructive actions. |
 
 ### Compose and message-content expansion
@@ -90,7 +90,7 @@ Scores use 1–5. **Impact** is expected value for the target user. **Difficulty
 ### Feasible now or after live DOM validation
 
 - Additional conversation-row menu actions: mark read, mute/unmute, unarchive (archived modal), and block/report spam (shipped 1.9.0).
-- Navigation shortcuts: open Archived (page-level); future Start chat and Spam and blocked entry points.
+- Navigation shortcuts: open Archived and Start chat (page-level); future Spam and blocked entry points.
 - Command palette, keyboard help, list focus/navigation, improved feedback, preference controls, and a selector-health check.
 - Templates, loaded-message search, and draft recovery **only after** the compose/message feasibility spikes demonstrate stable DOM anchors and account/conversation identity.
 - Local-only storage using `chrome.storage.local` or IndexedDB, with explicit consent and data lifecycle controls.
