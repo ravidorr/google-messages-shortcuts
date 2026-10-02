@@ -362,10 +362,10 @@ describe('navigation-shortcuts', () => {
     });
 
     document.dispatchEvent(new KeyboardEvent('keydown', {
-      key: 'n',
+      key: 'g',
       ctrlKey: true,
-      altKey: true,
-      shiftKey: false,
+      shiftKey: true,
+      altKey: false,
       bubbles: true
     }));
 
@@ -390,10 +390,10 @@ describe('navigation-shortcuts', () => {
     });
 
     document.dispatchEvent(new KeyboardEvent('keydown', {
-      key: 'n',
+      key: 'g',
       ctrlKey: true,
-      altKey: true,
-      shiftKey: false,
+      shiftKey: true,
+      altKey: false,
       bubbles: true
     }));
 
@@ -417,10 +417,10 @@ describe('navigation-shortcuts', () => {
     });
 
     document.dispatchEvent(new KeyboardEvent('keydown', {
-      key: 'n',
+      key: 'g',
       ctrlKey: true,
-      altKey: true,
-      shiftKey: false,
+      shiftKey: true,
+      altKey: false,
       bubbles: true
     }));
 
@@ -455,10 +455,10 @@ describe('navigation-shortcuts', () => {
     await Promise.resolve();
 
     document.dispatchEvent(new KeyboardEvent('keydown', {
-      key: 'n',
+      key: 'g',
       ctrlKey: true,
-      altKey: true,
-      shiftKey: false,
+      shiftKey: true,
+      altKey: false,
       bubbles: true
     }));
 
@@ -468,10 +468,10 @@ describe('navigation-shortcuts', () => {
     pauseListener({ [PAUSE_STORAGE_KEY]: { newValue: false } }, 'local');
 
     document.dispatchEvent(new KeyboardEvent('keydown', {
-      key: 'n',
+      key: 'g',
       ctrlKey: true,
-      altKey: true,
-      shiftKey: false,
+      shiftKey: true,
+      altKey: false,
       bubbles: true
     }));
 
@@ -499,10 +499,10 @@ describe('navigation-shortcuts', () => {
     });
 
     document.dispatchEvent(new KeyboardEvent('keydown', {
-      key: 'n',
+      key: 'g',
       ctrlKey: true,
-      altKey: true,
-      shiftKey: false,
+      shiftKey: true,
+      altKey: false,
       bubbles: true
     }));
 
@@ -528,10 +528,10 @@ describe('navigation-shortcuts', () => {
     });
 
     document.dispatchEvent(new KeyboardEvent('keydown', {
-      key: 'n',
+      key: 'g',
       metaKey: true,
-      altKey: true,
-      shiftKey: false,
+      shiftKey: true,
+      altKey: false,
       ctrlKey: false,
       bubbles: true
     }));

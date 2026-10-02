@@ -56,31 +56,40 @@ describe('navigation-shortcut-bindings', () => {
 
   it('matches the start chat shortcut on Windows and macOS', () => {
     expect(matchesStartChatShortcut({
-      key: 'n',
+      key: 'g',
       ctrlKey: true,
-      shiftKey: false,
+      shiftKey: true,
       metaKey: false,
-      altKey: true,
+      altKey: false,
       repeat: false
     }, 'Win32')).toBe(true);
 
     expect(matchesStartChatShortcut({
-      key: 'n',
+      key: 'g',
       ctrlKey: false,
-      shiftKey: false,
+      shiftKey: true,
       metaKey: true,
-      altKey: true,
+      altKey: false,
       repeat: false
     }, 'MacIntel')).toBe(true);
   });
 
-  it('rejects the Chrome Incognito collision chord on macOS', () => {
+  it('rejects Chrome collision chords on macOS', () => {
     expect(matchesStartChatShortcut({
       key: 'n',
       ctrlKey: false,
       shiftKey: true,
       metaKey: true,
       altKey: false,
+      repeat: false
+    }, 'MacIntel')).toBe(false);
+
+    expect(matchesStartChatShortcut({
+      key: 'n',
+      ctrlKey: false,
+      shiftKey: false,
+      metaKey: true,
+      altKey: true,
       repeat: false
     }, 'MacIntel')).toBe(false);
   });
@@ -103,26 +112,25 @@ describe('navigation-shortcut-bindings', () => {
       repeat: false
     })).toBe(false);
     expect(matchesStartChatShortcut({
-      key: 'n',
+      key: 'g',
+      ctrlKey: true,
+      shiftKey: true,
+      metaKey: false,
+      altKey: true,
+      repeat: false
+    })).toBe(false);
+    expect(matchesStartChatShortcut({
+      key: 'g',
       ctrlKey: true,
       shiftKey: true,
       metaKey: false,
       altKey: false,
-      repeat: false
-    })).toBe(false);
-    expect(matchesStartChatShortcut({
-      key: 'n',
-      ctrlKey: true,
-      shiftKey: false,
-      metaKey: false,
-      altKey: true,
       repeat: true
     })).toBe(false);
     expect(matchesStartChatShortcut({
       key: 'a',
       ctrlKey: true,
-      altKey: true,
-      shiftKey: false,
+      shiftKey: true,
       metaKey: false,
       repeat: false
     })).toBe(false);

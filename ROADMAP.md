@@ -58,7 +58,7 @@ Scores use 1–5. **Impact** is expected value for the target user. **Difficulty
 | Add block/report-spam only with confirmation and capability checks (shipped in 1.9.0) | 3 | 3 | Pill-only action opens the native dialog and focuses the final confirm control without auto-clicking; live en-US `OK` confirm label validated. |
 | Add injected Archived FAB beside Start chat and page-level shortcut to open Archived (shipped with unarchive in 1.8.0) | 4 | 3 | Reduces navigation friction to the archived modal before unarchive pills run. |
 | Future: injected FAB and page-level shortcut for Spam and blocked (same pattern as Archived) | 3 | 3 | Deferred until native entry selectors are validated. |
-| ~~Page-level keyboard shortcut for native Start chat (`a[data-e2e-start-button]`)~~ **Complete (1.11.0):** `Ctrl+Alt+N` / `Option+Command+N` clicks the native Start chat FAB with fail-closed capability checks | 3 | 2 | Rebound after `Command+Shift+N` Chrome Incognito collision; live shortcut sign-off still required. |
+| ~~Page-level keyboard shortcut for native Start chat (`a[data-e2e-start-button]`)~~ **Complete (1.11.0):** `Ctrl+Shift+G` / `Command+Shift+G` clicks the native Start chat FAB with fail-closed capability checks | 3 | 2 | Live macOS pass 2026-10-02 after rebinding from Chrome Incognito and split-view collisions. |
 | Defer keyboard bulk operations until Google’s native multi-select state can be reliably inspected | 4 | 5 | The current single-row engine cannot safely generalize to queued destructive actions. |
 
 ### Compose and message-content expansion
