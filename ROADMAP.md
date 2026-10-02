@@ -24,7 +24,7 @@ flowchart LR
 ```
 
 - [manifest.json](manifest.json) permits only `storage`, `tabs`, and `https://messages.google.com/*`; it defines four browser-level commands (Open Archived is page-level because of Chrome's command limit).
-- [src/content/conversation-action.js](src/content/conversation-action.js) serializes row-menu actions, with safe archive, trash confirmation, and mark-unread flows.
+- [src/content/conversation-action.js](src/content/conversation-action.js) serializes row-menu actions, with safe archive, trash confirmation, mark-unread flows, and native focus-only block/report spam confirmation.
 - [src/content/google-messages-dom.js](src/content/google-messages-dom.js) is the private-DOM contract. It currently knows only list-row selectors and English fallback menu labels.
 - [src/content/conversation-shortcut-pills.js](src/content/conversation-shortcut-pills.js) injects pills and observes focus/read-state changes only in the conversation list.
 - [PRIVACY.md](PRIVACY.md) accurately promises that no content, contacts, identifiers, or analytics are stored or transmitted today; it must change before any opt-in local content feature ships.
@@ -55,7 +55,7 @@ Scores use 1–5. **Impact** is expected value for the target user. **Difficulty
 | Add next/previous unread and an unloaded-list coverage indicator | 5 | 4 | Directly addresses unread processing while avoiding false claims of complete coverage. |
 | Add mark-read and mute/unmute after live selector validation | 4 | 2 | These extend the existing menu-action pattern and provide high-value inbox triage. |
 | Add configurable pill visibility and selected-row-only targeting | 3 | 2 | Lets keyboard-first users reduce visual noise and accidental hover targeting. |
-| Add block/report-spam only with confirmation and capability checks | 3 | 3 | Useful but higher consequence and dependent on context-specific dialogs. |
+| Add block/report-spam only with confirmation and capability checks (shipped in 1.9.0) | 3 | 3 | Pill-only action opens the native dialog and focuses the final confirm control without auto-clicking; live en-US `OK` confirm label validated. |
 | Add injected Archived FAB beside Start chat and page-level shortcut to open Archived (shipped with unarchive in 1.8.0) | 4 | 3 | Reduces navigation friction to the archived modal before unarchive pills run. |
 | Future: injected FAB and page-level shortcut for Spam and blocked (same pattern as Archived) | 3 | 3 | Deferred until native entry selectors are validated. |
 | Future: page-level keyboard shortcut for native Start chat (`a[data-e2e-start-button]`) | 3 | 2 | Deferred until keyboard collision checks pass in live validation. |
@@ -89,7 +89,7 @@ Scores use 1–5. **Impact** is expected value for the target user. **Difficulty
 
 ### Feasible now or after live DOM validation
 
-- Additional conversation-row menu actions: mark read, mute/unmute, unarchive (archived modal), and potentially block/report spam.
+- Additional conversation-row menu actions: mark read, mute/unmute, unarchive (archived modal), and block/report spam (shipped 1.9.0).
 - Navigation shortcuts: open Archived (page-level); future Start chat and Spam and blocked entry points.
 - Command palette, keyboard help, list focus/navigation, improved feedback, preference controls, and a selector-health check.
 - Templates, loaded-message search, and draft recovery **only after** the compose/message feasibility spikes demonstrate stable DOM anchors and account/conversation identity.
