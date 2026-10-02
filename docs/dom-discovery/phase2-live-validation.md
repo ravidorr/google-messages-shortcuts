@@ -100,6 +100,8 @@ If no row looks focused after a refresh, wait about one second for the list to f
 - [ ] The conversation list does not jump
 - [ ] No navigation toast appears
 - [ ] The command palette (Step 7) does **not** open
+- [ ] **Shift+/** may still type **`?`** in compose; that is expected. The shortcut help overlay should **not** open
+- [ ] **Command+Shift+P** may still open Google Messages **Select photos** in compose. That native collision is expected; record it in Step 9
 
 ### 3b. While a native dialog is open
 

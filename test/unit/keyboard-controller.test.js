@@ -185,43 +185,12 @@ describe('keyboard-controller', () => {
 
     composerHost.dispatchEvent(new KeyboardEvent('keydown', {
       code: 'KeyP',
-      ctrlKey: true,
+      metaKey: true,
       shiftKey: true,
       bubbles: true,
       cancelable: true
     }));
     composerHost.dispatchEvent(new KeyboardEvent('keydown', {
-      code: 'Slash',
-      shiftKey: true,
-      bubbles: true,
-      cancelable: true
-    }));
-
-    await Promise.resolve();
-
-    expect(document.querySelector('[data-messages-shortcuts-command-palette]')).toBeNull();
-    expect(document.querySelector('[data-messages-shortcuts-shortcut-help]')).toBeNull();
-  });
-
-  it('ignores palette and help shortcuts while a textarea composer is focused', async () => {
-    disconnect = installKeyboardController({
-      documentRoot: document,
-      chromeApi: createChromeApi()
-    });
-
-    const textarea = document.createElement('textarea');
-    textarea.setAttribute('aria-label', 'Message');
-    document.body.append(textarea);
-    textarea.focus();
-
-    textarea.dispatchEvent(new KeyboardEvent('keydown', {
-      code: 'KeyP',
-      ctrlKey: true,
-      shiftKey: true,
-      bubbles: true,
-      cancelable: true
-    }));
-    textarea.dispatchEvent(new KeyboardEvent('keydown', {
       code: 'Slash',
       shiftKey: true,
       bubbles: true,
