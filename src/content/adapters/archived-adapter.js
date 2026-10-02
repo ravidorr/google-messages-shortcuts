@@ -27,7 +27,7 @@ export const ARCHIVED_SELECTORS = {
   appShellRegion:
     'header, [role="banner"], mws-app-bar, mws-top-app-bar, mws-conversations-list-header, mws-conversation-list-header',
   appOverflowTrigger:
-    'button[data-e2e-app-menu-button], button[data-e2e-overflow-button], button[data-e2e-header-overflow-button], button[data-e2e-navigation-button], button[data-e2e-drawer-button], button[aria-label*="Menu" i], button[aria-label*="Navigation" i], button[aria-label*="Main menu" i], button[aria-label*="drawer" i], button[aria-haspopup="menu"], button.mat-mdc-icon-button, button.menu-button',
+    'button[data-e2e-app-menu-button], button[data-e2e-overflow-button], button[data-e2e-header-overflow-button], button[data-e2e-navigation-button], button[data-e2e-drawer-button], button[aria-label*="Menu" i], button[aria-label*="Navigation" i], button[aria-label*="Main menu" i], button[aria-label*="drawer" i], button[aria-haspopup="menu"], button.menu-button',
   accountMenuTrigger:
     'button[data-e2e-account-button], button[data-e2e-user-menu-button], button[data-e2e-profile-button], button[aria-label*="Account" i], button[aria-label*="Google Account" i], button[aria-label*="Profile" i]',
   archivedNavigationPanel:
@@ -105,13 +105,45 @@ export function matchesArchivedLabel(element) {
     return false;
   }
 
-  for (const label of ARCHIVED_TEXT.archivedLabels) {
-    if (text === label || ariaLabel === label) {
-      return true;
+  return ARCHIVED_TEXT.archivedLabels.some(
+    (label) => text === label || ariaLabel === label
+  );
+}
+
+function getArchivedLabelFallbackScopes(documentRoot, selectors = ARCHIVED_SELECTORS) {
+  const scopes = new Set();
+
+  for (const selector of [
+    selectors.archivedNavigationPanel,
+    selectors.bottomNavigation,
+    selectors.settingsPanel
+  ]) {
+    for (const element of documentRoot.querySelectorAll(selector)) {
+      scopes.add(element);
     }
   }
 
-  return /\barchived\b/i.test(`${text} ${ariaLabel}`);
+  return [...scopes];
+}
+
+export function isAppOverflowMenuTrigger(trigger) {
+  if (!trigger?.matches) {
+    return false;
+  }
+
+  if (trigger.matches(
+    'button[data-e2e-app-menu-button], button[data-e2e-overflow-button], button[data-e2e-header-overflow-button], button[data-e2e-navigation-button], button[data-e2e-drawer-button]'
+  )) {
+    return true;
+  }
+
+  if (trigger.matches('button[aria-haspopup="menu"], button.menu-button')) {
+    return true;
+  }
+
+  const ariaLabel = normalizeText(trigger.getAttribute('aria-label') || '');
+
+  return /menu|navigation|main menu|drawer/i.test(ariaLabel);
 }
 
 function isExcludedArchivedOverflowScope(element) {
@@ -330,28 +362,32 @@ export function findArchivedModalEntryControl(
     return match;
   }
 
-  for (const candidate of documentRoot.querySelectorAll('button, a')) {
-    if (isInsideArchivedDialog(candidate, selectors)) {
-      continue;
-    }
+  for (const scope of getArchivedLabelFallbackScopes(documentRoot, selectors)) {
+    for (const candidate of scope.querySelectorAll(
+      'button, a, [role="button"], [role="menuitem"], [role="link"]'
+    )) {
+      if (isInsideArchivedDialog(candidate, selectors)) {
+        continue;
+      }
 
-    if (isExtensionOwnedArchivedControl(candidate)) {
-      continue;
-    }
+      if (isExtensionOwnedArchivedControl(candidate)) {
+        continue;
+      }
 
-    if (isArchivedRouteNavigationControl(candidate, documentRoot, selectors)) {
-      continue;
-    }
+      if (isArchivedRouteNavigationControl(candidate, documentRoot, selectors)) {
+        continue;
+      }
 
-    if (
-      candidate.matches('[role="menuitem"], .mat-mdc-menu-item')
-      || candidate.closest('[role="menu"]')
-    ) {
-      continue;
-    }
+      if (
+        candidate.matches('[role="menuitem"], .mat-mdc-menu-item')
+        || candidate.closest('[role="menu"]')
+      ) {
+        continue;
+      }
 
-    if (matchesArchivedLabel(candidate)) {
-      return candidate;
+      if (matchesArchivedLabel(candidate)) {
+        return candidate;
+      }
     }
   }
 
@@ -459,7 +495,8 @@ export function findArchivedAppOverflowTrigger(
   for (const region of documentRoot.querySelectorAll(selectors.appShellRegion)) {
     for (const trigger of region.querySelectorAll(selectors.appOverflowTrigger)) {
       if (
-        !isExcludedArchivedOverflowScope(trigger)
+        isAppOverflowMenuTrigger(trigger)
+        && !isExcludedArchivedOverflowScope(trigger)
         && !isExtensionOwnedArchivedControl(trigger)
       ) {
         return trigger;
@@ -469,7 +506,8 @@ export function findArchivedAppOverflowTrigger(
 
   for (const trigger of documentRoot.querySelectorAll(selectors.appOverflowTrigger)) {
     if (
-      isExcludedArchivedOverflowScope(trigger)
+      !isAppOverflowMenuTrigger(trigger)
+      || isExcludedArchivedOverflowScope(trigger)
       || isExtensionOwnedArchivedControl(trigger)
       || trigger.closest('mws-conversations-list, mws-conversation-list')
     ) {

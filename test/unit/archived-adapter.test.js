@@ -10,6 +10,7 @@ import {
   findArchivedSearchOverflowTrigger,
   findArchivedAccountMenuTrigger,
   findArchivedAppOverflowTrigger,
+  isAppOverflowMenuTrigger,
   findArchivedNavigationEntry,
   findArchivedRouteButton,
   getArchivedDialogShell,
@@ -100,7 +101,11 @@ describe('archived-adapter', () => {
     expect(findArchivedModalEntryControl(document)?.getAttribute('data-e2e-archived-list-button'))
       .toBe('');
 
-    document.body.innerHTML = '<button>Archived</button>';
+    document.body.innerHTML = `
+      <nav>
+        <button>Archived</button>
+      </nav>
+    `;
 
     expect(findArchivedEntryControl(document)?.textContent).toBe('Archived');
   });
@@ -184,7 +189,73 @@ describe('archived-adapter', () => {
     expect(matchesArchivedLabel({ textContent: 'ארכיון' })).toBe(true);
     expect(matchesArchivedLabel({ textContent: 'Archive' })).toBe(false);
     expect(matchesArchivedLabel({ textContent: 'Archive conversation' })).toBe(false);
+    expect(matchesArchivedLabel({ textContent: 'Archivar' })).toBe(false);
+    expect(matchesArchivedLabel({ textContent: 'View archived messages' })).toBe(false);
     expect(matchesArchivedLabel({ getAttribute: () => 'Archived', textContent: '' })).toBe(true);
+  });
+
+  it('ignores toolbar archive actions when finding modal entry labels', () => {
+    document.body.innerHTML = `
+      <header>
+        <button aria-label="Archive conversation">Archive</button>
+        <button class="mat-mdc-icon-button" aria-label="Search">Search</button>
+      </header>
+      <main>
+        <button>Archived</button>
+      </main>
+    `;
+
+    expect(findArchivedModalEntryControl(document)).toBeNull();
+  });
+
+  it('accepts only menu-like app overflow triggers', () => {
+    document.body.innerHTML = `
+      <header>
+        <button class="mat-mdc-icon-button" aria-label="Back">Back</button>
+        <button aria-label="Open menu" aria-haspopup="menu">Menu</button>
+      </header>
+    `;
+
+    expect(isAppOverflowMenuTrigger(null)).toBe(false);
+    expect(isAppOverflowMenuTrigger({})).toBe(false);
+    expect(isAppOverflowMenuTrigger(document.querySelector('.mat-mdc-icon-button'))).toBe(false);
+
+    const e2eTrigger = document.createElement('button');
+    e2eTrigger.setAttribute('data-e2e-app-menu-button', '');
+    expect(isAppOverflowMenuTrigger(e2eTrigger)).toBe(true);
+
+    const drawerTrigger = document.createElement('button');
+    drawerTrigger.setAttribute('aria-label', 'Open drawer');
+    expect(isAppOverflowMenuTrigger(drawerTrigger)).toBe(true);
+
+    const menuButton = document.createElement('button');
+    menuButton.className = 'menu-button';
+    expect(isAppOverflowMenuTrigger(menuButton)).toBe(true);
+
+    expect(isAppOverflowMenuTrigger(document.createElement('button'))).toBe(false);
+
+    expect(findArchivedAppOverflowTrigger(document)?.getAttribute('aria-label')).toBe('Open menu');
+  });
+
+  it('skips extension-owned and dialog-scoped labels in navigation fallback scopes', () => {
+    document.body.innerHTML = `
+      <nav>
+        <button data-messages-shortcuts-archived-fab="">Injected</button>
+        <button>Archived</button>
+      </nav>
+    `;
+
+    expect(findArchivedModalEntryControl(document)?.textContent).toBe('Archived');
+
+    document.body.innerHTML = `
+      <mat-dialog-container>
+        <nav>
+          <button>Archived</button>
+        </nav>
+      </mat-dialog-container>
+    `;
+
+    expect(findArchivedModalEntryControl(document)).toBeNull();
   });
 
   it('finds the account menu trigger from account buttons and profile images', () => {
@@ -285,11 +356,11 @@ describe('archived-adapter', () => {
         <button>Archived</button>
       </div>
       <aside>
-        <span class="mat-mdc-list-item">Archived target</span>
+        <span class="mat-mdc-list-item">Archived</span>
       </aside>
     `;
 
-    expect(findArchivedNavigationEntry(document)?.textContent).toBe('Archived target');
+    expect(findArchivedNavigationEntry(document)?.textContent).toBe('Archived');
   });
 
   it('finds archived entries from navigation panel list items', () => {
@@ -1355,7 +1426,9 @@ describe('archived-adapter', () => {
         <button data-e2e-archived-button>Archived</button>
         <button data-e2e-unarchive-button>Unarchive</button>
       </mat-dialog-container>
-      <button>Archived</button>
+      <nav>
+        <button>Archived</button>
+      </nav>
     `;
 
     expect(findArchivedEntryControl(document)?.textContent).toBe('Archived');
