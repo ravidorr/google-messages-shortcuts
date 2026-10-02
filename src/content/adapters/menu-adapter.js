@@ -24,6 +24,7 @@ export const MENU_TEXT = {
   mute: 'Mute',
   unmute: 'Unmute',
   blockReportSpam: 'Block & report spam',
+  blockReportSpamReportOnly: 'Report spam',
   blockReportSpamConfirm: 'Block',
   blockReportSpamConfirmAlternate: 'Block & report spam',
   blockReportSpamConfirmOk: 'OK'
@@ -54,12 +55,27 @@ function normalizeMenuLabel(value) {
   return value.replace(/\s+/g, ' ').trim();
 }
 
+export function isBlockReportSpamMenuLabel(label) {
+  const normalizedLabel = normalizeMenuLabel(label);
+
+  return normalizedLabel === MENU_TEXT.blockReportSpam
+    || normalizedLabel === MENU_TEXT.blockReportSpamReportOnly;
+}
+
 export function isBlockReportSpamConfirmLabel(label) {
   const normalizedLabel = normalizeMenuLabel(label);
 
   return normalizedLabel === MENU_TEXT.blockReportSpamConfirm
     || normalizedLabel === MENU_TEXT.blockReportSpamConfirmAlternate
     || normalizedLabel === MENU_TEXT.blockReportSpamConfirmOk;
+}
+
+function isAcceptedMenuLabel(label, acceptedLabels) {
+  const normalizedLabel = normalizeMenuLabel(label);
+
+  return acceptedLabels.some(
+    (acceptedLabel) => normalizeMenuLabel(acceptedLabel) === normalizedLabel
+  );
 }
 
 function isTrashConfirmLabel(label) {
@@ -154,8 +170,10 @@ function assessMenuActionCapability(
   actionLabel,
   fallbackText,
   listTargeting,
-  selectors
+  selectors,
+  alternateMenuLabels = []
 ) {
+  const acceptedMenuLabels = [fallbackText, ...alternateMenuLabels];
   if (listTargeting.state !== CAPABILITY_SUPPORTED) {
     return createCapabilityResult(
       CAPABILITY_UNAVAILABLE,
@@ -178,8 +196,12 @@ function assessMenuActionCapability(
     if (isConversationRowMenuOpen(documentRoot, selectors) && fallbackText) {
       const label = normalizeMenuLabel(matches[0].textContent || '');
 
-      if (label !== fallbackText) {
-        if (findFallbackMenuItemInOpenRowMenu(documentRoot, fallbackText, selectors)) {
+      if (!isAcceptedMenuLabel(label, acceptedMenuLabels)) {
+        const matchedFallbackLabel = acceptedMenuLabels.find(
+          (acceptedLabel) => findFallbackMenuItemInOpenRowMenu(documentRoot, acceptedLabel, selectors)
+        );
+
+        if (matchedFallbackLabel) {
           return createCapabilityResult(
             CAPABILITY_SUPPORTED,
             `${actionLabel} menu item matched English fallback while the row menu is open.`,
@@ -275,7 +297,8 @@ export function assessMenuCapabilities(documentRoot, listCapabilities, selectors
       'Block & report spam',
       MENU_TEXT.blockReportSpam,
       listTargeting,
-      selectors
+      selectors,
+      [MENU_TEXT.blockReportSpamReportOnly]
     ),
     [MENU_CAPABILITY_IDS.trashConfirm]: assessTrashConfirmCapability(
       documentRoot,

@@ -8,6 +8,7 @@ import {
   findFallbackMenuItemInOpenRowMenu,
   findLabelMatchedMenuItem,
   isBlockReportSpamConfirmLabel,
+  isBlockReportSpamMenuLabel,
   isConversationRowMenuOpen,
   MENU_CAPABILITY_IDS,
   MENU_SELECTORS,
@@ -17,6 +18,7 @@ import { CAPABILITY_SUPPORTED, CAPABILITY_UNAVAILABLE, CAPABILITY_UNSAFE } from 
 import {
   blockReportSpamConfirmDialog,
   blockReportSpamConfirmOkDialog,
+  groupThreadBlockReportSpamMenuOpen,
   duplicateArchiveMenuItems,
   duplicateBlockReportSpamConfirmDialog,
   duplicateTrashConfirmDialog,
@@ -269,6 +271,19 @@ describe('menu-adapter', () => {
     expect(isBlockReportSpamConfirmLabel('OK')).toBe(true);
     expect(findBlockReportSpamConfirmControl(document)?.textContent).toBe('OK');
     expect(localThis[MENU_CAPABILITY_IDS.blockReportSpamConfirm]).toMatchObject({
+      state: CAPABILITY_SUPPORTED,
+      evidenceSource: 'dom-query'
+    });
+  });
+
+  it('accepts group-thread Report spam menu labels while the row menu is open', () => {
+    document.body.innerHTML = groupThreadBlockReportSpamMenuOpen;
+    const listCapabilities = assessListCapabilities(document);
+    const localThis = assessMenuCapabilities(document, listCapabilities);
+
+    expect(isBlockReportSpamMenuLabel('Report spam')).toBe(true);
+    expect(isBlockReportSpamMenuLabel('Block & report spam')).toBe(true);
+    expect(localThis[MENU_CAPABILITY_IDS.blockReportSpam]).toMatchObject({
       state: CAPABILITY_SUPPORTED,
       evidenceSource: 'dom-query'
     });

@@ -50,7 +50,7 @@
       menuPanelOpen: Boolean(document.querySelector(menuPanelSelector))
     },
     observedControls,
-    note: 'Sanitized structural evidence only. Open archived discovery order: data-e2e-archived-list-button, bottom-nav data-e2e-archived-button (sidebar route), account menu, search overflow, app header menu, Settings, then localized Archived labels.'
+    note: 'Sanitized structural evidence only. Run with the row menu closed for a clean self-test pass. With the menu open on a non-muted row, menu.unmute may block self-test until the row is muted or the menu closes. Open archived discovery order: data-e2e-archived-list-button, bottom-nav data-e2e-archived-button (sidebar route), account menu, search overflow, app header menu, Settings, then localized Archived labels.'
   }, null, 2));
 })();
 
