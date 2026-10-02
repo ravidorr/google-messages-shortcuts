@@ -328,6 +328,8 @@ In Cursor: open that file from the repo → Select All → Copy.
 
 ### 10b. Composer focus
 
+Google Messages may render both a `textarea` and a `contenteditable` mirror with the same **Message** aria-label. The extension resolves candidates in priority order (contenteditable first) and fail-closed only when a single candidate selector matches multiple controls.
+
 **Where:** any open conversation with a visible compose box.
 
 1. Type a draft in compose (example: `hello`).
@@ -335,18 +337,18 @@ In Cursor: open that file from the repo → Select All → Copy.
 3. Press **Option+M** once, then confirm compose receives focus, draft text `hello` is unchanged, and no message was sent.
 4. Run `Phase2ValidationHelpers.runComposerProbe()` and confirm `selfTest.mutated` is `false`.
 
-- [ ] **Pass:** Compose receives focus
-- [ ] **Pass:** Draft text `hello` is unchanged
-- [ ] **Pass:** No message was sent
-- [ ] **Pass:** `selfTest.mutated` is `false`
+- [x] **Pass:** Compose receives focus
+- [x] **Pass:** Draft text `hello` is unchanged
+- [x] **Pass:** No message was sent
+- [x] **Pass:** `selfTest.mutated` is `false`
 
 **Inbox without an open conversation:**
 
 1. Return to `/web/conversations` with no conversation open in the pane.
 2. Press **Option+M** once.
 
-- [ ] **Pass:** Info toast about composer focus being unavailable in the current view
-- [ ] **Pass:** No error crash
+- [x] **Pass:** Info toast about composer focus being unavailable in the current view
+- [x] **Pass:** No error crash
 
 ---
 
@@ -364,4 +366,4 @@ Add one row to [compatibility-matrix.md](./compatibility-matrix.md):
 
 - [ ] All checkboxes above are checked
 - [ ] Collisions or failures noted in the matrix
-- [ ] Composer focus approved only after Step 10b draft preservation pass
+- [x] Composer focus approved only after Step 10b draft preservation pass

@@ -24,7 +24,7 @@ describe('focus-composer-action', () => {
     expect(document.activeElement.matches('textarea[aria-label="Message"]')).toBe(true);
   });
 
-  it('fails closed when multiple composer editors match', () => {
+  it('fails closed when multiple composer editors match one candidate', () => {
     document.body.innerHTML = `
       <textarea aria-label="Message"></textarea>
       <textarea aria-label="Message"></textarea>
@@ -34,6 +34,35 @@ describe('focus-composer-action', () => {
 
     expect(localThis.ok).toBe(false);
     expect(localThis.reason).toBe('composer-ambiguous');
+  });
+
+  it('focuses the contenteditable when GM renders textarea and contenteditable mirrors', () => {
+    document.body.innerHTML = `
+      <textarea aria-label="Message"></textarea>
+      <div contenteditable="true" aria-label="Message" tabindex="0"></div>
+    `;
+
+    const localThis = focusComposer(document, COMPOSER_SELECTORS);
+
+    expect(localThis.ok).toBe(true);
+    expect(document.activeElement.matches('div[contenteditable="true"][aria-label="Message"]')).toBe(true);
+  });
+
+  it('succeeds when GM redirects focus from textarea to contenteditable mirror', () => {
+    document.body.innerHTML = `
+      <textarea aria-label="Message"></textarea>
+      <div contenteditable="true" aria-label="Message" tabindex="0"></div>
+    `;
+    const contenteditable = document.querySelector('[contenteditable="true"]');
+    const textarea = document.querySelector('textarea');
+    textarea.addEventListener('focus', () => {
+      contenteditable.focus();
+    });
+
+    const localThis = focusComposer(document, COMPOSER_SELECTORS);
+
+    expect(localThis.ok).toBe(true);
+    expect(document.activeElement).toBe(contenteditable);
   });
 
   it('finds a uniquely matched composer editor', () => {

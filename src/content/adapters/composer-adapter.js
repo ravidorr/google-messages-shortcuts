@@ -1,4 +1,8 @@
-import { buildComposerEditorSelector } from './composer-dom.js';
+import {
+  buildComposerEditorSelector,
+  getComposerEditorCandidateSelectors,
+  resolveComposerEditor
+} from './composer-dom.js';
 import {
   CAPABILITY_SUPPORTED,
   CAPABILITY_UNAVAILABLE,
@@ -58,11 +62,48 @@ function assessSelectorCapability(documentRoot, selector, capabilityLabel) {
   );
 }
 
+function assessComposerFocusCapability(documentRoot, selectors = COMPOSER_SELECTORS) {
+  if (!selectors.editor) {
+    return createCapabilityResult(
+      CAPABILITY_UNAVAILABLE,
+      COMPOSER_DEFERRED_CAPABILITY_REASON,
+      COMPOSER_SPIKE_EVIDENCE_SOURCE
+    );
+  }
+
+  const resolution = resolveComposerEditor(
+    documentRoot,
+    getComposerEditorCandidateSelectors(selectors.editor)
+  );
+
+  if (resolution.state === 'unavailable') {
+    return createCapabilityResult(
+      CAPABILITY_UNAVAILABLE,
+      'No composer editor control found in the current view.',
+      'dom-query'
+    );
+  }
+
+  if (resolution.state === 'unsafe') {
+    return createCapabilityResult(
+      CAPABILITY_UNSAFE,
+      'Multiple composer editor controls matched.',
+      'dom-query'
+    );
+  }
+
+  return createCapabilityResult(
+    CAPABILITY_SUPPORTED,
+    'composer editor control is uniquely available.',
+    'dom-query'
+  );
+}
+
 export function assessComposerCapabilities(
   documentRoot = document,
   selectors = COMPOSER_SELECTORS
 ) {
-  const focus = assessSelectorCapability(documentRoot, selectors.editor, 'composer editor');
+  const focus = assessComposerFocusCapability(documentRoot, selectors);
   const sendState = assessSelectorCapability(documentRoot, selectors.sendButton, 'send');
 
   if (focus.state !== CAPABILITY_SUPPORTED) {

@@ -6,7 +6,8 @@ import {
 } from '../../src/content/adapters/composer-adapter.js';
 import {
   CAPABILITY_SUPPORTED,
-  CAPABILITY_UNAVAILABLE
+  CAPABILITY_UNAVAILABLE,
+  CAPABILITY_UNSAFE
 } from '../../src/content/adapters/capability-states.js';
 import { composerEditorSurface } from '../fixtures/dom/list-states.js';
 
@@ -36,6 +37,28 @@ describe('composer-adapter', () => {
     expect(localThis[COMPOSER_CAPABILITY_IDS.focus].state).toBe(CAPABILITY_SUPPORTED);
     expect(localThis[COMPOSER_CAPABILITY_IDS.readDraft].state).toBe(CAPABILITY_UNAVAILABLE);
     expect(localThis[COMPOSER_CAPABILITY_IDS.insertText].state).toBe(CAPABILITY_UNAVAILABLE);
+  });
+
+  it('reports deferred focus and send-state probe branches for custom selectors', () => {
+    const unavailableSend = assessComposerCapabilities(document, {
+      editor: null,
+      sendButton: 'button[data-e2e-send-button]'
+    });
+
+    expect(unavailableSend[COMPOSER_CAPABILITY_IDS.focus].state).toBe(CAPABILITY_UNAVAILABLE);
+    expect(unavailableSend[COMPOSER_CAPABILITY_IDS.sendState].state).toBe(CAPABILITY_UNAVAILABLE);
+
+    document.body.innerHTML = `
+      <button data-e2e-send-button></button>
+      <button data-e2e-send-button></button>
+    `;
+
+    const unsafeSend = assessComposerCapabilities(document, {
+      editor: null,
+      sendButton: 'button[data-e2e-send-button]'
+    });
+
+    expect(unsafeSend[COMPOSER_CAPABILITY_IDS.sendState].state).toBe(CAPABILITY_UNSAFE);
   });
 
   it('assesses explicit e2e selectors when provided for fixtures', () => {

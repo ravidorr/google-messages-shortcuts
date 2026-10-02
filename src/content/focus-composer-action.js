@@ -4,6 +4,10 @@ import {
   COMPOSER_SELECTORS
 } from './adapters/composer-adapter.js';
 import {
+  getComposerEditorCandidateSelectors,
+  resolveComposerEditor
+} from './adapters/composer-dom.js';
+import {
   CAPABILITY_SUPPORTED,
   CAPABILITY_UNSAFE
 } from './adapters/capability-states.js';
@@ -13,13 +17,16 @@ export function findComposerEditor(documentRoot, selectors = COMPOSER_SELECTORS)
     return null;
   }
 
-  const matches = [...documentRoot.querySelectorAll(selectors.editor)];
+  const resolution = resolveComposerEditor(
+    documentRoot,
+    getComposerEditorCandidateSelectors(selectors.editor)
+  );
 
-  if (matches.length !== 1) {
+  if (resolution.state !== 'supported') {
     return null;
   }
 
-  return matches[0];
+  return resolution.editor;
 }
 
 export function focusComposer(documentRoot, selectors = COMPOSER_SELECTORS) {
@@ -34,17 +41,28 @@ export function focusComposer(documentRoot, selectors = COMPOSER_SELECTORS) {
     return { ok: false, reason: 'composer-unavailable' };
   }
 
-  const editor = findComposerEditor(documentRoot, selectors);
+  const resolution = resolveComposerEditor(
+    documentRoot,
+    getComposerEditorCandidateSelectors(selectors.editor)
+  );
+  const { editor, editors } = resolution;
 
-  if (!editor) {
+  if (!editor || editors.length === 0) {
     return { ok: false, reason: 'composer-not-found' };
   }
 
-  editor.focus({ preventScroll: false });
+  const focusOrder = [
+    editor,
+    ...editors.filter((candidate) => candidate !== editor)
+  ];
 
-  if (documentRoot.activeElement !== editor) {
-    return { ok: false, reason: 'composer-not-found' };
+  for (const editor of focusOrder) {
+    editor.focus({ preventScroll: false });
+
+    if (editors.includes(documentRoot.activeElement)) {
+      return { ok: true };
+    }
   }
 
-  return { ok: true };
+  return { ok: false, reason: 'composer-not-found' };
 }

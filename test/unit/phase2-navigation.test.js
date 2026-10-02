@@ -289,6 +289,12 @@ describe('phase2 navigation coverage', () => {
     `;
     expect(getCommandRegistryEntry(PAGE_COMMAND_FOCUS_COMPOSER).availability.status).toBe('unsafe');
 
+    document.body.innerHTML = `
+      <textarea aria-label="Message"></textarea>
+      <div contenteditable="true" aria-label="Message"></div>
+    `;
+    expect(getCommandRegistryEntry(PAGE_COMMAND_FOCUS_COMPOSER).availability.status).toBe('available');
+
     expect(getCommandRegistryEntry('missing-command')).toBeNull();
     expect(filterCommandRegistryEntries(getCommandRegistryEntries(document), '   ').length)
       .toBeGreaterThan(10);
