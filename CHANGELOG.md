@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.11.1 - 2026-10-02
+
+### Fixed
+
+- Keep a live pill-visibility preference change when the content script's initial storage read resolves late
+- Skip empty shortcut-pill groups and host styling for archived modal rows
+
 ## 1.11.0 - 2026-10-02
 
 ### Added
