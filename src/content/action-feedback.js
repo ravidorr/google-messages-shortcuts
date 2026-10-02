@@ -137,7 +137,7 @@ export function getActionFeedbackMessage(result, command) {
     if (command === COMMAND_OPEN_ARCHIVED && result.reason === 'archived-sidebar-only') {
       return {
         kind: 'info',
-        message: 'Google Messages opened the Archived sidebar, not the unarchive dialog. Open Archived from the account menu or search overflow to reach the unarchive dialog.'
+        message: 'Google Messages opened the Archived sidebar, not the unarchive dialog. Open Archived from the account menu or list header overflow to reach the unarchive dialog.'
       };
     }
 
@@ -183,7 +183,7 @@ export function getActionFeedbackMessage(result, command) {
     case 'archived-entry-not-found':
       return {
         kind: 'error',
-        message: 'Could not find the Archived entry control. Try the account menu, header menu, bottom navigation, search overflow, or Settings, then Archived.'
+        message: 'Could not find the Archived entry control. Try the account menu, header menu, bottom navigation, list header overflow, or Settings, then Archived.'
       };
     case 'archived-modal-timeout':
       return {

@@ -7,7 +7,7 @@ The extension will target **keyboard-first personal productivity for frequent de
 - Conversation-list actions remain the stable core.
 - Compose and message-content workflows are intentionally in scope, but each begins with a feasibility spike because the present code only automates conversation-row menus.
 - Persistent content features must be explicitly enabled, scoped to the active Google account, retention-configurable, and removable. Default: no message indexing; draft recovery defaults to a conservative 30-day retention.
-- Current-conversation search starts with loaded messages only. A user-started older-history loader is a later experiment, never an implicit scan and never described as a complete history search.
+- Current-conversation find starts with loaded messages only. A user-started older-history loader is a later experiment, never an implicit scan and never described as complete history coverage.
 - Include an internationalization track for Google Messages interfaces and extension UI.
 
 ### Shortcut assignment model
@@ -60,8 +60,8 @@ Scores use 1–5. **Impact** is expected value for the target user. **Difficulty
 | Finding and action | Impact | Difficulty | Why it matters |
 | --- | --- | --- | --- |
 | Add a page-level keyboard controller that respects editable fields, IME composition, selected text, and browser shortcuts | 5 | 4 | Required before introducing single-key navigation without breaking typing. |
-| Add a searchable command palette with visible bindings and a `?` shortcut reference | 5 | 4 | Gives users discovery before memorization and unifies list, compose, and content commands. |
-| Add next/previous conversation, open, return-to-previous, focus search, focus composer, and escape-to-list | 5 | 4 | Closes the current mouse-dependent navigation gap. |
+| Add a filterable command palette with visible bindings and a `?` shortcut reference | 5 | 4 | Gives users discovery before memorization and unifies list, compose, and content commands. |
+| Add next/previous conversation, open, return-to-previous, focus composer (after DOM spike), and escape-to-list | 5 | 4 | Closes the current mouse-dependent navigation gap without native filter UI focus automation. |
 | Add next/previous unread and an unloaded-list coverage indicator | 5 | 4 | Directly addresses unread processing while avoiding false claims of complete coverage. |
 | Add mark-read and mute/unmute after live selector validation | 4 | 2 | These extend the existing menu-action pattern and provide high-value inbox triage. |
 | ~~Add configurable pill visibility and selected-row-only targeting~~ **Complete (1.10.0):** popup select with hover-or-focus (default), selected-row-only (`is-focused="true"`), and hidden modes | 3 | 2 | Lets keyboard-first users reduce visual noise and accidental hover targeting. |
@@ -77,9 +77,9 @@ Scores use 1–5. **Impact** is expected value for the target user. **Difficulty
 | --- | --- | --- | --- |
 | Build a compose-adapter feasibility spike for focus, editor read/write, send state, and composer mutations | 5 | 5 | All requested compose features depend on selectors and side effects that do not exist in the codebase today. |
 | Build a local templates/snippets spike with explicit insertion preview | 4 | 4 | High-frequency typing savings, but the extension must never overwrite an existing draft or accidentally send. |
-| Build current-conversation search for currently loaded message nodes | 5 | 5 | Strong retrieval value, but message identity, virtualized DOM, and rendering change risk are substantial. |
-| Add user-visible search coverage metadata: loaded message count and oldest/newest captured timestamps | 5 | 3 | Makes a zero-result safe to interpret as “not in loaded content,” not “does not exist.” |
-| Prototype an explicit load-older-history search helper as a later experimental path | 3 | 5 | It may change read state or be incomplete. It must be cancellable, visibly bounded, and opt-in per run. |
+| Build current-conversation find for currently loaded message nodes | 5 | 5 | Strong retrieval value, but message identity, virtualized DOM, and rendering change risk are substantial. |
+| Add user-visible find coverage metadata: loaded message count and oldest/newest captured timestamps | 5 | 3 | Makes a zero-result safe to interpret as “not in loaded content,” not “does not exist.” |
+| Prototype an explicit load-older-history helper as a later experimental path | 3 | 5 | It may change read state or be incomplete. It must be cancellable, visibly bounded, and opt-in per run. |
 | Build draft-recovery spike that snapshots unsent compose text locally, only after detecting a stable account/conversation key | 4 | 5 | Draft loss is consequential; wrong-account or wrong-thread restoration would be a severe privacy/correctness bug. |
 | Ship opt-in draft recovery with review-before-restore, short configurable retention, and one-click deletion | 4 | 4 | Makes the feature safe only after identity and composer behavior are demonstrated. |
 | Add a local data store with schema versioning, per-account namespaces, retention cleanup, size bounds, and export/delete controls | 5 | 5 | A shared prerequisite for templates, draft recovery, and any future index. |
@@ -91,7 +91,7 @@ Scores use 1–5. **Impact** is expected value for the target user. **Difficulty
 | Finding and action | Impact | Difficulty | Why it matters |
 | --- | --- | --- | --- |
 | Update privacy policy, popup disclosures, and README for every local-content feature | 5 | 2 | The current no-storage promise must not become inaccurate. |
-| Add keyboard-accessible overlay semantics, focus trapping/restoration, screen-reader labels, and RTL test cases | 5 | 4 | The keyboard-first product must work without a pointer and in RTL layouts. |
+| Add keyboard-accessible overlay semantics, focus trapping/restoration, screen-reader labels, and RTL test cases | 5 | 4 | Phase 2 ships English LTR overlay semantics and focus restoration; RTL and localized UI validation remain Phase 5. |
 | Use a live UI compatibility matrix across Chrome/Chromium, English plus priority non-English locales, personal/group chats, and account switching | 5 | 4 | Unit tests alone cannot verify Google’s private production DOM. |
 | Keep content and identifiers out of logs, support reports, and any future diagnostics | 5 | 2 | Preserves the selected strict local-only trust model. |
 
@@ -100,9 +100,9 @@ Scores use 1–5. **Impact** is expected value for the target user. **Difficulty
 ### Feasible now or after live DOM validation
 
 - Additional conversation-row menu actions: mark read, mute/unmute, unarchive (archived modal), and block/report spam (shipped 1.9.0).
-- Navigation shortcuts: open Archived and Start chat (page-level); future Spam and blocked entry points.
+- Navigation shortcuts: optional Chrome commands for Open Archived, Start chat, and Open Spam & blocked; page-local list navigation, palette, and help overlay.
 - Command palette, keyboard help, list focus/navigation, improved feedback, preference controls, and a selector-health check.
-- Templates, loaded-message search, and draft recovery **only after** the compose/message feasibility spikes demonstrate stable DOM anchors and account/conversation identity.
+- Templates, loaded-message find, and draft recovery **only after** the compose/message feasibility spikes demonstrate stable DOM anchors and account/conversation identity.
 - Local-only storage using `chrome.storage.local` or IndexedDB, with explicit consent and data lifecycle controls.
 
 ### Conditional and gated
@@ -117,7 +117,7 @@ Scores use 1–5. **Impact** is expected value for the target user. **Difficulty
 - Repairing Google Messages pairing, phone synchronization, RCS delivery, or browser page-load failures. The extension can surface observed status and troubleshooting guidance but cannot fix Google’s service.
 - A replacement Google Messages client or a direct protocol integration. There is no supported consumer API established for that path.
 - Guaranteed delivery confirmation, unattended scheduled sending, or a complete backup/recovery product.
-- Full-history global search before the extension proves safe content capture, stable identity, and correct virtualized-list behavior.
+- Full-history global find before the extension proves safe content capture, stable identity, and correct virtualized-list behavior.
 - Firefox support in this roadmap, by product decision.
 
 ## Delivery plan
@@ -141,18 +141,20 @@ Scores use 1–5. **Impact** is expected value for the target user. **Difficulty
 
 ### Phase 2: keyboard-first navigation and discovery
 
-1. Add a context-aware page keyboard controller. It must ignore keystrokes in editable controls, during IME composition, and while text is selected unless a modifier-based command is explicitly intended.
-2. Add list navigation, open, previous-conversation return, search focus, composer focus, escape-to-list, and unread traversal.
-3. Add a command palette and shortcut overlay that list command availability, custom bindings, and unsupported features. Use page-level handling for page actions and `chrome.commands` only for browser-level entry points.
-4. Add focus restoration, ARIA semantics, and RTL layout behavior for every injected surface.
-5. Ship a user-visible limitation when results are based only on loaded list items. Never hide the native list in a way that prevents access to new conversations.
+**Status:** Shipped in extension **1.13.0** (English LTR). Live collision validation and composer DOM discovery recorded in [compatibility-matrix.md](docs/dom-discovery/compatibility-matrix.md); composer focus remains deferred pending selector wiring.
+
+1. ~~Add a context-aware page keyboard controller. It must ignore keystrokes in editable controls, during IME composition, and while text is selected unless a modifier-based command is explicitly intended.~~ **Complete:** guarded page-local controller with context guards and a separate page command registry.
+2. ~~Add list navigation, open, previous-conversation return, escape-to-list, and unread traversal.~~ **Complete:** loaded-list cursor, fail-closed return navigation by conversation-link identity, and unread boundary feedback. **Composer focus:** DOM discovery spike only; command stays unavailable until live validation confirms a stable, locale-agnostic editor target.
+3. ~~Add a command palette and shortcut overlay that list command availability, custom bindings, and unsupported features.~~ **Complete:** filterable palette (`Ctrl+Shift+P` / `Command+Shift+P`) and `Shift+/` help overlay driven by command metadata. Palette filtering applies to command labels and descriptions only, not conversations or message content. Browser-level entry points remain `chrome.commands` only.
+4. ~~Add focus restoration, ARIA semantics, and loaded-list limitation messaging for injected surfaces.~~ **Complete for English LTR unit and JSDOM coverage.** RTL layout validation and localized extension UI move to Phase 5.
+5. ~~Ship a user-visible limitation when results are based only on loaded list items.~~ **Complete:** unread traversal and list navigation operate only on currently loaded rows; the native list is never filtered or hidden.
 
 ### Phase 3: three feasibility spikes for expansion features
 
 Run these as separate, testable spikes. Each delivers a short evidence report and either a shippable capability contract or a documented stop decision.
 
 1. **Templates spike:** determine how to focus the editor, inspect existing draft text, insert at the cursor, preserve undo behavior, and avoid sending. Prototype local templates with no message capture.
-2. **Current-conversation search spike:** determine message-node identity, author/timestamp extraction, virtualized rendering limits, highlight behavior, and safe navigation to a match. Search only loaded nodes.
+2. **Current-conversation find spike:** determine message-node identity, author/timestamp extraction, virtualized rendering limits, highlight behavior, and safe navigation to a match. Find only loaded nodes.
 3. **Draft-recovery spike:** determine account and conversation identity, mutation observation reliability, debounce behavior, and how to restore without overwriting a live draft.
 
 Reject any spike that cannot satisfy fail-closed behavior, account isolation, a disclosure of coverage, and sanitized automated tests.
@@ -161,9 +163,9 @@ Reject any spike that cannot satisfy fail-closed behavior, account isolation, a 
 
 1. Add a local-data module with namespaced keys, schema migrations, retention policy, data-size caps, per-feature opt-in, account-change invalidation, and deletion controls.
 2. Ship templates first if its spike is successful: local template manager, keyboard invocation, previewed insertion, and non-destructive conflict handling.
-3. Ship current-conversation loaded-content search if its spike is successful: find UI, next/previous matches, highlighted results, explicit loaded-coverage facts, and clear-data control if any index is persisted.
+3. Ship current-conversation loaded-content find if its spike is successful: find UI, next/previous matches, highlighted results, explicit loaded-coverage facts, and clear-data control if any index is persisted.
 4. Ship draft recovery if its spike is successful: opt-in, conservative 30-day default, review-before-restore, never overwrite a non-empty active draft, and delete-by-thread/account/all controls.
-5. Consider the older-history loader only after the loaded-content search is dependable. Make it explicit, cancelable, state-safe, and labeled experimental.
+5. Consider the older-history loader only after the loaded-content find is dependable. Make it explicit, cancelable, state-safe, and labeled experimental.
 
 ### Phase 5: internationalization, validation, and maintenance loop
 
@@ -178,7 +180,7 @@ Reject any spike that cannot satisfy fail-closed behavior, account isolation, a 
 
 - Preserve 100% unit coverage, extending the fixture library rather than lowering thresholds.
 - Unit-test selector capability checks, action preconditions, keyboard context guards, local-store retention/migrations, account isolation, template insertion safety, and draft conflict resolution.
-- Add integration-style JSDOM tests for palette focus behavior, compose adapters, loaded-message search coverage labels, and data-deletion controls.
+- Add integration-style JSDOM tests for palette focus behavior, compose adapters, loaded-message find coverage labels, and data-deletion controls.
 - Use manual live Google Messages checks for private DOM validation. Do not automate real conversations, send real messages, or retain personal data in test artifacts.
 - Test destructive actions only against dedicated test conversations and retain confirmation requirements unless native behavior is unambiguous and the user has opted into automation.
 
@@ -186,7 +188,7 @@ Reject any spike that cannot satisfy fail-closed behavior, account isolation, a 
 
 - Do not implement a row action until the live UI exposes a stable primary selector or a locale-tested fallback.
 - Do not ship a compose/content feature until its spike establishes stable targets, a fail-closed state, a privacy disclosure, and a full deletion path.
-- Do not claim “search all messages” unless coverage across unloaded history has been proven. Initial copy must say “search loaded messages in this conversation.”
+- Do not claim “find all messages” unless coverage across unloaded history has been proven. Initial copy must say “find loaded messages in this conversation.”
 - Do not restore drafts automatically or over a non-empty native draft.
 - Ship a capability only if the core workflow can be completed without a pointer, preserves normal typing and IME behavior, and passes accessibility/focus tests.
 

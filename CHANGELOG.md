@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.13.0 - 2026-10-02
+
+### Added
+
+- Guarded page-local keyboard controller with context guards for editable fields, IME composition, native dialogs, repeated keys, and selected text
+- Loaded-list navigation: next/previous conversation, open focused row, next/previous unread (loaded rows only), escape-to-list, and in-memory return navigation by conversation link identity
+- Filterable command palette (`Ctrl+Shift+P` / `Command+Shift+P`) and shortcut reference overlay (`Shift+/`) driven by command metadata
+- Navigation feedback toasts for unavailable, boundary, and fail-closed outcomes
+- Composer DOM discovery spike script at `output/composer-discovery-console.js` (composer focus command remains unavailable until live validation)
+
+### Changed
+
+- Phase 2 documentation: RTL and localized validation deferred to Phase 5
+- Popup adds a Page navigation section describing loaded-list limits and `Shift+/` help on Google Messages Web
+
 ## 1.12.0 - 2026-10-02
 
 ### Added
@@ -101,7 +116,7 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 
 - Archived FAB and shortcut false timeout when the Archived dialog opens slowly with a loading spinner
-- Archived entry discovery on desktop layouts that expose Archived through account or header menus rather than search overflow
+- Archived entry discovery on desktop layouts that expose Archived through account or header menus rather than list header overflow
 
 ## 1.7.1 - 2026-10-01
 

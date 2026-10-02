@@ -29,6 +29,8 @@ Chrome extension for keyboard shortcuts and row pills that automate conversation
 - Reset extension preferences from the popup without changing Google Messages
 - In-page success and failure feedback with a screen-reader-friendly status region
 - Language-agnostic menu targeting through Google Messages `data-e2e-*` attributes, with English text fallback
+- Page-local keyboard navigation across currently loaded conversation rows (see Phase 2 below)
+- Filterable command palette and `Shift+/` shortcut reference on Google Messages Web
 
 ## Requirements
 
@@ -120,6 +122,31 @@ If Chrome or the operating system already uses a suggested shortcut, Chrome may 
 - The extension does not collect or transmit conversation data.
 - Shortcut automation depends on Google Messages accepting programmatic clicks in its UI.
 
+## Phase 2: page navigation and discovery (1.13.0)
+
+Page-local shortcuts run only on Google Messages Web. They ignore editable fields, IME composition, native dialogs, repeated key presses, and selected text unless a command is explicitly safe for that context. Pause closes the palette and help overlay and blocks the keyboard controller.
+
+Provisional page-local bindings (validate collisions in your browser and OS before relying on them):
+
+| Action | Binding (Windows/Linux) | Binding (macOS) |
+| --- | --- | --- |
+| Next conversation | `Alt+ArrowDown` | `Option+ArrowDown` |
+| Previous conversation | `Alt+ArrowUp` | `Option+ArrowUp` |
+| Open focused conversation | `Alt+Enter` | `Option+Enter` |
+| Return to previous conversation | `Alt+[` | `Option+[` |
+| Next unread | `Alt+U` | `Option+U` |
+| Previous unread | `Alt+Shift+U` | `Option+Shift+U` |
+| Return focus to conversation list | `Escape` | `Escape` |
+| Command palette | `Ctrl+Shift+P` | `Command+Shift+P` |
+| Shortcut reference | `Shift+/` | `Shift+/` |
+| Focus composer | `Alt+M` | `Option+M` (unavailable until live DOM validation) |
+
+List and unread navigation operate on **currently loaded rows only**. When unread traversal reaches the end of loaded unread rows, the extension reports a visible boundary message without hiding or filtering the native list. Return navigation stores the last opened conversation link in memory (not persisted), re-queries loaded rows, and fails closed when the target is missing or ambiguous.
+
+The command palette filters **command labels and descriptions only**. It does not index conversations or message content.
+
+Composer focus remains **unavailable** until the Phase 2 DOM discovery spike confirms a stable editor selector. Follow [docs/dom-discovery/phase2-live-validation.md](docs/dom-discovery/phase2-live-validation.md) for the step-by-step live pass and record results in [docs/dom-discovery/compatibility-matrix.md](docs/dom-discovery/compatibility-matrix.md).
+
 ## Phase 1 scope (complete)
 
 Phase 1 row actions are implemented and documented through extension **1.9.1**:
@@ -146,7 +173,7 @@ The capability self-test is exposed to the page through a small MAIN-world bridg
 
 Contributors document live validation in [docs/dom-discovery/live-validation-checklist.md](docs/dom-discovery/live-validation-checklist.md), record results in [docs/dom-discovery/compatibility-matrix.md](docs/dom-discovery/compatibility-matrix.md), and follow [docs/dom-discovery/fixture-sanitization.md](docs/dom-discovery/fixture-sanitization.md) before adding DOM fixtures. Phase 1 row-action gates live in [docs/dom-discovery/phase1-action-decisions.md](docs/dom-discovery/phase1-action-decisions.md).
 
-Compose, loaded-message search, and connection diagnostics remain unavailable until live DOM discovery validates their selectors.
+Compose focus (page-local `Alt+M` / `Option+M`), loaded-message find, native filter UI focus, and connection diagnostics remain unavailable until live DOM discovery validates their selectors.
 
 ## Development
 

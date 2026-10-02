@@ -8,17 +8,17 @@ export const MESSAGE_PANE_SELECTORS = {
 };
 
 export const MESSAGE_PANE_CAPABILITY_IDS = {
-  loadedSearch: 'messagePane.loadedSearch',
+  loadedMessageFind: 'messagePane.loadedMessageFind',
   highlightMatch: 'messagePane.highlightMatch',
   authorTimestamp: 'messagePane.authorTimestamp'
 };
 
 const MESSAGE_PANE_UNAVAILABLE_REASON =
-  'Message pane selectors are not validated; complete live DOM discovery before enabling loaded-message search.';
+  'Message pane selectors are not validated; complete live DOM discovery before enabling loaded-message find.';
 
 export function assessMessagePaneCapabilities() {
   return {
-    [MESSAGE_PANE_CAPABILITY_IDS.loadedSearch]: createCapabilityResult(
+    [MESSAGE_PANE_CAPABILITY_IDS.loadedMessageFind]: createCapabilityResult(
       CAPABILITY_UNAVAILABLE,
       MESSAGE_PANE_UNAVAILABLE_REASON,
       MESSAGE_PANE_EVIDENCE_SOURCE

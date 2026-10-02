@@ -9,10 +9,17 @@ const consoleProbePath = fileURLToPath(
 );
 
 describe('deferred action validation console', () => {
+  it('is valid JavaScript that can be pasted into the DevTools console', async () => {
+    const localThis = await readFile(consoleProbePath, 'utf8');
+
+    expect(() => new Function(localThis)).not.toThrow();
+  });
+
   it('includes a read-only Spam and Blocked discovery probe', async () => {
     const localThis = await readFile(consoleProbePath, 'utf8');
 
     expect(localThis).toContain('inspectGoogleMessagesDestination');
+    expect(localThis).toContain('globalThis.inspectGoogleMessagesDestination = async');
     expect(localThis).toContain("spam: ['spam']");
     expect(localThis).toContain("blocked: ['blocked']");
     expect(localThis).toContain('readOnly: true');

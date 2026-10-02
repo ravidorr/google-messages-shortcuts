@@ -1,6 +1,6 @@
 # Compatibility matrix
 
-Record live validation results from [live-validation-checklist.md](./live-validation-checklist.md). Update this file after each manual compatibility pass or when Google Messages ships a visible UI change.
+Record live validation results from [live-validation-checklist.md](./live-validation-checklist.md). For Phase 2 page navigation, follow the step-by-step guide in [phase2-live-validation.md](./phase2-live-validation.md). Update this file after each manual compatibility pass or when Google Messages ships a visible UI change.
 
 ## Matrix format
 
@@ -34,8 +34,9 @@ Use **approve** only when automation can fail closed with a bounded postconditio
 - `slow-dom`: CPU throttling enabled
 - `baseline-trash-dialog-open`: Move to trash dialog visible (row menu typically closed)
 - `pill-visibility`: Epic A popup visibility modes on inbox rows plus Archived modal absence check
-- `start-chat`: Epic B page-level Start chat shortcut and native FAB selector validation
+- `start-chat`: Epic B optional Chrome Start chat command and native FAB selector validation
 - `spam-blocked`: Epic C shared Spam & blocked drawer-entry and dialog validation
+- `phase2-navigation`: Phase 2 page-local keyboard controller, loaded-list navigation, palette/help, unread boundaries, and composer discovery spike
 
 ### Capability self-test column
 
@@ -45,6 +46,8 @@ Use **pass** when `runCapabilitySelfTest()` returns `ok: true` (no DOM mutation,
 
 | Date | Browser | Extension | Locale | Direction | Scenario | Capability self-test | Notes |
 | ---- | ------- | --------- | ------ | --------- | -------- | -------------------- | ----- |
+| 2026-10-03 | Chrome 154 | 1.13.0 | en | LTR | phase2-navigation | pass | **Phase 2 live pass (macOS).** Steps 1–5, 7–10 pass. Initial list cursor on inbox load. Unread traversal (3 loaded unread, boundary toast). Return navigation per two-open stack (Option+Enter A → B → Option+[). Command palette: 17 commands, `unread` filter → 3 items, arrow nav, Escape close. Help overlay: open, Tab trap, Escape close. **Collision matrix:** all 10 shortcuts **works**, no collisions. Composer probe: `mutated: false`; editors match `textarea[aria-label*="Message" i]` and `div[contenteditable="true"][aria-label*="Message" i]` (`matchCount: 1` each); `data-e2e-message-input` selectors `0`. Composer focus remains deferred. Helpers: [phase2-live-validation-console.js](../../output/phase2-live-validation-console.js). |
+| 2026-10-02 | n/a (unit + JSDOM) | 1.13.0 | en | LTR | phase2-navigation | n/a | **Phase 2 implementation pass (automated).** Guarded keyboard controller, loaded-list cursor, unread boundaries, return-by-link-identity fail-closed paths, command palette metadata filtering, shortcut help overlay focus trap, and navigation feedback covered by unit tests and sanitized fixtures. **Live collision matrix, virtualized-row rerender, and composer spike pending** before release sign-off. Composer focus command remains unavailable (`COMPOSER_SELECTORS.editor: null`). Probe: [composer-discovery-console.js](../../output/composer-discovery-console.js). |
 | 2026-10-02 | Chrome 154.0.0.0 | 1.12.0 | en | LTR | spam-blocked | pass | **Epic C implementation pass.** Optional Chrome commands assigned for Open Archived, Open Spam & blocked, and Start chat all worked. The injected Spam & blocked FAB opened the intended native dialog without triggering report, block, unblock, or deletion behavior. |
 | 2026-10-02 | Chrome 154.0.0.0 | 1.11.1 | en | LTR | spam-blocked | pass | **Epic C discovery pass, en-only contract.** Inbox self-test: `ok: true`, `mutated: false`, `unsafe: 0`, `blockingUnavailable: 0`. Native top-left navigation drawer exposes exactly one visible `BUTTON` matching the shared Spam & blocked entry; no `data-e2e-*` selector observed. Opening it produces exactly one destination heading and one `mat-dialog-container`, both immediately and after 1s, repeated twice. Narrow-layout pass recorded (`narrowLayout: true`). Dialog-internal Not spam actions are excluded from entry matching. |
 | 2026-10-02 | Chrome 154.0.0.0 | 1.11.0 | en | LTR | start-chat | pass | **Epic B pass (macOS Chrome).** Inbox self-test: `ok: true`, `mutated: false`, `blockingUnavailable: 0`, `startChat.entry` supported (`dom-query`). Structural probe: 24 rows, `a[data-e2e-start-button]` `matchCount: 1`, `href: /web/conversations/new`, visible. **Shortcut:** `Command+Shift+G` opens new-conversation view with no Chrome or Google Messages collision (after rebinding from Incognito `Command+Shift+N` and split-view `Command+Option+N`). Editable-target and dialog-suppression guards remain unit-tested; optional manual spot-check. PR #82. |
@@ -91,14 +94,19 @@ Use **pass** when `runCapabilitySelfTest()` returns `ok: true` (no DOM mutation,
 | Mute / unmute (menu toggle) | `button[data-e2e-conversation-menu-mute]` (same node; label `Mute` ↔ `Unmute`) | English "Mute" / "Unmute" | en live | 5 | 2026-10-01 |
 | Mute state (list row) | _not used_ (menu-label toggle is postcondition) | n/a | en live | n/a | 2026-10-01 |
 | Unarchive (archived modal) | `button[data-e2e-unarchive-button]` in `mat-dialog-container` | English "Unarchive" | en + he (RTL threads) live | 5 | 2026-10-02 |
-| Open archived (modal entry) | `button[data-e2e-archived-list-button], a[data-e2e-archived-list-button]` | Direct modal entry, bottom-nav route, account menu, search overflow, app header menu, Settings, then localized "Archived" labels | en + he (RTL threads) live | 5 | 2026-10-02 |
+| Open archived (modal entry) | `button[data-e2e-archived-list-button], a[data-e2e-archived-list-button]` | Direct modal entry, bottom-nav route, account menu, list header overflow, app header menu, Settings, then localized "Archived" labels | en + he (RTL threads) live | 5 | 2026-10-02 |
 | Open archived (dialog shell) | `mat-dialog-container` with heading "Archived" | Unarchive controls may render after spinner | en + he (RTL threads) live | 5 | 2026-10-02 |
 | Open archived (sidebar route) | `button[data-e2e-archived-button], a[data-e2e-archived-button]` | Any visible route control outside dialog; bottom navigation on narrow layouts | en live | 5 | 2026-10-01 |
 | Open Spam & blocked (drawer entry) | _no `data-e2e-*` selector observed_ | Exact English “Spam & blocked” label on one visible `BUTTON` scoped to the native navigation drawer and outside dialogs | en live | 4 | 2026-10-02 |
 | Open Spam & blocked (dialog postcondition) | One `mat-dialog-container` with one matching heading | n/a | en live | 4 | 2026-10-02 |
 | Start chat FAB anchor | `a[data-e2e-start-button]` inside `mw-fab-link.start-chat` | n/a | en live | 5 | 2026-10-02 |
 | Start chat postcondition | URL path `/web/conversations/new` or `mws-new-conversation` / `[data-e2e-new-conversation-view]` | n/a | en live (macOS shortcut pass) | 5 | 2026-10-02 |
-| Start chat shortcut | `Ctrl+Shift+G` / `Command+Shift+G` (page-level) | n/a | en live macOS; no collision after rebinding from Incognito and split-view chords | 5 | 2026-10-02 |
+| Start chat shortcut | Optional Chrome command (user-assigned; e.g. `Ctrl+Shift+G` / `Command+Shift+G` in live validation) | n/a | en live macOS; no collision after rebinding from Incognito and split-view chords | 5 | 2026-10-02 |
+| Page-local list navigation | Extension-managed cursor on `a[data-e2e-conversation]` / row `a[href]` inside `mws-conversation-list-item` | Focused row (`is-focused="true"`), `aria-selected`, or first loaded row | en unit fixtures | 3 | 2026-10-02 |
+| Page-local unread traversal | `[data-e2e-is-unread="true"]` on row or link | n/a | en unit fixtures | 3 | 2026-10-02 |
+| Return navigation identity | Conversation link `href` (`href:/web/conversations/...`) | In-memory stack only; fail closed on missing or duplicate loaded matches | en unit fixtures | 3 | 2026-10-02 |
+| Command palette / shortcut help | Injected modal overlays (`data-messages-shortcuts-*`) | Filter command metadata only; no conversation find | en unit fixtures | 4 | 2026-10-02 |
+| Composer focus (Phase 2 spike) | _not validated for automation_ | Candidate probes in [composer-discovery-console.js](../../output/composer-discovery-console.js) | n/a | 1 | Phase 2 gate |
 | Pin (web row menu) | _not present_ | n/a | en live | 5 | 2026-10-01 |
 | Unpin (web row menu) | _not present_ | n/a | en live | 5 | 2026-10-01 |
 | Composer | _not validated_ | n/a | n/a | 1 | Phase 0 gate |
@@ -132,14 +140,15 @@ Use **pass** when `runCapabilitySelfTest()` returns `ok: true` (no DOM mutation,
 - Pin/unpin (web): row overflow menu inspected on promo/business and 1:1 SMS inbox rows. Menu items are Archive, Block & report spam, Move to trash, and Mute only. No Pin or Unpin control; `button[data-e2e-conversation-menu-pin]` not in DOM with menu open. Aligns with [Google Messages pin help](https://support.google.com/messages/answer/10930955) (pin/unpin action mobile-only; pinned rows may sync for display on web). Decision: **block** pin/unpin automation on Google Messages Web.
 - Mute/unmute: `button[data-e2e-conversation-menu-mute]` confirmed; label toggles `Mute` → `Unmute` after native mute (menu reopen probe). List-row mute icon not required; menu-label is bounded postcondition. Decision: **approve** for menu-action implementation.
 - Unarchive: Archived modal (title "Archived", Done footer) with inline `button[data-e2e-unarchive-button]` per row (`unarchiveCount: 25`). Not a row overflow menu item; do not use `data-e2e-conversation-menu-unarchive`. Native unarchive + `backInInbox: true` verified. Selector **approve**; shipped in extension 1.8.0 via `EXECUTION_KIND_ARCHIVED_MODAL_CLICK`.
-- Open archived: bottom navigation `data-e2e-archived-button` opens the Archived **sidebar route**, not the unarchive modal. Extension discovery order: direct modal entry (`data-e2e-archived-list-button`), bottom-nav route, account menu, search overflow, app header menu, Settings, then localized "Archived" labels. Page-level shortcut `Ctrl+Shift+A` / `⇧⌘A` and the injected Archived FAB use that order. Modal success is detected when the dialog shell appears (`mat-dialog-container` + "Archived" heading), even before unarchive controls finish loading. Sidebar route success returns `archived-sidebar-only` feedback because unarchive pills require the modal.
+- Open archived: bottom navigation `data-e2e-archived-button` opens the Archived **sidebar route**, not the unarchive modal. Extension discovery order: direct modal entry (`data-e2e-archived-list-button`), bottom-nav route, account menu, list header overflow, app header menu, Settings, then localized "Archived" labels. Page-level shortcut `Ctrl+Shift+A` / `⇧⌘A` and the injected Archived FAB use that order. Modal success is detected when the dialog shell appears (`mat-dialog-container` + "Archived" heading), even before unarchive controls finish loading. Sidebar route success returns `archived-sidebar-only` feedback because unarchive pills require the modal.
 - Open archived (desktop manual pass, 2026-10-02): injected Archived FAB and page-level shortcut open the Archived modal on a wide desktop layout. Initial spinner state resolves without a false timeout once dialog-shell detection is used.
 
-### Live notes (2026-10-02, Epic B Start chat, extension 1.11.0, Chrome 154, en LTR)
+### Live notes (2026-10-02, Epic B Start chat, extension 1.11.0+, Chrome 154, en LTR)
 
 - Inbox capability self-test pass: `startChat.entry` supported via `dom-query`; `matchCount: 1` for `a[data-e2e-start-button]` with `href="/web/conversations/new"`, visible, not disabled.
 - **Shortcut collisions (macOS Chrome):** `Command+Shift+N` opens Incognito; `Command+Option+N` opens split view. Rebound to `Command+Shift+G` / `Ctrl+Shift+G` (same Shift+letter pattern as Open Archived).
-- **Live shortcut pass (macOS):** `Command+Shift+G` opens the new-conversation view without browser or Google Messages interception. Start chat moved to **Approve**.
+- **Live shortcut pass (macOS, extension 1.11.0):** `Command+Shift+G` opens the new-conversation view without browser or Google Messages interception. Start chat moved to **Approve**.
+- **Extension 1.12.0+:** Start chat is an optional Chrome command assigned in `chrome://extensions/shortcuts`, not a fixed page-level binding.
 
 ### Live notes (2026-10-02, locale matrix sign-off, extension 1.8.0)
 

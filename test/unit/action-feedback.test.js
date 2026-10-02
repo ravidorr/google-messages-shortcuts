@@ -75,7 +75,7 @@ describe('action-feedback', () => {
       openedRoute: true
     }, COMMAND_OPEN_ARCHIVED)).toEqual({
       kind: 'info',
-      message: 'Google Messages opened the Archived sidebar, not the unarchive dialog. Open Archived from the account menu or search overflow to reach the unarchive dialog.'
+      message: 'Google Messages opened the Archived sidebar, not the unarchive dialog. Open Archived from the account menu or list header overflow to reach the unarchive dialog.'
     });
   });
 

@@ -30,7 +30,7 @@ States:
 | Surface | Decision | Rationale |
 | ------- | -------- | --------- |
 | Composer adapter | **Block** (feature) | No validated selectors; capability contract returns `unavailable` until live spike |
-| Message pane adapter | **Block** (feature) | Loaded-message search deferred to Phase 3 spike |
+| Message pane adapter | **Block** (feature) | Loaded-message find deferred to Phase 3 spike |
 | Connection status adapter | **Block** (feature) | No validated selectors for pairing/status UI |
 
 These are not row actions but share the same gate: Phase 4 content features must not ship until corresponding spikes pass.

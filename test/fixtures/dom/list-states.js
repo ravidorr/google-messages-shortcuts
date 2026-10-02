@@ -223,6 +223,54 @@ export const fullListActionSurface = `
   ${startChatFabSurface}
 `;
 
+export const unfocusedMultiRowNavigationList = `
+  <mws-conversation-list-item id="fixture-row-a">
+    <a href="/web/conversations/a" data-e2e-conversation></a>
+    <button aria-haspopup="menu"></button>
+  </mws-conversation-list-item>
+  <mws-conversation-list-item id="fixture-row-b">
+    <a href="/web/conversations/b" data-e2e-conversation data-e2e-is-unread="true"></a>
+    <button aria-haspopup="menu"></button>
+  </mws-conversation-list-item>
+  <mws-conversation-list-item id="fixture-row-c">
+    <a href="/web/conversations/c" data-e2e-conversation data-e2e-is-unread="true"></a>
+    <button aria-haspopup="menu"></button>
+  </mws-conversation-list-item>
+`;
+
+export const multiRowNavigationList = `
+  <mws-conversation-list-item id="fixture-row-a">
+    <a href="/web/conversations/a" data-e2e-conversation></a>
+    <button aria-haspopup="menu"></button>
+  </mws-conversation-list-item>
+  <mws-conversation-list-item id="fixture-row-b" is-focused="true">
+    <a href="/web/conversations/b" data-e2e-conversation data-e2e-is-unread="true"></a>
+    <button aria-haspopup="menu"></button>
+  </mws-conversation-list-item>
+  <mws-conversation-list-item id="fixture-row-c">
+    <a href="/web/conversations/c" data-e2e-conversation data-e2e-is-unread="true"></a>
+    <button aria-haspopup="menu"></button>
+  </mws-conversation-list-item>
+`;
+
+export const duplicateConversationLinkList = `
+  <mws-conversation-list-item>
+    <a href="/web/conversations/shared" data-e2e-conversation></a>
+    <button aria-haspopup="menu"></button>
+  </mws-conversation-list-item>
+  <mws-conversation-list-item>
+    <a href="/web/conversations/shared" data-e2e-conversation></a>
+    <button aria-haspopup="menu"></button>
+  </mws-conversation-list-item>
+`;
+
+export const composerEditorSurface = `
+  <mws-message-input>
+    <textarea data-e2e-message-input aria-label="Message"></textarea>
+    <button data-e2e-send-button aria-label="Send"></button>
+  </mws-message-input>
+`;
+
 export const openRowMenuMarkUnreadFallbackOnly = `
   ${selectedReadRow}
   <div role="menu" class="conversation-actions-menu mat-mdc-menu-panel">
@@ -276,5 +324,8 @@ export const FIXTURE_EXPORT_NAMES = [
   'startChatFabSurface',
   'startChatNewConversationSurface',
   'duplicateStartChatButtons',
-  'archivedModalSurface'
+  'archivedModalSurface',
+  'multiRowNavigationList',
+  'duplicateConversationLinkList',
+  'composerEditorSurface'
 ];

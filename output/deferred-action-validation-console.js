@@ -26,7 +26,7 @@
     'button[data-e2e-unarchive-button]',
     'button[data-e2e-archived-button], a[data-e2e-archived-button], button[data-e2e-archived-list-button]',
     'button[data-e2e-settings-button], a[data-e2e-settings-button]',
-    'input[type="search"], input[type="text"], input[aria-label*="Search" i], input[placeholder*="Search" i]',
+    'input[type="text"], input[type="text"], input[aria-label*="Filter" i], input[placeholder*="Filter" i]',
     'button[aria-haspopup="menu"], button.menu-button, button.mat-mdc-icon-button',
     'button[data-e2e-account-button], button[data-e2e-user-menu-button], button[data-e2e-profile-button]',
     'header img, [role="banner"] img',
@@ -70,7 +70,7 @@
       controls: startChatProbe
     },
     observedControls,
-    note: 'Sanitized structural evidence only. Run with the row menu closed for a clean self-test pass. With the menu open on a non-muted row, menu.unmute may block self-test until the row is muted or the menu closes. Open archived discovery order: data-e2e-archived-list-button, bottom-nav data-e2e-archived-button (sidebar route), account menu, search overflow, app header menu, Settings, then localized Archived labels. Start chat postcondition: pathname includes /web/conversations/new or a validated new-conversation surface selector.'
+    note: 'Sanitized structural evidence only. Run with the row menu closed for a clean self-test pass. With the menu open on a non-muted row, menu.unmute may block self-test until the row is muted or the menu closes. Open archived discovery order: data-e2e-archived-list-button, bottom-nav data-e2e-archived-button (sidebar route), account menu, list header overflow, app header menu, Settings, then localized Archived labels. Start chat postcondition: pathname includes /web/conversations/new or a validated new-conversation surface selector.'
   }, null, 2));
 })();
 
@@ -112,7 +112,7 @@
 //
 // It never clicks or focuses an element. The result intentionally excludes text,
 // accessible names, URLs, account identifiers, contacts, and message content.
-const inspectGoogleMessagesDestination = async (destination, { waitMs = 0 } = {}) => {
+globalThis.inspectGoogleMessagesDestination = async (destination, { waitMs = 0 } = {}) => {
   const destinationTokens = {
     spam: ['spam'],
     blocked: ['blocked']
@@ -209,7 +209,7 @@ const inspectGoogleMessagesDestination = async (destination, { waitMs = 0 } = {}
           'mws-bottom-navigation, mws-bottom-nav, [data-e2e-bottom-navigation], nav, aside, mws-navigation-drawer, mws-drawer'
         ),
         accountMenu: summarizeScope('mws-account-menu, [role="menu"], .cdk-overlay-container'),
-        searchOrHeaderOverflow: summarizeScope(
+        listHeaderOverflow: summarizeScope(
           'mws-search, mws-conversations-list-header, mws-conversation-list-header, header, [role="banner"], mws-app-bar, mws-top-app-bar'
         ),
         settings: summarizeScope('mws-settings, [data-e2e-settings-panel], mws-settings-home, [class*="settings"]')
