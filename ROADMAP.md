@@ -159,9 +159,10 @@ Reject any spike that cannot satisfy fail-closed behavior, account isolation, a 
 
 1. Move extension UI strings, fallback menu labels, and accessibility text into locale resources. Keep `data-e2e-*` selectors as the source of truth.
 2. Define priority locales from project feedback, including at least one RTL interface. Test localized fallback behavior manually against live Google Messages UI.
-3. Add a no-content support report that captures extension version, capability state, browser version, and selector status only with an explicit user copy/download action.
-4. Publish a compatibility matrix, a troubleshooting pause mode, a public changelog, and a feature-request path. Do not collect analytics or message content.
-5. Re-run the live compatibility suite whenever Google Messages changes the DOM or an extension release changes adapter code.
+3. Validate non-English LTR Google Messages UI chrome and block/report spam confirm dialog labels outside en-US before claiming locale support.
+4. Add a no-content support report that captures extension version, capability state, browser version, and selector status only with an explicit user copy/download action.
+5. Publish a compatibility matrix, a troubleshooting pause mode, a public changelog, and a feature-request path. Do not collect analytics or message content.
+6. Re-run the live compatibility suite whenever Google Messages changes the DOM or an extension release changes adapter code.
 
 ## Testing strategy
 

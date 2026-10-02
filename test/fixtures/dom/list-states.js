@@ -111,6 +111,15 @@ export const blockReportSpamConfirmDialog = `
   </mat-dialog-container>
 `;
 
+export const groupThreadBlockReportSpamMenuOpen = `
+  ${selectedReadRow}
+  <div class="conversation-actions-menu" role="menu">
+    <button data-e2e-conversation-menu-block class="mat-mdc-menu-item">
+      <span class="mat-mdc-menu-item-text">Report spam</span>
+    </button>
+  </div>
+`;
+
 export const blockReportSpamConfirmOkDialog = `
   <mat-dialog-container>
     <button>Cancel</button>
@@ -241,6 +250,7 @@ export const FIXTURE_EXPORT_NAMES = [
   'menuItemsPresent',
   'trashConfirmDialog',
   'blockReportSpamConfirmDialog',
+  'groupThreadBlockReportSpamMenuOpen',
   'blockReportSpamConfirmOkDialog',
   'duplicateBlockReportSpamConfirmDialog',
   'openBlockDialogMissingConfirmControl',

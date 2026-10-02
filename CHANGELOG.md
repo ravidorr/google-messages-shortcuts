@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.9.1 - 2026-10-02
+
+### Changed
+
+- Block / report spam menu capability accepts live group-thread label **Report spam** alongside **Block & report spam**
+- Compatibility matrix records en group-thread row menu validation; non-English LTR UI chrome and non-en-US block confirm labels moved to Phase 5
+- Validation console note clarifies self-test behavior when the row menu is open on a non-muted row
+
 ## 1.9.0 - 2026-10-02
 
 ### Added
