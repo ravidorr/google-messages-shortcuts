@@ -5,7 +5,6 @@ import {
 } from '../content/row-action-registry.js';
 import {
   getNavigationPopupLabelsByCommand,
-  getNavigationShortcutLabel,
   NAVIGATION_ACTIONS
 } from '../shared/navigation-actions.js';
 
@@ -95,17 +94,21 @@ function createShortcutIcon(documentRoot, commandName) {
   return svg;
 }
 
-export function renderNavigationShortcutRows(platform = navigator.platform) {
+export function renderNavigationShortcutRows(commands) {
   return NAVIGATION_ACTIONS.map((action) => ({
     commandName: action.command,
     label: getNavigationPopupLabelsByCommand()[action.command],
-    shortcut: getNavigationShortcutLabel(action, platform),
-    className: 'shortcut-status shortcut-status--assigned'
+    shortcut: getShortcutStatus(
+      commands.find((entry) => entry.name === action.command)?.shortcut || ''
+    ).label,
+    className: getShortcutStatus(
+      commands.find((entry) => entry.name === action.command)?.shortcut || ''
+    ).className
   }));
 }
 
-export function populateNavigationShortcutList(container, documentRoot = document, platform = navigator.platform) {
-  const rows = renderNavigationShortcutRows(platform);
+export function populateNavigationShortcutList(container, commands, documentRoot = document) {
+  const rows = renderNavigationShortcutRows(commands);
 
   container.replaceChildren();
 

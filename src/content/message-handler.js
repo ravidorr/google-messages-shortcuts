@@ -1,5 +1,6 @@
 import {
   COMMAND_OPEN_ARCHIVED,
+  COMMAND_OPEN_SPAM_BLOCKED,
   COMMAND_START_CHAT,
   isNavigationCommand,
   isValidCommand
@@ -8,6 +9,7 @@ import { isPaused } from '../shared/pause-preference.js';
 import { showActionFeedback } from './action-feedback.js';
 import { runConversationAction } from './conversation-action.js';
 import { handleOpenArchived } from './open-archived-action.js';
+import { handleOpenSpamBlocked } from './open-spam-blocked-action.js';
 import { handleOpenStartChat } from './open-start-chat-action.js';
 
 const STEP_LABELS = {
@@ -62,6 +64,8 @@ export async function handleCommand(
         result = await handleOpenArchived(documentRoot, chromeApi);
       } else if (command === COMMAND_START_CHAT) {
         result = await handleOpenStartChat(documentRoot, chromeApi);
+      } else if (command === COMMAND_OPEN_SPAM_BLOCKED) {
+        result = await handleOpenSpamBlocked(documentRoot, chromeApi);
       } else {
         result = { ok: false, reason: 'unknown-command' };
       }

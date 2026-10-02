@@ -22,7 +22,7 @@ import {
   COMMAND_TRASH,
   COMMAND_UNARCHIVE,
   COMMAND_UNMUTE,
-  MANIFEST_COMMANDS,
+  DEFAULT_MANIFEST_COMMANDS,
   NAVIGATION_COMMANDS,
   VALID_COMMANDS
 } from '../../src/shared/commands.js';
@@ -56,7 +56,7 @@ describe('row-action-registry', () => {
 
   it('limits manifest-eligible actions to the Chrome command cap', () => {
     expect(new Set(getManifestEligibleActions().map((action) => action.command)))
-      .toEqual(new Set(MANIFEST_COMMANDS));
+      .toEqual(new Set(DEFAULT_MANIFEST_COMMANDS));
     expect(getRowAction(COMMAND_MUTE)?.pillOnly).toBe(true);
     expect(getRowAction(COMMAND_UNMUTE)?.pillOnly).toBe(true);
     expect(getRowAction(COMMAND_BLOCK_REPORT_SPAM)?.pillOnly).toBe(true);

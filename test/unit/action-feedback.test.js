@@ -5,6 +5,7 @@ import {
   COMMAND_MARK_READ,
   COMMAND_MUTE,
   COMMAND_OPEN_ARCHIVED,
+  COMMAND_OPEN_SPAM_BLOCKED,
   COMMAND_START_CHAT,
   COMMAND_TRASH,
   COMMAND_UNARCHIVE,
@@ -52,6 +53,13 @@ describe('action-feedback', () => {
     expect(getActionFeedbackMessage({ ok: true, alreadyOpen: true }, COMMAND_OPEN_ARCHIVED)).toEqual({
       kind: 'info',
       message: 'Archived is already open.'
+    });
+    expect(getActionFeedbackMessage({
+      ok: true,
+      alreadyOpen: true
+    }, COMMAND_OPEN_SPAM_BLOCKED)).toEqual({
+      kind: 'info',
+      message: 'Spam & blocked is already open.'
     });
     expect(getActionFeedbackMessage({ ok: true }, COMMAND_START_CHAT)).toEqual({
       kind: 'success',
@@ -121,6 +129,11 @@ describe('action-feedback', () => {
       ['start-chat-not-found', 'error'],
       ['start-chat-ambiguous', 'error'],
       ['start-chat-timeout', 'error'],
+      ['spam-blocked-drawer-trigger-not-found', 'error'],
+      ['spam-blocked-drawer-trigger-ambiguous', 'error'],
+      ['spam-blocked-entry-ambiguous', 'error'],
+      ['spam-blocked-entry-not-found', 'error'],
+      ['spam-blocked-dialog-timeout', 'error'],
       ['native-dialog-open', 'info'],
       ['unarchive-button-not-found', 'error'],
       ['action-in-progress', 'info'],

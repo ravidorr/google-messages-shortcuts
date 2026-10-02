@@ -42,7 +42,7 @@ describe('popup entry', () => {
     await Promise.resolve();
     await Promise.resolve();
 
-    expect(document.querySelectorAll('.shortcut-item')).toHaveLength(9);
+    expect(document.querySelectorAll('.shortcut-item')).toHaveLength(10);
     expect(document.getElementById('shortcut-warning').hidden).toBe(false);
     expect(document.getElementById('auto-confirm-trash').checked).toBe(true);
     expect(document.getElementById('auto-confirm-trash').disabled).toBe(false);

@@ -1,7 +1,7 @@
 {
   "name": "google-messages-shortcuts",
-  "version": "1.11.1",
-  "description": "Use shortcuts to Archive, Trash, Mark as read, or Mark as unread, row pills for Mute, Unmute, and Block / report spam, and page-level navigation shortcuts to open Archived or Start chat in Google Messages.",
+  "version": "1.12.0",
+  "description": "Use shortcuts to archive, trash, mark conversations read or unread, and optionally navigate Google Messages.",
   "type": "module",
   "scripts": {
     "build": "node scripts/build.js",

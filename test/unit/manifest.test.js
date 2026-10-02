@@ -8,6 +8,7 @@ import { fileURLToPath } from 'node:url';
 import { afterEach, describe, expect, it } from 'vitest';
 import { buildExtension } from '../../scripts/build.js';
 import {
+  DEFAULT_MANIFEST_COMMANDS,
   MANIFEST_COMMANDS,
   MAX_MANIFEST_COMMANDS
 } from '../../src/shared/commands.js';
@@ -52,7 +53,9 @@ describe('extension manifest', () => {
       }
     ]);
     expect(Object.keys(manifest.commands)).toEqual(MANIFEST_COMMANDS);
-    expect(Object.keys(manifest.commands).length).toBeLessThanOrEqual(MAX_MANIFEST_COMMANDS);
+    expect(DEFAULT_MANIFEST_COMMANDS).toHaveLength(MAX_MANIFEST_COMMANDS);
+    expect(Object.values(manifest.commands)
+      .filter((command) => command.suggested_key)).toHaveLength(MAX_MANIFEST_COMMANDS);
     expect(manifest.icons).toEqual({
       16: 'icons/icon16.png',
       32: 'icons/icon32.png',

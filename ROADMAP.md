@@ -10,6 +10,16 @@ The extension will target **keyboard-first personal productivity for frequent de
 - Current-conversation search starts with loaded messages only. A user-started older-history loader is a later experiment, never an implicit scan and never described as a complete history search.
 - Include an internationalization track for Google Messages interfaces and extension UI.
 
+### Shortcut assignment model
+
+The extension will use a hybrid Chrome Commands model:
+
+- Archive, trash, mark unread, and mark read remain the four default Chrome command bindings.
+- Open Archived, Start chat, and future Open Spam & blocked become optional Chrome commands without `suggested_key`. Users assign or rebind them in `chrome://extensions/shortcuts`.
+- The popup must show each optional command’s current assignment or **Not assigned**, and link users to Chrome’s shortcut manager. Navigation FABs remain available when no shortcut is assigned.
+- Do not add new fixed page-level `keydown` shortcuts for navigation. A content-script listener can support unlimited page-local combinations, but those bindings are not visible or rebindable in Chrome’s shortcut manager and can conflict with browser, OS, or Google Messages behavior.
+- `keydown` remains appropriate for future in-page interactions only when it ignores editable controls, IME composition, repeated keys, selected text where relevant, and native dialogs. Use `event.code` for physical-key matching when layout independence matters; call `preventDefault()` only after an action is safe to run.
+
 ## Current implementation and technical baseline
 
 The existing MV3 extension has a narrow, well-tested DOM-automation architecture:
@@ -56,9 +66,9 @@ Scores use 1–5. **Impact** is expected value for the target user. **Difficulty
 | Add mark-read and mute/unmute after live selector validation | 4 | 2 | These extend the existing menu-action pattern and provide high-value inbox triage. |
 | ~~Add configurable pill visibility and selected-row-only targeting~~ **Complete (1.10.0):** popup select with hover-or-focus (default), selected-row-only (`is-focused="true"`), and hidden modes | 3 | 2 | Lets keyboard-first users reduce visual noise and accidental hover targeting. |
 | Add block/report-spam only with confirmation and capability checks (shipped in 1.9.0) | 3 | 3 | Pill-only action opens the native dialog and focuses the final confirm control without auto-clicking; live en-US `OK` confirm label validated. |
-| Add injected Archived FAB beside Start chat and page-level shortcut to open Archived (shipped with unarchive in 1.8.0) | 4 | 3 | Reduces navigation friction to the archived modal before unarchive pills run. |
-| Future: injected FAB and page-level shortcut for Spam and blocked (same pattern as Archived) | 3 | 3 | Deferred until native entry selectors are validated. |
-| ~~Page-level keyboard shortcut for native Start chat (`a[data-e2e-start-button]`)~~ **Complete (1.11.0):** `Ctrl+Shift+G` / `Command+Shift+G` clicks the native Start chat FAB with fail-closed capability checks | 3 | 2 | Live macOS pass 2026-10-02 after rebinding from Chrome Incognito and split-view collisions. |
+| Add injected Archived FAB beside Start chat and optional Chrome command to open Archived | 4 | 3 | Reduces navigation friction to the archived modal before unarchive pills run. |
+| Add injected FAB and optional Chrome command for the shared Spam & blocked dialog (shipped 1.12.0) | 3 | 3 | Uses fail-closed English Main menu and drawer-label fallbacks until locale validation expands. |
+| ~~Page-level keyboard shortcut for native Start chat (`a[data-e2e-start-button]`)~~ **Replaced (1.12.0):** optional Chrome command users assign in `chrome://extensions/shortcuts` | 3 | 2 | Avoids fixed page-level shortcut collisions while preserving Start chat navigation. |
 | Defer keyboard bulk operations until Google’s native multi-select state can be reliably inspected | 4 | 5 | The current single-row engine cannot safely generalize to queued destructive actions. |
 
 ### Compose and message-content expansion

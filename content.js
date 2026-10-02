@@ -11,9 +11,9 @@ import {
   resetArchivedFabInstallationsForTests
 } from './src/content/navigation-fab.js';
 import {
-  installNavigationShortcuts,
-  resetNavigationShortcutInstallationsForTests
-} from './src/content/navigation-shortcuts.js';
+  installSpamBlockedFab,
+  resetSpamBlockedFabInstallationsForTests
+} from './src/content/spam-blocked-fab.js';
 import {
   createDefaultPageWorldBridgeHandlers,
   installPageWorldBridgeHost
@@ -22,7 +22,7 @@ import {
 const disconnectMessageListener = installMessageListener();
 const disconnectPills = installConversationShortcutPills();
 const disconnectArchivedFab = installArchivedFab();
-const disconnectNavigationShortcuts = installNavigationShortcuts();
+const disconnectSpamBlockedFab = installSpamBlockedFab();
 const disconnectPageWorldBridge = installPageWorldBridgeHost(
   document,
   createDefaultPageWorldBridgeHandlers({
@@ -36,11 +36,11 @@ export function resetContentScriptForTests() {
   disconnectMessageListener();
   disconnectPills();
   disconnectArchivedFab();
-  disconnectNavigationShortcuts();
+  disconnectSpamBlockedFab();
   disconnectPageWorldBridge();
   resetConversationShortcutPillInstallationsForTests();
   resetArchivedFabInstallationsForTests();
-  resetNavigationShortcutInstallationsForTests();
+  resetSpamBlockedFabInstallationsForTests();
   resetActionFeedbackForTests();
 }
 

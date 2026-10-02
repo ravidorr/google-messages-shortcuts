@@ -35,6 +35,7 @@ Use **approve** only when automation can fail closed with a bounded postconditio
 - `baseline-trash-dialog-open`: Move to trash dialog visible (row menu typically closed)
 - `pill-visibility`: Epic A popup visibility modes on inbox rows plus Archived modal absence check
 - `start-chat`: Epic B page-level Start chat shortcut and native FAB selector validation
+- `spam-blocked`: Epic C shared Spam & blocked drawer-entry and dialog validation
 
 ### Capability self-test column
 
@@ -44,6 +45,8 @@ Use **pass** when `runCapabilitySelfTest()` returns `ok: true` (no DOM mutation,
 
 | Date | Browser | Extension | Locale | Direction | Scenario | Capability self-test | Notes |
 | ---- | ------- | --------- | ------ | --------- | -------- | -------------------- | ----- |
+| 2026-10-02 | Chrome 154.0.0.0 | 1.12.0 | en | LTR | spam-blocked | pass | **Epic C implementation pass.** Optional Chrome commands assigned for Open Archived, Open Spam & blocked, and Start chat all worked. The injected Spam & blocked FAB opened the intended native dialog without triggering report, block, unblock, or deletion behavior. |
+| 2026-10-02 | Chrome 154.0.0.0 | 1.11.1 | en | LTR | spam-blocked | pass | **Epic C discovery pass, en-only contract.** Inbox self-test: `ok: true`, `mutated: false`, `unsafe: 0`, `blockingUnavailable: 0`. Native top-left navigation drawer exposes exactly one visible `BUTTON` matching the shared Spam & blocked entry; no `data-e2e-*` selector observed. Opening it produces exactly one destination heading and one `mat-dialog-container`, both immediately and after 1s, repeated twice. Narrow-layout pass recorded (`narrowLayout: true`). Dialog-internal Not spam actions are excluded from entry matching. |
 | 2026-10-02 | Chrome 154.0.0.0 | 1.11.0 | en | LTR | start-chat | pass | **Epic B pass (macOS Chrome).** Inbox self-test: `ok: true`, `mutated: false`, `blockingUnavailable: 0`, `startChat.entry` supported (`dom-query`). Structural probe: 24 rows, `a[data-e2e-start-button]` `matchCount: 1`, `href: /web/conversations/new`, visible. **Shortcut:** `Command+Shift+G` opens new-conversation view with no Chrome or Google Messages collision (after rebinding from Incognito `Command+Shift+N` and split-view `Command+Option+N`). Editable-target and dialog-suppression guards remain unit-tested; optional manual spot-check. PR #82. |
 | 2026-10-02 | Chrome 154.0.0.0 | 1.10.0 | en | LTR | pill-visibility | pass | **Epic A manual pass.** hover-or-focus (default): pills on hover, browser keyboard focus, and `is-focused="true"` rows. selected-row-only: hover and browser focus alone do not show pills; `is-focused="true"` rows do. hidden: no pills; keyboard shortcuts still work. Archived modal: no extension pills under any setting; native Unarchive button only (expected). Virtualized list: visibility policy holds after row rerender. Self-test on inbox: `ok: true`, `mutated: false`, `blockingUnavailable: 0`. environment: Chrome 154 / extension 1.10.0 / locale en / direction ltr. |
 | 2026-10-02 | Chrome 154 | 1.9.0 | en | LTR | baseline (block pill automation) | pass | Block / report spam pill opens native dialog, focuses `OK` confirm (`data-e2e-action-button-confirm`), does not auto-click. Cancel verified non-mutating. |
@@ -91,6 +94,8 @@ Use **pass** when `runCapabilitySelfTest()` returns `ok: true` (no DOM mutation,
 | Open archived (modal entry) | `button[data-e2e-archived-list-button], a[data-e2e-archived-list-button]` | Direct modal entry, bottom-nav route, account menu, search overflow, app header menu, Settings, then localized "Archived" labels | en + he (RTL threads) live | 5 | 2026-10-02 |
 | Open archived (dialog shell) | `mat-dialog-container` with heading "Archived" | Unarchive controls may render after spinner | en + he (RTL threads) live | 5 | 2026-10-02 |
 | Open archived (sidebar route) | `button[data-e2e-archived-button], a[data-e2e-archived-button]` | Any visible route control outside dialog; bottom navigation on narrow layouts | en live | 5 | 2026-10-01 |
+| Open Spam & blocked (drawer entry) | _no `data-e2e-*` selector observed_ | Exact English “Spam & blocked” label on one visible `BUTTON` scoped to the native navigation drawer and outside dialogs | en live | 4 | 2026-10-02 |
+| Open Spam & blocked (dialog postcondition) | One `mat-dialog-container` with one matching heading | n/a | en live | 4 | 2026-10-02 |
 | Start chat FAB anchor | `a[data-e2e-start-button]` inside `mw-fab-link.start-chat` | n/a | en live | 5 | 2026-10-02 |
 | Start chat postcondition | URL path `/web/conversations/new` or `mws-new-conversation` / `[data-e2e-new-conversation-view]` | n/a | en live (macOS shortcut pass) | 5 | 2026-10-02 |
 | Start chat shortcut | `Ctrl+Shift+G` / `Command+Shift+G` (page-level) | n/a | en live macOS; no collision after rebinding from Incognito and split-view chords | 5 | 2026-10-02 |

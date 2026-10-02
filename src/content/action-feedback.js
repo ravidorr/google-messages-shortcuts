@@ -5,6 +5,7 @@ import {
   COMMAND_MARK_UNREAD,
   COMMAND_MUTE,
   COMMAND_OPEN_ARCHIVED,
+  COMMAND_OPEN_SPAM_BLOCKED,
   COMMAND_START_CHAT,
   COMMAND_TRASH,
   COMMAND_UNARCHIVE,
@@ -27,6 +28,7 @@ const SUCCESS_MESSAGES = {
   [COMMAND_UNMUTE]: 'Conversation unmuted.',
   [COMMAND_UNARCHIVE]: 'Conversation unarchived.',
   [COMMAND_OPEN_ARCHIVED]: 'Archived opened.',
+  [COMMAND_OPEN_SPAM_BLOCKED]: 'Spam & blocked opened.',
   [COMMAND_START_CHAT]: 'Start chat opened.'
 };
 
@@ -146,6 +148,13 @@ export function getActionFeedbackMessage(result, command) {
       };
     }
 
+    if (command === COMMAND_OPEN_SPAM_BLOCKED && result.alreadyOpen) {
+      return {
+        kind: 'info',
+        message: 'Spam & blocked is already open.'
+      };
+    }
+
     const action = getRowAction(command);
 
     return {
@@ -195,6 +204,27 @@ export function getActionFeedbackMessage(result, command) {
       return {
         kind: 'error',
         message: 'Start chat did not open in time. Try again.'
+      };
+    case 'spam-blocked-drawer-trigger-not-found':
+      return {
+        kind: 'error',
+        message: 'Could not find the Google Messages Main menu control.'
+      };
+    case 'spam-blocked-drawer-trigger-ambiguous':
+    case 'spam-blocked-entry-ambiguous':
+      return {
+        kind: 'error',
+        message: 'Multiple Spam & blocked controls matched. The extension blocked the action for safety.'
+      };
+    case 'spam-blocked-entry-not-found':
+      return {
+        kind: 'error',
+        message: 'Could not find Spam & blocked in the Google Messages Main menu.'
+      };
+    case 'spam-blocked-dialog-timeout':
+      return {
+        kind: 'error',
+        message: 'Spam & blocked did not open in time. Try again.'
       };
     case 'native-dialog-open':
       return {
