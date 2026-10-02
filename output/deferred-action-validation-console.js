@@ -49,7 +49,7 @@
       menuPanelOpen: Boolean(document.querySelector(menuPanelSelector))
     },
     observedControls,
-    note: 'Sanitized structural evidence only. Open archived entry candidates: data-e2e-archived-list-button, account/header menu item labeled Archived, search overflow, Settings, or bottom-nav data-e2e-archived-button (sidebar route).'
+    note: 'Sanitized structural evidence only. Open archived discovery order: data-e2e-archived-list-button, bottom-nav data-e2e-archived-button (sidebar route), account menu, search overflow, app header menu, Settings, then localized Archived labels.'
   }, null, 2));
 })();
 

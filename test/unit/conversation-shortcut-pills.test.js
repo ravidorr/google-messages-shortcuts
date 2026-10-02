@@ -3,7 +3,8 @@ import {
   COMMAND_ARCHIVE,
   COMMAND_MARK_READ,
   COMMAND_MARK_UNREAD,
-  COMMAND_TRASH
+  COMMAND_TRASH,
+  COMMAND_UNARCHIVE
 } from '../../src/shared/commands.js';
 import { getCommandIcon } from '../../src/shared/command-icons.js';
 import { resetActionFeedbackForTests } from '../../src/content/action-feedback.js';
@@ -13,6 +14,7 @@ import {
   resetConversationShortcutPillInstallationsForTests,
   safeDomMutation
 } from '../../src/content/conversation-shortcut-pills.js';
+import { archivedModalSurface } from '../fixtures/dom/list-states.js';
 
 function createConversationRow({ focused = false, unread = true } = {}) {
   const row = document.createElement('mws-conversation-list-item');
@@ -64,6 +66,30 @@ describe('conversation shortcut pills', () => {
     disconnect?.();
     disconnect = undefined;
     resetActionFeedbackForTests();
+  });
+
+  it('renders only the unarchive pill inside the archived modal', async () => {
+    document.body.innerHTML = archivedModalSurface;
+    const row = document.getElementById('fixture-archived-row');
+    row.setAttribute('is-focused', 'true');
+
+    disconnect = installConversationShortcutPills({
+      documentRoot: document,
+      getShortcutLabels: vi.fn(async () => ({
+        archive: 'Ctrl+Shift+Y',
+        trash: 'Not assigned',
+        markRead: 'Ctrl+Shift+K',
+        markUnread: 'Ctrl+Shift+U'
+      }))
+    });
+
+    await vi.waitFor(() => {
+      expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(1);
+    });
+
+    expect(row.querySelector(`[data-command="${COMMAND_UNARCHIVE}"]`)).not.toBeNull();
+    expect(row.querySelector(`[data-command="${COMMAND_ARCHIVE}"]`)).toBeNull();
+    expect(row.querySelector(`[data-command="${COMMAND_TRASH}"]`)).toBeNull();
   });
 
   it('renders compact icon-and-shortcut pills for the focused row', async () => {

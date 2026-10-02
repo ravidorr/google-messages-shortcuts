@@ -335,7 +335,11 @@ describe('navigation-fab', () => {
           onChanged: { addListener: vi.fn(), removeListener: vi.fn() }
         }
       },
-      openArchived: vi.fn(async () => ({ ok: true, openedRoute: true }))
+      openArchived: vi.fn(async () => ({
+        ok: true,
+        reason: 'archived-sidebar-only',
+        openedRoute: true
+      }))
     });
 
     await vi.waitFor(() => {
@@ -346,6 +350,124 @@ describe('navigation-fab', () => {
     await Promise.resolve();
 
     expect(document.querySelector(`[${ARCHIVED_FAB_ATTRIBUTE}]`)).not.toBeNull();
+  });
+
+  it('removes the archived fab when the sidebar route becomes active', async () => {
+    document.body.innerHTML = startChatFabSurface;
+    const openArchived = vi.fn(async () => {
+      document.body.insertAdjacentHTML('beforeend', archivedSidebarView);
+
+      return {
+        ok: true,
+        reason: 'archived-sidebar-only',
+        openedRoute: true
+      };
+    });
+
+    installArchivedFab({
+      documentRoot: document,
+      chromeApi: {
+        storage: {
+          local: { get: vi.fn(async () => ({})) },
+          onChanged: { addListener: vi.fn(), removeListener: vi.fn() }
+        }
+      },
+      openArchived
+    });
+
+    await vi.waitFor(() => {
+      expect(document.querySelector(`[${ARCHIVED_FAB_ATTRIBUTE}]`)).not.toBeNull();
+    });
+
+    document.querySelector(`[${ARCHIVED_FAB_ATTRIBUTE}]`).click();
+    await Promise.resolve();
+
+    expect(openArchived).toHaveBeenCalledTimes(1);
+    expect(document.querySelector(`[${ARCHIVED_FAB_ATTRIBUTE}]`)).toBeNull();
+  });
+
+  it('opens archived when the injected fab receives Enter', async () => {
+    document.body.innerHTML = startChatFabSurface;
+    const openArchived = vi.fn(async () => ({ ok: true }));
+
+    installArchivedFab({
+      documentRoot: document,
+      chromeApi: {
+        storage: {
+          local: { get: vi.fn(async () => ({})) },
+          onChanged: { addListener: vi.fn(), removeListener: vi.fn() }
+        }
+      },
+      openArchived
+    });
+
+    await vi.waitFor(() => {
+      expect(document.querySelector(`[${ARCHIVED_FAB_ATTRIBUTE}]`)).not.toBeNull();
+    });
+
+    document.querySelector(`[${ARCHIVED_FAB_ATTRIBUTE}]`).dispatchEvent(new KeyboardEvent('keydown', {
+      key: 'Enter',
+      bubbles: true
+    }));
+    await Promise.resolve();
+
+    expect(openArchived).toHaveBeenCalledTimes(1);
+  });
+
+  it('ignores unrelated key presses on the injected fab', async () => {
+    document.body.innerHTML = startChatFabSurface;
+    const openArchived = vi.fn(async () => ({ ok: true }));
+
+    installArchivedFab({
+      documentRoot: document,
+      chromeApi: {
+        storage: {
+          local: { get: vi.fn(async () => ({})) },
+          onChanged: { addListener: vi.fn(), removeListener: vi.fn() }
+        }
+      },
+      openArchived
+    });
+
+    await vi.waitFor(() => {
+      expect(document.querySelector(`[${ARCHIVED_FAB_ATTRIBUTE}]`)).not.toBeNull();
+    });
+
+    document.querySelector(`[${ARCHIVED_FAB_ATTRIBUTE}]`).dispatchEvent(new KeyboardEvent('keydown', {
+      key: 'Tab',
+      bubbles: true
+    }));
+    await Promise.resolve();
+
+    expect(openArchived).not.toHaveBeenCalled();
+  });
+
+  it('opens archived when the injected fab receives Space', async () => {
+    document.body.innerHTML = startChatFabSurface;
+    const openArchived = vi.fn(async () => ({ ok: true }));
+
+    installArchivedFab({
+      documentRoot: document,
+      chromeApi: {
+        storage: {
+          local: { get: vi.fn(async () => ({})) },
+          onChanged: { addListener: vi.fn(), removeListener: vi.fn() }
+        }
+      },
+      openArchived
+    });
+
+    await vi.waitFor(() => {
+      expect(document.querySelector(`[${ARCHIVED_FAB_ATTRIBUTE}]`)).not.toBeNull();
+    });
+
+    document.querySelector(`[${ARCHIVED_FAB_ATTRIBUTE}]`).dispatchEvent(new KeyboardEvent('keydown', {
+      key: ' ',
+      bubbles: true
+    }));
+    await Promise.resolve();
+
+    expect(openArchived).toHaveBeenCalledTimes(1);
   });
 
   it('opens archived when the injected fab is clicked', async () => {
@@ -467,6 +589,8 @@ describe('navigation-fab', () => {
 
     pauseListener({}, 'sync');
     pauseListener({ unrelated: { newValue: true } }, 'local');
+
+    expect(document.querySelector(`[${ARCHIVED_FAB_ATTRIBUTE}]`)).not.toBeNull();
   });
 
   it('waits for initialization before injecting the archived fab', async () => {

@@ -51,9 +51,13 @@ describe('action-feedback', () => {
       kind: 'info',
       message: 'Archived is already open.'
     });
-    expect(getActionFeedbackMessage({ ok: true, openedRoute: true }, COMMAND_OPEN_ARCHIVED)).toEqual({
-      kind: 'success',
-      message: 'Archived opened.'
+    expect(getActionFeedbackMessage({
+      ok: true,
+      reason: 'archived-sidebar-only',
+      openedRoute: true
+    }, COMMAND_OPEN_ARCHIVED)).toEqual({
+      kind: 'info',
+      message: 'Google Messages opened the Archived sidebar, not the unarchive dialog. Open Archived from the account menu or search overflow to reach the unarchive dialog.'
     });
   });
 
@@ -91,7 +95,6 @@ describe('action-feedback', () => {
       ['not-muted', 'info'],
       ['archived-modal-required', 'info'],
       ['archived-entry-not-found', 'error'],
-      ['archived-sidebar-only', 'info'],
       ['archived-modal-timeout', 'error'],
       ['unarchive-button-not-found', 'error'],
       ['action-in-progress', 'info'],

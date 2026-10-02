@@ -25,8 +25,11 @@ import {
   isArchivedSidebarViewActive,
   isRowInArchivedModal,
   isTrashConfirmDialogOpen,
+  finalizeArchivedOpenModalResult,
   openArchivedModal,
+  resetOpenArchivedModalInFlightForTests,
   resolveArchivedEntryCapabilityReason,
+  resolveArchivedOpenResult,
   waitForArchivedModal
 } from '../../src/content/adapters/archived-adapter.js';
 import {
@@ -52,6 +55,8 @@ describe('archived-adapter', () => {
 
   afterEach(() => {
     vi.useRealTimers();
+    vi.restoreAllMocks();
+    resetOpenArchivedModalInFlightForTests();
   });
 
   it('ignores the extension injected archived fab when finding modal entry controls', () => {
@@ -178,6 +183,7 @@ describe('archived-adapter', () => {
     expect(matchesArchivedLabel({ textContent: 'Archived' })).toBe(true);
     expect(matchesArchivedLabel({ textContent: 'ארכיון' })).toBe(true);
     expect(matchesArchivedLabel({ textContent: 'Archive' })).toBe(false);
+    expect(matchesArchivedLabel({ textContent: 'Archive conversation' })).toBe(false);
     expect(matchesArchivedLabel({ getAttribute: () => 'Archived', textContent: '' })).toBe(true);
   });
 
@@ -471,6 +477,87 @@ describe('archived-adapter', () => {
     expect(result).toEqual({ ok: true });
   });
 
+  it('does not fall back to the sidebar route after a slow direct modal click', async () => {
+    document.body.innerHTML = `
+      ${archivedEntryControl}
+      <mws-bottom-navigation>
+        <button data-e2e-home-button aria-selected="true">Home</button>
+        <button data-e2e-archived-button>Archived</button>
+      </mws-bottom-navigation>
+      <main><h2>Inbox</h2></main>
+    `;
+
+    const entryControl = findArchivedModalEntryControl(document);
+    const routeButton = document.querySelector('[data-e2e-archived-button]');
+
+    vi.spyOn(entryControl, 'click').mockImplementation(() => {
+      document.body.insertAdjacentHTML(
+        'beforeend',
+        '<mat-dialog-container><h2>Archived</h2></mat-dialog-container>'
+      );
+    });
+    vi.spyOn(routeButton, 'click');
+
+    const result = await openArchivedModal(
+      document,
+      undefined,
+      () => Promise.reject(new Error('archived-modal-timeout')),
+      { delayFn: async () => {}, timeoutMs: 200 }
+    );
+
+    expect(entryControl.click).toHaveBeenCalledTimes(1);
+    expect(routeButton.click).not.toHaveBeenCalled();
+    expect(result).toEqual({ ok: true });
+  });
+
+  it('resolves archived open results from the dialog shell or sidebar route', () => {
+    document.body.innerHTML = archivedModalSurface;
+
+    expect(resolveArchivedOpenResult(document)).toEqual({ ok: true });
+
+    document.body.innerHTML = archivedSidebarView;
+
+    expect(resolveArchivedOpenResult(document)).toEqual({
+      ok: true,
+      reason: 'archived-sidebar-only',
+      openedRoute: true
+    });
+
+    document.body.innerHTML = archivedModalSurface;
+
+    expect(finalizeArchivedOpenModalResult(document)).toEqual({ ok: true });
+
+    document.body.innerHTML = startChatFabSurface;
+
+    expect(finalizeArchivedOpenModalResult(document)).toEqual({
+      ok: false,
+      reason: 'archived-modal-timeout'
+    });
+  });
+
+  it('blocks concurrent openArchivedModal calls while one is in progress', async () => {
+    document.body.innerHTML = archivedEntryControl;
+
+    let resolveWait;
+    const waitPromise = new Promise((resolve) => {
+      resolveWait = resolve;
+    });
+
+    const firstPromise = openArchivedModal(
+      document,
+      undefined,
+      () => waitPromise
+    );
+    await Promise.resolve();
+
+    const secondResult = await openArchivedModal(document);
+
+    expect(secondResult).toEqual({ ok: false, reason: 'action-in-progress' });
+
+    resolveWait(document.querySelector('mat-dialog-container'));
+    await expect(firstPromise).resolves.toEqual({ ok: true });
+  });
+
   it('reports app header menu capability when search overflow is unavailable', () => {
     document.body.innerHTML = `
       <header>
@@ -549,7 +636,11 @@ describe('archived-adapter', () => {
       { delayFn: async () => {}, timeoutMs: 200 }
     );
 
-    expect(result).toEqual({ ok: true, openedRoute: true });
+    expect(result).toEqual({
+      ok: true,
+      reason: 'archived-sidebar-only',
+      openedRoute: true
+    });
   });
 
   it('opens archived through overflow menu route controls when the modal does not appear', async () => {
@@ -585,7 +676,11 @@ describe('archived-adapter', () => {
     );
 
     expect(routeButton.click).toHaveBeenCalledTimes(1);
-    expect(result).toEqual({ ok: true, openedRoute: true });
+    expect(result).toEqual({
+      ok: true,
+      reason: 'archived-sidebar-only',
+      openedRoute: true
+    });
   });
 
   it('opens archived through the app header overflow menu', async () => {
@@ -1131,7 +1226,11 @@ describe('archived-adapter', () => {
 
     await vi.advanceTimersByTimeAsync(500);
 
-    await expect(resultPromise).resolves.toEqual({ ok: true, openedRoute: true });
+    await expect(resultPromise).resolves.toEqual({
+      ok: true,
+      reason: 'archived-sidebar-only',
+      openedRoute: true
+    });
   });
 
   it('does not re-click settings when the settings tab is already selected', async () => {
@@ -1211,7 +1310,11 @@ describe('archived-adapter', () => {
 
     expect(injectedFab.click).not.toHaveBeenCalled();
     expect(routeButton.click).toHaveBeenCalledTimes(1);
-    expect(result).toEqual({ ok: true, openedRoute: true });
+    expect(result).toEqual({
+      ok: true,
+      reason: 'archived-sidebar-only',
+      openedRoute: true
+    });
   });
 
   it('opens the archived sidebar route when modal entry controls are unavailable', async () => {
@@ -1239,7 +1342,11 @@ describe('archived-adapter', () => {
     );
 
     expect(routeButton.click).toHaveBeenCalledTimes(1);
-    expect(result).toEqual({ ok: true, openedRoute: true });
+    expect(result).toEqual({
+      ok: true,
+      reason: 'archived-sidebar-only',
+      openedRoute: true
+    });
   });
 
   it('skips archived entry controls that only exist inside the modal', () => {

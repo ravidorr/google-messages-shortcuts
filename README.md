@@ -18,7 +18,7 @@ Chrome extension that archives, trashes, marks as read, or marks as unread the s
 - Show a Mark as unread pill on read conversations
 - Show Mute and Unmute pills on hovered and focused conversations
 - Show an Unarchive pill on hovered and focused conversations inside the Archived dialog
-- Show an Archived FAB beside Start chat when the Archived dialog is closed
+- Show an Archived FAB beside Start chat when Archived is not already open (modal or sidebar route)
 - Optionally open conversations immediately when they are hovered or focused
 - Popup UI that shows the effective Chrome shortcut assignments and page-level navigation shortcuts
 - Configurable automatic confirmation for the native Move to trash dialog
@@ -86,8 +86,8 @@ If Chrome or the operating system already uses a suggested shortcut, Chrome may 
 7. Trash actions confirm through Google Messages' native dialog.
 8. Mark as unread is available only for conversations that are currently read.
 9. Mark as read is available only for conversations that are currently unread.
-10. Open Archived runs as a page-level shortcut because Chrome limits extensions to four manifest commands. It discovers the native entry through direct controls, bottom navigation, account menu, search overflow, app header menu, or Settings, then localized "Archived" labels.
-11. Open Archived succeeds when the Archived dialog shell appears, even if the conversation list is still loading inside the modal.
+10. Open Archived runs as a page-level shortcut because Chrome limits extensions to four manifest commands. It discovers the native entry through direct modal controls, bottom navigation, account menu, search overflow, app header menu, or Settings, then localized "Archived" labels.
+11. Open Archived succeeds when the Archived dialog shell appears, even if the conversation list is still loading inside the modal. Sidebar route navigation also counts as success but shows guidance to reach the unarchive modal.
 12. Unarchive runs only inside the Archived modal and does not use the row overflow menu.
 
 ## Limitations

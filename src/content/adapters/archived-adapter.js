@@ -79,6 +79,20 @@ function normalizeText(value) {
   return value.replace(/\s+/g, ' ').trim();
 }
 
+function isArchiveActionLabel(value) {
+  const normalized = normalizeText(value);
+
+  if (!normalized) {
+    return false;
+  }
+
+  if (/^archived\b/i.test(normalized)) {
+    return false;
+  }
+
+  return /^archive\b/i.test(normalized);
+}
+
 export function matchesArchivedLabel(element) {
   if (!element) {
     return false;
@@ -87,7 +101,7 @@ export function matchesArchivedLabel(element) {
   const text = normalizeText(element.textContent || '');
   const ariaLabel = normalizeText(element.getAttribute?.('aria-label') || '');
 
-  if (text === 'Archive' || ariaLabel === 'Archive') {
+  if (isArchiveActionLabel(text) || isArchiveActionLabel(ariaLabel)) {
     return false;
   }
 
@@ -97,7 +111,7 @@ export function matchesArchivedLabel(element) {
     }
   }
 
-  return /archived|archiv/i.test(`${text} ${ariaLabel}`);
+  return /\barchived\b/i.test(`${text} ${ariaLabel}`);
 }
 
 function isExcludedArchivedOverflowScope(element) {
@@ -245,16 +259,36 @@ export function isArchivedModalOpen(documentRoot, selectors = ARCHIVED_SELECTORS
   return Boolean(getArchivedDialog(documentRoot, selectors));
 }
 
-function resolveArchivedOpenResult(documentRoot, selectors = ARCHIVED_SELECTORS) {
+export function resolveArchivedOpenResult(documentRoot, selectors = ARCHIVED_SELECTORS) {
   if (isArchivedDialogShellVisible(documentRoot, selectors)) {
     return { ok: true };
   }
 
   if (isArchivedSidebarViewActive(documentRoot, selectors)) {
-    return { ok: true, openedRoute: true };
+    return {
+      ok: true,
+      reason: 'archived-sidebar-only',
+      openedRoute: true
+    };
   }
 
   return null;
+}
+
+export function finalizeArchivedOpenModalResult(documentRoot, selectors = ARCHIVED_SELECTORS) {
+  const resolvedResult = resolveArchivedOpenResult(documentRoot, selectors);
+
+  if (resolvedResult) {
+    return resolvedResult;
+  }
+
+  return { ok: false, reason: 'archived-modal-timeout' };
+}
+
+let openArchivedModalInFlight = false;
+
+export function resetOpenArchivedModalInFlightForTests() {
+  openArchivedModalInFlight = false;
 }
 
 export function isTrashConfirmDialogOpen(documentRoot, selectors = ARCHIVED_SELECTORS) {
@@ -959,6 +993,30 @@ export async function openArchivedModal(
   waitForSelectorFn = waitForArchivedModal,
   options = {}
 ) {
+  if (openArchivedModalInFlight) {
+    return { ok: false, reason: 'action-in-progress' };
+  }
+
+  openArchivedModalInFlight = true;
+
+  try {
+    return await openArchivedModalInternal(
+      documentRoot,
+      selectors,
+      waitForSelectorFn,
+      options
+    );
+  } finally {
+    openArchivedModalInFlight = false;
+  }
+}
+
+async function openArchivedModalInternal(
+  documentRoot,
+  selectors = ARCHIVED_SELECTORS,
+  waitForSelectorFn = waitForArchivedModal,
+  options = {}
+) {
   const delayFn = options.delayFn ?? ((delayMs) => new Promise((resolve) => {
     setTimeout(resolve, delayMs);
   }));
@@ -988,6 +1046,14 @@ export async function openArchivedModal(
     )
   ) {
     return { ok: true };
+  }
+
+  if (directEntry) {
+    const resolvedAfterDirectClick = resolveArchivedOpenResult(documentRoot, selectors);
+
+    if (resolvedAfterDirectClick) {
+      return resolvedAfterDirectClick;
+    }
   }
 
   const routeResult = await openArchivedViaRoute(documentRoot, selectors, delayFn);
@@ -1067,13 +1133,7 @@ export async function openArchivedModal(
     return settingsResult;
   }
 
-  const resolvedResult = resolveArchivedOpenResult(documentRoot, selectors);
-
-  if (resolvedResult) {
-    return resolvedResult;
-  }
-
-  return { ok: false, reason: 'archived-modal-timeout' };
+  return finalizeArchivedOpenModalResult(documentRoot, selectors);
 }
 
 export function waitForArchivedModal(

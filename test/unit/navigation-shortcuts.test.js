@@ -1,15 +1,49 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { PAUSE_STORAGE_KEY } from '../../src/shared/pause-preference.js';
+import { matchesOpenArchivedShortcut } from '../../src/shared/navigation-shortcut-bindings.js';
+import {
+  openArchivedModal,
+  resetOpenArchivedModalInFlightForTests
+} from '../../src/content/adapters/archived-adapter.js';
 import {
   installNavigationShortcuts,
   resetNavigationShortcutInstallationsForTests
 } from '../../src/content/navigation-shortcuts.js';
-import { archivedModalSurface } from '../fixtures/dom/list-states.js';
+import { archivedEntryControl, archivedModalSurface } from '../fixtures/dom/list-states.js';
 
 describe('navigation-shortcuts', () => {
   beforeEach(() => {
     resetNavigationShortcutInstallationsForTests(document);
+    resetOpenArchivedModalInFlightForTests();
     document.body.innerHTML = '';
+  });
+
+  it('opens archived from the Mac page-level shortcut', async () => {
+    const openArchived = vi.fn(async () => ({ ok: true }));
+
+    installNavigationShortcuts({
+      documentRoot: document,
+      chromeApi: {
+        storage: {
+          local: { get: vi.fn(async () => ({})) },
+          onChanged: { addListener: vi.fn(), removeListener: vi.fn() }
+        }
+      },
+      openArchived,
+      matchesShortcut: (event) => matchesOpenArchivedShortcut(event, 'MacIntel')
+    });
+
+    document.dispatchEvent(new KeyboardEvent('keydown', {
+      key: 'a',
+      metaKey: true,
+      shiftKey: true,
+      ctrlKey: false,
+      bubbles: true
+    }));
+
+    await Promise.resolve();
+
+    expect(openArchived).toHaveBeenCalledWith(document, expect.any(Object), expect.any(Object));
   });
 
   it('opens archived from the page-level shortcut', async () => {
@@ -225,6 +259,7 @@ describe('navigation-shortcuts', () => {
 
   it('ignores unrelated pause preference events', async () => {
     let pauseListener;
+    const openArchived = vi.fn(async () => ({ ok: true }));
 
     installNavigationShortcuts({
       documentRoot: document,
@@ -238,12 +273,71 @@ describe('navigation-shortcuts', () => {
           }
         }
       },
-      openArchived: vi.fn(async () => ({ ok: true }))
+      openArchived
     });
 
     pauseListener({}, 'sync');
     pauseListener({ unrelated: { newValue: true } }, 'local');
 
-    expect(pauseListener).toBeTypeOf('function');
+    document.dispatchEvent(new KeyboardEvent('keydown', {
+      key: 'a',
+      ctrlKey: true,
+      shiftKey: true,
+      bubbles: true
+    }));
+
+    await Promise.resolve();
+
+    expect(openArchived).toHaveBeenCalledTimes(1);
+  });
+
+  it('ignores the shortcut while open archived is already in progress', async () => {
+    document.body.innerHTML = archivedEntryControl;
+
+    let resolveWait;
+    const waitPromise = new Promise((resolve) => {
+      resolveWait = resolve;
+    });
+    const results = [];
+
+    installNavigationShortcuts({
+      documentRoot: document,
+      chromeApi: {
+        storage: {
+          local: { get: vi.fn(async () => ({})) },
+          onChanged: { addListener: vi.fn(), removeListener: vi.fn() }
+        }
+      },
+      openArchived: async (documentRoot, chromeApi, selectors) => {
+        const result = await openArchivedModal(
+          documentRoot,
+          selectors,
+          () => waitPromise
+        );
+        results.push(result);
+        return result;
+      }
+    });
+
+    document.dispatchEvent(new KeyboardEvent('keydown', {
+      key: 'a',
+      ctrlKey: true,
+      shiftKey: true,
+      bubbles: true
+    }));
+    await Promise.resolve();
+
+    document.dispatchEvent(new KeyboardEvent('keydown', {
+      key: 'a',
+      ctrlKey: true,
+      shiftKey: true,
+      bubbles: true
+    }));
+    await Promise.resolve();
+
+    expect(results).toEqual([{ ok: false, reason: 'action-in-progress' }]);
+
+    resolveWait(document.querySelector('mat-dialog-container'));
+    await Promise.resolve();
   });
 });

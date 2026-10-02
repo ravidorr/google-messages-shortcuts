@@ -166,6 +166,15 @@ export function createArchivedFab(_documentRoot, startChatContainer, onClick) {
     void onClick();
   }, true);
 
+  link.addEventListener('keydown', (event) => {
+    if (event.key === ' ' || event.key === 'Enter') {
+      event.preventDefault();
+      event.stopPropagation();
+      event.stopImmediatePropagation();
+      void onClick();
+    }
+  }, true);
+
   syncArchivedFabAppearance(startChatContainer, wrap);
 
   return wrap;

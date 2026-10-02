@@ -923,4 +923,25 @@ describe('runConversationAction', () => {
     expect(localThis).toEqual({ ok: false, reason: 'archived-modal-required' });
   });
 
+  it('times out when unarchive does not remove the row or button', async () => {
+    vi.useFakeTimers();
+    document.body.innerHTML = archivedModalSurface;
+    const archivedRow = document.getElementById('fixture-archived-row');
+    const unarchiveButton = archivedRow.querySelector('[data-e2e-unarchive-button]');
+    vi.spyOn(unarchiveButton, 'click').mockImplementation(() => {});
+
+    const resultPromise = runConversationAction(
+      document,
+      COMMAND_UNARCHIVE,
+      undefined,
+      archivedRow
+    );
+
+    await vi.advanceTimersByTimeAsync(2500);
+    const localThis = await resultPromise;
+
+    expect(localThis).toEqual({ ok: false, reason: 'postcondition-timeout' });
+    vi.useRealTimers();
+  });
+
 });

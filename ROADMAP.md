@@ -23,7 +23,7 @@ flowchart LR
   Popup[Extension popup] --> LocalPrefs[chrome.storage.local]
 ```
 
-- [manifest.json](manifest.json) permits only `storage`, `tabs`, and `https://messages.google.com/*`; it defines three browser-level commands.
+- [manifest.json](manifest.json) permits only `storage`, `tabs`, and `https://messages.google.com/*`; it defines four browser-level commands (Open Archived is page-level because of Chrome's command limit).
 - [src/content/conversation-action.js](src/content/conversation-action.js) serializes row-menu actions, with safe archive, trash confirmation, and mark-unread flows.
 - [src/content/google-messages-dom.js](src/content/google-messages-dom.js) is the private-DOM contract. It currently knows only list-row selectors and English fallback menu labels.
 - [src/content/conversation-shortcut-pills.js](src/content/conversation-shortcut-pills.js) injects pills and observes focus/read-state changes only in the conversation list.
