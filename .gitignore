@@ -13,6 +13,7 @@ release/
 output/*
 !output/live-validation-console.js
 !output/deferred-action-validation-console.js
+!output/composer-discovery-console.js
 
 # IDE and OS
 .idea/
