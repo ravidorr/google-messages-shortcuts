@@ -15,7 +15,7 @@ describe('popup markup', () => {
     const sections = [...document.querySelectorAll('.popup__section')];
 
     expect(document.querySelector('.popup__subtitle').textContent.trim())
-      .toBe('Archive, trash, mute, or mark Google Messages conversations from the list.');
+      .toBe('Archive, trash, read/unread, mute, block / report spam, and open Archived from Google Messages conversation rows.');
     expect(document.getElementById('extension-version').className).toBe('popup__version');
     expect(document.getElementById('extension-version').hidden).toBe(true);
     expect(sections.map((section) => section.querySelector('.popup__section-title').textContent.trim()))

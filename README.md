@@ -1,6 +1,6 @@
 # Messages Shortcut Actions
 
-Chrome extension that archives, trashes, marks as read, or marks as unread the selected or hovered conversation in [Google Messages Web](https://messages.google.com/web/).
+Chrome extension for keyboard shortcuts and row pills that automate conversation-list actions in [Google Messages Web](https://messages.google.com/web/): archive, trash, read/unread, mute/unmute, block / report spam, open Archived, and unarchive.
 
 [Install Messages Shortcut Actions from the Chrome Web Store](https://chromewebstore.google.com/detail/messages-shortcut-actions/dhdkppijmdfhgmbedgimkgenbmfhldjn).
 
@@ -95,14 +95,27 @@ If Chrome or the operating system already uses a suggested shortcut, Chrome may 
 
 - Google Messages owns its private DOM. Menu selectors may break after a UI update.
 - Mark as read has no row-menu control in the current en-US UI; the extension uses row-open instead.
+- Pin and unpin are not available in Google Messages Web row menus; the extension does not automate them.
+- Block / report spam opens Google Messages' native dialog and focuses the final confirmation control. You complete the block and any report-spam choice in the native UI.
+- Supported locale evidence is documented in [docs/dom-discovery/compatibility-matrix.md](docs/dom-discovery/compatibility-matrix.md). en-US and RTL baseline passes are complete; non-English LTR UI chrome and non-en-US confirm labels are Phase 5 work.
 - The extension does not collect or transmit conversation data.
 - Shortcut automation depends on Google Messages accepting programmatic clicks in its UI.
+
+## Phase 1 scope (complete)
+
+Phase 1 row actions are implemented and documented through extension **1.9.1**:
+
+- **Keyboard shortcuts (manifest):** Archive, trash, mark as read, mark as unread
+- **Row pills:** Mute, unmute, block / report spam, unarchive (Archived modal only)
+- **Page-level navigation:** Open Archived (shortcut + injected FAB beside Start chat)
+
+Live validation covers en-US inbox rows, group-thread row menus (group labels may read **Report spam** instead of **Block & report spam**), RTL thread labels with English UI chrome, and the Archived modal. See [docs/dom-discovery/phase1-action-decisions.md](docs/dom-discovery/phase1-action-decisions.md) for approve/defer/block gates.
 
 ## DOM discovery and selector health
 
 Phase 0 adds a fail-closed page adapter and a non-destructive capability self-test. The self-test only queries the page; it does not open menus, change read state, or store conversation content.
 
-Phase 1 wires matrix-approved row actions through a single action registry. Before running an action, the content script runs the same capability assessment used by the self-test and blocks when list or menu selectors are unavailable or unsafe. Mark as unread prefers English menu fallback text when the primary e2e attribute is missing, matching live en-US validation. Mark as read uses open-row execution because the row menu does not expose a mark-as-read item. Paused state, capability blocks, and action outcomes surface through an in-page status region with recovery guidance.
+Phase 1 wires matrix-approved row actions through a single action registry. Before running an action, the content script runs the same capability assessment used by the self-test and blocks when list or menu selectors are unavailable or unsafe. Mark as unread prefers English menu fallback text when the primary e2e attribute is missing, matching live en-US validation. Mark as read uses open-row execution because the row menu does not expose a mark-as-read item. Mute, unmute, block / report spam, unarchive, and open Archived follow the same fail-closed capability contract. Paused state, capability blocks, and action outcomes surface through an in-page status region with recovery guidance.
 
 On Google Messages Web, rebuild and reload the unpacked extension from `dist/`, then open DevTools on the page console (not an extension context) and run:
 
