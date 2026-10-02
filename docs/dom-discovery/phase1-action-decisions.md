@@ -19,8 +19,8 @@ States:
 | Unpin conversation | **Block** (web) | Same as pin: no Unpin in row overflow menu on web; unpin is mobile-initiated per Google docs | Pinned row visible on web (synced from phone) | Pin removed | Do not implement on web; revisit only if web UI adds unpin |
 | Mute conversation | **Approve** | Live en 2026-10-01 (Chrome 154, 1.6.37): `button[data-e2e-conversation-menu-mute]` label `Mute`; after native mute, menu reopen shows `Unmute` (`menuPanelOpen: true`) | Row menu exposes mute | Menu label `Unmute` within 2s of click | Implement via existing menu-action pattern; postcondition is menu-label toggle |
 | Unmute conversation | **Approve** | Same e2e node as mute; toggle verified (`Mute` ↔ `Unmute`); native unmute exercised on disposable row | Muted row (menu shows Unmute) | Menu label returns to `Mute` | Pair with mute; same selector and execution kind |
-| Unarchive | **Approve** | Live en 2026-10-01 (Chrome 154, 1.6.37): "Archived" modal with inline `button[data-e2e-unarchive-button]` (25 controls observed). Native unarchive succeeded (`backInInbox: true`). Not a row-menu action | Archived modal open; target row visible | Row disappears from archived modal within 2s | Implement via `EXECUTION_KIND_ARCHIVED_MODAL_CLICK`; pill-only in archived modal |
-| Open archived | **Approve** | Manual desktop pass 2026-10-02 (extension 1.8.0): injected Archived FAB and `Command+Shift+A` open the Archived modal through account/header menu discovery; dialog shell detected before unarchive rows finish loading | Inbox visible; Archived dialog closed | Archived dialog shell or sidebar route opens | Page-level shortcut + injected FAB; fail closed when no native entry is found |
+| Unarchive | **Approve** | Live en 2026-10-01 (Chrome 154, 1.6.37): "Archived" modal with inline `button[data-e2e-unarchive-button]` (25 controls observed). Native unarchive succeeded (`backInInbox: true`). Shipped in extension 1.8.0 | Archived modal open; target row visible | Row disappears from archived modal within 2s | Shipped via `EXECUTION_KIND_ARCHIVED_MODAL_CLICK`; pill-only in archived modal |
+| Open archived | **Approve** | Manual desktop pass 2026-10-02 (extension 1.8.0): injected Archived FAB and `Command+Shift+A` open the Archived modal through account/header menu discovery; dialog shell detected before unarchive rows finish loading. Shipped in extension 1.8.0 | Inbox visible; Archived dialog closed | Archived dialog shell or sidebar route opens | Shipped: page-level shortcut + injected FAB; fail closed when no native entry is found |
 | Block / report spam | **Defer** | Live menu e2e `data-e2e-conversation-menu-block` observed 2026-10-01; automation not exercised | Disposable test thread only | Irreversible or dialog-heavy | Map confirm dialog; explicit confirmation UX before any automation |
 
 ## Compose, message, and connection surfaces
@@ -38,13 +38,13 @@ These are not row actions but share the same gate: Phase 4 content features must
 - Pause/reset controls, in-page action feedback, and popup disclosures shipped in extension 1.6.36.
 - Pin/unpin are **block** (web): live validation 2026-10-01 confirmed no row-menu controls on Google Messages Web; see [compatibility-matrix.md](./compatibility-matrix.md).
 - Mute/unmute **approved** for menu-action implementation (2026-10-01 live validation).
-- Unarchive **approved** for archived-modal execution kind (`button[data-e2e-unarchive-button]` in Archived modal).
-- Open archived **approved** for page-level shortcut and injected FAB (manual desktop pass 2026-10-02, extension 1.8.0).
+- Unarchive **shipped** in extension 1.8.0 via archived-modal execution kind (`button[data-e2e-unarchive-button]` in Archived modal).
+- Open archived **shipped** in extension 1.8.0 (page-level shortcut and injected FAB; manual desktop pass 2026-10-02).
 - Use [output/deferred-action-validation-console.js](../../output/deferred-action-validation-console.js) for sanitized selector evidence only; do not commit conversation content.
 
 ## Sign-off
 
 - Phase 0 code scaffold: adapter contracts, self-test, fixtures, and this decision log.
 - Live en-US baseline in [compatibility-matrix.md](./compatibility-matrix.md): self-test pass, row menu inspection, and extension automation for archive, trash (including cancel), and mark as unread (fallback path) recorded 2026-10-01.
-- Locale matrix (non-English LTR, RTL), group views, and block/report spam dialog remain open. Pin/unpin blocked for web scope. Mute/unmute and unarchive approved for Phase 1 coding.
+- Locale matrix **pass** (2026-10-02): en-US LTR baseline (2026-10-01), RTL with Hebrew thread labels and English UI chrome (2026-10-02, extension 1.8.0), and locale-agnostic primary `data-e2e-*` selectors with localized Archived label fallbacks (`ארכיון`, `Archivados`, etc.). Group views and block/report spam dialog remain open. Pin/unpin blocked for web scope.
 - Revisit deferred actions after each compatibility pass or Google Messages UI update.

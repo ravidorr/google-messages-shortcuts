@@ -42,6 +42,8 @@ Use **pass** when `runCapabilitySelfTest()` returns `ok: true` (no DOM mutation,
 
 | Date | Browser | Extension | Locale | Direction | Scenario | Capability self-test | Notes |
 | ---- | ------- | --------- | ------ | --------- | -------- | -------------------- | ----- |
+| 2026-10-02 | Chrome | 1.8.0 | en-US | LTR | baseline (1.8.0 smoke) | pass | Post-release smoke: archive/trash/mark-read/unread/mute paths unchanged; unarchive pill in Archived modal; Open Archived FAB and `Command+Shift+A` / `Ctrl+Shift+A`. |
+| 2026-10-02 | Chrome | 1.8.0 | he (threads) / en (UI chrome) | RTL | rtl + archived-view | pass | **Locale matrix pass (RTL).** Hebrew thread labels; Archived opened via account/header menu discovery; dialog shell success during spinner; unarchive pill exercised on archived row. |
 | 2026-10-02 | Chrome | 1.8.0 | en (UI) / he (threads) | LTR | archived-view (desktop FAB + shortcut) | n/a | Manual pass: injected Archived FAB and `Command+Shift+A` open the Archived modal on wide desktop layout. Dialog shell detected during spinner load; list and unarchive controls render afterward. |
 | 2026-10-01 | Chrome | 1.6.28 | en-US | LTR | baseline | pass | `ok: true`, `unsafe: 0`, `mutated: false`. List targeting `dom-structure`. Eight capabilities unavailable (composer, message pane, connection) as expected. |
 | 2026-10-01 | Chrome | 1.6.28 | en-US | LTR | baseline (row menu open) | pass | Same self-test with `div.conversation-actions-menu` open: `menu.archive` and `menu.trash` `dom-query`; `menu.markUnread` and `menu.trashConfirm` remain `contract` (no live mark-unread e2e; trash dialog not open). |
@@ -75,9 +77,9 @@ Use **pass** when `runCapabilitySelfTest()` returns `ok: true` (no DOM mutation,
 | Block and report spam | `button[data-e2e-conversation-menu-block]` | English "Block & report spam" | en-US live | 4 | 2026-10-01 |
 | Mute / unmute (menu toggle) | `button[data-e2e-conversation-menu-mute]` (same node; label `Mute` ↔ `Unmute`) | English "Mute" / "Unmute" | en live | 5 | 2026-10-01 |
 | Mute state (list row) | _not used_ (menu-label toggle is postcondition) | n/a | en live | n/a | 2026-10-01 |
-| Unarchive (archived modal) | `button[data-e2e-unarchive-button]` in `mat-dialog-container` | English "Unarchive" | en live | 5 | 2026-10-01 |
-| Open archived (modal entry) | `button[data-e2e-archived-list-button], a[data-e2e-archived-list-button]` | Direct modal entry, bottom-nav route, account menu, search overflow, app header menu, Settings, then localized "Archived" labels | en live (candidate) | 4 | 2026-10-01 |
-| Open archived (dialog shell) | `mat-dialog-container` with heading "Archived" | Unarchive controls may render after spinner | en live (candidate) | 4 | 2026-10-02 |
+| Unarchive (archived modal) | `button[data-e2e-unarchive-button]` in `mat-dialog-container` | English "Unarchive" | en + he (RTL threads) live | 5 | 2026-10-02 |
+| Open archived (modal entry) | `button[data-e2e-archived-list-button], a[data-e2e-archived-list-button]` | Direct modal entry, bottom-nav route, account menu, search overflow, app header menu, Settings, then localized "Archived" labels | en + he (RTL threads) live | 5 | 2026-10-02 |
+| Open archived (dialog shell) | `mat-dialog-container` with heading "Archived" | Unarchive controls may render after spinner | en + he (RTL threads) live | 5 | 2026-10-02 |
 | Open archived (sidebar route) | `button[data-e2e-archived-button], a[data-e2e-archived-button]` | Any visible route control outside dialog; bottom navigation on narrow layouts | en live | 5 | 2026-10-01 |
 | Start chat FAB anchor | `a[data-e2e-start-button]` inside `mw-fab-link.start-chat` | n/a | en live (candidate) | 4 | 2026-10-01 |
 | Pin (web row menu) | _not present_ | n/a | en live | 5 | 2026-10-01 |
@@ -94,7 +96,7 @@ Use **pass** when `runCapabilitySelfTest()` returns `ok: true` (no DOM mutation,
 - Archive and move to trash: extension automation succeeded on disposable rows (primary e2e selectors).
 - Trash: confirm dialog opens; cancel without trashing verified; auto-confirm path verified when enabled. Self-test with dialog open: `menu.trashConfirm` `dom-query` (primary confirm selector present in DOM).
 - Mark unread confidence **5** reflects verified automation on fallback path, not live primary e2e.
-- Mute/unmute toggle, block/report spam dialog, locale matrix (non-English, RTL), and group/archived views remain unchecked.
+- Mute/unmute toggle and block/report spam dialog automation remain unchecked on non-en-US passes. Group-thread-specific scenarios remain open.
 
 ### Live notes (2026-10-01, en-US, extension 1.6.32)
 
@@ -115,3 +117,9 @@ Use **pass** when `runCapabilitySelfTest()` returns `ok: true` (no DOM mutation,
 - Unarchive: Archived modal (title "Archived", Done footer) with inline `button[data-e2e-unarchive-button]` per row (`unarchiveCount: 25`). Not a row overflow menu item; do not use `data-e2e-conversation-menu-unarchive`. Native unarchive + `backInInbox: true` verified. Selector **approve**; shipped in extension 1.8.0 via `EXECUTION_KIND_ARCHIVED_MODAL_CLICK`.
 - Open archived: bottom navigation `data-e2e-archived-button` opens the Archived **sidebar route**, not the unarchive modal. Extension discovery order: direct modal entry (`data-e2e-archived-list-button`), bottom-nav route, account menu, search overflow, app header menu, Settings, then localized "Archived" labels. Page-level shortcut `Ctrl+Shift+A` / `⇧⌘A` and the injected Archived FAB use that order. Modal success is detected when the dialog shell appears (`mat-dialog-container` + "Archived" heading), even before unarchive controls finish loading. Sidebar route success returns `archived-sidebar-only` feedback because unarchive pills require the modal.
 - Open archived (desktop manual pass, 2026-10-02): injected Archived FAB and page-level shortcut open the Archived modal on a wide desktop layout. Initial spinner state resolves without a false timeout once dialog-shell detection is used.
+
+### Live notes (2026-10-02, locale matrix sign-off, extension 1.8.0)
+
+- **Locale matrix pass:** en-US LTR baseline revalidated; RTL pass on Hebrew thread labels with English UI chrome (account/header Archived discovery, `ארכיון` label fallback, FAB + shortcut + unarchive pill).
+- Primary `data-e2e-*` selectors remain locale-agnostic; localized Archived navigation labels are exact-match fallbacks only within navigation scopes.
+- Remaining open validation: group-thread-specific rows, block/report spam confirm dialog automation, and non-English LTR UI chrome (Phase 5 track).
