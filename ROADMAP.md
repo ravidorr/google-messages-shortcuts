@@ -23,7 +23,7 @@ flowchart LR
   Popup[Extension popup] --> LocalPrefs[chrome.storage.local]
 ```
 
-- [manifest.json](manifest.json) permits only `storage`, `tabs`, and `https://messages.google.com/*`; it defines four browser-level commands (Open Archived is page-level because of Chrome's command limit).
+- [manifest.json](manifest.json) permits only `storage`, `tabs`, and content scripts on `https://messages.google.com/web/*` (Phase 0 confirmed the web client path is sufficient); it defines four browser-level commands (Open Archived is page-level because of Chrome's command limit).
 - [src/content/conversation-action.js](src/content/conversation-action.js) serializes row-menu actions, with safe archive, trash confirmation, mark-unread flows, and native focus-only block/report spam confirmation.
 - [src/content/google-messages-dom.js](src/content/google-messages-dom.js) is the private-DOM contract. It currently knows only list-row selectors and English fallback menu labels.
 - [src/content/conversation-shortcut-pills.js](src/content/conversation-shortcut-pills.js) injects pills and observes focus/read-state changes only in the conversation list.
@@ -125,9 +125,9 @@ Scores use 1–5. **Impact** is expected value for the target user. **Difficulty
 1. Refactor [src/content/google-messages-dom.js](src/content/google-messages-dom.js) into selector and capability modules while retaining primary `data-e2e-*` selectors and controlled locale fallbacks.
 2. Refactor [src/content/conversation-action.js](src/content/conversation-action.js) into an action registry so new actions declare selector, fallback label, precondition, confirmation rule, and postcondition.
 3. Add an on-page action-feedback component, a pause/reset control, and a capability self-test. Unknown or unsupported actions must not open a menu.
-4. Narrow permissions if Phase 0 confirms `/web/*` is sufficient. Update contract tests for the manifest.
-5. Add mark-read and mute/unmute only where Phase 0 confirms correct selectors and state detection. Include test fixtures and confirmation behavior for each destructive action.
-6. Update [README.md](README.md), [PRIVACY.md](PRIVACY.md), popup text, and release notes to state precise supported behaviors.
+4. ~~Narrow permissions if Phase 0 confirms `/web/*` is sufficient. Update contract tests for the manifest.~~ **Complete:** content scripts match `https://messages.google.com/web/*`; runtime tab checks enforce the same path.
+5. ~~Add mark-read and mute/unmute only where Phase 0 confirms correct selectors and state detection. Include test fixtures and confirmation behavior for each destructive action.~~ **Complete:** matrix-approved row actions shipped through 1.9.1, including block / report spam with native focus-only confirmation.
+6. ~~Update [README.md](README.md), [PRIVACY.md](PRIVACY.md), popup text, and release notes to state precise supported behaviors.~~ **Complete (2026-10-02):** Phase 1 user-facing docs aligned with the stable action set; locale expansion remains Phase 5.
 
 ### Phase 2: keyboard-first navigation and discovery
 

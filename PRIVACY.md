@@ -8,11 +8,13 @@ This extension does not collect, store, or transmit conversation content, contac
 
 ## Local processing
 
-When you use a keyboard shortcut:
+When you use a keyboard shortcut, row pill, or navigation shortcut:
 
-1. The extension checks whether the active tab is Google Messages Web.
-2. The extension sends the shortcut command to the content script in that tab.
-3. The content script interacts with the Google Messages page DOM to archive, trash, mark as read, or mark as unread the selected or hovered conversation.
+1. The extension checks whether the active tab is Google Messages Web (`/web/*`).
+2. Keyboard shortcuts go through the background service worker to the content script in that tab. Row pills and page-level navigation shortcuts run in the content script on the page you already have open.
+3. The content script interacts with the Google Messages page DOM to run the requested action on the selected, focused, or hovered conversation row, or to open native navigation such as the Archived dialog.
+
+Supported actions include archive, move to trash, mark as read, mark as unread, mute, unmute, block / report spam (native dialog focus only; you confirm in Google Messages), open Archived, and unarchive inside the Archived modal.
 
 All of those steps happen on your device.
 
@@ -30,7 +32,7 @@ Resetting extension preferences from the popup restores those defaults. It does 
 
 ## Network access
 
-The extension requests host permission for `https://messages.google.com/*` so its content script can run on Google Messages Web. The extension itself does not send your conversation data to any third-party service operated by this project.
+The extension content scripts run only on `https://messages.google.com/web/*`, the Google Messages Web client path validated in Phase 0. The extension itself does not send your conversation data to any third-party service operated by this project.
 
 ## Permissions
 

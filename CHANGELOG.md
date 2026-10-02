@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.9.2 - 2026-10-02
+
+### Changed
+
+- Align README, PRIVACY, popup, ROADMAP, and Phase 1 sign-off docs with the stable 1.9.1 action set and `https://messages.google.com/web/*` content script scope
+
 ## 1.9.1 - 2026-10-02
 
 ### Changed
