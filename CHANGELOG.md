@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.14.0 - 2026-10-03
+
+### Added
+
+- Composer focus command (`Alt+M` / `Option+M`) using live-validated aria-label editor selectors inside `mws-message-input`
+
+### Changed
+
+- Composer adapter wires production editor selectors from Phase 2 live validation; draft read, insert, and send remain deferred
+- Navigation feedback copy when composer focus is unavailable in the current view
+
 ## 1.13.0 - 2026-10-02
 
 ### Added

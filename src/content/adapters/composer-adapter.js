@@ -1,3 +1,4 @@
+import { buildComposerEditorSelector } from './composer-dom.js';
 import {
   CAPABILITY_SUPPORTED,
   CAPABILITY_UNAVAILABLE,
@@ -5,11 +6,11 @@ import {
   createCapabilityResult
 } from './capability-states.js';
 
-export const COMPOSER_EVIDENCE_SOURCE = 'phase2-pending-live-validation';
+export const COMPOSER_EVIDENCE_SOURCE = 'phase2-live-validation-2026-10-03';
 export const COMPOSER_SPIKE_EVIDENCE_SOURCE = 'phase2-composer-discovery-spike';
 
 export const COMPOSER_SELECTORS = {
-  editor: null,
+  editor: buildComposerEditorSelector(),
   sendButton: null
 };
 
@@ -20,15 +21,15 @@ export const COMPOSER_CAPABILITY_IDS = {
   sendState: 'composer.sendState'
 };
 
-const COMPOSER_UNAVAILABLE_REASON =
-  'Composer selectors are not validated; complete live DOM discovery before enabling compose features.';
+const COMPOSER_DEFERRED_CAPABILITY_REASON =
+  'Draft read and insert behavior is not validated in Phase 2.';
 
 function assessSelectorCapability(documentRoot, selector, capabilityLabel) {
   if (!selector) {
     return createCapabilityResult(
       CAPABILITY_UNAVAILABLE,
-      COMPOSER_UNAVAILABLE_REASON,
-      COMPOSER_EVIDENCE_SOURCE
+      COMPOSER_DEFERRED_CAPABILITY_REASON,
+      COMPOSER_SPIKE_EVIDENCE_SOURCE
     );
   }
 
@@ -69,13 +70,13 @@ export function assessComposerCapabilities(
       [COMPOSER_CAPABILITY_IDS.focus]: focus,
       [COMPOSER_CAPABILITY_IDS.readDraft]: createCapabilityResult(
         CAPABILITY_UNAVAILABLE,
-        COMPOSER_UNAVAILABLE_REASON,
-        COMPOSER_EVIDENCE_SOURCE
+        COMPOSER_DEFERRED_CAPABILITY_REASON,
+        COMPOSER_SPIKE_EVIDENCE_SOURCE
       ),
       [COMPOSER_CAPABILITY_IDS.insertText]: createCapabilityResult(
         CAPABILITY_UNAVAILABLE,
-        COMPOSER_UNAVAILABLE_REASON,
-        COMPOSER_EVIDENCE_SOURCE
+        COMPOSER_DEFERRED_CAPABILITY_REASON,
+        COMPOSER_SPIKE_EVIDENCE_SOURCE
       ),
       [COMPOSER_CAPABILITY_IDS.sendState]: sendState
     };

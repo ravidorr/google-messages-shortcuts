@@ -29,7 +29,7 @@ States:
 
 | Surface | Decision | Rationale |
 | ------- | -------- | --------- |
-| Composer adapter | **Block** (feature) | No validated selectors; capability contract returns `unavailable` until live spike |
+| Composer adapter | **Approve** (focus only) | Live-validated aria-label editor selectors in 1.14.0; draft read/insert/send remain deferred |
 | Message pane adapter | **Block** (feature) | Loaded-message find deferred to Phase 3 spike |
 | Connection status adapter | **Block** (feature) | No validated selectors for pairing/status UI |
 

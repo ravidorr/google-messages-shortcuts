@@ -141,10 +141,10 @@ Scores use 1–5. **Impact** is expected value for the target user. **Difficulty
 
 ### Phase 2: keyboard-first navigation and discovery
 
-**Status:** Shipped in extension **1.13.0** (English LTR). Live collision validation and composer DOM discovery recorded in [compatibility-matrix.md](docs/dom-discovery/compatibility-matrix.md); composer focus remains deferred pending selector wiring.
+**Status:** Shipped in extension **1.13.0** (English LTR) with composer focus enabled in **1.14.0**. Live collision validation and composer DOM discovery recorded in [compatibility-matrix.md](docs/dom-discovery/compatibility-matrix.md).
 
 1. ~~Add a context-aware page keyboard controller. It must ignore keystrokes in editable controls, during IME composition, and while text is selected unless a modifier-based command is explicitly intended.~~ **Complete:** guarded page-local controller with context guards and a separate page command registry.
-2. ~~Add list navigation, open, previous-conversation return, escape-to-list, and unread traversal.~~ **Complete:** loaded-list cursor, fail-closed return navigation by conversation-link identity, and unread boundary feedback. **Composer focus:** DOM discovery spike only; command stays unavailable until live validation confirms a stable, locale-agnostic editor target.
+2. ~~Add list navigation, open, previous-conversation return, escape-to-list, unread traversal, and composer focus.~~ **Complete:** loaded-list cursor, fail-closed return navigation by conversation-link identity, unread boundary feedback, and composer focus via live-validated aria-label editor selectors (1.14.0).
 3. ~~Add a command palette and shortcut overlay that list command availability, custom bindings, and unsupported features.~~ **Complete:** filterable palette (`Ctrl+Shift+P` / `Command+Shift+P`) and `Shift+/` help overlay driven by command metadata. Palette filtering applies to command labels and descriptions only, not conversations or message content. Browser-level entry points remain `chrome.commands` only.
 4. ~~Add focus restoration, ARIA semantics, and loaded-list limitation messaging for injected surfaces.~~ **Complete for English LTR unit and JSDOM coverage.** RTL layout validation and localized extension UI move to Phase 5.
 5. ~~Ship a user-visible limitation when results are based only on loaded list items.~~ **Complete:** unread traversal and list navigation operate only on currently loaded rows; the native list is never filtered or hidden.

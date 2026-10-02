@@ -266,8 +266,8 @@ export const duplicateConversationLinkList = `
 
 export const composerEditorSurface = `
   <mws-message-input>
-    <textarea data-e2e-message-input aria-label="Message"></textarea>
-    <button data-e2e-send-button aria-label="Send"></button>
+    <textarea aria-label="Message"></textarea>
+    <button aria-label="Send"></button>
   </mws-message-input>
 `;
 

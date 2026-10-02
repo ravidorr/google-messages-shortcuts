@@ -152,7 +152,7 @@ export function getNavigationFeedbackMessage(result, command) {
     case 'composer-unavailable':
       return {
         kind: 'info',
-        message: 'Composer focus is unavailable until live DOM discovery validates a stable target.'
+        message: 'Composer focus is unavailable because no message composer is visible in the current view.'
       };
     case 'composer-not-found':
       return { kind: 'error', message: 'Could not find the message composer.' };

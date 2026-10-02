@@ -4,22 +4,41 @@ import {
   COMPOSER_CAPABILITY_IDS,
   COMPOSER_SELECTORS
 } from '../../src/content/adapters/composer-adapter.js';
-import { CAPABILITY_UNAVAILABLE } from '../../src/content/adapters/capability-states.js';
+import {
+  CAPABILITY_SUPPORTED,
+  CAPABILITY_UNAVAILABLE
+} from '../../src/content/adapters/capability-states.js';
+import { composerEditorSurface } from '../fixtures/dom/list-states.js';
 
 describe('composer-adapter', () => {
   beforeEach(() => {
     document.body.innerHTML = '';
   });
 
-  it('keeps compose capabilities unavailable until live validation', () => {
-    const localThis = assessComposerCapabilities(document, COMPOSER_SELECTORS);
-
-    for (const capabilityId of Object.values(COMPOSER_CAPABILITY_IDS)) {
-      expect(localThis[capabilityId].state).toBe(CAPABILITY_UNAVAILABLE);
-    }
+  it('defines live-validated composer editor selectors', () => {
+    expect(COMPOSER_SELECTORS.editor).toContain('textarea[aria-label*="Message" i]');
+    expect(COMPOSER_SELECTORS.sendButton).toBeNull();
   });
 
-  it('assesses validated composer selectors from the live DOM', () => {
+  it('reports composer focus unavailable when no editor is present', () => {
+    const localThis = assessComposerCapabilities(document, COMPOSER_SELECTORS);
+
+    expect(localThis[COMPOSER_CAPABILITY_IDS.focus].state).toBe(CAPABILITY_UNAVAILABLE);
+    expect(localThis[COMPOSER_CAPABILITY_IDS.readDraft].state).toBe(CAPABILITY_UNAVAILABLE);
+    expect(localThis[COMPOSER_CAPABILITY_IDS.insertText].state).toBe(CAPABILITY_UNAVAILABLE);
+  });
+
+  it('supports composer focus on the live-validated editor surface', () => {
+    document.body.innerHTML = composerEditorSurface;
+
+    const localThis = assessComposerCapabilities(document, COMPOSER_SELECTORS);
+
+    expect(localThis[COMPOSER_CAPABILITY_IDS.focus].state).toBe(CAPABILITY_SUPPORTED);
+    expect(localThis[COMPOSER_CAPABILITY_IDS.readDraft].state).toBe(CAPABILITY_UNAVAILABLE);
+    expect(localThis[COMPOSER_CAPABILITY_IDS.insertText].state).toBe(CAPABILITY_UNAVAILABLE);
+  });
+
+  it('assesses explicit e2e selectors when provided for fixtures', () => {
     document.body.innerHTML = `
       <textarea data-e2e-message-input></textarea>
       <button data-e2e-send-button></button>
@@ -32,10 +51,5 @@ describe('composer-adapter', () => {
 
     expect(localThis[COMPOSER_CAPABILITY_IDS.focus].state).not.toBe(CAPABILITY_UNAVAILABLE);
     expect(localThis[COMPOSER_CAPABILITY_IDS.sendState].state).not.toBe(CAPABILITY_UNAVAILABLE);
-  });
-
-  it('does not define unvalidated composer selectors', () => {
-    expect(COMPOSER_SELECTORS.editor).toBeNull();
-    expect(COMPOSER_SELECTORS.sendButton).toBeNull();
   });
 });

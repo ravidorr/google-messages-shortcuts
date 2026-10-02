@@ -17,7 +17,7 @@ describe('phase1 action decisions', () => {
     expect(localThis).toContain('| Mark as read (row menu) | **Block** |');
     expect(localThis).toContain('| Mark as read (open row) | **Approve** |');
     expect(localThis).toContain('| Block / report spam | **Approve** |');
-    expect(localThis).toContain('Composer adapter | **Block**');
+    expect(localThis).toContain('Composer adapter | **Approve** (focus only)');
     expect(localThis).toContain('| Unarchive | **Approve** |');
     expect(getApprovedCommands()).toHaveLength(8);
   });

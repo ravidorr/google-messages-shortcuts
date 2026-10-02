@@ -71,6 +71,7 @@ import {
   openShortcutHelpOverlay
 } from '../../src/content/shortcut-help-overlay.js';
 import {
+  composerEditorSurface,
   duplicateConversationLinkList,
   multiRowNavigationList
 } from '../fixtures/dom/list-states.js';
@@ -128,9 +129,9 @@ describe('phase2 navigation coverage', () => {
     });
     expect(localThis[COMPOSER_CAPABILITY_IDS.focus].state).toBe(CAPABILITY_UNSAFE);
 
-    document.body.innerHTML = COMPOSER_SELECTORS.editor ?? '';
+    document.body.innerHTML = composerEditorSurface;
     expect(assessComposerCapabilities(document, COMPOSER_SELECTORS)[COMPOSER_CAPABILITY_IDS.focus].state)
-      .toBeDefined();
+      .toBe(CAPABILITY_SUPPORTED);
   });
 
   it('covers list navigation edge cases and cursor helpers', () => {
@@ -279,18 +280,14 @@ describe('phase2 navigation coverage', () => {
     }
     expect(consumePreviousConversationIdentity()).toBe('href:/web/conversations/20');
 
-    document.body.innerHTML = '<textarea data-e2e-message-input></textarea>';
-    COMPOSER_SELECTORS.editor = 'textarea[data-e2e-message-input]';
+    document.body.innerHTML = composerEditorSurface;
     expect(getCommandRegistryEntry(PAGE_COMMAND_FOCUS_COMPOSER).availability.status).toBe('available');
-    COMPOSER_SELECTORS.editor = null;
 
     document.body.innerHTML = `
-      <textarea data-e2e-message-input></textarea>
-      <textarea data-e2e-message-input></textarea>
+      <textarea aria-label="Message"></textarea>
+      <textarea aria-label="Message"></textarea>
     `;
-    COMPOSER_SELECTORS.editor = 'textarea[data-e2e-message-input]';
     expect(getCommandRegistryEntry(PAGE_COMMAND_FOCUS_COMPOSER).availability.status).toBe('unsafe');
-    COMPOSER_SELECTORS.editor = null;
 
     expect(getCommandRegistryEntry('missing-command')).toBeNull();
     expect(filterCommandRegistryEntries(getCommandRegistryEntries(document), '   ').length)
@@ -408,7 +405,7 @@ describe('phase2 navigation coverage', () => {
     expect(focusComposer(document, {
       editor: 'textarea[data-e2e-message-input]',
       sendButton: null
-    }).reason).toBe('composer-unavailable');
+    }).reason).toBe('composer-ambiguous');
 
     document.body.innerHTML = '<textarea data-e2e-message-input></textarea>';
     const editor = document.querySelector('textarea');

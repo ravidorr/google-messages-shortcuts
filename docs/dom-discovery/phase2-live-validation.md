@@ -280,7 +280,7 @@ Press each shortcut **once**. Write **works**, **collision**, or **nothing**.
 - [x] **Escape** (with a conversation open on the right) — **works**
 - [x] **Command+Shift+P** — **works** (extension command palette opens)
 - [x] **Shift+/** — **works** (extension shortcut help opens)
-- [x] **Option+M** — **works** (unavailable toast in 1.13.0; composer focus deferred)
+- [x] **Option+M** — **works** (focuses composer when a conversation is open)
 
 ### 9b. Compose focused
 
@@ -326,6 +326,28 @@ In Cursor: open that file from the repo → Select All → Copy.
 - [ ] **Pass:** `editorCandidates` shows `matchCount` values
 - [ ] **Pass:** No message was sent
 
+### 10b. Composer focus
+
+**Where:** any open conversation with a visible compose box.
+
+1. Type a draft in compose (example: `hello`).
+2. Click the conversation list so compose is not focused.
+3. Press **Option+M** once, then confirm compose receives focus, draft text `hello` is unchanged, and no message was sent.
+4. Run `Phase2ValidationHelpers.runComposerProbe()` and confirm `selfTest.mutated` is `false`.
+
+- [ ] **Pass:** Compose receives focus
+- [ ] **Pass:** Draft text `hello` is unchanged
+- [ ] **Pass:** No message was sent
+- [ ] **Pass:** `selfTest.mutated` is `false`
+
+**Inbox without an open conversation:**
+
+1. Return to `/web/conversations` with no conversation open in the pane.
+2. Press **Option+M** once.
+
+- [ ] **Pass:** Info toast about composer focus being unavailable in the current view
+- [ ] **Pass:** No error crash
+
 ---
 
 ## Step 11: Save your results
@@ -342,4 +364,4 @@ Add one row to [compatibility-matrix.md](./compatibility-matrix.md):
 
 - [ ] All checkboxes above are checked
 - [ ] Collisions or failures noted in the matrix
-- [ ] Composer focus **not** approved unless you separately verified draft preservation
+- [ ] Composer focus approved only after Step 10b draft preservation pass
