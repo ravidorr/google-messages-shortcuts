@@ -27,10 +27,16 @@ function isElementVisible(element) {
   const view = element.ownerDocument?.defaultView;
 
   if (view && typeof view.getComputedStyle === 'function') {
-    const style = view.getComputedStyle(element);
+    let current = element;
 
-    if (style.visibility === 'hidden' || style.display === 'none') {
-      return false;
+    while (current && current.nodeType === 1) {
+      const style = view.getComputedStyle(current);
+
+      if (style.visibility === 'hidden' || style.display === 'none') {
+        return false;
+      }
+
+      current = current.parentElement;
     }
   }
 

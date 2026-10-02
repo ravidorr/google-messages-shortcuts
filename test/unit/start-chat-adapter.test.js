@@ -71,6 +71,22 @@ describe('start-chat-adapter', () => {
     expect(isViableStartChatButton(document.querySelector('[aria-disabled="true"]'))).toBe(false);
   });
 
+  it('ignores start chat controls hidden by ancestor display or visibility', () => {
+    document.body.innerHTML = `
+      <div style="display: none">
+        <a data-e2e-start-button style="display: flex" href="/web/conversations/new">Hidden mobile</a>
+      </div>
+      <div style="visibility: hidden">
+        <a data-e2e-start-button style="visibility: visible" href="/web/conversations/new">Hidden sidebar</a>
+      </div>
+      <a data-e2e-start-button href="/web/conversations/new">Visible</a>
+    `;
+
+    expect(findViableStartChatButtons(document)).toHaveLength(1);
+    expect(assessStartChatCapabilities(document)[START_CHAT_CAPABILITY_IDS.entry].state)
+      .toBe(CAPABILITY_SUPPORTED);
+  });
+
   it('detects the start chat view from the new conversation path', () => {
     window.history.pushState({}, '', '/web/conversations/new');
 
