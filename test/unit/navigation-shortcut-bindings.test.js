@@ -58,12 +58,23 @@ describe('navigation-shortcut-bindings', () => {
     expect(matchesStartChatShortcut({
       key: 'n',
       ctrlKey: true,
-      shiftKey: true,
+      shiftKey: false,
       metaKey: false,
-      altKey: false,
+      altKey: true,
       repeat: false
     }, 'Win32')).toBe(true);
 
+    expect(matchesStartChatShortcut({
+      key: 'n',
+      ctrlKey: false,
+      shiftKey: false,
+      metaKey: true,
+      altKey: true,
+      repeat: false
+    }, 'MacIntel')).toBe(true);
+  });
+
+  it('rejects the Chrome Incognito collision chord on macOS', () => {
     expect(matchesStartChatShortcut({
       key: 'n',
       ctrlKey: false,
@@ -71,7 +82,7 @@ describe('navigation-shortcut-bindings', () => {
       metaKey: true,
       altKey: false,
       repeat: false
-    }, 'MacIntel')).toBe(true);
+    }, 'MacIntel')).toBe(false);
   });
 
   it('ignores repeated or modified shortcut chords', () => {
@@ -96,23 +107,23 @@ describe('navigation-shortcut-bindings', () => {
       ctrlKey: true,
       shiftKey: true,
       metaKey: false,
-      altKey: true,
+      altKey: false,
       repeat: false
     })).toBe(false);
     expect(matchesStartChatShortcut({
       key: 'n',
       ctrlKey: true,
-      shiftKey: true,
+      shiftKey: false,
       metaKey: false,
-      altKey: false,
+      altKey: true,
       repeat: true
     })).toBe(false);
     expect(matchesStartChatShortcut({
       key: 'a',
       ctrlKey: true,
-      shiftKey: true,
+      altKey: true,
+      shiftKey: false,
       metaKey: false,
-      altKey: false,
       repeat: false
     })).toBe(false);
   });

@@ -27,7 +27,7 @@ describe('navigation-actions', () => {
     expect(getNavigationShortcutLabel(NAVIGATION_ACTIONS[0], 'Win32'))
       .toBe('Ctrl+Shift+A');
     expect(getNavigationShortcutLabel(NAVIGATION_ACTIONS[1], 'MacIntel'))
-      .toBe('⇧⌘N');
+      .toBe('⌥⌘N');
     expect(getNavigationShortcutLabel({ command: 'unknown' }, 'Win32')).toBe('');
   });
 });

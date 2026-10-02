@@ -364,7 +364,8 @@ describe('navigation-shortcuts', () => {
     document.dispatchEvent(new KeyboardEvent('keydown', {
       key: 'n',
       ctrlKey: true,
-      shiftKey: true,
+      altKey: true,
+      shiftKey: false,
       bubbles: true
     }));
 
@@ -391,7 +392,8 @@ describe('navigation-shortcuts', () => {
     document.dispatchEvent(new KeyboardEvent('keydown', {
       key: 'n',
       ctrlKey: true,
-      shiftKey: true,
+      altKey: true,
+      shiftKey: false,
       bubbles: true
     }));
 
@@ -417,7 +419,8 @@ describe('navigation-shortcuts', () => {
     document.dispatchEvent(new KeyboardEvent('keydown', {
       key: 'n',
       ctrlKey: true,
-      shiftKey: true,
+      altKey: true,
+      shiftKey: false,
       bubbles: true
     }));
 
@@ -454,7 +457,8 @@ describe('navigation-shortcuts', () => {
     document.dispatchEvent(new KeyboardEvent('keydown', {
       key: 'n',
       ctrlKey: true,
-      shiftKey: true,
+      altKey: true,
+      shiftKey: false,
       bubbles: true
     }));
 
@@ -466,7 +470,8 @@ describe('navigation-shortcuts', () => {
     document.dispatchEvent(new KeyboardEvent('keydown', {
       key: 'n',
       ctrlKey: true,
-      shiftKey: true,
+      altKey: true,
+      shiftKey: false,
       bubbles: true
     }));
 
@@ -496,7 +501,8 @@ describe('navigation-shortcuts', () => {
     document.dispatchEvent(new KeyboardEvent('keydown', {
       key: 'n',
       ctrlKey: true,
-      shiftKey: true,
+      altKey: true,
+      shiftKey: false,
       bubbles: true
     }));
 
@@ -524,7 +530,8 @@ describe('navigation-shortcuts', () => {
     document.dispatchEvent(new KeyboardEvent('keydown', {
       key: 'n',
       metaKey: true,
-      shiftKey: true,
+      altKey: true,
+      shiftKey: false,
       ctrlKey: false,
       bubbles: true
     }));
