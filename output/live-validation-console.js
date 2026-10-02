@@ -120,9 +120,7 @@
 
   console.log(JSON.stringify({
     ok: allPassed,
-    extensionVersion: chrome?.runtime?.getManifest?.()?.version ?? 'unknown',
-    browser: navigator.userAgent,
-    locale: document.documentElement.lang || 'en-US',
+    environment: selfTest.environment,
     selfTest: {
       ok: selfTest.ok,
       mutated: selfTest.mutated,

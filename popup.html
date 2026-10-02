@@ -29,7 +29,7 @@
         <h2 id="navigation-shortcuts-heading" class="popup__section-title">Navigation shortcuts</h2>
         <ul id="navigation-shortcut-list" class="shortcut-list"></ul>
         <p class="popup__help">
-          Navigation shortcuts run on the Google Messages page. Mute, unmute, block / report spam, and unarchive are row pills only (no manifest shortcut slot). Unarchive appears inside the Archived dialog. Block / report spam opens Google Messages' native dialog and focuses the final confirmation control without auto-clicking.
+          Navigation shortcuts run on the Google Messages page. Mute, unmute, and block / report spam are row pills only (no manifest shortcut slot). The Archived dialog uses Google Messages' native Unarchive controls. Block / report spam opens Google Messages' native dialog and focuses the final confirmation control without auto-clicking.
         </p>
       </section>
 
@@ -56,6 +56,21 @@
           <input id="open-conversation-on-focus" type="checkbox" disabled>
           Open conversations on hover or focus
         </label>
+      </section>
+
+      <section class="popup__section" aria-labelledby="pill-visibility-heading">
+        <h2 id="pill-visibility-heading" class="popup__section-title">Pill visibility</h2>
+        <label class="popup__select-label" for="pill-visibility">
+          Show shortcut pills
+        </label>
+        <select id="pill-visibility" class="popup__select" disabled>
+          <option value="hover-or-focus">On hover or focus</option>
+          <option value="selected-row-only">On selected row only</option>
+          <option value="hidden">Hidden</option>
+        </select>
+        <p class="popup__help">
+          Selected row means the conversation Google Messages marks with keyboard focus in the list. Keyboard shortcuts still work when pills are hidden.
+        </p>
       </section>
 
       <section class="popup__section" aria-labelledby="extension-controls-heading">

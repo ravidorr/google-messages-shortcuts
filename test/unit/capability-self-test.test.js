@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
+  getSelfTestEnvironment,
   hasBlockingUnavailableCapabilities,
   hasUnsafeCapabilities,
   runCapabilitySelfTest
@@ -18,13 +19,122 @@ describe('capability-self-test', () => {
   });
 
   it('returns ok when capabilities are safe and the DOM is unchanged', () => {
+    document.documentElement.lang = 'en-US';
+    document.documentElement.dir = 'ltr';
     document.body.innerHTML = fullListActionSurface;
-    const localThis = runCapabilitySelfTest(document);
+    const localThis = runCapabilitySelfTest(document, undefined, {
+      runtime: {
+        getManifest: () => ({ version: '1.10.0' })
+      }
+    });
 
     expect(localThis.ok).toBe(true);
     expect(localThis.mutated).toBe(false);
     expect(localThis.summary.unsafe).toBe(0);
     expect(localThis.capabilities.length).toBeGreaterThan(0);
+    expect(localThis.environment).toEqual({
+      browserVersion: navigator.userAgent,
+      extensionVersion: '1.10.0',
+      locale: 'en-US',
+      direction: 'ltr'
+    });
+  });
+
+  it('collects environment metadata with locale and direction fallbacks', () => {
+    const localThis = {
+      documentRoot: {
+        documentElement: {
+          getAttribute: () => null,
+          lang: '',
+          dir: ''
+        },
+        defaultView: {
+          getComputedStyle: () => ({ direction: 'rtl' })
+        }
+      },
+      chromeApi: {
+        runtime: {
+          getManifest: () => {
+            throw new Error('manifest unavailable');
+          }
+        }
+      }
+    };
+
+    expect(getSelfTestEnvironment(localThis.documentRoot, localThis.chromeApi)).toEqual({
+      browserVersion: navigator.userAgent,
+      extensionVersion: 'unknown',
+      locale: navigator.language,
+      direction: 'rtl'
+    });
+  });
+
+  it('reports unknown direction when html metadata and computed style are absent', () => {
+    const localThis = {
+      documentRoot: {
+        documentElement: {
+          getAttribute: () => null,
+          lang: '',
+          dir: ''
+        },
+        defaultView: {
+          getComputedStyle: () => ({ direction: '' })
+        }
+      },
+      chromeApi: {}
+    };
+
+    expect(getSelfTestEnvironment(localThis.documentRoot, localThis.chromeApi).direction)
+      .toBe('unknown');
+  });
+
+  it('prefers html lang attributes and normalizes explicit direction values', () => {
+    const localThis = {
+      documentRoot: {
+        documentElement: {
+          getAttribute: (name) => (name === 'lang' ? null : 'ltr'),
+          lang: 'he-IL',
+          dir: 'LTR'
+        },
+        defaultView: {}
+      },
+      chromeApi: {
+        runtime: {
+          getManifest: () => ({})
+        }
+      }
+    };
+
+    expect(getSelfTestEnvironment(localThis.documentRoot, localThis.chromeApi)).toEqual({
+      browserVersion: navigator.userAgent,
+      extensionVersion: 'unknown',
+      locale: 'he-IL',
+      direction: 'ltr'
+    });
+  });
+
+  it('falls back to unknown locale and browser metadata when page signals are absent', () => {
+    const navigatorStub = {};
+    const originalNavigator = globalThis.navigator;
+
+    Object.defineProperty(globalThis, 'navigator', {
+      configurable: true,
+      value: navigatorStub
+    });
+
+    try {
+      expect(getSelfTestEnvironment({}, {})).toEqual({
+        browserVersion: 'unknown',
+        extensionVersion: 'unknown',
+        locale: 'unknown',
+        direction: 'unknown'
+      });
+    } finally {
+      Object.defineProperty(globalThis, 'navigator', {
+        configurable: true,
+        value: originalNavigator
+      });
+    }
   });
 
   it('returns not ok when any capability is unsafe', () => {

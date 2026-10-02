@@ -71,7 +71,7 @@ describe('row-action-registry', () => {
     expect(getRowAction(COMMAND_MUTE)?.selectorStrategy).toBe('label-matched');
     expect(getRowAction(COMMAND_UNMUTE)?.menuItemSelectorKey).toBe('muteMenuItem');
     expect(getRowAction(COMMAND_UNARCHIVE)?.executionKind).toBe('archived-modal-click');
-    expect(getRowAction(COMMAND_UNARCHIVE)?.pillOnly).toBe(true);
+    expect(getRowAction(COMMAND_UNARCHIVE)?.supportsPill).toBe(false);
     expect(getRowAction(COMMAND_MARK_READ)?.executionKind).toBe(EXECUTION_KIND_OPEN_ROW);
     expect(isApprovedRowAction('unsupported')).toBe(false);
     expect(getRowAction('unsupported')).toBeNull();

@@ -12,16 +12,17 @@ Chrome extension for keyboard shortcuts and row pills that automate conversation
 - Mark the active read conversation as unread with `Ctrl+Shift+U` (`Command+Shift+U` on macOS)
 - Mute, unmute, or block / report spam from row pills (Chrome allows only four keyboard shortcuts per extension)
 - Open the Archived dialog with `Ctrl+Shift+A` (`Command+Shift+A` on macOS) or the injected Archived FAB beside Start chat
-- Unarchive conversations from row pills inside the Archived dialog
+- Rely on Google Messages' native Unarchive controls inside the Archived dialog
 - Show Archive and Trash shortcut pills on hovered and focused conversations
 - Show a Mark as read pill on unread conversations
 - Show a Mark as unread pill on read conversations
 - Show Mute, Unmute, and Block / report spam pills on hovered and focused conversations
-- Show an Unarchive pill on hovered and focused conversations inside the Archived dialog
+- Do not show extension pills inside the Archived dialog; use Google Messages' native Unarchive controls there
 - Show an Archived FAB beside Start chat when Archived is not already open (modal or sidebar route)
 - Optionally open conversations immediately when they are hovered or focused
 - Popup UI that shows the effective Chrome shortcut assignments and page-level navigation shortcuts
 - Configurable automatic confirmation for the native Move to trash dialog
+- Configurable pill visibility: on hover or focus (default), on selected row only, or hidden
 - Pause shortcut actions and conversation pills without disabling the extension
 - Reset extension preferences from the popup without changing Google Messages
 - In-page success and failure feedback with a screen-reader-friendly status region
@@ -50,6 +51,20 @@ Chrome controls extension keyboard shortcuts. Open the extension popup or go to 
 The popup's **Automatically confirm Move to trash** setting controls whether a
 trash shortcut or pill automatically confirms Google Messages' native dialog.
 It is enabled by default.
+
+## Configure pill visibility
+
+The popup's **Show shortcut pills** setting controls when conversation row
+pills appear:
+
+- **On hover or focus** (default): show pills when you hover a row, move
+  keyboard focus into it, or Google Messages marks it selected in the list.
+- **On selected row only**: show pills only on the row Google Messages marks
+  with `is-focused="true"`. Hover and browser keyboard focus alone do not
+  show pills.
+- **Hidden**: do not show pills. Keyboard shortcuts still work.
+
+Changes apply immediately in open Google Messages tabs.
 
 ## Configure conversation opening
 
@@ -89,7 +104,7 @@ If Chrome or the operating system already uses a suggested shortcut, Chrome may 
 10. Mark as read is available only for conversations that are currently unread.
 11. Open Archived runs as a page-level shortcut because Chrome limits extensions to four manifest commands. It discovers the native entry through direct modal controls, bottom navigation, account menu, search overflow, app header menu, or Settings, then localized "Archived" labels.
 12. Open Archived succeeds when the Archived dialog shell appears, even if the conversation list is still loading inside the modal. Sidebar route navigation also counts as success but shows guidance to reach the unarchive modal.
-13. Unarchive runs only inside the Archived modal and does not use the row overflow menu.
+13. The Archived modal does not show extension pills; unarchive there uses Google Messages' native controls.
 
 ## Limitations
 
@@ -106,14 +121,14 @@ If Chrome or the operating system already uses a suggested shortcut, Chrome may 
 Phase 1 row actions are implemented and documented through extension **1.9.1**:
 
 - **Keyboard shortcuts (manifest):** Archive, trash, mark as read, mark as unread
-- **Row pills:** Mute, unmute, block / report spam, unarchive (Archived modal only)
+- **Row pills:** Mute, unmute, block / report spam (inbox rows only; Archived modal uses native Unarchive)
 - **Page-level navigation:** Open Archived (shortcut + injected FAB beside Start chat)
 
 Live validation covers en-US inbox rows, group-thread row menus (group labels may read **Report spam** instead of **Block & report spam**), RTL thread labels with English UI chrome, and the Archived modal. See [docs/dom-discovery/phase1-action-decisions.md](docs/dom-discovery/phase1-action-decisions.md) for approve/defer/block gates.
 
 ## DOM discovery and selector health
 
-Phase 0 adds a fail-closed page adapter and a non-destructive capability self-test. The self-test only queries the page; it does not open menus, change read state, or store conversation content.
+Phase 0 adds a fail-closed page adapter and a non-destructive capability self-test. The self-test only queries the page; it does not open menus, change read state, or store conversation content. Its result includes an `environment` object with browser version, extension version, locale, and text direction for compatibility notes.
 
 Phase 1 wires matrix-approved row actions through a single action registry. Before running an action, the content script runs the same capability assessment used by the self-test and blocks when list or menu selectors are unavailable or unsafe. Mark as unread prefers English menu fallback text when the primary e2e attribute is missing, matching live en-US validation. Mark as read uses open-row execution because the row menu does not expose a mark-as-read item. Mute, unmute, block / report spam, unarchive, and open Archived follow the same fail-closed capability contract. Paused state, capability blocks, and action outcomes surface through an in-page status region with recovery guidance.
 
