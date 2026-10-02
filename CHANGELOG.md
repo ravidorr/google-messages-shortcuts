@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.9.0 - 2026-10-02
+
+### Added
+
+- Block / report spam row pill that opens Google Messages' native dialog and focuses the final confirmation control without auto-clicking
+- Dedicated `EXECUTION_KIND_BLOCK_REPORT_SPAM_WITH_NATIVE_CONFIRM` execution path with fail-closed dialog mapping
+- Sanitized block-dialog probe in `output/deferred-action-validation-console.js`
+
+### Changed
+
+- Phase 1 decision log and compatibility matrix record block/report spam as approved for en-US with native focus-only confirmation
+- Block / report spam confirm mapping accepts live en-US `OK` dialog label in addition to `Block` and `Block & report spam`
+
 ## 1.8.1 - 2026-10-02
 
 ### Changed

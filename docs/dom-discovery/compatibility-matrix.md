@@ -42,6 +42,10 @@ Use **pass** when `runCapabilitySelfTest()` returns `ok: true` (no DOM mutation,
 
 | Date | Browser | Extension | Locale | Direction | Scenario | Capability self-test | Notes |
 | ---- | ------- | --------- | ------ | --------- | -------- | -------------------- | ----- |
+| 2026-10-02 | Chrome 154 | 1.9.0 | en | LTR | baseline (block pill automation) | pass | Block / report spam pill opens native dialog, focuses `OK` confirm (`data-e2e-action-button-confirm`), does not auto-click. Cancel verified non-mutating. |
+| 2026-10-02 | Chrome 154 | 1.9.0 | en | LTR | baseline (block dialog open) | n/a | Dialog probe: `confirmButtonCount: 1`, confirm label `OK`, `Report spam` checkbox present. Matches `mat-dialog-container button[data-e2e-action-button-confirm]` contract. |
+| 2026-10-02 | Chrome 154 | 1.9.0 | en | LTR | baseline (row menu open, block menu item) | n/a | `menuOpen: true`, `button[data-e2e-conversation-menu-block]` `matchCount: 1`. |
+| 2026-10-02 | Chrome 154 | 1.9.0 | en | LTR | baseline (deferred structural probe) | pass | [deferred-action-validation-console.js](../../output/deferred-action-validation-console.js): `ok: true`, `mutated: false`, 25 rows, `hasMenuButton: true`, `menuPanelOpen: false`. Menu e2e selectors `matchCount: 0` with menu closed (expected). |
 | 2026-10-02 | Chrome | 1.8.0 | en-US | LTR | baseline (1.8.0 smoke) | pass | Post-release smoke: archive/trash/mark-read/unread/mute paths unchanged; unarchive pill in Archived modal; Open Archived FAB and `Command+Shift+A` / `Ctrl+Shift+A`. |
 | 2026-10-02 | Chrome | 1.8.0 | he (threads) / en (UI chrome) | RTL | rtl + archived-view | pass | **Locale matrix pass (RTL).** Hebrew thread labels; Archived opened via account/header menu discovery; dialog shell success during spinner; unarchive pill exercised on archived row. |
 | 2026-10-02 | Chrome | 1.8.0 | en (UI) / he (threads) | LTR | archived-view (desktop FAB + shortcut) | n/a | Manual pass: injected Archived FAB and `Command+Shift+A` open the Archived modal on wide desktop layout. Dialog shell detected during spinner load; list and unarchive controls render afterward. |
@@ -74,7 +78,8 @@ Use **pass** when `runCapabilitySelfTest()` returns `ok: true` (no DOM mutation,
 | Mark as read (menu) | _not present_ | n/a | en-US live | 5 | 2026-10-01 |
 | Mark as read (open row) | `a[data-e2e-conversation]` inside `mws-conversation-list-item` | n/a | en-US live | 5 | 2026-10-01 |
 | Trash confirm | `mat-dialog-container button[data-e2e-action-button-confirm]` | English "Move to trash" | en-US live | 5 | 2026-10-01 |
-| Block and report spam | `button[data-e2e-conversation-menu-block]` | English "Block & report spam" | en-US live | 4 | 2026-10-01 |
+| Block and report spam (menu) | `button[data-e2e-conversation-menu-block]` | English "Block & report spam" | en-US live | 5 | 2026-10-01 |
+| Block and report spam (confirm) | `mat-dialog-container button[data-e2e-action-button-confirm]` | English "OK", "Block", or "Block & report spam" | en-US live (OK, 2026-10-02) + fixtures | 5 | 2026-10-02 |
 | Mute / unmute (menu toggle) | `button[data-e2e-conversation-menu-mute]` (same node; label `Mute` ↔ `Unmute`) | English "Mute" / "Unmute" | en live | 5 | 2026-10-01 |
 | Mute state (list row) | _not used_ (menu-label toggle is postcondition) | n/a | en live | n/a | 2026-10-01 |
 | Unarchive (archived modal) | `button[data-e2e-unarchive-button]` in `mat-dialog-container` | English "Unarchive" | en + he (RTL threads) live | 5 | 2026-10-02 |
@@ -96,7 +101,7 @@ Use **pass** when `runCapabilitySelfTest()` returns `ok: true` (no DOM mutation,
 - Archive and move to trash: extension automation succeeded on disposable rows (primary e2e selectors).
 - Trash: confirm dialog opens; cancel without trashing verified; auto-confirm path verified when enabled. Self-test with dialog open: `menu.trashConfirm` `dom-query` (primary confirm selector present in DOM).
 - Mark unread confidence **5** reflects verified automation on fallback path, not live primary e2e.
-- Mute/unmute toggle and block/report spam dialog automation remain unchecked on non-en-US passes. Group-thread-specific scenarios remain open.
+- Mute/unmute toggle remains unchecked on non-en-US passes. Block/report spam dialog automation uses native focus-only confirmation on en-US; non-en-US confirm labels remain open. Group-thread-specific scenarios remain open.
 
 ### Live notes (2026-10-01, en-US, extension 1.6.32)
 
@@ -122,4 +127,4 @@ Use **pass** when `runCapabilitySelfTest()` returns `ok: true` (no DOM mutation,
 
 - **Locale matrix pass:** en-US LTR baseline revalidated; RTL pass on Hebrew thread labels with English UI chrome (account/header Archived discovery, `ארכיון` label fallback, FAB + shortcut + unarchive pill).
 - Primary `data-e2e-*` selectors remain locale-agnostic; localized Archived navigation labels are exact-match fallbacks only within navigation scopes.
-- Remaining open validation: group-thread-specific rows, block/report spam confirm dialog automation, and non-English LTR UI chrome (Phase 5 track).
+- Remaining open validation: group-thread-specific rows, block/report spam confirm dialog on non-en-US UI chrome, and non-English LTR UI chrome (Phase 5 track).

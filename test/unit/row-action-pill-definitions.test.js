@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { getPillDefinitionsForRow } from '../../src/content/row-action-registry.js';
 import {
   COMMAND_ARCHIVE,
+  COMMAND_BLOCK_REPORT_SPAM,
   COMMAND_MARK_READ,
   COMMAND_MARK_UNREAD,
   COMMAND_MUTE,
@@ -33,14 +34,24 @@ describe('row action pill definitions', () => {
       { command: COMMAND_TRASH, label: 'Trash', shortcutKey: 'trash' },
       { command: COMMAND_MARK_UNREAD, label: 'Mark as unread', shortcutKey: 'markUnread' },
       { command: COMMAND_MUTE, label: 'Mute', shortcutKey: 'mute' },
-      { command: COMMAND_UNMUTE, label: 'Unmute', shortcutKey: 'unmute' }
+      { command: COMMAND_UNMUTE, label: 'Unmute', shortcutKey: 'unmute' },
+      {
+        command: COMMAND_BLOCK_REPORT_SPAM,
+        label: 'Block / report spam',
+        shortcutKey: 'blockReportSpam'
+      }
     ]);
     expect(getPillDefinitionsForRow(unreadRow)).toEqual([
       { command: COMMAND_ARCHIVE, label: 'Archive', shortcutKey: 'archive' },
       { command: COMMAND_TRASH, label: 'Trash', shortcutKey: 'trash' },
       { command: COMMAND_MARK_READ, label: 'Mark as read', shortcutKey: 'markRead' },
       { command: COMMAND_MUTE, label: 'Mute', shortcutKey: 'mute' },
-      { command: COMMAND_UNMUTE, label: 'Unmute', shortcutKey: 'unmute' }
+      { command: COMMAND_UNMUTE, label: 'Unmute', shortcutKey: 'unmute' },
+      {
+        command: COMMAND_BLOCK_REPORT_SPAM,
+        label: 'Block / report spam',
+        shortcutKey: 'blockReportSpam'
+      }
     ]);
   });
 

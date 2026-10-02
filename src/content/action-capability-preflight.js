@@ -3,7 +3,11 @@ import {
   CAPABILITY_UNSAFE
 } from './adapters/capability-states.js';
 import { assessPageCapabilities } from './adapters/page-adapter.js';
-import { MENU_CAPABILITY_IDS, MENU_TEXT } from './adapters/menu-adapter.js';
+import {
+  hasBlockReportSpamConfirmControl,
+  MENU_CAPABILITY_IDS,
+  MENU_TEXT
+} from './adapters/menu-adapter.js';
 import {
   EXECUTION_KIND_ARCHIVED_MODAL_CLICK,
   EXECUTION_KIND_OPEN_ROW
@@ -122,6 +126,97 @@ export function assessTrashConfirmCapability(documentRoot, selectors) {
       MENU_CAPABILITY_IDS.trashConfirm,
       trashConfirm.state,
       trashConfirm.reason
+    );
+  }
+
+  return { allowed: true };
+}
+
+export function assessBlockReportSpamConfirmCapability(documentRoot, selectors) {
+  const capabilities = assessPageCapabilities(documentRoot, selectors);
+  const blockConfirm = capabilities.menu[MENU_CAPABILITY_IDS.blockReportSpamConfirm];
+
+  if (blockConfirm.state === CAPABILITY_UNSAFE) {
+    return createBlockedResult(
+      MENU_CAPABILITY_IDS.blockReportSpamConfirm,
+      blockConfirm.state,
+      blockConfirm.reason
+    );
+  }
+
+  return { allowed: true };
+}
+
+export async function assessBlockReportSpamConfirmCapabilityAfterRender(
+  documentRoot,
+  selectors,
+  timeout = 1000
+) {
+  const syncResult = assessBlockReportSpamConfirmCapability(documentRoot, selectors);
+
+  if (!syncResult.allowed) {
+    return syncResult;
+  }
+
+  if (!isTrashConfirmDialogOpen(documentRoot)) {
+    return { allowed: true };
+  }
+
+  if (hasBlockReportSpamConfirmControl(documentRoot, selectors)) {
+    return { allowed: true };
+  }
+
+  if (hasTrashConfirmControl(documentRoot, selectors)) {
+    return { allowed: true };
+  }
+
+  try {
+    await waitForSelector(documentRoot, selectors.blockReportSpamConfirmButton, timeout);
+
+    if (hasBlockReportSpamConfirmControl(documentRoot, selectors)) {
+      return { allowed: true };
+    }
+  } catch (_primaryError) {
+    try {
+      await waitForElement(
+        documentRoot,
+        'mat-dialog-container button, mat-dialog-container .mat-focus-indicator',
+        MENU_TEXT.blockReportSpamConfirm,
+        timeout
+      );
+
+      return { allowed: true };
+    } catch (_alternateError) {
+      try {
+        await waitForElement(
+          documentRoot,
+          'mat-dialog-container button, mat-dialog-container .mat-focus-indicator',
+          MENU_TEXT.blockReportSpamConfirmAlternate,
+          timeout
+        );
+
+        return { allowed: true };
+      } catch (_fallbackError) {
+        if (isTrashConfirmDialogOpen(documentRoot)
+          && !hasBlockReportSpamConfirmControl(documentRoot, selectors)) {
+          return createBlockedResult(
+            MENU_CAPABILITY_IDS.blockReportSpamConfirm,
+            CAPABILITY_UNAVAILABLE,
+            'Block confirmation dialog is open but the confirm control was not found.'
+          );
+        }
+
+        return { allowed: true };
+      }
+    }
+  }
+
+  if (isTrashConfirmDialogOpen(documentRoot)
+    && !hasBlockReportSpamConfirmControl(documentRoot, selectors)) {
+    return createBlockedResult(
+      MENU_CAPABILITY_IDS.blockReportSpamConfirm,
+      CAPABILITY_UNAVAILABLE,
+      'Block confirmation dialog is open but the confirm control was not found.'
     );
   }
 

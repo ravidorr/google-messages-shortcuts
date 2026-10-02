@@ -1,5 +1,6 @@
 import {
   COMMAND_ARCHIVE,
+  COMMAND_BLOCK_REPORT_SPAM,
   COMMAND_MARK_READ,
   COMMAND_MARK_UNREAD,
   COMMAND_MUTE,
@@ -105,6 +106,13 @@ export function getActionFeedbackMessage(result, command) {
       return {
         kind: 'info',
         message: 'Confirm Move to trash in the Google Messages dialog to finish.'
+      };
+    }
+
+    if (command === COMMAND_BLOCK_REPORT_SPAM && result.pendingBlockReportSpamConfirmation) {
+      return {
+        kind: 'info',
+        message: 'Confirm Block / report spam in the Google Messages dialog to finish.'
       };
     }
 

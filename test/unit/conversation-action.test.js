@@ -4,6 +4,7 @@ import { READ_STATE_TIMEOUT_MS } from '../../src/content/conversation-read-state
 import { MENU_ACTION_ATTRIBUTE } from '../../src/content/menu-action-overlay.js';
 import {
   COMMAND_ARCHIVE,
+  COMMAND_BLOCK_REPORT_SPAM,
   COMMAND_MARK_READ,
   COMMAND_MARK_UNREAD,
   COMMAND_MUTE,
@@ -11,6 +12,7 @@ import {
   COMMAND_UNARCHIVE,
   COMMAND_UNMUTE
 } from '../../src/shared/commands.js';
+import * as actionCapabilityPreflight from '../../src/content/action-capability-preflight.js';
 import * as waitForElement from '../../src/content/wait-for-element.js';
 import * as rowActionRegistry from '../../src/content/row-action-registry.js';
 import { SELECTOR_STRATEGY_FALLBACK_FIRST } from '../../src/content/row-action-registry.js';
@@ -19,6 +21,9 @@ import {
   duplicateArchiveMenuItems,
   openRowMenuMarkUnreadFallbackOnly,
   archivedModalSurface,
+  blockReportSpamConfirmDialog,
+  blockReportSpamConfirmOkDialog,
+  duplicateBlockReportSpamConfirmDialog,
   selectedReadRow,
   selectedUnreadRow
 } from '../fixtures/dom/list-states.js';
@@ -37,6 +42,9 @@ function createConversationFixture() {
     </button>
     <button data-e2e-conversation-menu-mark-unread class="mat-mdc-menu-item">
       <span class="mat-mdc-menu-item-text">Mark as unread</span>
+    </button>
+    <button data-e2e-conversation-menu-block class="mat-mdc-menu-item">
+      <span class="mat-mdc-menu-item-text">Block &amp; report spam</span>
     </button>
     <mat-dialog-container>
       <button data-e2e-action-button-confirm>Move to trash</button>
@@ -181,6 +189,310 @@ describe('runConversationAction', () => {
     resolveConfirmation(fixture.confirmButton);
 
     await expect(trashAction).resolves.toEqual({ ok: true });
+  });
+
+  it('focuses block confirmation when duplicate primary labels require fallback lookup', async () => {
+    document.body.innerHTML = `
+      <mws-conversation-list-item>
+        <a aria-selected="true"></a>
+        <button aria-haspopup="menu"></button>
+      </mws-conversation-list-item>
+      <button data-e2e-conversation-menu-block class="mat-mdc-menu-item">
+        Block &amp; report spam
+      </button>
+      ${duplicateBlockReportSpamConfirmDialog}
+    `;
+    const confirmButtons = document.querySelectorAll('[data-e2e-action-button-confirm]');
+    vi.spyOn(confirmButtons[0], 'focus');
+
+    const localThis = await runConversationAction(document, COMMAND_BLOCK_REPORT_SPAM);
+
+    expect(localThis).toEqual({
+      ok: false,
+      reason: 'capability-blocked',
+      capabilityId: 'menu.blockReportSpamConfirm',
+      capabilityState: 'unsafe'
+    });
+  });
+
+  it('focuses block confirmation through fallback lookup when the primary label mismatches', async () => {
+    document.body.innerHTML = `
+      <mws-conversation-list-item>
+        <a aria-selected="true"></a>
+        <button aria-haspopup="menu"></button>
+      </mws-conversation-list-item>
+      <button data-e2e-conversation-menu-block class="mat-mdc-menu-item">
+        Block &amp; report spam
+      </button>
+      <mat-dialog-container>
+        <button data-e2e-action-button-confirm>Move to trash</button>
+        <button class="mat-focus-indicator">Block</button>
+      </mat-dialog-container>
+    `;
+    const confirmButton = document.querySelector('.mat-focus-indicator');
+    vi.spyOn(confirmButton, 'focus');
+
+    const localThis = await runConversationAction(document, COMMAND_BLOCK_REPORT_SPAM);
+
+    expect(localThis).toEqual({ ok: true, pendingBlockReportSpamConfirmation: true });
+    expect(confirmButton.focus).toHaveBeenCalledTimes(1);
+  });
+
+  it('opens block and report spam and focuses the native confirmation without clicking it', async () => {
+    document.body.innerHTML = `
+      <mws-conversation-list-item>
+        <a aria-selected="true"></a>
+        <button aria-haspopup="menu"></button>
+      </mws-conversation-list-item>
+      <button data-e2e-conversation-menu-block class="mat-mdc-menu-item">
+        Block &amp; report spam
+      </button>
+      ${blockReportSpamConfirmDialog}
+    `;
+    const menuButton = document.querySelector('button[aria-haspopup="menu"]');
+    const blockButton = document.querySelector('[data-e2e-conversation-menu-block]');
+    const confirmButton = document.querySelector('[data-e2e-action-button-confirm]');
+    vi.spyOn(menuButton, 'click');
+    vi.spyOn(blockButton, 'click').mockImplementation(() => {});
+    vi.spyOn(confirmButton, 'click');
+    vi.spyOn(confirmButton, 'focus');
+
+    const localThis = await runConversationAction(document, COMMAND_BLOCK_REPORT_SPAM);
+
+    expect(localThis).toEqual({ ok: true, pendingBlockReportSpamConfirmation: true });
+    expect(menuButton.click).toHaveBeenCalledTimes(1);
+    expect(blockButton.click).toHaveBeenCalledTimes(1);
+    expect(confirmButton.click).not.toHaveBeenCalled();
+    expect(confirmButton.focus).toHaveBeenCalledTimes(1);
+  });
+
+  it('opens block and report spam and focuses the live OK confirmation without clicking it', async () => {
+    document.body.innerHTML = `
+      <mws-conversation-list-item>
+        <a aria-selected="true"></a>
+        <button aria-haspopup="menu"></button>
+      </mws-conversation-list-item>
+      <button data-e2e-conversation-menu-block class="mat-mdc-menu-item">
+        Block &amp; report spam
+      </button>
+      ${blockReportSpamConfirmOkDialog}
+    `;
+    const confirmButton = document.querySelector('[data-e2e-action-button-confirm]');
+    vi.spyOn(confirmButton, 'click');
+    vi.spyOn(confirmButton, 'focus');
+
+    const localThis = await runConversationAction(document, COMMAND_BLOCK_REPORT_SPAM);
+
+    expect(localThis).toEqual({ ok: true, pendingBlockReportSpamConfirmation: true });
+    expect(confirmButton.click).not.toHaveBeenCalled();
+    expect(confirmButton.focus).toHaveBeenCalledTimes(1);
+  });
+
+  it('focuses block confirmation after waiting for the primary selector', async () => {
+    document.body.innerHTML = `
+      <mws-conversation-list-item>
+        <a aria-selected="true"></a>
+        <button aria-haspopup="menu"></button>
+      </mws-conversation-list-item>
+      <button data-e2e-conversation-menu-block class="mat-mdc-menu-item">
+        Block &amp; report spam
+      </button>
+      <mat-dialog-container></mat-dialog-container>
+    `;
+    const confirmButton = document.createElement('button');
+    confirmButton.setAttribute('data-e2e-action-button-confirm', '');
+    confirmButton.textContent = 'Block';
+    vi.spyOn(
+      actionCapabilityPreflight,
+      'assessBlockReportSpamConfirmCapabilityAfterRender'
+    ).mockResolvedValue({ allowed: true });
+    vi.spyOn(waitForElement, 'waitForSelector')
+      .mockResolvedValueOnce(document.querySelector('[data-e2e-conversation-menu-block]'))
+      .mockImplementationOnce(async () => {
+        document.querySelector('mat-dialog-container').append(confirmButton);
+
+        return confirmButton;
+      });
+    vi.spyOn(confirmButton, 'focus');
+
+    const localThis = await runConversationAction(document, COMMAND_BLOCK_REPORT_SPAM);
+
+    expect(localThis).toEqual({ ok: true, pendingBlockReportSpamConfirmation: true });
+    expect(confirmButton.focus).toHaveBeenCalledTimes(1);
+  });
+
+  it('focuses block confirmation after the primary selector renders late', async () => {
+    vi.useFakeTimers();
+    document.body.innerHTML = `
+      <mws-conversation-list-item>
+        <a aria-selected="true"></a>
+        <button aria-haspopup="menu"></button>
+      </mws-conversation-list-item>
+      <button data-e2e-conversation-menu-block class="mat-mdc-menu-item">
+        Block &amp; report spam
+      </button>
+      <mat-dialog-container></mat-dialog-container>
+    `;
+    const blockButton = document.querySelector('[data-e2e-conversation-menu-block]');
+    vi.spyOn(blockButton, 'click').mockImplementation(() => {
+      document.querySelector('mat-dialog-container').innerHTML =
+        '<button data-e2e-action-button-confirm>Block</button>';
+    });
+
+    const resultPromise = runConversationAction(document, COMMAND_BLOCK_REPORT_SPAM);
+    await vi.runAllTimersAsync();
+    const localThis = await resultPromise;
+
+    expect(localThis).toEqual({ ok: true, pendingBlockReportSpamConfirmation: true });
+    vi.useRealTimers();
+  });
+
+  it('focuses block confirmation through the Block English label fallback', async () => {
+    document.body.innerHTML = `
+      <mws-conversation-list-item>
+        <a aria-selected="true"></a>
+        <button aria-haspopup="menu"></button>
+      </mws-conversation-list-item>
+      <button data-e2e-conversation-menu-block class="mat-mdc-menu-item">
+        Block &amp; report spam
+      </button>
+      <mat-dialog-container></mat-dialog-container>
+    `;
+    const confirmButton = document.createElement('button');
+    confirmButton.className = 'mat-focus-indicator';
+    confirmButton.textContent = 'Block';
+    vi.spyOn(confirmButton, 'focus');
+    vi.spyOn(
+      actionCapabilityPreflight,
+      'assessBlockReportSpamConfirmCapabilityAfterRender'
+    ).mockResolvedValue({ allowed: true });
+    vi.spyOn(waitForElement, 'waitForSelector')
+      .mockResolvedValueOnce(document.querySelector('[data-e2e-conversation-menu-block]'))
+      .mockRejectedValueOnce(new Error('confirmation selector unavailable'));
+    vi.spyOn(waitForElement, 'waitForElement')
+      .mockResolvedValueOnce(confirmButton);
+
+    const localThis = await runConversationAction(document, COMMAND_BLOCK_REPORT_SPAM);
+
+    expect(localThis).toEqual({ ok: true, pendingBlockReportSpamConfirmation: true });
+    expect(confirmButton.focus).toHaveBeenCalledTimes(1);
+  });
+
+  it('returns a confirmation failure when no block confirmation control appears', async () => {
+    document.body.innerHTML = `
+      <mws-conversation-list-item>
+        <a aria-selected="true"></a>
+        <button aria-haspopup="menu"></button>
+      </mws-conversation-list-item>
+      <button data-e2e-conversation-menu-block class="mat-mdc-menu-item">
+        Block &amp; report spam
+      </button>
+      <mat-dialog-container>
+        <button>Cancel</button>
+      </mat-dialog-container>
+    `;
+    vi.spyOn(
+      actionCapabilityPreflight,
+      'assessBlockReportSpamConfirmCapabilityAfterRender'
+    ).mockResolvedValue({ allowed: true });
+    vi.spyOn(waitForElement, 'waitForSelector')
+      .mockResolvedValueOnce(document.querySelector('[data-e2e-conversation-menu-block]'))
+      .mockRejectedValueOnce(new Error('confirmation unavailable'));
+    vi.spyOn(waitForElement, 'waitForElement')
+      .mockRejectedValueOnce(new Error('confirmation fallback unavailable'))
+      .mockRejectedValueOnce(new Error('confirmation alternate unavailable'));
+
+    const localThis = await runConversationAction(document, COMMAND_BLOCK_REPORT_SPAM);
+
+    expect(localThis).toEqual({
+      ok: false,
+      reason: 'confirmation alternate unavailable'
+    });
+  });
+
+  it('focuses block confirmation through the alternate English label fallback', async () => {
+    document.body.innerHTML = `
+      <mws-conversation-list-item>
+        <a aria-selected="true"></a>
+        <button aria-haspopup="menu"></button>
+      </mws-conversation-list-item>
+      <button data-e2e-conversation-menu-block class="mat-mdc-menu-item">
+        Block &amp; report spam
+      </button>
+      <mat-dialog-container></mat-dialog-container>
+    `;
+    const confirmButton = document.createElement('button');
+    confirmButton.className = 'mat-focus-indicator';
+    confirmButton.textContent = 'Block & report spam';
+    vi.spyOn(confirmButton, 'focus');
+    vi.spyOn(
+      actionCapabilityPreflight,
+      'assessBlockReportSpamConfirmCapabilityAfterRender'
+    ).mockResolvedValue({ allowed: true });
+    vi.spyOn(waitForElement, 'waitForSelector')
+      .mockResolvedValueOnce(document.querySelector('[data-e2e-conversation-menu-block]'))
+      .mockRejectedValueOnce(new Error('confirmation selector unavailable'));
+    vi.spyOn(waitForElement, 'waitForElement')
+      .mockRejectedValueOnce(new Error('primary fallback unavailable'))
+      .mockResolvedValueOnce(confirmButton);
+
+    const localThis = await runConversationAction(document, COMMAND_BLOCK_REPORT_SPAM);
+
+    expect(localThis).toEqual({ ok: true, pendingBlockReportSpamConfirmation: true });
+    expect(confirmButton.focus).toHaveBeenCalledTimes(1);
+  });
+
+  it('returns a menu-action failure when block menu items are unavailable', async () => {
+    document.body.innerHTML = `
+      <mws-conversation-list-item>
+        <a aria-selected="true"></a>
+        <button aria-haspopup="menu"></button>
+      </mws-conversation-list-item>
+    `;
+    vi.spyOn(waitForElement, 'waitForSelector')
+      .mockRejectedValueOnce(new Error('block menu unavailable'));
+    vi.spyOn(waitForElement, 'waitForElement')
+      .mockRejectedValueOnce(new Error('block fallback unavailable'));
+
+    const localThis = await runConversationAction(document, COMMAND_BLOCK_REPORT_SPAM);
+
+    expect(localThis).toEqual({
+      ok: false,
+      reason: 'block fallback unavailable'
+    });
+  });
+
+  it('blocks block and report spam when the dialog opens without a confirm control', async () => {
+    vi.useFakeTimers();
+    document.body.innerHTML = `
+      ${selectedReadRow}
+      <button data-e2e-conversation-menu-block class="mat-mdc-menu-item">
+        Block &amp; report spam
+      </button>
+      <mat-dialog-container>
+        <button>Cancel</button>
+      </mat-dialog-container>
+    `;
+    const menuButton = document.querySelector('button[aria-haspopup="menu"]');
+    const blockButton = document.querySelector('[data-e2e-conversation-menu-block]');
+    vi.spyOn(menuButton, 'click');
+    vi.spyOn(blockButton, 'click').mockImplementation(() => {});
+
+    const resultPromise = runConversationAction(document, COMMAND_BLOCK_REPORT_SPAM);
+
+    await vi.runAllTimersAsync();
+
+    const localThis = await resultPromise;
+
+    expect(localThis).toEqual({
+      ok: false,
+      reason: 'capability-blocked',
+      capabilityId: 'menu.blockReportSpamConfirm',
+      capabilityState: 'unavailable'
+    });
+    expect(menuButton.click).toHaveBeenCalledTimes(1);
+    expect(blockButton.click).toHaveBeenCalledTimes(1);
+    vi.useRealTimers();
   });
 
   it('leaves the native trash dialog visible when confirmation is disabled', async () => {

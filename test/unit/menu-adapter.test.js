@@ -2,8 +2,12 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { assessListCapabilities } from '../../src/content/adapters/list-adapter.js';
 import {
   assessMenuCapabilities,
+  findBlockReportSpamConfirmControl,
+  findBlockReportSpamConfirmFallbackControl,
+  hasBlockReportSpamConfirmControl,
   findFallbackMenuItemInOpenRowMenu,
   findLabelMatchedMenuItem,
+  isBlockReportSpamConfirmLabel,
   isConversationRowMenuOpen,
   MENU_CAPABILITY_IDS,
   MENU_SELECTORS,
@@ -11,21 +15,39 @@ import {
 } from '../../src/content/adapters/menu-adapter.js';
 import { CAPABILITY_SUPPORTED, CAPABILITY_UNAVAILABLE, CAPABILITY_UNSAFE } from '../../src/content/adapters/capability-states.js';
 import {
+  blockReportSpamConfirmDialog,
+  blockReportSpamConfirmOkDialog,
   duplicateArchiveMenuItems,
+  duplicateBlockReportSpamConfirmDialog,
   duplicateTrashConfirmDialog,
   fullListActionSurface,
   menuItemsPresent,
   openRowMenuMarkUnreadFallbackOnly,
+  openBlockDialogMissingConfirmControl,
   openRowMenuMutedOnly,
   openRowMenuMuteLabelMismatchWithFallback,
   openRowMenuMissingArchiveControl,
   openTrashDialogMissingConfirmControl,
-  selectedReadRow
+  selectedReadRow,
+  trashConfirmDialog
 } from '../fixtures/dom/list-states.js';
 
 describe('menu-adapter', () => {
   beforeEach(() => {
     document.body.innerHTML = '';
+  });
+
+  it('defers block confirmation when list targeting is unavailable', () => {
+    const localThis = assessMenuCapabilities(document, {
+      'list.targeting': {
+        state: CAPABILITY_UNAVAILABLE,
+        reason: 'No rows',
+        evidenceSource: 'dom-query'
+      }
+    });
+
+    expect(localThis[MENU_CAPABILITY_IDS.blockReportSpamConfirm].reason)
+      .toContain('List targeting');
   });
 
   it('defers menu capabilities when list targeting is unavailable', () => {
@@ -52,6 +74,7 @@ describe('menu-adapter', () => {
     expect(localThis[MENU_CAPABILITY_IDS.markUnread].state).toBe(CAPABILITY_SUPPORTED);
     expect(localThis[MENU_CAPABILITY_IDS.mute].state).toBe(CAPABILITY_SUPPORTED);
     expect(localThis[MENU_CAPABILITY_IDS.unmute].state).toBe(CAPABILITY_SUPPORTED);
+    expect(localThis[MENU_CAPABILITY_IDS.blockReportSpam].state).toBe(CAPABILITY_SUPPORTED);
   });
 
   it('supports contract-only menu actions when the row menu has not been opened', () => {
@@ -225,6 +248,234 @@ describe('menu-adapter', () => {
       MENU_TEXT.mute,
       MENU_SELECTORS
     )?.classList.contains('mat-mdc-menu-item')).toBe(true);
+  });
+
+  it('detects block confirmation controls in the document', () => {
+    document.body.innerHTML = `${selectedReadRow}${blockReportSpamConfirmDialog}`;
+    const listCapabilities = assessListCapabilities(document);
+    const localThis = assessMenuCapabilities(document, listCapabilities);
+
+    expect(localThis[MENU_CAPABILITY_IDS.blockReportSpamConfirm]).toMatchObject({
+      state: CAPABILITY_SUPPORTED,
+      evidenceSource: 'dom-query'
+    });
+  });
+
+  it('detects live block confirmation controls labeled OK', () => {
+    document.body.innerHTML = `${selectedReadRow}${blockReportSpamConfirmOkDialog}`;
+    const listCapabilities = assessListCapabilities(document);
+    const localThis = assessMenuCapabilities(document, listCapabilities);
+
+    expect(isBlockReportSpamConfirmLabel('OK')).toBe(true);
+    expect(findBlockReportSpamConfirmControl(document)?.textContent).toBe('OK');
+    expect(localThis[MENU_CAPABILITY_IDS.blockReportSpamConfirm]).toMatchObject({
+      state: CAPABILITY_SUPPORTED,
+      evidenceSource: 'dom-query'
+    });
+  });
+
+  it('marks duplicate block confirmation selectors as unsafe', () => {
+    document.body.innerHTML = `${selectedReadRow}${duplicateBlockReportSpamConfirmDialog}`;
+    const listCapabilities = assessListCapabilities(document);
+    const localThis = assessMenuCapabilities(document, listCapabilities);
+
+    expect(localThis[MENU_CAPABILITY_IDS.blockReportSpamConfirm].state).toBe(CAPABILITY_UNSAFE);
+  });
+
+  it('finds block confirmation controls through the primary selector', () => {
+    document.body.innerHTML = `
+      ${selectedReadRow}
+      ${blockReportSpamConfirmDialog}
+    `;
+
+    expect(findBlockReportSpamConfirmControl(document)).toBe(
+      document.querySelector('[data-e2e-action-button-confirm]')
+    );
+    expect(hasBlockReportSpamConfirmControl(document)).toBe(true);
+  });
+
+  it('skips non-block primary labels before matching the block confirmation control', () => {
+    document.body.innerHTML = `
+      ${selectedReadRow}
+      <mat-dialog-container>
+        <button data-e2e-action-button-confirm>Continue</button>
+        <button data-e2e-action-button-confirm>Cancel</button>
+        <button data-e2e-action-button-confirm>Block</button>
+      </mat-dialog-container>
+    `;
+
+    expect(findBlockReportSpamConfirmControl(document)?.textContent).toBe('Block');
+  });
+
+  it('skips empty dialog labels when matching block confirmation controls', () => {
+    document.body.innerHTML = `
+      ${selectedReadRow}
+      <mat-dialog-container>
+        <button data-e2e-action-button-confirm></button>
+        <button class="mat-focus-indicator"></button>
+        <button data-e2e-action-button-confirm>Block</button>
+      </mat-dialog-container>
+    `;
+
+    expect(findBlockReportSpamConfirmControl(document)?.textContent).toBe('Block');
+  });
+
+  it('finds block confirmation controls through primary and fallback selectors', () => {
+    document.body.innerHTML = `
+      ${selectedReadRow}
+      <mat-dialog-container>
+        <button data-e2e-action-button-confirm>Move to trash</button>
+        <button class="mat-focus-indicator">Block</button>
+      </mat-dialog-container>
+    `;
+
+    expect(findBlockReportSpamConfirmControl(document)).toBe(
+      document.querySelector('.mat-focus-indicator')
+    );
+    expect(hasBlockReportSpamConfirmControl(document)).toBe(true);
+  });
+
+  it('detects trash confirmation through the dialog loop when the primary label mismatches', () => {
+    document.body.innerHTML = `
+      ${selectedReadRow}
+      <mat-dialog-container>
+        <button data-e2e-action-button-confirm>Block</button>
+        <button>Move to trash</button>
+      </mat-dialog-container>
+    `;
+    const listCapabilities = assessListCapabilities(document);
+    const localThis = assessMenuCapabilities(document, listCapabilities);
+
+    expect(localThis[MENU_CAPABILITY_IDS.blockReportSpamConfirm]).toMatchObject({
+      state: CAPABILITY_SUPPORTED,
+      evidenceSource: 'dom-query'
+    });
+  });
+
+  it('returns null for block fallback lookup when no dialog is open', () => {
+    document.body.innerHTML = selectedReadRow;
+
+    expect(findBlockReportSpamConfirmFallbackControl(document)).toBeNull();
+    expect(isBlockReportSpamConfirmLabel('Block')).toBe(true);
+    expect(isBlockReportSpamConfirmLabel('Block & report spam')).toBe(true);
+    expect(isBlockReportSpamConfirmLabel('OK')).toBe(true);
+    expect(isBlockReportSpamConfirmLabel('Move to trash')).toBe(false);
+  });
+
+  it('finds block fallback controls after scanning non-block dialog buttons', () => {
+    document.body.innerHTML = `
+      ${selectedReadRow}
+      <mat-dialog-container>
+        <button class="mat-focus-indicator">Cancel</button>
+        <button class="mat-focus-indicator">Block</button>
+      </mat-dialog-container>
+    `;
+
+    expect(findBlockReportSpamConfirmFallbackControl(document)?.textContent).toBe('Block');
+  });
+
+  it('detects trash confirmation through dialog fallback when the primary label mismatches', () => {
+    document.body.innerHTML = `
+      ${selectedReadRow}
+      <mat-dialog-container>
+        <button data-e2e-action-button-confirm>Block</button>
+        <button class="mat-focus-indicator">Move to trash</button>
+      </mat-dialog-container>
+    `;
+    const listCapabilities = assessListCapabilities(document);
+    const localThis = assessMenuCapabilities(document, listCapabilities);
+
+    expect(localThis[MENU_CAPABILITY_IDS.blockReportSpamConfirm]).toMatchObject({
+      state: CAPABILITY_SUPPORTED,
+      evidenceSource: 'dom-query'
+    });
+  });
+
+  it('detects trash confirmation through the primary selector when present', () => {
+    document.body.innerHTML = `
+      ${selectedReadRow}
+      ${trashConfirmDialog}
+    `;
+    const listCapabilities = assessListCapabilities(document);
+    const localThis = assessMenuCapabilities(document, listCapabilities);
+
+    expect(localThis[MENU_CAPABILITY_IDS.trashConfirm]).toMatchObject({
+      state: CAPABILITY_SUPPORTED,
+      evidenceSource: 'dom-query'
+    });
+  });
+
+  it('detects trash confirmation text through fallback dialog controls', () => {
+    document.body.innerHTML = `
+      ${selectedReadRow}
+      <mat-dialog-container>
+        <button class="mat-focus-indicator">Move to trash</button>
+      </mat-dialog-container>
+    `;
+    const listCapabilities = assessListCapabilities(document);
+    const localThis = assessMenuCapabilities(document, listCapabilities);
+
+    expect(localThis[MENU_CAPABILITY_IDS.blockReportSpamConfirm]).toMatchObject({
+      state: CAPABILITY_SUPPORTED,
+      evidenceSource: 'contract'
+    });
+  });
+
+  it('skips empty dialog labels when detecting trash confirmation in an open dialog', () => {
+    document.body.innerHTML = `
+      ${selectedReadRow}
+      <mat-dialog-container>
+        <button data-e2e-action-button-confirm></button>
+        <button class="mat-focus-indicator"></button>
+        <button class="mat-focus-indicator">Move to trash</button>
+      </mat-dialog-container>
+    `;
+    const listCapabilities = assessListCapabilities(document);
+    const localThis = assessMenuCapabilities(document, listCapabilities);
+
+    expect(localThis[MENU_CAPABILITY_IDS.blockReportSpamConfirm]).toMatchObject({
+      state: CAPABILITY_SUPPORTED,
+      evidenceSource: 'contract'
+    });
+  });
+
+  it('supports block confirmation fallback labels while the dialog is open', () => {
+    document.body.innerHTML = `
+      ${selectedReadRow}
+      <mat-dialog-container>
+        <button class="mat-focus-indicator">Block &amp; report spam</button>
+      </mat-dialog-container>
+    `;
+    const listCapabilities = assessListCapabilities(document);
+    const localThis = assessMenuCapabilities(document, listCapabilities);
+
+    expect(localThis[MENU_CAPABILITY_IDS.blockReportSpamConfirm]).toMatchObject({
+      state: CAPABILITY_SUPPORTED,
+      evidenceSource: 'dom-query-fallback'
+    });
+  });
+
+  it('finds block confirmation fallback controls by English label', () => {
+    document.body.innerHTML = `
+      ${selectedReadRow}
+      <mat-dialog-container>
+        <button class="mat-focus-indicator">Block</button>
+      </mat-dialog-container>
+    `;
+
+    expect(isBlockReportSpamConfirmLabel('Block')).toBe(true);
+    expect(findBlockReportSpamConfirmFallbackControl(document)?.textContent).toBe('Block');
+  });
+
+  it('marks missing block confirm controls unavailable while the dialog is open', () => {
+    document.body.innerHTML = openBlockDialogMissingConfirmControl;
+    const listCapabilities = assessListCapabilities(document);
+    const localThis = assessMenuCapabilities(document, listCapabilities);
+
+    expect(localThis[MENU_CAPABILITY_IDS.blockReportSpamConfirm]).toMatchObject({
+      state: CAPABILITY_UNAVAILABLE,
+      evidenceSource: 'dom-query'
+    });
   });
 
   it('marks missing trash confirm controls unavailable while the dialog is open', () => {

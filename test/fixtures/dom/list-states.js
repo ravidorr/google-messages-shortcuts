@@ -64,6 +64,9 @@ export const menuItemsPresent = `
   <button data-e2e-conversation-menu-mute class="mat-mdc-menu-item">
     <span class="mat-mdc-menu-item-text">Mute</span>
   </button>
+  <button data-e2e-conversation-menu-block class="mat-mdc-menu-item">
+    <span class="mat-mdc-menu-item-text">Block &amp; report spam</span>
+  </button>
 `;
 
 export const openRowMenuMuteFallbackOnly = `
@@ -99,6 +102,34 @@ export const openRowMenuMutedOnly = `
 export const trashConfirmDialog = `
   <mat-dialog-container>
     <button data-e2e-action-button-confirm>Move to trash</button>
+  </mat-dialog-container>
+`;
+
+export const blockReportSpamConfirmDialog = `
+  <mat-dialog-container>
+    <button data-e2e-action-button-confirm>Block</button>
+  </mat-dialog-container>
+`;
+
+export const blockReportSpamConfirmOkDialog = `
+  <mat-dialog-container>
+    <button>Cancel</button>
+    <input type="checkbox" aria-label="Report spam" checked>
+    <button data-e2e-action-button-confirm>OK</button>
+  </mat-dialog-container>
+`;
+
+export const duplicateBlockReportSpamConfirmDialog = `
+  <mat-dialog-container>
+    <button data-e2e-action-button-confirm>Block</button>
+    <button data-e2e-action-button-confirm>Block</button>
+  </mat-dialog-container>
+`;
+
+export const openBlockDialogMissingConfirmControl = `
+  ${selectedReadRow}
+  <mat-dialog-container>
+    <button>Cancel</button>
   </mat-dialog-container>
 `;
 
@@ -209,6 +240,10 @@ export const FIXTURE_EXPORT_NAMES = [
   'emptyConversationList',
   'menuItemsPresent',
   'trashConfirmDialog',
+  'blockReportSpamConfirmDialog',
+  'blockReportSpamConfirmOkDialog',
+  'duplicateBlockReportSpamConfirmDialog',
+  'openBlockDialogMissingConfirmControl',
   'duplicateArchiveMenuItems',
   'duplicateTrashConfirmDialog',
   'fullListActionSurface',

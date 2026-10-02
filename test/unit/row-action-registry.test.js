@@ -15,6 +15,7 @@ import {
 } from '../../src/content/row-action-registry.js';
 import {
   COMMAND_ARCHIVE,
+  COMMAND_BLOCK_REPORT_SPAM,
   COMMAND_MARK_READ,
   COMMAND_MARK_UNREAD,
   COMMAND_MUTE,
@@ -39,6 +40,7 @@ describe('row-action-registry', () => {
       COMMAND_MARK_UNREAD,
       COMMAND_MUTE,
       COMMAND_UNMUTE,
+      COMMAND_BLOCK_REPORT_SPAM,
       COMMAND_UNARCHIVE
     ]);
     expect(APPROVED_ROW_ACTIONS.every((action) => action.decision === ACTION_DECISION_APPROVE)).toBe(
@@ -57,11 +59,14 @@ describe('row-action-registry', () => {
       .toEqual(new Set(MANIFEST_COMMANDS));
     expect(getRowAction(COMMAND_MUTE)?.pillOnly).toBe(true);
     expect(getRowAction(COMMAND_UNMUTE)?.pillOnly).toBe(true);
+    expect(getRowAction(COMMAND_BLOCK_REPORT_SPAM)?.pillOnly).toBe(true);
   });
 
   it('resolves row actions by command id', () => {
     expect(getRowAction(COMMAND_ARCHIVE)?.capabilityId).toBe('menu.archive');
     expect(getRowAction(COMMAND_TRASH)?.executionKind).toBe('trash-with-confirm');
+    expect(getRowAction(COMMAND_BLOCK_REPORT_SPAM)?.executionKind)
+      .toBe('block-report-spam-with-native-confirm');
     expect(getRowAction(COMMAND_MARK_UNREAD)?.selectorStrategy).toBe('fallback-first');
     expect(getRowAction(COMMAND_MUTE)?.selectorStrategy).toBe('label-matched');
     expect(getRowAction(COMMAND_UNMUTE)?.menuItemSelectorKey).toBe('muteMenuItem');
@@ -87,6 +92,7 @@ describe('row-action-registry', () => {
       'Mark as read (open row)',
       'Mute conversation',
       'Unmute conversation',
+      'Block / report spam',
       'Unarchive'
     ];
 
