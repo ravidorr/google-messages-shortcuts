@@ -95,11 +95,8 @@ describe('navigation FAB shortcut badges', () => {
     expect(document.querySelectorAll(BADGE_SELECTOR)).toHaveLength(0);
   });
 
-  it('uses the runtime message request and existing styles by default', async () => {
+  it('uses the runtime message request by default', async () => {
     addNavigationFabs();
-    const style = document.createElement('style');
-    style.setAttribute('data-messages-shortcuts-navigation-shortcut-styles', '');
-    document.head.append(style);
     const localThis = vi.fn(async () => ({
       'start-chat': 'Ctrl+Shift+S',
       'open-archived': 'Ctrl+Shift+A',
@@ -116,8 +113,6 @@ describe('navigation FAB shortcut badges', () => {
     });
 
     expect(localThis).toHaveBeenCalledWith({ type: 'get-browser-command-labels' });
-    expect(document.querySelectorAll('[data-messages-shortcuts-navigation-shortcut-styles]'))
-      .toHaveLength(1);
   });
 
   it('adds a badge after Spam and blocked is injected after shortcut labels load', async () => {
@@ -243,7 +238,8 @@ describe('navigation FAB shortcut badges', () => {
       expect(row.inert).toBe(true);
     });
     expect(row.hasAttribute('data-messages-shortcuts-native-modal-open')).toBe(true);
-    expect(document.querySelector('a[data-e2e-start-button]').getAttribute('aria-disabled')).toBe('true');
+    expect(document.querySelector('a[data-e2e-start-button]').hasAttribute('aria-disabled')).toBe(false);
+    expect(document.querySelector('a[data-e2e-start-button]').style.opacity).not.toBe('0.38');
 
     document.querySelector('mat-dialog-container').remove();
 
@@ -251,10 +247,9 @@ describe('navigation FAB shortcut badges', () => {
       expect(row.inert).toBe(false);
     });
     expect(row.hasAttribute('data-messages-shortcuts-native-modal-open')).toBe(false);
-    expect(document.querySelector('a[data-e2e-start-button]').hasAttribute('aria-disabled')).toBe(false);
   });
 
-  it('scopes badge styling under the navigation tile row', async () => {
+  it('marks badge hosts with the tile badge host class', async () => {
     addNavigationFabs();
 
     disconnect = installNavigationFabShortcutBadges({
@@ -270,16 +265,11 @@ describe('navigation FAB shortcut badges', () => {
       expect(document.querySelectorAll(BADGE_SELECTOR)).toHaveLength(3);
     });
 
-    const styles = document.querySelector('[data-messages-shortcuts-navigation-shortcut-styles]').textContent;
-
-    expect(styles).toContain('.gm-nav-row');
-    expect(styles).toContain('top: -6px');
-    expect(styles).toContain('right: -2px');
-    expect(styles).toContain('height: 16px');
-    expect(styles).toContain('border: 1px solid #c4c7c5');
+    expect(document.querySelector('a[data-e2e-start-button]').classList.contains('gm-nav-tile-badge-host'))
+      .toBe(true);
   });
 
-  it('removes shortcut badges and styles during teardown', async () => {
+  it('removes shortcut badges during teardown', async () => {
     addNavigationFabs();
 
     disconnect = installNavigationFabShortcutBadges({
@@ -299,7 +289,5 @@ describe('navigation FAB shortcut badges', () => {
     disconnect = undefined;
 
     expect(document.querySelectorAll(BADGE_SELECTOR)).toHaveLength(0);
-    expect(document.querySelector('[data-messages-shortcuts-navigation-shortcut-styles]'))
-      .toBeNull();
   });
 });

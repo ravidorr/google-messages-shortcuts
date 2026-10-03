@@ -6,12 +6,20 @@ import { showActionFeedback } from './action-feedback.js';
 import { SELECTORS } from './google-messages-dom.js';
 import { isPaused, PAUSE_STORAGE_KEY } from '../shared/pause-preference.js';
 import { COMMAND_OPEN_ARCHIVED } from '../shared/commands.js';
+import {
+  injectNavigationTileStyles,
+  NAV_TILE_ROW_CLASS,
+  normalizeNavigationTileLink,
+  normalizeNavigationTileRow,
+  NAV_TILE_STYLE_SELECTOR,
+  removeNavigationTileStyles
+} from './navigation-tile-styles.js';
 
 export const ARCHIVED_FAB_ATTRIBUTE = 'data-messages-shortcuts-archived-fab';
 export const ARCHIVED_FAB_WRAP_ATTRIBUTE = 'data-messages-shortcuts-archived-fab-wrap';
 export const ARCHIVED_FAB_ROW_ATTRIBUTE = 'data-messages-shortcuts-fab-row';
-export const ARCHIVED_FAB_STYLE_SELECTOR = 'style[data-messages-shortcuts-archived-fab-styles]';
-export const NAV_TILE_ROW_CLASS = 'gm-nav-row';
+export const ARCHIVED_FAB_STYLE_SELECTOR = NAV_TILE_STYLE_SELECTOR;
+export { NAV_TILE_ROW_CLASS };
 
 export const ARCHIVED_FAB_ICON_PATH = 'M20.54 5.23l-1.39-1.68C18.88 3.21 18.47 3 18 3H6c-.47 0-.88.21-1.16.55L3.46 5.23C3.17 5.57 3 6.02 3 6.5V19c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6.5c0-.48-.17-.93-.46-1.27zM12 17.5L6.5 12H10v-2h4v2h3.5L12 17.5zM5.12 5l.81-1h12l.94 1H5.12z';
 export const SPAM_BLOCKED_FAB_ICON_PATH =
@@ -74,96 +82,6 @@ export function copyArchivedFabIcon(startChatContainer, archivedWrap) {
   copyNavigationFabIcon(startChatContainer, archivedWrap, ARCHIVED_FAB_ICON_PATH);
 }
 
-function addStyles(documentRoot) {
-  if (documentRoot.querySelector(ARCHIVED_FAB_STYLE_SELECTOR)) {
-    return;
-  }
-
-  const style = documentRoot.createElement('style');
-  style.setAttribute('data-messages-shortcuts-archived-fab-styles', '');
-  style.textContent = `
-    .${NAV_TILE_ROW_CLASS}[${ARCHIVED_FAB_ROW_ATTRIBUTE}] {
-      box-sizing: border-box;
-      display: grid;
-      gap: 8px;
-      grid-template-columns: repeat(3, 84px);
-      max-width: 100%;
-      overflow: visible;
-      padding: 6px 16px 12px;
-      width: 100%;
-    }
-
-    .${NAV_TILE_ROW_CLASS}[${ARCHIVED_FAB_ROW_ATTRIBUTE}][data-messages-shortcuts-native-modal-open] {
-      pointer-events: none;
-    }
-
-    .${NAV_TILE_ROW_CLASS}[${ARCHIVED_FAB_ROW_ATTRIBUTE}] > mw-fab-link {
-      display: block;
-      height: 72px;
-      width: 84px;
-    }
-
-    .${NAV_TILE_ROW_CLASS}[${ARCHIVED_FAB_ROW_ATTRIBUTE}] > mw-fab-link > a.fab {
-      align-items: center;
-      border: none;
-      border-radius: 16px;
-      box-sizing: border-box;
-      display: inline-flex;
-      flex-direction: column;
-      gap: 4px;
-      height: 72px;
-      justify-content: center;
-      max-width: 84px;
-      min-height: 72px;
-      padding: 8px 4px;
-      text-decoration: none;
-      width: 84px;
-    }
-
-    .${NAV_TILE_ROW_CLASS}[${ARCHIVED_FAB_ROW_ATTRIBUTE}] > mw-fab-link.start-chat > a.fab {
-      background: #d3e3fd;
-      color: #041e49;
-    }
-
-    .${NAV_TILE_ROW_CLASS}[${ARCHIVED_FAB_ROW_ATTRIBUTE}] > mw-fab-link.archived-chat > a.fab,
-    .${NAV_TILE_ROW_CLASS}[${ARCHIVED_FAB_ROW_ATTRIBUTE}] > mw-fab-link.spam-blocked-chat > a.fab {
-      background: #f0f4f9;
-      color: #1f1f1f;
-    }
-
-    .${NAV_TILE_ROW_CLASS}[${ARCHIVED_FAB_ROW_ATTRIBUTE}] > mw-fab-link > a.fab:focus-visible {
-      outline: 2px solid #0b57d0;
-      outline-offset: 2px;
-    }
-
-    .${NAV_TILE_ROW_CLASS}[${ARCHIVED_FAB_ROW_ATTRIBUTE}] .fab-icon-label-container {
-      align-items: center;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      min-width: 0;
-    }
-
-    .${NAV_TILE_ROW_CLASS}[${ARCHIVED_FAB_ROW_ATTRIBUTE}] mws-icon.fab-icon,
-    .${NAV_TILE_ROW_CLASS}[${ARCHIVED_FAB_ROW_ATTRIBUTE}] mws-icon.fab-icon svg {
-      height: 20px;
-      width: 20px;
-    }
-
-    .${NAV_TILE_ROW_CLASS}[${ARCHIVED_FAB_ROW_ATTRIBUTE}] .fab-label {
-      font-size: 11px;
-      font-weight: 500;
-      line-height: 14px;
-      max-height: 28px;
-      overflow: hidden;
-      text-align: center;
-      white-space: normal;
-      word-break: break-word;
-    }
-  `;
-  documentRoot.head.append(style);
-}
-
 export function createArchivedFab(_documentRoot, startChatContainer, onClick) {
   const wrap = startChatContainer.cloneNode(true);
   wrap.classList.remove('start-chat');
@@ -191,6 +109,7 @@ export function createArchivedFab(_documentRoot, startChatContainer, onClick) {
   }
 
   copyArchivedFabIcon(startChatContainer, wrap);
+  normalizeNavigationTileLink(link, 'neutral');
 
   link.addEventListener('click', (event) => {
     event.preventDefault();
@@ -221,16 +140,16 @@ function ensureFabRow(documentRoot, startChatContainer) {
   const existingRow = startChatContainer.closest(`[${ARCHIVED_FAB_ROW_ATTRIBUTE}]`);
 
   if (existingRow) {
-    existingRow.classList.add(NAV_TILE_ROW_CLASS);
+    normalizeNavigationTileRow(existingRow);
 
     return existingRow;
   }
 
   const row = documentRoot.createElement('div');
   row.setAttribute(ARCHIVED_FAB_ROW_ATTRIBUTE, '');
-  row.classList.add(NAV_TILE_ROW_CLASS);
   startChatContainer.parentElement.insertBefore(row, startChatContainer);
   row.append(startChatContainer);
+  normalizeNavigationTileRow(row);
 
   return row;
 }
@@ -273,6 +192,7 @@ function injectArchivedFab(documentRoot, selectors, onClick) {
   const row = ensureFabRow(documentRoot, startChatContainer);
   const archivedWrap = createArchivedFab(documentRoot, startChatContainer, onClick);
   row.append(archivedWrap);
+  normalizeNavigationTileRow(row);
 }
 
 function createInstallation({
@@ -288,7 +208,7 @@ function createInstallation({
     return isPaused(chromeApi);
   }
 } = {}) {
-  addStyles(documentRoot);
+  injectNavigationTileStyles(documentRoot);
   let paused = false;
   let fabActionInProgress = false;
   let refreshScheduled = false;
@@ -399,7 +319,7 @@ function createInstallation({
     observer.disconnect();
     chromeApi.storage?.onChanged?.removeListener(handlePausePreferenceChange);
     removeArchivedFab(documentRoot);
-    documentRoot.querySelector(ARCHIVED_FAB_STYLE_SELECTOR)?.remove();
+    removeNavigationTileStyles(documentRoot);
   };
 }
 

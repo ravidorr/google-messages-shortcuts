@@ -9,15 +9,14 @@ import {
 } from '../shared/browser-command-labels.js';
 import { UNASSIGNED_SHORTCUT_LABEL } from '../shared/shortcut-labels.js';
 import { isNativeDialogOpen } from './keyboard-context-guard.js';
+import { ARCHIVED_FAB_ATTRIBUTE, ARCHIVED_FAB_ROW_ATTRIBUTE } from './navigation-fab.js';
 import {
-  ARCHIVED_FAB_ATTRIBUTE,
-  ARCHIVED_FAB_ROW_ATTRIBUTE
-} from './navigation-fab.js';
+  NAV_TILE_BADGE_ATTRIBUTE,
+  NAV_TILE_BADGE_HOST_CLASS,
+  normalizeNavigationTileRow
+} from './navigation-tile-styles.js';
 import { SPAM_BLOCKED_FAB_ATTRIBUTE } from './spam-blocked-fab.js';
 
-const BADGE_ATTRIBUTE = 'data-messages-shortcuts-navigation-shortcut';
-const BADGE_HOST_ATTRIBUTE = 'data-messages-shortcuts-navigation-shortcut-host';
-const STYLE_SELECTOR = 'style[data-messages-shortcuts-navigation-shortcut-styles]';
 const NATIVE_MODAL_OPEN_ATTRIBUTE = 'data-messages-shortcuts-native-modal-open';
 const START_CHAT_SELECTOR = 'a[data-e2e-start-button]';
 const installationRegistry = new WeakMap();
@@ -28,49 +27,9 @@ const NAVIGATION_CONTROLS = [
   { command: COMMAND_OPEN_SPAM_BLOCKED, selector: `[${SPAM_BLOCKED_FAB_ATTRIBUTE}]` }
 ];
 
-function addStyles(documentRoot) {
-  const existingStyle = documentRoot.querySelector(STYLE_SELECTOR);
-
-  if (existingStyle) {
-    return existingStyle;
-  }
-
-  const style = documentRoot.createElement('style');
-  style.setAttribute('data-messages-shortcuts-navigation-shortcut-styles', '');
-  style.textContent = `
-    .gm-nav-row[${ARCHIVED_FAB_ROW_ATTRIBUTE}] [${BADGE_HOST_ATTRIBUTE}] {
-      position: relative !important;
-    }
-
-    .gm-nav-row[${ARCHIVED_FAB_ROW_ATTRIBUTE}] [${BADGE_ATTRIBUTE}] {
-      align-items: center;
-      background: #ffffff;
-      border: 1px solid #c4c7c5;
-      border-radius: 999px;
-      box-sizing: border-box;
-      color: #1f1f1f;
-      display: inline-flex;
-      font: 600 10px/14px system-ui, sans-serif;
-      height: 16px;
-      max-width: calc(100% - 4px);
-      overflow: hidden;
-      padding: 0 4px;
-      position: absolute;
-      right: -2px;
-      text-overflow: ellipsis;
-      top: -6px;
-      white-space: nowrap;
-      z-index: 1;
-    }
-  `;
-  documentRoot.head.append(style);
-
-  return style;
-}
-
 function createShortcutBadge(documentRoot, shortcut) {
   const badge = documentRoot.createElement('span');
-  badge.setAttribute(BADGE_ATTRIBUTE, '');
+  badge.setAttribute(NAV_TILE_BADGE_ATTRIBUTE, '');
   badge.setAttribute('aria-hidden', 'true');
   badge.textContent = shortcut;
   return badge;
@@ -83,27 +42,28 @@ function applyShortcutBadge(documentRoot, selector, shortcut) {
     return;
   }
 
-  const existingBadge = control.querySelector(`[${BADGE_ATTRIBUTE}]`);
+  const existingBadge = control.querySelector(`[${NAV_TILE_BADGE_ATTRIBUTE}]`);
 
   if (shortcut === UNASSIGNED_SHORTCUT_LABEL) {
     existingBadge?.remove();
-    control.removeAttribute(BADGE_HOST_ATTRIBUTE);
+    control.classList.remove(NAV_TILE_BADGE_HOST_CLASS);
     return;
   }
 
   if (existingBadge?.textContent === shortcut) {
+    control.classList.add(NAV_TILE_BADGE_HOST_CLASS);
     return;
   }
 
   existingBadge?.remove();
-  control.setAttribute(BADGE_HOST_ATTRIBUTE, '');
+  control.classList.add(NAV_TILE_BADGE_HOST_CLASS);
   control.append(createShortcutBadge(documentRoot, shortcut));
 }
 
 function removeBadges(documentRoot) {
-  documentRoot.querySelectorAll(`[${BADGE_ATTRIBUTE}]`).forEach((badge) => badge.remove());
-  documentRoot.querySelectorAll(`[${BADGE_HOST_ATTRIBUTE}]`).forEach((control) => {
-    control.removeAttribute(BADGE_HOST_ATTRIBUTE);
+  documentRoot.querySelectorAll(`[${NAV_TILE_BADGE_ATTRIBUTE}]`).forEach((badge) => badge.remove());
+  documentRoot.querySelectorAll(`.${NAV_TILE_BADGE_HOST_CLASS}`).forEach((control) => {
+    control.classList.remove(NAV_TILE_BADGE_HOST_CLASS);
   });
 }
 
@@ -123,20 +83,6 @@ export function syncNavigationTileModalState(documentRoot = document) {
     row.removeAttribute(NATIVE_MODAL_OPEN_ATTRIBUTE);
     row.inert = false;
   }
-
-  for (const { selector } of NAVIGATION_CONTROLS) {
-    const control = documentRoot.querySelector(selector);
-
-    if (!control) {
-      continue;
-    }
-
-    if (modalOpen) {
-      control.setAttribute('aria-disabled', 'true');
-    } else {
-      control.removeAttribute('aria-disabled');
-    }
-  }
 }
 
 function createInstallation({
@@ -146,7 +92,6 @@ function createInstallation({
     type: MESSAGE_GET_BROWSER_COMMAND_LABELS
   })
 } = {}) {
-  const style = addStyles(documentRoot);
   let labels = getFallbackBrowserCommandLabelMap();
   let active = true;
 
@@ -159,6 +104,8 @@ function createInstallation({
       applyShortcutBadge(documentRoot, selector, labels[command]);
     }
 
+    const row = documentRoot.querySelector(`[${ARCHIVED_FAB_ROW_ATTRIBUTE}]`);
+    normalizeNavigationTileRow(row);
     syncNavigationTileModalState(documentRoot);
   }
 
@@ -185,7 +132,6 @@ function createInstallation({
     observer.disconnect();
     removeBadges(documentRoot);
     syncNavigationTileModalState(documentRoot);
-    style.remove();
   };
 }
 

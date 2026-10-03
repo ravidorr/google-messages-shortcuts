@@ -5,6 +5,10 @@ import {
   copyNavigationFabIcon,
   SPAM_BLOCKED_FAB_ICON_PATH
 } from './navigation-fab.js';
+import {
+  normalizeNavigationTileLink,
+  normalizeNavigationTileRow
+} from './navigation-tile-styles.js';
 import { handleOpenSpamBlocked } from './open-spam-blocked-action.js';
 import { COMMAND_OPEN_SPAM_BLOCKED } from '../shared/commands.js';
 import { SELECTORS } from './google-messages-dom.js';
@@ -39,6 +43,7 @@ export function createSpamBlockedFab(startChatContainer, onClick) {
   link.setAttribute('aria-label', 'Open Spam and blocked');
   wrap.querySelector('.fab-label')?.replaceChildren('Spam & blocked');
   copyNavigationFabIcon(startChatContainer, wrap, SPAM_BLOCKED_FAB_ICON_PATH);
+  normalizeNavigationTileLink(link, 'neutral');
 
   const activate = (event) => {
     event.preventDefault();
@@ -82,6 +87,7 @@ function createInstallation({
 
     if (startChatContainer) {
       row.append(createSpamBlockedFab(startChatContainer, handleFabClick));
+      normalizeNavigationTileRow(row);
     }
   }
 

@@ -102,7 +102,7 @@ describe('content entry helpers', () => {
         document.querySelectorAll('[data-messages-shortcuts-pill]')
       ).toHaveLength(6);
     });
-    expect(document.querySelector('[data-messages-shortcuts-navigation-shortcut-styles]'))
+    expect(document.querySelector('[data-messages-shortcuts-navigation-tile-styles]'))
       .not.toBeNull();
   });
 
@@ -116,7 +116,7 @@ describe('content entry helpers', () => {
     resetContentScriptForTests();
     expect(globalThis.chrome.runtime.onMessage.listenerCount()).toBe(0);
     expect(document.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(0);
-    expect(document.querySelector('[data-messages-shortcuts-navigation-shortcut-styles]'))
+    expect(document.querySelector('[data-messages-shortcuts-navigation-tile-styles]'))
       .toBeNull();
 
     vi.resetModules();
