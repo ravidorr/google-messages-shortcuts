@@ -80,7 +80,7 @@ describe('keyboard-context-guard', () => {
     expect(hasNonCollapsibleTextSelection(window)).toBe(true);
   });
 
-  it('detects native dialogs and builds keyboard context', () => {
+  it('detects visible mat-dialog-container surfaces and builds keyboard context', () => {
     document.body.innerHTML = '<mat-dialog-container></mat-dialog-container><input />';
     const input = document.body.querySelector('input');
     const event = { target: input, isComposing: false, keyCode: 0, repeat: false };
@@ -89,6 +89,27 @@ describe('keyboard-context-guard', () => {
     expect(isNativeDialogOpen(document)).toBe(true);
     expect(localThis.isEditable).toBe(true);
     expect(localThis.nativeDialogOpen).toBe(true);
+  });
+
+  it('detects visible role=dialog and aria-modal surfaces', () => {
+    document.body.innerHTML = `
+      <div role="dialog" hidden></div>
+      <div role="dialog" style="display:none"></div>
+      <div role="dialog">Visible dialog</div>
+      <section aria-modal="true">Visible modal</section>
+    `;
+
+    expect(isNativeDialogOpen(document)).toBe(true);
+  });
+
+  it('ignores hidden dialog false positives', () => {
+    document.body.innerHTML = `
+      <mat-dialog-container hidden></mat-dialog-container>
+      <div role="dialog" style="display:none"></div>
+      <section aria-modal="true" style="visibility:hidden">Hidden modal</section>
+    `;
+
+    expect(isNativeDialogOpen(document)).toBe(false);
   });
 
   it('detects open row menus in keyboard context', () => {

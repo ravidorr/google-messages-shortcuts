@@ -229,7 +229,7 @@ export function getActionFeedbackMessage(result, command) {
     case 'native-dialog-open':
       return {
         kind: 'info',
-        message: 'Close the open Google Messages dialog before starting a new chat.'
+        message: 'Close the open Google Messages dialog before using a navigation shortcut.'
       };
     case 'unarchive-button-not-found':
       return {

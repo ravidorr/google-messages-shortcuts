@@ -11,6 +11,12 @@ const EDITABLE_SELECTOR = [
   '[role="textbox"]'
 ].join(', ');
 
+const NATIVE_DIALOG_SELECTORS = [
+  'mat-dialog-container',
+  '[role="dialog"]',
+  '[aria-modal="true"]'
+];
+
 export const COMPOSER_CONTAINER_SELECTOR = 'mws-message-input';
 
 function isEditableElement(element) {
@@ -24,6 +30,30 @@ function isEditableElement(element) {
 
   return element.matches?.(COMPOSER_CONTAINER_SELECTOR)
     || element.closest(COMPOSER_CONTAINER_SELECTOR) !== null;
+}
+
+export function isElementVisible(element) {
+  if (!element || element.closest('[hidden]')) {
+    return false;
+  }
+
+  const view = element.ownerDocument?.defaultView;
+
+  if (view && typeof view.getComputedStyle === 'function') {
+    let current = element;
+
+    while (current && current.nodeType === 1) {
+      const style = view.getComputedStyle(current);
+
+      if (style.visibility === 'hidden' || style.display === 'none') {
+        return false;
+      }
+
+      current = current.parentElement;
+    }
+  }
+
+  return true;
 }
 
 export function isEditableTarget(element, documentRoot = document) {
@@ -51,7 +81,9 @@ export function isRepeatedKeyEvent(event) {
 }
 
 export function isNativeDialogOpen(documentRoot = document) {
-  return Boolean(documentRoot.querySelector('mat-dialog-container'));
+  return NATIVE_DIALOG_SELECTORS.some((selector) =>
+    [...documentRoot.querySelectorAll(selector)].some(isElementVisible)
+  );
 }
 
 export function createKeyboardContext(event, documentRoot = document) {

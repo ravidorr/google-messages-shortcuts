@@ -18,6 +18,7 @@ output/*
 # IDE and OS
 .idea/
 .vscode/
+.worktrees/
 *.swp
 *.swo
 .DS_Store

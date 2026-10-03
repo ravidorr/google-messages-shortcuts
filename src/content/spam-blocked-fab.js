@@ -1,11 +1,14 @@
 import { isPaused } from '../shared/pause-preference.js';
 import { showActionFeedback } from './action-feedback.js';
-import { isSpamBlockedDialogOpen } from './adapters/spam-blocked-adapter.js';
 import {
   ARCHIVED_FAB_ROW_ATTRIBUTE,
-  copyArchivedFabIcon,
-  syncArchivedFabAppearance
+  copyNavigationFabIcon,
+  SPAM_BLOCKED_FAB_ICON_PATH
 } from './navigation-fab.js';
+import {
+  normalizeNavigationTileLink,
+  normalizeNavigationTileRow
+} from './navigation-tile-styles.js';
 import { handleOpenSpamBlocked } from './open-spam-blocked-action.js';
 import { COMMAND_OPEN_SPAM_BLOCKED } from '../shared/commands.js';
 import { SELECTORS } from './google-messages-dom.js';
@@ -39,8 +42,8 @@ export function createSpamBlockedFab(startChatContainer, onClick) {
   link.setAttribute(SPAM_BLOCKED_FAB_ATTRIBUTE, '');
   link.setAttribute('aria-label', 'Open Spam and blocked');
   wrap.querySelector('.fab-label')?.replaceChildren('Spam & blocked');
-  copyArchivedFabIcon(startChatContainer, wrap);
-  syncArchivedFabAppearance(startChatContainer, wrap);
+  copyNavigationFabIcon(startChatContainer, wrap, SPAM_BLOCKED_FAB_ICON_PATH);
+  normalizeNavigationTileLink(link, 'neutral');
 
   const activate = (event) => {
     event.preventDefault();
@@ -70,8 +73,12 @@ function createInstallation({
   async function refresh() {
     paused = await isPaused(chromeApi);
 
-    if (paused || inFlight || isSpamBlockedDialogOpen(documentRoot, selectors)) {
+    if (paused) {
       removeSpamBlockedFab(documentRoot);
+      return;
+    }
+
+    if (inFlight) {
       return;
     }
 
@@ -84,6 +91,7 @@ function createInstallation({
 
     if (startChatContainer) {
       row.append(createSpamBlockedFab(startChatContainer, handleFabClick));
+      normalizeNavigationTileRow(row);
     }
   }
 
@@ -97,7 +105,6 @@ function createInstallation({
     try {
       const result = await openSpamBlocked(documentRoot, chromeApi, selectors);
       showActionFeedback(result, COMMAND_OPEN_SPAM_BLOCKED, documentRoot);
-      await refresh();
     } finally {
       inFlight = false;
     }

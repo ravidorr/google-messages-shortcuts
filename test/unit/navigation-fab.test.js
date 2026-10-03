@@ -11,6 +11,9 @@ import {
   syncArchivedFabAppearance
 } from '../../src/content/navigation-fab.js';
 import {
+  createSpamBlockedFab
+} from '../../src/content/spam-blocked-fab.js';
+import {
   archivedModalSurface,
   archivedSidebarView,
   startChatFabSurface
@@ -51,9 +54,53 @@ describe('navigation-fab', () => {
     expect(archivedWrap?.getAttribute('label')).toBe('Archived');
     expect(archivedWrap?.querySelector('.fab-label')?.textContent).toBe('Archived');
     expect(archivedWrap?.querySelector('a')?.getAttribute('href')).toBe('#');
-    expect(archivedWrap?.querySelector('a')?.className)
-      .toBe(startChatWrap?.querySelector('a')?.className);
+    expect(startChatWrap?.querySelector('a')?.classList.contains('gm-nav-tile-start')).toBe(true);
+    expect(archivedWrap?.querySelector('a')?.classList.contains('gm-nav-tile-neutral')).toBe(true);
+    expect(row?.classList.contains('gm-nav-row')).toBe(true);
 
+    disconnect();
+  });
+
+  it('adds tile styles that lay out three equal navigation controls in a grid', async () => {
+    document.body.innerHTML = startChatFabSurface;
+    const disconnect = installArchivedFab({
+      documentRoot: document,
+      chromeApi: {
+        storage: {
+          local: { get: vi.fn(async () => ({})) },
+          onChanged: { addListener: vi.fn(), removeListener: vi.fn() }
+        }
+      }
+    });
+
+    await vi.waitFor(() => {
+      expect(document.querySelector(`[${ARCHIVED_FAB_ATTRIBUTE}]`)).not.toBeNull();
+    });
+
+    const row = document.querySelector(`[${ARCHIVED_FAB_ROW_ATTRIBUTE}]`);
+    const styles = document.querySelector('[data-messages-shortcuts-navigation-tile-styles]').textContent;
+    const startLink = row?.querySelector('a[data-e2e-start-button]');
+    const archivedLink = row?.querySelector(`[${ARCHIVED_FAB_ATTRIBUTE}]`);
+
+    expect(row?.classList.contains('gm-nav-row')).toBe(true);
+    expect(styles).toContain('margin-top: 8px !important');
+    expect(styles).toContain('width: 300px !important');
+    expect(styles).toContain('position: static !important');
+    expect(styles).toContain('grid-template-columns: repeat(3, 84px) !important');
+    expect(styles).toContain('padding: 6px 16px 12px !important');
+    expect(styles).toContain('gap: 8px !important');
+    expect(styles).toContain('overflow: visible !important');
+    expect(styles).toContain('height: 72px !important');
+    expect(styles).toContain('width: 84px !important');
+    expect(styles).toContain('position: relative !important');
+    expect(styles).toContain('box-shadow: none !important');
+    expect(styles).toContain('all: unset');
+    expect(styles).toContain('background: #d3e3fd !important');
+    expect(styles).toContain('background: #f0f4f9 !important');
+    expect(styles).toContain('fill: #0b57d0 !important');
+    expect(styles).toContain('white-space: normal !important');
+    expect(startLink?.classList.contains('gm-nav-tile-start')).toBe(true);
+    expect(archivedLink?.classList.contains('gm-nav-tile-neutral')).toBe(true);
     disconnect();
   });
 
@@ -173,6 +220,21 @@ describe('navigation-fab', () => {
     expect(archivedFab.querySelector('.fab-label')).toBeNull();
   });
 
+  it('renders distinct icons and a two-line Spam and blocked label in the tile row', () => {
+    document.body.innerHTML = startChatFabSurface;
+    const startChatContainer = document.querySelector('mw-fab-link.start-chat');
+    const archivedFab = createArchivedFab(document, startChatContainer, vi.fn());
+    const spamFab = createSpamBlockedFab(startChatContainer, vi.fn());
+    const archivedPath = archivedFab.querySelector('mws-icon.fab-icon path')?.getAttribute('d');
+    const spamPath = spamFab.querySelector('mws-icon.fab-icon path')?.getAttribute('d');
+    const spamLabel = spamFab.querySelector('.fab-label')?.textContent;
+
+    expect(archivedPath).toContain('M20.54 5.23');
+    expect(spamPath).toContain('M12 1L3 5v6');
+    expect(archivedPath).not.toBe(spamPath);
+    expect(spamLabel).toBe('Spam & blocked');
+  });
+
   it('builds an archived fab that mirrors the start chat button structure', () => {
     document.body.innerHTML = startChatFabSurface;
     const startChatContainer = document.querySelector('mw-fab-link.start-chat');
@@ -225,7 +287,7 @@ describe('navigation-fab', () => {
     expect(document.querySelector(`[${ARCHIVED_FAB_ATTRIBUTE}]`)).toBeNull();
   });
 
-  it('does not inject the archived fab when the modal is already open', async () => {
+  it('injects the archived fab when the modal is already open', async () => {
     document.body.innerHTML = `${startChatFabSurface}${archivedModalSurface}`;
 
     installArchivedFab({
@@ -240,7 +302,9 @@ describe('navigation-fab', () => {
 
     await Promise.resolve();
 
-    expect(document.querySelector(`[${ARCHIVED_FAB_ATTRIBUTE}]`)).toBeNull();
+    await vi.waitFor(() => {
+      expect(document.querySelector(`[${ARCHIVED_FAB_ATTRIBUTE}]`)).not.toBeNull();
+    });
   });
 
   it('keeps the archived fab visible when opening archived fails', async () => {
@@ -470,7 +534,7 @@ describe('navigation-fab', () => {
     expect(openArchived).toHaveBeenCalledTimes(1);
   });
 
-  it('opens archived when the injected fab is clicked', async () => {
+  it('keeps the archived fab visible when the injected fab opens the modal', async () => {
     document.body.innerHTML = startChatFabSurface;
     const openArchived = vi.fn(async () => {
       document.body.insertAdjacentHTML('beforeend', archivedModalSurface);
@@ -497,7 +561,7 @@ describe('navigation-fab', () => {
     await Promise.resolve();
 
     expect(openArchived).toHaveBeenCalledTimes(1);
-    expect(document.querySelector(`[${ARCHIVED_FAB_ATTRIBUTE}]`)).toBeNull();
+    expect(document.querySelector(`[${ARCHIVED_FAB_ATTRIBUTE}]`)).not.toBeNull();
   });
 
   it('reuses an existing fab installation until the last listener disconnects', async () => {
