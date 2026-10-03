@@ -7,7 +7,8 @@ import {
 } from './navigation-fab.js';
 import {
   normalizeNavigationTileLink,
-  normalizeNavigationTileRow
+  normalizeNavigationTileRow,
+  syncNavigationTileTheme
 } from './navigation-tile-styles.js';
 import { handleOpenSpamBlocked } from './open-spam-blocked-action.js';
 import { COMMAND_OPEN_SPAM_BLOCKED } from '../shared/commands.js';
@@ -91,6 +92,7 @@ function createInstallation({
 
     if (startChatContainer) {
       row.append(createSpamBlockedFab(startChatContainer, handleFabClick));
+      syncNavigationTileTheme(row);
       normalizeNavigationTileRow(row);
     }
   }

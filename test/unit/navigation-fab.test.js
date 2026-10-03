@@ -61,6 +61,37 @@ describe('navigation-fab', () => {
     disconnect();
   });
 
+  it('synchronizes the FAB row when its native sidebar theme changes', async () => {
+    document.body.innerHTML = `
+      <aside style="background-color: rgb(32, 33, 36)">
+        ${startChatFabSurface}
+      </aside>
+    `;
+    const localThis = installArchivedFab({
+      documentRoot: document,
+      chromeApi: {
+        storage: {
+          local: { get: vi.fn(async () => ({})) },
+          onChanged: { addListener: vi.fn(), removeListener: vi.fn() }
+        }
+      }
+    });
+
+    await vi.waitFor(() => {
+      expect(document.querySelector(`[${ARCHIVED_FAB_ROW_ATTRIBUTE}]`)
+        ?.getAttribute('data-messages-shortcuts-theme')).toBe('dark');
+    });
+
+    document.querySelector('aside').style.backgroundColor = 'rgb(240, 244, 249)';
+
+    await vi.waitFor(() => {
+      expect(document.querySelector(`[${ARCHIVED_FAB_ROW_ATTRIBUTE}]`)
+        ?.getAttribute('data-messages-shortcuts-theme')).toBe('light');
+    });
+
+    localThis();
+  });
+
   it('adds tile styles that lay out three equal navigation controls in a grid', async () => {
     document.body.innerHTML = startChatFabSurface;
     const disconnect = installArchivedFab({

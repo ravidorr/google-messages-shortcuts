@@ -86,6 +86,23 @@ describe('spam-blocked-fab', () => {
     expect(chromeApi.storage.onChanged.removeListener).toHaveBeenCalledTimes(1);
   });
 
+  it('preserves the native dark theme when it appends the Spam and blocked FAB', async () => {
+    document.body.innerHTML = `
+      <aside style="background-color: rgb(32, 33, 36)">
+        <div ${ARCHIVED_FAB_ROW_ATTRIBUTE}>${startChatFabSurface}</div>
+      </aside>
+    `;
+
+    installSpamBlockedFab({ documentRoot: document, chromeApi: createChromeApi() });
+
+    await vi.waitFor(() => {
+      expect(document.querySelector(`[${SPAM_BLOCKED_FAB_ATTRIBUTE}]`)).not.toBeNull();
+    });
+
+    expect(document.querySelector(`[${ARCHIVED_FAB_ROW_ATTRIBUTE}]`)
+      .getAttribute('data-messages-shortcuts-theme')).toBe('dark');
+  });
+
   it('does not inject while paused but keeps the tile visible when its dialog is open', async () => {
     document.body.innerHTML = `<div ${ARCHIVED_FAB_ROW_ATTRIBUTE}>${startChatFabSurface}</div>`;
     installSpamBlockedFab({ documentRoot: document, chromeApi: createChromeApi(true) });

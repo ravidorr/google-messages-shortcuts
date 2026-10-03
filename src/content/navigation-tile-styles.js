@@ -6,6 +6,9 @@ export const NAV_TILE_STYLE_SELECTOR = 'style[data-messages-shortcuts-navigation
 export const NAV_TILE_DISABLED_ATTRIBUTE = 'data-messages-shortcuts-tile-disabled';
 export const NAV_TILE_BADGE_ATTRIBUTE = 'data-messages-shortcuts-navigation-shortcut';
 export const NAV_TILE_BADGE_HOST_CLASS = 'gm-nav-tile-badge-host';
+export const NAV_TILE_THEME_ATTRIBUTE = 'data-messages-shortcuts-theme';
+export const NAV_TILE_THEME_LIGHT = 'light';
+export const NAV_TILE_THEME_DARK = 'dark';
 
 const LEGACY_RESET = `
   backdrop-filter: none !important;
@@ -21,6 +24,66 @@ const LEGACY_RESET = `
   top: auto !important;
   transform: none !important;
 `;
+
+function parseOpaqueCssColor(color) {
+  const value = String(color ?? '').trim().toLowerCase();
+  const hexMatch = value.match(/^#([\da-f]{3}|[\da-f]{6})$/);
+
+  if (hexMatch) {
+    const hex = hexMatch[1].length === 3
+      ? [...hexMatch[1]].map((channel) => channel.repeat(2)).join('')
+      : hexMatch[1];
+
+    return [
+      Number.parseInt(hex.slice(0, 2), 16),
+      Number.parseInt(hex.slice(2, 4), 16),
+      Number.parseInt(hex.slice(4, 6), 16)
+    ];
+  }
+
+  const rgbMatch = value.match(/^rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)$/);
+
+  if (rgbMatch) {
+    const channels = rgbMatch.slice(1).map(Number);
+
+    return channels.every((channel) => channel >= 0 && channel <= 255) ? channels : null;
+  }
+
+  const rgbaMatch = value.match(
+    /^rgba\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(1(?:\.0+)?)\s*\)$/
+  );
+
+  if (!rgbaMatch) {
+    return null;
+  }
+
+  const channels = rgbaMatch.slice(1, 4).map(Number);
+
+  return channels.every((channel) => channel >= 0 && channel <= 255) ? channels : null;
+}
+
+function toLinearChannel(channel) {
+  const normalized = channel / 255;
+
+  return normalized <= 0.04045
+    ? normalized / 12.92
+    : ((normalized + 0.055) / 1.055) ** 2.4;
+}
+
+export function classifyNavigationTileTheme(color) {
+  const channels = parseOpaqueCssColor(color);
+
+  if (!channels) {
+    return NAV_TILE_THEME_LIGHT;
+  }
+
+  const [red, green, blue] = channels;
+  const luminance = (0.2126 * toLinearChannel(red))
+    + (0.7152 * toLinearChannel(green))
+    + (0.0722 * toLinearChannel(blue));
+
+  return luminance < 0.5 ? NAV_TILE_THEME_DARK : NAV_TILE_THEME_LIGHT;
+}
 
 function buildNavigationTileStylesheet() {
   return `
@@ -83,6 +146,16 @@ function buildNavigationTileStylesheet() {
       color: #1f1f1f !important;
     }
 
+    .${NAV_TILE_ROW_CLASS}[${NAV_TILE_ROW_ATTRIBUTE}][${NAV_TILE_THEME_ATTRIBUTE}="${NAV_TILE_THEME_DARK}"] > mw-fab-link > a.fab.gm-nav-tile-start {
+      background: #303134 !important;
+      color: #e8eaed !important;
+    }
+
+    .${NAV_TILE_ROW_CLASS}[${NAV_TILE_ROW_ATTRIBUTE}][${NAV_TILE_THEME_ATTRIBUTE}="${NAV_TILE_THEME_DARK}"] > mw-fab-link > a.fab.gm-nav-tile-neutral {
+      background: #202124 !important;
+      color: #e8eaed !important;
+    }
+
     .${NAV_TILE_ROW_CLASS}[${NAV_TILE_ROW_ATTRIBUTE}] > mw-fab-link > a.fab[${NAV_TILE_DISABLED_ATTRIBUTE}] {
       opacity: 0.38 !important;
       pointer-events: none !important;
@@ -91,6 +164,10 @@ function buildNavigationTileStylesheet() {
     .${NAV_TILE_ROW_CLASS}[${NAV_TILE_ROW_ATTRIBUTE}] > mw-fab-link > a.fab:focus-visible {
       outline: 2px solid #0b57d0 !important;
       outline-offset: 2px !important;
+    }
+
+    .${NAV_TILE_ROW_CLASS}[${NAV_TILE_ROW_ATTRIBUTE}][${NAV_TILE_THEME_ATTRIBUTE}="${NAV_TILE_THEME_DARK}"] > mw-fab-link > a.fab:focus-visible {
+      outline-color: #8ab4f8 !important;
     }
 
     .${NAV_TILE_ROW_CLASS}[${NAV_TILE_ROW_ATTRIBUTE}] .mdc-button__label,
@@ -119,6 +196,13 @@ function buildNavigationTileStylesheet() {
       fill: #0b57d0 !important;
     }
 
+    .${NAV_TILE_ROW_CLASS}[${NAV_TILE_ROW_ATTRIBUTE}][${NAV_TILE_THEME_ATTRIBUTE}="${NAV_TILE_THEME_DARK}"] mws-icon.fab-icon,
+    .${NAV_TILE_ROW_CLASS}[${NAV_TILE_ROW_ATTRIBUTE}][${NAV_TILE_THEME_ATTRIBUTE}="${NAV_TILE_THEME_DARK}"] mws-icon.fab-icon svg,
+    .${NAV_TILE_ROW_CLASS}[${NAV_TILE_ROW_ATTRIBUTE}][${NAV_TILE_THEME_ATTRIBUTE}="${NAV_TILE_THEME_DARK}"] mws-icon.fab-icon path {
+      color: #8ab4f8 !important;
+      fill: #8ab4f8 !important;
+    }
+
     .${NAV_TILE_ROW_CLASS}[${NAV_TILE_ROW_ATTRIBUTE}] .fab-label {
       ${LEGACY_RESET}
       color: inherit !important;
@@ -139,6 +223,12 @@ function buildNavigationTileStylesheet() {
 
     .${NAV_TILE_ROW_CLASS}[${NAV_TILE_ROW_ATTRIBUTE}] > mw-fab-link > a.fab.gm-nav-tile-neutral .fab-label {
       color: #1f1f1f !important;
+    }
+
+    .${NAV_TILE_ROW_CLASS}[${NAV_TILE_ROW_ATTRIBUTE}][${NAV_TILE_THEME_ATTRIBUTE}="${NAV_TILE_THEME_DARK}"] .fab-label,
+    .${NAV_TILE_ROW_CLASS}[${NAV_TILE_ROW_ATTRIBUTE}][${NAV_TILE_THEME_ATTRIBUTE}="${NAV_TILE_THEME_DARK}"] > mw-fab-link > a.fab.gm-nav-tile-start .fab-label,
+    .${NAV_TILE_ROW_CLASS}[${NAV_TILE_ROW_ATTRIBUTE}][${NAV_TILE_THEME_ATTRIBUTE}="${NAV_TILE_THEME_DARK}"] > mw-fab-link > a.fab.gm-nav-tile-neutral .fab-label {
+      color: #e8eaed !important;
     }
 
     .${NAV_TILE_ROW_CLASS}[${NAV_TILE_ROW_ATTRIBUTE}] .${NAV_TILE_BADGE_HOST_CLASS} {
@@ -165,6 +255,12 @@ function buildNavigationTileStylesheet() {
       top: -6px !important;
       white-space: nowrap !important;
       z-index: 1 !important;
+    }
+
+    .${NAV_TILE_ROW_CLASS}[${NAV_TILE_ROW_ATTRIBUTE}][${NAV_TILE_THEME_ATTRIBUTE}="${NAV_TILE_THEME_DARK}"] [${NAV_TILE_BADGE_ATTRIBUTE}] {
+      background: #303134 !important;
+      border-color: #5f6368 !important;
+      color: #e8eaed !important;
     }
   `;
 }
@@ -193,6 +289,31 @@ export function normalizeNavigationTileLink(link, variant) {
   link.classList.add('gm-nav-tile');
   link.classList.remove('gm-nav-tile-start', 'gm-nav-tile-neutral');
   link.classList.add(variant === 'start' ? 'gm-nav-tile-start' : 'gm-nav-tile-neutral');
+}
+
+export function syncNavigationTileTheme(row) {
+  if (!row) {
+    return NAV_TILE_THEME_LIGHT;
+  }
+
+  const getComputedStyle = row.ownerDocument?.defaultView?.getComputedStyle;
+  let current = row.parentElement;
+
+  while (current && current.nodeType === 1) {
+    const backgroundColor = getComputedStyle?.(current)?.backgroundColor;
+
+    if (parseOpaqueCssColor(backgroundColor)) {
+      const theme = classifyNavigationTileTheme(backgroundColor);
+
+      row.setAttribute(NAV_TILE_THEME_ATTRIBUTE, theme);
+      return theme;
+    }
+
+    current = current.parentElement;
+  }
+
+  row.setAttribute(NAV_TILE_THEME_ATTRIBUTE, NAV_TILE_THEME_LIGHT);
+  return NAV_TILE_THEME_LIGHT;
 }
 
 export function normalizeNavigationTileRow(row) {
