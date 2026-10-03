@@ -1,11 +1,9 @@
 import { isPaused } from '../shared/pause-preference.js';
 import { showActionFeedback } from './action-feedback.js';
-import { isSpamBlockedDialogOpen } from './adapters/spam-blocked-adapter.js';
 import {
   ARCHIVED_FAB_ROW_ATTRIBUTE,
   copyNavigationFabIcon,
-  SPAM_BLOCKED_FAB_ICON_PATH,
-  syncArchivedFabAppearance
+  SPAM_BLOCKED_FAB_ICON_PATH
 } from './navigation-fab.js';
 import { handleOpenSpamBlocked } from './open-spam-blocked-action.js';
 import { COMMAND_OPEN_SPAM_BLOCKED } from '../shared/commands.js';
@@ -41,7 +39,6 @@ export function createSpamBlockedFab(startChatContainer, onClick) {
   link.setAttribute('aria-label', 'Open Spam and blocked');
   wrap.querySelector('.fab-label')?.replaceChildren('Spam & blocked');
   copyNavigationFabIcon(startChatContainer, wrap, SPAM_BLOCKED_FAB_ICON_PATH);
-  syncArchivedFabAppearance(startChatContainer, wrap);
 
   const activate = (event) => {
     event.preventDefault();
@@ -71,7 +68,7 @@ function createInstallation({
   async function refresh() {
     paused = await isPaused(chromeApi);
 
-    if (paused || inFlight || isSpamBlockedDialogOpen(documentRoot, selectors)) {
+    if (paused || inFlight) {
       removeSpamBlockedFab(documentRoot);
       return;
     }
@@ -98,7 +95,6 @@ function createInstallation({
     try {
       const result = await openSpamBlocked(documentRoot, chromeApi, selectors);
       showActionFeedback(result, COMMAND_OPEN_SPAM_BLOCKED, documentRoot);
-      await refresh();
     } finally {
       inFlight = false;
     }

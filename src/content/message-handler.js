@@ -11,6 +11,7 @@ import { runConversationAction } from './conversation-action.js';
 import { handleOpenArchived } from './open-archived-action.js';
 import { handleOpenSpamBlocked } from './open-spam-blocked-action.js';
 import { handleOpenStartChat } from './open-start-chat-action.js';
+import { isNativeDialogOpen } from './keyboard-context-guard.js';
 
 const STEP_LABELS = {
   'no-target': 'find the selected or hovered conversation row',
@@ -57,6 +58,13 @@ export async function handleCommand(
   }
 
   if (isNavigationCommand(command)) {
+    if (isNativeDialogOpen(documentRoot)) {
+      const result = { ok: false, reason: 'native-dialog-open' };
+      showActionFeedback(result, command, documentRoot);
+
+      return result;
+    }
+
     try {
       let result;
 

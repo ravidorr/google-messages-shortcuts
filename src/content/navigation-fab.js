@@ -11,31 +11,11 @@ export const ARCHIVED_FAB_ATTRIBUTE = 'data-messages-shortcuts-archived-fab';
 export const ARCHIVED_FAB_WRAP_ATTRIBUTE = 'data-messages-shortcuts-archived-fab-wrap';
 export const ARCHIVED_FAB_ROW_ATTRIBUTE = 'data-messages-shortcuts-fab-row';
 export const ARCHIVED_FAB_STYLE_SELECTOR = 'style[data-messages-shortcuts-archived-fab-styles]';
+export const NAV_TILE_ROW_CLASS = 'gm-nav-row';
 
 export const ARCHIVED_FAB_ICON_PATH = 'M20.54 5.23l-1.39-1.68C18.88 3.21 18.47 3 18 3H6c-.47 0-.88.21-1.16.55L3.46 5.23C3.17 5.57 3 6.02 3 6.5V19c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6.5c0-.48-.17-.93-.46-1.27zM12 17.5L6.5 12H10v-2h4v2h3.5L12 17.5zM5.12 5l.81-1h12l.94 1H5.12z';
 export const SPAM_BLOCKED_FAB_ICON_PATH =
-  'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10M9 9h6M12 6v6';
-
-const FAB_LINK_STYLE_PROPERTIES = [
-  'backgroundColor',
-  'border',
-  'borderRadius',
-  'boxShadow',
-  'color',
-  'fontFamily',
-  'fontSize',
-  'fontWeight',
-  'height',
-  'letterSpacing',
-  'lineHeight',
-  'minHeight',
-  'padding',
-  'paddingBottom',
-  'paddingLeft',
-  'paddingRight',
-  'paddingTop',
-  'textTransform'
-];
+  'M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm7 10c0 4.52-2.98 8.69-7 9.93-4.02-1.24-7-5.41-7-9.93V6.3l7-3.11 7 3.11V11z';
 
 const installationRegistry = new WeakMap();
 
@@ -58,23 +38,8 @@ function replaceFabIcon(iconElement, pathData) {
   iconElement.replaceChildren(svg);
 }
 
-export function syncArchivedFabAppearance(startChatContainer, archivedWrap) {
-  const sourceLink = startChatContainer.querySelector('a.fab');
-  const targetLink = archivedWrap.querySelector('a.fab');
-
-  if (!sourceLink || !targetLink) {
-    return;
-  }
-
-  const sourceStyles = getComputedStyle(sourceLink);
-
-  for (const property of FAB_LINK_STYLE_PROPERTIES) {
-    targetLink.style[property] = sourceStyles[property];
-  }
-
-  targetLink.style.display = 'inline-flex';
-  targetLink.style.alignItems = 'center';
-  targetLink.style.textDecoration = 'none';
+export function syncArchivedFabAppearance(_startChatContainer, _archivedWrap) {
+  // Tile styling is applied through scoped gm-nav CSS.
 }
 
 export function copyNavigationFabIcon(startChatContainer, targetWrap, pathData) {
@@ -117,39 +82,83 @@ function addStyles(documentRoot) {
   const style = documentRoot.createElement('style');
   style.setAttribute('data-messages-shortcuts-archived-fab-styles', '');
   style.textContent = `
-    [${ARCHIVED_FAB_ROW_ATTRIBUTE}] {
-      align-items: center;
-      display: flex;
-      flex-direction: row;
-      flex-wrap: nowrap;
-      gap: 4px;
+    .${NAV_TILE_ROW_CLASS}[${ARCHIVED_FAB_ROW_ATTRIBUTE}] {
+      box-sizing: border-box;
+      display: grid;
+      gap: 8px;
+      grid-template-columns: repeat(3, 84px);
       max-width: 100%;
+      overflow: visible;
+      padding: 6px 16px 12px;
       width: 100%;
     }
 
-    [${ARCHIVED_FAB_ROW_ATTRIBUTE}] > mw-fab-link {
+    .${NAV_TILE_ROW_CLASS}[${ARCHIVED_FAB_ROW_ATTRIBUTE}][data-messages-shortcuts-native-modal-open] {
+      pointer-events: none;
+    }
+
+    .${NAV_TILE_ROW_CLASS}[${ARCHIVED_FAB_ROW_ATTRIBUTE}] > mw-fab-link {
+      display: block;
+      height: 72px;
+      width: 84px;
+    }
+
+    .${NAV_TILE_ROW_CLASS}[${ARCHIVED_FAB_ROW_ATTRIBUTE}] > mw-fab-link > a.fab {
+      align-items: center;
+      border: none;
+      border-radius: 16px;
+      box-sizing: border-box;
       display: inline-flex;
-      flex: 1 1 0;
-      max-width: 100%;
+      flex-direction: column;
+      gap: 4px;
+      height: 72px;
+      justify-content: center;
+      max-width: 84px;
+      min-height: 72px;
+      padding: 8px 4px;
+      text-decoration: none;
+      width: 84px;
+    }
+
+    .${NAV_TILE_ROW_CLASS}[${ARCHIVED_FAB_ROW_ATTRIBUTE}] > mw-fab-link.start-chat > a.fab {
+      background: #d3e3fd;
+      color: #041e49;
+    }
+
+    .${NAV_TILE_ROW_CLASS}[${ARCHIVED_FAB_ROW_ATTRIBUTE}] > mw-fab-link.archived-chat > a.fab,
+    .${NAV_TILE_ROW_CLASS}[${ARCHIVED_FAB_ROW_ATTRIBUTE}] > mw-fab-link.spam-blocked-chat > a.fab {
+      background: #f0f4f9;
+      color: #1f1f1f;
+    }
+
+    .${NAV_TILE_ROW_CLASS}[${ARCHIVED_FAB_ROW_ATTRIBUTE}] > mw-fab-link > a.fab:focus-visible {
+      outline: 2px solid #0b57d0;
+      outline-offset: 2px;
+    }
+
+    .${NAV_TILE_ROW_CLASS}[${ARCHIVED_FAB_ROW_ATTRIBUTE}] .fab-icon-label-container {
+      align-items: center;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
       min-width: 0;
-      width: 0;
     }
 
-    [${ARCHIVED_FAB_ROW_ATTRIBUTE}] > mw-fab-link > a.fab {
-      font-size: 12px !important;
-      max-width: 100%;
-      min-height: 36px !important;
-      padding: 6px 8px !important;
+    .${NAV_TILE_ROW_CLASS}[${ARCHIVED_FAB_ROW_ATTRIBUTE}] mws-icon.fab-icon,
+    .${NAV_TILE_ROW_CLASS}[${ARCHIVED_FAB_ROW_ATTRIBUTE}] mws-icon.fab-icon svg {
+      height: 20px;
+      width: 20px;
     }
 
-    [${ARCHIVED_FAB_ROW_ATTRIBUTE}] .fab-icon-label-container {
-      min-width: 0;
-    }
-
-    [${ARCHIVED_FAB_ROW_ATTRIBUTE}] .fab-label {
+    .${NAV_TILE_ROW_CLASS}[${ARCHIVED_FAB_ROW_ATTRIBUTE}] .fab-label {
+      font-size: 11px;
+      font-weight: 500;
+      line-height: 14px;
+      max-height: 28px;
       overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+      text-align: center;
+      white-space: normal;
+      word-break: break-word;
     }
   `;
   documentRoot.head.append(style);
@@ -199,8 +208,6 @@ export function createArchivedFab(_documentRoot, startChatContainer, onClick) {
     }
   }, true);
 
-  syncArchivedFabAppearance(startChatContainer, wrap);
-
   return wrap;
 }
 
@@ -214,11 +221,14 @@ function ensureFabRow(documentRoot, startChatContainer) {
   const existingRow = startChatContainer.closest(`[${ARCHIVED_FAB_ROW_ATTRIBUTE}]`);
 
   if (existingRow) {
+    existingRow.classList.add(NAV_TILE_ROW_CLASS);
+
     return existingRow;
   }
 
   const row = documentRoot.createElement('div');
   row.setAttribute(ARCHIVED_FAB_ROW_ATTRIBUTE, '');
+  row.classList.add(NAV_TILE_ROW_CLASS);
   startChatContainer.parentElement.insertBefore(row, startChatContainer);
   row.append(startChatContainer);
 
@@ -263,7 +273,6 @@ function injectArchivedFab(documentRoot, selectors, onClick) {
   const row = ensureFabRow(documentRoot, startChatContainer);
   const archivedWrap = createArchivedFab(documentRoot, startChatContainer, onClick);
   row.append(archivedWrap);
-  syncArchivedFabAppearance(startChatContainer, archivedWrap);
 }
 
 function createInstallation({

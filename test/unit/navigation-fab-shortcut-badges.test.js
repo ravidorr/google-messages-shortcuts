@@ -13,7 +13,7 @@ import { startChatFabSurface } from '../fixtures/dom/list-states.js';
 const BADGE_SELECTOR = '[data-messages-shortcuts-navigation-shortcut]';
 
 function addNavigationFabs() {
-  document.body.innerHTML = `<div ${ARCHIVED_FAB_ROW_ATTRIBUTE}>${startChatFabSurface}</div>`;
+  document.body.innerHTML = `<div class="gm-nav-row" ${ARCHIVED_FAB_ROW_ATTRIBUTE}>${startChatFabSurface}</div>`;
   const row = document.querySelector(`[${ARCHIVED_FAB_ROW_ATTRIBUTE}]`);
   const startChatContainer = row.querySelector('mw-fab-link.start-chat');
 
@@ -215,6 +215,68 @@ describe('navigation FAB shortcut badges', () => {
     await Promise.resolve();
 
     expect(document.querySelectorAll(BADGE_SELECTOR)).toHaveLength(0);
+  });
+
+  it('marks the navigation tile row inert while a native dialog is visible', async () => {
+    addNavigationFabs();
+
+    disconnect = installNavigationFabShortcutBadges({
+      documentRoot: document,
+      getBrowserCommandLabels: vi.fn(async () => ({
+        'start-chat': 'Ctrl+Shift+S',
+        'open-archived': 'Ctrl+Shift+A',
+        'open-spam-blocked': 'Ctrl+Shift+B'
+      }))
+    });
+
+    await vi.waitFor(() => {
+      expect(document.querySelectorAll(BADGE_SELECTOR)).toHaveLength(3);
+    });
+
+    const row = document.querySelector(`[${ARCHIVED_FAB_ROW_ATTRIBUTE}]`);
+    expect(row.inert).toBe(false);
+    expect(row.hasAttribute('data-messages-shortcuts-native-modal-open')).toBe(false);
+
+    document.body.insertAdjacentHTML('beforeend', '<mat-dialog-container></mat-dialog-container>');
+
+    await vi.waitFor(() => {
+      expect(row.inert).toBe(true);
+    });
+    expect(row.hasAttribute('data-messages-shortcuts-native-modal-open')).toBe(true);
+    expect(document.querySelector('a[data-e2e-start-button]').getAttribute('aria-disabled')).toBe('true');
+
+    document.querySelector('mat-dialog-container').remove();
+
+    await vi.waitFor(() => {
+      expect(row.inert).toBe(false);
+    });
+    expect(row.hasAttribute('data-messages-shortcuts-native-modal-open')).toBe(false);
+    expect(document.querySelector('a[data-e2e-start-button]').hasAttribute('aria-disabled')).toBe(false);
+  });
+
+  it('scopes badge styling under the navigation tile row', async () => {
+    addNavigationFabs();
+
+    disconnect = installNavigationFabShortcutBadges({
+      documentRoot: document,
+      getBrowserCommandLabels: vi.fn(async () => ({
+        'start-chat': 'Ctrl+Shift+S',
+        'open-archived': 'Ctrl+Shift+A',
+        'open-spam-blocked': 'Ctrl+Shift+B'
+      }))
+    });
+
+    await vi.waitFor(() => {
+      expect(document.querySelectorAll(BADGE_SELECTOR)).toHaveLength(3);
+    });
+
+    const styles = document.querySelector('[data-messages-shortcuts-navigation-shortcut-styles]').textContent;
+
+    expect(styles).toContain('.gm-nav-row');
+    expect(styles).toContain('top: -6px');
+    expect(styles).toContain('right: -2px');
+    expect(styles).toContain('height: 16px');
+    expect(styles).toContain('border: 1px solid #c4c7c5');
   });
 
   it('removes shortcut badges and styles during teardown', async () => {

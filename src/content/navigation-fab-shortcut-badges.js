@@ -8,12 +8,17 @@ import {
   MESSAGE_GET_BROWSER_COMMAND_LABELS
 } from '../shared/browser-command-labels.js';
 import { UNASSIGNED_SHORTCUT_LABEL } from '../shared/shortcut-labels.js';
-import { ARCHIVED_FAB_ATTRIBUTE } from './navigation-fab.js';
+import { isNativeDialogOpen } from './keyboard-context-guard.js';
+import {
+  ARCHIVED_FAB_ATTRIBUTE,
+  ARCHIVED_FAB_ROW_ATTRIBUTE
+} from './navigation-fab.js';
 import { SPAM_BLOCKED_FAB_ATTRIBUTE } from './spam-blocked-fab.js';
 
 const BADGE_ATTRIBUTE = 'data-messages-shortcuts-navigation-shortcut';
 const BADGE_HOST_ATTRIBUTE = 'data-messages-shortcuts-navigation-shortcut-host';
 const STYLE_SELECTOR = 'style[data-messages-shortcuts-navigation-shortcut-styles]';
+const NATIVE_MODAL_OPEN_ATTRIBUTE = 'data-messages-shortcuts-native-modal-open';
 const START_CHAT_SELECTOR = 'a[data-e2e-start-button]';
 const installationRegistry = new WeakMap();
 
@@ -33,21 +38,25 @@ function addStyles(documentRoot) {
   const style = documentRoot.createElement('style');
   style.setAttribute('data-messages-shortcuts-navigation-shortcut-styles', '');
   style.textContent = `
-    [${BADGE_HOST_ATTRIBUTE}] {
+    .gm-nav-row[${ARCHIVED_FAB_ROW_ATTRIBUTE}] [${BADGE_HOST_ATTRIBUTE}] {
       position: relative !important;
     }
 
-    [${BADGE_ATTRIBUTE}] {
+    .gm-nav-row[${ARCHIVED_FAB_ROW_ATTRIBUTE}] [${BADGE_ATTRIBUTE}] {
+      align-items: center;
       background: #ffffff;
-      border: 1px solid #d2e3fc;
+      border: 1px solid #c4c7c5;
       border-radius: 999px;
-      color: #174ea6;
-      font: 600 9px/12px system-ui, sans-serif;
+      box-sizing: border-box;
+      color: #1f1f1f;
+      display: inline-flex;
+      font: 600 10px/14px system-ui, sans-serif;
+      height: 16px;
       max-width: calc(100% - 4px);
       overflow: hidden;
-      padding: 1px 4px;
+      padding: 0 4px;
       position: absolute;
-      right: -4px;
+      right: -2px;
       text-overflow: ellipsis;
       top: -6px;
       white-space: nowrap;
@@ -98,6 +107,38 @@ function removeBadges(documentRoot) {
   });
 }
 
+export function syncNavigationTileModalState(documentRoot = document) {
+  const row = documentRoot.querySelector(`[${ARCHIVED_FAB_ROW_ATTRIBUTE}]`);
+
+  if (!row) {
+    return;
+  }
+
+  const modalOpen = isNativeDialogOpen(documentRoot);
+
+  if (modalOpen) {
+    row.setAttribute(NATIVE_MODAL_OPEN_ATTRIBUTE, '');
+    row.inert = true;
+  } else {
+    row.removeAttribute(NATIVE_MODAL_OPEN_ATTRIBUTE);
+    row.inert = false;
+  }
+
+  for (const { selector } of NAVIGATION_CONTROLS) {
+    const control = documentRoot.querySelector(selector);
+
+    if (!control) {
+      continue;
+    }
+
+    if (modalOpen) {
+      control.setAttribute('aria-disabled', 'true');
+    } else {
+      control.removeAttribute('aria-disabled');
+    }
+  }
+}
+
 function createInstallation({
   documentRoot = document,
   chromeApi = globalThis.chrome,
@@ -117,6 +158,8 @@ function createInstallation({
     for (const { command, selector } of NAVIGATION_CONTROLS) {
       applyShortcutBadge(documentRoot, selector, labels[command]);
     }
+
+    syncNavigationTileModalState(documentRoot);
   }
 
   void Promise.resolve()
@@ -141,6 +184,7 @@ function createInstallation({
     active = false;
     observer.disconnect();
     removeBadges(documentRoot);
+    syncNavigationTileModalState(documentRoot);
     style.remove();
   };
 }

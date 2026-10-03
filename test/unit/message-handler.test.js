@@ -135,6 +135,28 @@ describe('message-handler', () => {
       .toBe('Archived opened.');
   });
 
+  it('fails closed for navigation commands while a native dialog is open', async () => {
+    document.body.innerHTML = '<mat-dialog-container></mat-dialog-container>';
+    const openArchived = vi.spyOn(openArchivedAction, 'handleOpenArchived');
+    const openStartChat = vi.spyOn(openStartChatAction, 'handleOpenStartChat');
+    const openSpamBlocked = vi.spyOn(openSpamBlockedAction, 'handleOpenSpamBlocked');
+
+    const archivedResult = await handleCommand(COMMAND_OPEN_ARCHIVED, document, createChromeApi());
+    const startChatResult = await handleCommand(COMMAND_START_CHAT, document, createChromeApi());
+    const spamBlockedResult = await handleCommand(
+      COMMAND_OPEN_SPAM_BLOCKED,
+      document,
+      createChromeApi()
+    );
+
+    expect(archivedResult).toEqual({ ok: false, reason: 'native-dialog-open' });
+    expect(startChatResult).toEqual({ ok: false, reason: 'native-dialog-open' });
+    expect(spamBlockedResult).toEqual({ ok: false, reason: 'native-dialog-open' });
+    expect(openArchived).not.toHaveBeenCalled();
+    expect(openStartChat).not.toHaveBeenCalled();
+    expect(openSpamBlocked).not.toHaveBeenCalled();
+  });
+
   it('handles start-chat navigation commands', async () => {
     vi.spyOn(openStartChatAction, 'handleOpenStartChat')
       .mockResolvedValueOnce({ ok: true });

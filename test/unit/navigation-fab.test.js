@@ -11,6 +11,9 @@ import {
   syncArchivedFabAppearance
 } from '../../src/content/navigation-fab.js';
 import {
+  createSpamBlockedFab
+} from '../../src/content/spam-blocked-fab.js';
+import {
   archivedModalSurface,
   archivedSidebarView,
   startChatFabSurface
@@ -53,11 +56,12 @@ describe('navigation-fab', () => {
     expect(archivedWrap?.querySelector('a')?.getAttribute('href')).toBe('#');
     expect(archivedWrap?.querySelector('a')?.className)
       .toBe(startChatWrap?.querySelector('a')?.className);
+    expect(row?.classList.contains('gm-nav-row')).toBe(true);
 
     disconnect();
   });
 
-  it('adds compact styles that constrain the navigation FAB row to the sidebar', async () => {
+  it('adds tile styles that lay out three equal navigation controls in a grid', async () => {
     document.body.innerHTML = startChatFabSurface;
     const disconnect = installArchivedFab({
       documentRoot: document,
@@ -73,11 +77,20 @@ describe('navigation-fab', () => {
       expect(document.querySelector(`[${ARCHIVED_FAB_ATTRIBUTE}]`)).not.toBeNull();
     });
 
+    const row = document.querySelector(`[${ARCHIVED_FAB_ROW_ATTRIBUTE}]`);
     const styles = document.querySelector('[data-messages-shortcuts-archived-fab-styles]').textContent;
 
-    expect(styles).toContain('max-width: 100%');
-    expect(styles).toContain('font-size: 12px !important');
-    expect(styles).toContain('text-overflow: ellipsis');
+    expect(row?.classList.contains('gm-nav-row')).toBe(true);
+    expect(styles).toContain('grid-template-columns: repeat(3, 84px)');
+    expect(styles).toContain('padding: 6px 16px 12px');
+    expect(styles).toContain('gap: 8px');
+    expect(styles).toContain('overflow: visible');
+    expect(styles).toContain('height: 72px');
+    expect(styles).toContain('width: 84px');
+    expect(styles).toContain('flex-direction: column');
+    expect(styles).toContain('background: #d3e3fd');
+    expect(styles).toContain('background: #f0f4f9');
+    expect(styles).toContain('white-space: normal');
     disconnect();
   });
 
@@ -195,6 +208,21 @@ describe('navigation-fab', () => {
     );
 
     expect(archivedFab.querySelector('.fab-label')).toBeNull();
+  });
+
+  it('renders distinct icons and a two-line Spam and blocked label in the tile row', () => {
+    document.body.innerHTML = startChatFabSurface;
+    const startChatContainer = document.querySelector('mw-fab-link.start-chat');
+    const archivedFab = createArchivedFab(document, startChatContainer, vi.fn());
+    const spamFab = createSpamBlockedFab(startChatContainer, vi.fn());
+    const archivedPath = archivedFab.querySelector('mws-icon.fab-icon path')?.getAttribute('d');
+    const spamPath = spamFab.querySelector('mws-icon.fab-icon path')?.getAttribute('d');
+    const spamLabel = spamFab.querySelector('.fab-label')?.textContent;
+
+    expect(archivedPath).toContain('M20.54 5.23');
+    expect(spamPath).toContain('M12 1L3 5v6');
+    expect(archivedPath).not.toBe(spamPath);
+    expect(spamLabel).toBe('Spam & blocked');
   });
 
   it('builds an archived fab that mirrors the start chat button structure', () => {

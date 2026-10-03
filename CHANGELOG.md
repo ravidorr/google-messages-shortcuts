@@ -6,7 +6,7 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 
-- Keep the Start chat, Archived, and Spam & blocked navigation FABs compact in the sidebar, show assigned shortcuts as badges, retain them behind native modals, and give Spam & blocked its own shield icon
+- Redesign the Start chat, Archived, and Spam & blocked navigation controls as equal icon-over-label tiles, show assigned shortcuts as top-right badges, keep the tile group visible but inert behind native modals, and fail closed for navigation shortcuts while a dialog is open
 
 ## 1.14.2 - 2026-10-03
 
