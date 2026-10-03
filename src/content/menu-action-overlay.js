@@ -49,8 +49,8 @@ function createEscapeKeyEvent() {
 
 function dispatchEscapeKey(documentRoot) {
   const escapeTargets = [
-    documentRoot.activeElement,
     documentRoot.querySelector(ROW_MENU_PANEL_SELECTOR),
+    documentRoot.activeElement,
     documentRoot
   ].filter(Boolean);
 
