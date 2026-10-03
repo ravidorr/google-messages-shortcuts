@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.14.5 - 2026-10-03
+
+### Fixed
+
+- Keep Google Messages' native Block / report spam confirmation open by leaving its row menu alone while the dialog is displayed
+
 ## 1.14.4 - 2026-10-03
 
 ### Fixed
