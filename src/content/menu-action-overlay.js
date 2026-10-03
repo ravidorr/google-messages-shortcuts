@@ -90,9 +90,16 @@ export function beginMenuAction(documentRoot = document) {
 }
 
 export function endMenuAction(documentRoot = document) {
-  dismissOpenRowMenu(documentRoot);
+  const nativeDialogOpen = Boolean(documentRoot.querySelector('mat-dialog-container'));
+
+  if (!nativeDialogOpen) {
+    dismissOpenRowMenu(documentRoot);
+  }
   documentRoot.documentElement.removeAttribute(MENU_ACTION_ATTRIBUTE);
-  dismissOpenRowMenu(documentRoot);
+
+  if (!nativeDialogOpen) {
+    dismissOpenRowMenu(documentRoot);
+  }
 }
 
 export {

@@ -267,13 +267,16 @@ describe('runConversationAction', () => {
     expect(confirmButton.focus).toHaveBeenCalledTimes(1);
   });
 
-  it('keeps the native block confirmation dialog open while dismissing the row menu', async () => {
+  it('does not dismiss the row menu after the block confirmation dialog opens', async () => {
     document.body.innerHTML = `
       <mws-conversation-list-item>
         <a aria-selected="true"></a>
         <button aria-haspopup="menu"></button>
       </mws-conversation-list-item>
-      <div role="menu" class="conversation-actions-menu mat-mdc-menu-panel"></div>
+      <div class="cdk-overlay-container">
+        <div class="cdk-overlay-backdrop"></div>
+        <div role="menu" class="conversation-actions-menu mat-mdc-menu-panel"></div>
+      </div>
       <button data-e2e-conversation-menu-block class="mat-mdc-menu-item">
         Block &amp; report spam
       </button>
@@ -281,11 +284,9 @@ describe('runConversationAction', () => {
     `;
     const dialog = document.querySelector('mat-dialog-container');
     const menu = document.querySelector('.conversation-actions-menu');
-    const confirmButton = document.querySelector('[data-e2e-action-button-confirm]');
-    menu.addEventListener('keydown', (event) => {
-      if (event.key === 'Escape') {
-        menu.remove();
-      }
+    const localThis = vi.fn();
+    menu.addEventListener('keydown', () => {
+      localThis();
     });
     dialog.addEventListener('keydown', (event) => {
       if (event.key === 'Escape') {
@@ -293,12 +294,12 @@ describe('runConversationAction', () => {
       }
     });
 
-    const localThis = await runConversationAction(document, COMMAND_BLOCK_REPORT_SPAM);
+    const result = await runConversationAction(document, COMMAND_BLOCK_REPORT_SPAM);
 
-    expect(localThis).toEqual({ ok: true, pendingBlockReportSpamConfirmation: true });
-    expect(document.querySelector('.conversation-actions-menu')).toBeNull();
+    expect(result).toEqual({ ok: true, pendingBlockReportSpamConfirmation: true });
+    expect(localThis).not.toHaveBeenCalled();
+    expect(document.querySelector('.conversation-actions-menu')).toBe(menu);
     expect(document.querySelector('mat-dialog-container')).toBe(dialog);
-    expect(document.activeElement).toBe(confirmButton);
   });
 
   it('opens block and report spam and focuses the live OK confirmation without clicking it', async () => {
