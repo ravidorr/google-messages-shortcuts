@@ -1,6 +1,6 @@
 {
   "name": "google-messages-shortcuts",
-  "version": "1.14.0",
+  "version": "1.14.1",
   "description": "Use shortcuts to archive, trash, mark conversations read or unread, and optionally navigate Google Messages.",
   "type": "module",
   "scripts": {
