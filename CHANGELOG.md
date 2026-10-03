@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.14.4 - 2026-10-03
+
+### Fixed
+
+- Preserve the native Block / report spam confirmation dialog while dismissing the row menu, so the confirmation remains available to complete the action
+
 ## 1.14.3 - 2026-10-03
 
 ### Fixed
