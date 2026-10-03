@@ -3,7 +3,8 @@ import { showActionFeedback } from './action-feedback.js';
 import { isSpamBlockedDialogOpen } from './adapters/spam-blocked-adapter.js';
 import {
   ARCHIVED_FAB_ROW_ATTRIBUTE,
-  copyArchivedFabIcon,
+  copyNavigationFabIcon,
+  SPAM_BLOCKED_FAB_ICON_PATH,
   syncArchivedFabAppearance
 } from './navigation-fab.js';
 import { handleOpenSpamBlocked } from './open-spam-blocked-action.js';
@@ -39,7 +40,7 @@ export function createSpamBlockedFab(startChatContainer, onClick) {
   link.setAttribute(SPAM_BLOCKED_FAB_ATTRIBUTE, '');
   link.setAttribute('aria-label', 'Open Spam and blocked');
   wrap.querySelector('.fab-label')?.replaceChildren('Spam & blocked');
-  copyArchivedFabIcon(startChatContainer, wrap);
+  copyNavigationFabIcon(startChatContainer, wrap, SPAM_BLOCKED_FAB_ICON_PATH);
   syncArchivedFabAppearance(startChatContainer, wrap);
 
   const activate = (event) => {

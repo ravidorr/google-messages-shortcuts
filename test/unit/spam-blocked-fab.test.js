@@ -45,6 +45,10 @@ describe('spam-blocked-fab', () => {
     expect(link.getAttribute('aria-label')).toBe('Open Spam and blocked');
     expect(link.getAttribute('data-e2e-start-button')).toBeNull();
     expect(fab.querySelector('.fab-label').textContent).toBe('Spam & blocked');
+    expect(fab.querySelector('mws-icon.fab-icon path').getAttribute('d'))
+      .toContain('M12 22s8-4');
+    expect(fab.querySelector('mws-icon.fab-icon path').getAttribute('d'))
+      .not.toContain('M20.54 5.23');
 
     link.click();
     link.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));

@@ -13,7 +13,9 @@ export const ARCHIVED_FAB_WRAP_ATTRIBUTE = 'data-messages-shortcuts-archived-fab
 export const ARCHIVED_FAB_ROW_ATTRIBUTE = 'data-messages-shortcuts-fab-row';
 export const ARCHIVED_FAB_STYLE_SELECTOR = 'style[data-messages-shortcuts-archived-fab-styles]';
 
-const ARCHIVED_FAB_ICON_PATH = 'M20.54 5.23l-1.39-1.68C18.88 3.21 18.47 3 18 3H6c-.47 0-.88.21-1.16.55L3.46 5.23C3.17 5.57 3 6.02 3 6.5V19c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6.5c0-.48-.17-.93-.46-1.27zM12 17.5L6.5 12H10v-2h4v2h3.5L12 17.5zM5.12 5l.81-1h12l.94 1H5.12z';
+export const ARCHIVED_FAB_ICON_PATH = 'M20.54 5.23l-1.39-1.68C18.88 3.21 18.47 3 18 3H6c-.47 0-.88.21-1.16.55L3.46 5.23C3.17 5.57 3 6.02 3 6.5V19c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6.5c0-.48-.17-.93-.46-1.27zM12 17.5L6.5 12H10v-2h4v2h3.5L12 17.5zM5.12 5l.81-1h12l.94 1H5.12z';
+export const SPAM_BLOCKED_FAB_ICON_PATH =
+  'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10M9 9h6M12 6v6';
 
 const FAB_LINK_STYLE_PROPERTIES = [
   'backgroundColor',
@@ -76,9 +78,9 @@ export function syncArchivedFabAppearance(startChatContainer, archivedWrap) {
   targetLink.style.textDecoration = 'none';
 }
 
-export function copyArchivedFabIcon(startChatContainer, archivedWrap) {
+export function copyNavigationFabIcon(startChatContainer, targetWrap, pathData) {
   const sourceIcon = startChatContainer.querySelector('mws-icon.fab-icon');
-  const targetIcon = archivedWrap.querySelector('mws-icon.fab-icon');
+  const targetIcon = targetWrap.querySelector('mws-icon.fab-icon');
 
   if (!targetIcon) {
     return;
@@ -91,7 +93,7 @@ export function copyArchivedFabIcon(startChatContainer, archivedWrap) {
     const path = svgClone.querySelector('path');
 
     if (path) {
-      path.setAttribute('d', ARCHIVED_FAB_ICON_PATH);
+      path.setAttribute('d', pathData);
       path.setAttribute('fill', 'currentColor');
       path.removeAttribute('stroke');
       path.removeAttribute('stroke-width');
@@ -101,7 +103,11 @@ export function copyArchivedFabIcon(startChatContainer, archivedWrap) {
     return;
   }
 
-  replaceFabIcon(targetIcon, ARCHIVED_FAB_ICON_PATH);
+  replaceFabIcon(targetIcon, pathData);
+}
+
+export function copyArchivedFabIcon(startChatContainer, archivedWrap) {
+  copyNavigationFabIcon(startChatContainer, archivedWrap, ARCHIVED_FAB_ICON_PATH);
 }
 
 function addStyles(documentRoot) {
@@ -117,15 +123,34 @@ function addStyles(documentRoot) {
       display: flex;
       flex-direction: row;
       flex-wrap: nowrap;
-      gap: 8px;
+      gap: 4px;
+      max-width: 100%;
       width: 100%;
     }
 
     [${ARCHIVED_FAB_ROW_ATTRIBUTE}] > mw-fab-link {
       display: inline-flex;
-      flex: 0 0 auto;
-      max-width: none;
-      width: auto;
+      flex: 1 1 0;
+      max-width: 100%;
+      min-width: 0;
+      width: 0;
+    }
+
+    [${ARCHIVED_FAB_ROW_ATTRIBUTE}] > mw-fab-link > a.fab {
+      font-size: 12px !important;
+      max-width: 100%;
+      min-height: 36px !important;
+      padding: 6px 8px !important;
+    }
+
+    [${ARCHIVED_FAB_ROW_ATTRIBUTE}] .fab-icon-label-container {
+      min-width: 0;
+    }
+
+    [${ARCHIVED_FAB_ROW_ATTRIBUTE}] .fab-label {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
   `;
   documentRoot.head.append(style);

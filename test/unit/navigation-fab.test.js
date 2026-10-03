@@ -57,6 +57,30 @@ describe('navigation-fab', () => {
     disconnect();
   });
 
+  it('adds compact styles that constrain the navigation FAB row to the sidebar', async () => {
+    document.body.innerHTML = startChatFabSurface;
+    const disconnect = installArchivedFab({
+      documentRoot: document,
+      chromeApi: {
+        storage: {
+          local: { get: vi.fn(async () => ({})) },
+          onChanged: { addListener: vi.fn(), removeListener: vi.fn() }
+        }
+      }
+    });
+
+    await vi.waitFor(() => {
+      expect(document.querySelector(`[${ARCHIVED_FAB_ATTRIBUTE}]`)).not.toBeNull();
+    });
+
+    const styles = document.querySelector('[data-messages-shortcuts-archived-fab-styles]').textContent;
+
+    expect(styles).toContain('max-width: 100%');
+    expect(styles).toContain('font-size: 12px !important');
+    expect(styles).toContain('text-overflow: ellipsis');
+    disconnect();
+  });
+
   it('throws when the start chat container is missing its anchor element', () => {
     const startChatContainer = document.createElement('mw-fab-link');
     startChatContainer.className = 'start-chat';

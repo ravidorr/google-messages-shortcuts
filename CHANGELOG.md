@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.14.3 - 2026-10-03
+
+### Fixed
+
+- Keep the Start chat, Archived, and Spam & blocked navigation FABs compact in the sidebar, show assigned shortcuts as badges, and give Spam & blocked its own shield icon
+
 ## 1.14.2 - 2026-10-03
 
 ### Changed

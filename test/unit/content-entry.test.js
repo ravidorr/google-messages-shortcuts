@@ -102,6 +102,8 @@ describe('content entry helpers', () => {
         document.querySelectorAll('[data-messages-shortcuts-pill]')
       ).toHaveLength(6);
     });
+    expect(document.querySelector('[data-messages-shortcuts-navigation-shortcut-styles]'))
+      .not.toBeNull();
   });
 
   it('cleans up listeners, observers, and pills before reloading the content script', async () => {
@@ -114,6 +116,8 @@ describe('content entry helpers', () => {
     resetContentScriptForTests();
     expect(globalThis.chrome.runtime.onMessage.listenerCount()).toBe(0);
     expect(document.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(0);
+    expect(document.querySelector('[data-messages-shortcuts-navigation-shortcut-styles]'))
+      .toBeNull();
 
     vi.resetModules();
     document.body.innerHTML = '<mws-conversation-list-item is-focused="true"></mws-conversation-list-item>';
