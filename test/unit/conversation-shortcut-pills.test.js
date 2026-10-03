@@ -161,6 +161,49 @@ describe('conversation shortcut pills', () => {
     expectLucidePillIcon(trashPill, COMMAND_TRASH);
   });
 
+  it('adds dark pill tokens without changing light pill styles', () => {
+    disconnect = installConversationShortcutPills({ documentRoot: document });
+    const localThis = document.querySelector('[data-messages-shortcuts-pill-styles]').textContent;
+
+    expect(localThis).toContain('background: #ffffff');
+    expect(localThis).toContain('[data-messages-shortcuts-theme="dark"]');
+    expect(localThis).toContain('background: #303134');
+    expect(localThis).toContain('border-color: #5f6368');
+    expect(localThis).toContain('color: #8ab4f8');
+    expect(localThis).toContain('outline-color: #8ab4f8');
+    expect(localThis).toContain(':focus-visible');
+  });
+
+  it('uses and updates the native theme for visible pill hosts without refetching labels', async () => {
+    const wrapper = document.createElement('aside');
+    wrapper.style.backgroundColor = 'rgb(32, 33, 36)';
+    const row = createConversationRow({ focused: true });
+    const localThis = vi.fn(async () => ({
+      archive: 'Ctrl+Shift+Y',
+      trash: 'Ctrl+Shift+D'
+    }));
+    wrapper.append(row);
+    document.body.append(wrapper);
+
+    disconnect = installConversationShortcutPills({
+      documentRoot: document,
+      getShortcutLabels: localThis
+    });
+
+    await vi.waitFor(() => {
+      expect(row.getAttribute('data-messages-shortcuts-theme')).toBe('dark');
+    });
+    const group = row.querySelector('[data-messages-shortcuts-pill-group]');
+    wrapper.style.backgroundColor = 'rgb(240, 244, 249)';
+
+    await vi.waitFor(() => {
+      expect(row.getAttribute('data-messages-shortcuts-theme')).toBe('light');
+    });
+
+    expect(row.querySelector('[data-messages-shortcuts-pill-group]')).toBe(group);
+    expect(localThis).toHaveBeenCalledTimes(1);
+  });
+
   it('renders unassigned shortcut pills as icons only', async () => {
     const row = createConversationRow({ focused: true, unread: false });
     document.body.append(row);
@@ -1289,6 +1332,7 @@ describe('conversation shortcut pills', () => {
         type: 'other',
         target: document.body
       }]);
+      observerCallbacks[2]([{ target: document }]);
     } finally {
       globalThis.MutationObserver = NativeMutationObserver;
     }

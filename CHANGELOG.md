@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.14.7 - 2026-10-03
+
+### Added
+
+- Automatically match injected conversation row-action pills to the active Google Messages light or dark theme
+
 ## 1.14.6 - 2026-10-03
 
 ### Added
