@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.14.2 - 2026-10-03
+
+### Changed
+
+- Rewrite ROADMAP.md as a forward-looking phase plan and move product principles, feature backlog, and architecture notes into dedicated docs
+
 ## 1.14.1 - 2026-10-03
 
 ### Fixed
