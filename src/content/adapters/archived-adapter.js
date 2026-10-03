@@ -4,6 +4,11 @@ import {
   CAPABILITY_UNSAFE,
   createCapabilityResult
 } from './capability-states.js';
+import {
+  buildListHeaderInputSelector,
+  buildListHeaderOverflowTriggerSelector,
+  buildListHeaderRegionSelector
+} from './list-header-dom.js';
 import { START_CHAT_SELECTORS } from './start-chat-adapter.js';
 
 export const ARCHIVED_SELECTORS = {
@@ -18,12 +23,9 @@ export const ARCHIVED_SELECTORS = {
   archivedRow: 'mws-conversation-list-item',
   bottomNavigation:
     'mws-bottom-navigation, mws-bottom-nav, [data-e2e-bottom-navigation]',
-  searchInput:
-    'input[type="search"], input[type="text"], [data-e2e-search-input], mws-search input, input[aria-label*="Search" i], input[placeholder*="Search" i]',
-  searchRegion:
-    'mws-search, mws-conversations-list-header, mws-conversation-list-header, [class*="search"]',
-  searchOverflowTrigger:
-    'button[aria-haspopup="menu"], button.menu-button, button[aria-label*="More" i], button[aria-label*="more" i], button[mattooltip*="More" i], button[data-e2e-search-overflow-button]',
+  listHeaderInput: buildListHeaderInputSelector(),
+  listHeaderRegion: buildListHeaderRegionSelector(),
+  listHeaderOverflowTrigger: buildListHeaderOverflowTriggerSelector(),
   appShellRegion:
     'header, [role="banner"], mws-app-bar, mws-top-app-bar, mws-conversations-list-header, mws-conversation-list-header',
   appOverflowTrigger:
@@ -398,20 +400,20 @@ export function findArchivedEntryControl(documentRoot, selectors = ARCHIVED_SELE
   return findArchivedModalEntryControl(documentRoot, selectors);
 }
 
-function findSearchRegion(documentRoot, selectors = ARCHIVED_SELECTORS) {
-  const searchInput = documentRoot.querySelector(selectors.searchInput);
+function findListHeaderRegion(documentRoot, selectors = ARCHIVED_SELECTORS) {
+  const listHeaderInput = documentRoot.querySelector(selectors.listHeaderInput);
 
-  if (searchInput) {
-    const matchedRegion = searchInput.closest(selectors.searchRegion);
+  if (listHeaderInput) {
+    const matchedRegion = listHeaderInput.closest(selectors.listHeaderRegion);
 
     if (matchedRegion) {
       return matchedRegion;
     }
 
-    return searchInput.parentElement?.parentElement ?? searchInput.parentElement;
+    return listHeaderInput.parentElement?.parentElement ?? listHeaderInput.parentElement;
   }
 
-  return documentRoot.querySelector(selectors.searchRegion);
+  return documentRoot.querySelector(selectors.listHeaderRegion);
 }
 
 function findOverflowTriggerInScope(scope, selectors) {
@@ -419,7 +421,7 @@ function findOverflowTriggerInScope(scope, selectors) {
     return null;
   }
 
-  for (const trigger of scope.querySelectorAll(selectors.searchOverflowTrigger)) {
+  for (const trigger of scope.querySelectorAll(selectors.listHeaderOverflowTrigger)) {
     if (
       !isExcludedArchivedOverflowScope(trigger)
       && !isExtensionOwnedArchivedControl(trigger)
@@ -431,18 +433,18 @@ function findOverflowTriggerInScope(scope, selectors) {
   return null;
 }
 
-export function findArchivedSearchOverflowTrigger(
+export function findArchivedListHeaderOverflowTrigger(
   documentRoot,
   selectors = ARCHIVED_SELECTORS
 ) {
-  const searchRegion = findSearchRegion(documentRoot, selectors);
+  const listHeaderRegion = findListHeaderRegion(documentRoot, selectors);
 
-  if (!searchRegion) {
+  if (!listHeaderRegion) {
     return null;
   }
 
-  return findOverflowTriggerInScope(searchRegion, selectors)
-    ?? findOverflowTriggerInScope(searchRegion.parentElement, selectors)
+  return findOverflowTriggerInScope(listHeaderRegion, selectors)
+    ?? findOverflowTriggerInScope(listHeaderRegion.parentElement, selectors)
     ?? null;
 }
 
@@ -740,7 +742,7 @@ export function resolveArchivedEntryCapabilityReason({
   }
 
   if (overflowTrigger) {
-    return 'Archived modal entry is available through the search overflow menu.';
+    return 'Archived modal entry is available through the list header overflow menu.';
   }
 
   if (appOverflowTrigger) {
@@ -751,12 +753,12 @@ export function resolveArchivedEntryCapabilityReason({
     return 'Archived modal entry is available through Settings.';
   }
 
-  return 'Archived modal entry is available through the search overflow menu.';
+  return 'Archived modal entry is available through the list header overflow menu.';
 }
 
 function assessArchivedEntryCapability(documentRoot, selectors) {
   const entryControl = findArchivedModalEntryControl(documentRoot, selectors);
-  const overflowTrigger = findArchivedSearchOverflowTrigger(documentRoot, selectors);
+  const overflowTrigger = findArchivedListHeaderOverflowTrigger(documentRoot, selectors);
   const appOverflowTrigger = findArchivedAppOverflowTrigger(documentRoot, selectors);
   const accountMenuTrigger = findArchivedAccountMenuTrigger(documentRoot, selectors);
   const settingsButton = findArchivedSettingsButton(documentRoot, selectors);
@@ -936,7 +938,7 @@ async function openArchivedViaOverflowMenu(
   return { ok: false, reason: 'archived-modal-timeout' };
 }
 
-async function openArchivedViaSearchOverflow(
+async function openArchivedViaListHeaderOverflow(
   documentRoot,
   selectors,
   waitForSelectorFn,
@@ -944,7 +946,7 @@ async function openArchivedViaSearchOverflow(
   timeoutMs
 ) {
   return openArchivedViaOverflowMenu(
-    findArchivedSearchOverflowTrigger(documentRoot, selectors),
+    findArchivedListHeaderOverflowTrigger(documentRoot, selectors),
     documentRoot,
     selectors,
     waitForSelectorFn,
@@ -1113,7 +1115,7 @@ async function openArchivedModalInternal(
     return accountMenuResult;
   }
 
-  const searchOverflowResult = await openArchivedViaSearchOverflow(
+  const listHeaderOverflowResult = await openArchivedViaListHeaderOverflow(
     documentRoot,
     selectors,
     modalWaitFn,
@@ -1121,13 +1123,13 @@ async function openArchivedModalInternal(
     timeoutMs
   );
 
-  if (searchOverflowResult.ok) {
-    return searchOverflowResult;
+  if (listHeaderOverflowResult.ok) {
+    return listHeaderOverflowResult;
   }
 
-  const searchOverflowTrigger = findArchivedSearchOverflowTrigger(documentRoot, selectors);
+  const listHeaderOverflowTrigger = findArchivedListHeaderOverflowTrigger(documentRoot, selectors);
   const appOverflowTrigger = findArchivedAppOverflowTrigger(documentRoot, selectors);
-  const appOverflowResult = appOverflowTrigger && appOverflowTrigger !== searchOverflowTrigger
+  const appOverflowResult = appOverflowTrigger && appOverflowTrigger !== listHeaderOverflowTrigger
     ? await openArchivedViaOverflowMenu(
       appOverflowTrigger,
       documentRoot,
@@ -1144,7 +1146,7 @@ async function openArchivedModalInternal(
 
   const overflowResult = [
     accountMenuResult,
-    searchOverflowResult,
+    listHeaderOverflowResult,
     appOverflowResult
   ].find((result) => result.reason !== 'archived-entry-not-found')
     ?? accountMenuResult;

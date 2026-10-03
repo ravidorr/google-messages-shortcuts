@@ -70,7 +70,7 @@ export function assessPageCapabilities(documentRoot, selectors = getPageSelector
     archived: assessArchivedCapabilities(documentRoot, selectors),
     spamBlocked: assessSpamBlockedCapabilities(documentRoot, selectors),
     startChat: assessStartChatCapabilities(documentRoot, selectors),
-    composer: assessComposerCapabilities(),
+    composer: assessComposerCapabilities(documentRoot),
     messagePane: assessMessagePaneCapabilities(),
     connection: assessConnectionCapabilities()
   };

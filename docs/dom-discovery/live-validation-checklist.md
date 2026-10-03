@@ -29,7 +29,7 @@ Use this checklist against a signed-in Google Messages Web test account before c
 
 - [ ] Tab through the conversation list without triggering unintended sends or menu opens.
 - [ ] Confirm Google Messages native shortcuts still work when the extension is enabled.
-- [ ] Type in search and compose fields; verify extension shortcuts do not fire in editable controls.
+- [ ] Type in compose fields; verify extension shortcuts do not fire in editable controls.
 - [ ] Test IME composition if available (do not commit composed text to real threads unless intentional).
 
 ### Conversation list and virtualization
@@ -93,7 +93,7 @@ For Start chat, record evidence using this field set in [compatibility-matrix.md
 - shortcut collision outcome for `Ctrl+Shift+G` / `Command+Shift+G` against Google Messages, browser, and OS shortcuts
 - bounded postcondition (URL path `/web/conversations/new` or validated new-conversation surface selector)
 - behavior while a native dialog is open (Archived modal, trash confirm, block dialog)
-- editable-target guard (search field, compose field, IME composition if available)
+- editable-target guard (compose field, IME composition if available; Google Messages Web has no filter field in scope)
 - delayed render or virtualization behavior on the Start chat FAB
 
 Optional helper: paste [output/deferred-action-validation-console.js](../../output/deferred-action-validation-console.js) into the Google Messages page console and copy the sanitized `startChat` probe JSON into the matrix.
@@ -118,6 +118,20 @@ For the shared native Spam & blocked dialog, record:
 - [x] Native dialog postcondition is one heading plus one `mat-dialog-container`, immediately and after 1s, repeated twice.
 - [x] Narrow-layout dialog check passes.
 - [ ] Validate the exact fallback label in each additional supported locale before claiming locale support.
+
+### Phase 2 page navigation
+
+Follow [phase2-live-validation.md](./phase2-live-validation.md) for the full step-by-step pass. Record results in [compatibility-matrix.md](./compatibility-matrix.md) under scenario `phase2-navigation`.
+
+Quick checklist:
+
+- [ ] Steps 1–2: session metadata and capability self-test
+- [ ] Step 3: context guards (editables, native dialogs, pause)
+- [ ] Steps 4–6: loaded-list navigation, unread boundaries, return navigation
+- [ ] Steps 7–8: command palette and shortcut help overlay
+- [ ] Step 9: key collision matrix for every provisional binding
+- [ ] Step 10: composer discovery spike ([composer-discovery-console.js](../../output/composer-discovery-console.js))
+- [ ] Step 11: compatibility matrix row added
 
 ### Pill visibility (Epic A)
 

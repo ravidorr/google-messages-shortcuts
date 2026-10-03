@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { LIST_HEADER_INPUT_TYPE, LIST_HEADER_TAG } from '../../src/content/adapters/list-header-dom.js';
 import {
   assessArchivedCapabilities,
   ARCHIVED_CAPABILITY_IDS,
@@ -7,7 +8,7 @@ import {
   findArchivedEntryControl,
   findArchivedMenuItem,
   findArchivedModalEntryControl,
-  findArchivedSearchOverflowTrigger,
+  findArchivedListHeaderOverflowTrigger,
   findArchivedAccountMenuTrigger,
   findArchivedAppOverflowTrigger,
   isAppOverflowMenuTrigger,
@@ -198,7 +199,7 @@ describe('archived-adapter', () => {
     document.body.innerHTML = `
       <header>
         <button aria-label="Archive conversation">Archive</button>
-        <button class="mat-mdc-icon-button" aria-label="Search">Search</button>
+        <button class="mat-mdc-icon-button" aria-label="Filter conversations">Filter</button>
       </header>
       <main>
         <button>Archived</button>
@@ -374,14 +375,14 @@ describe('archived-adapter', () => {
     expect(findArchivedNavigationEntry(document)?.matches('.mat-mdc-list-item')).toBe(true);
   });
 
-  it('falls back to the search overflow reason when no specific entry path is selected', () => {
+  it('falls back to the list header overflow reason when no specific entry path is selected', () => {
     expect(resolveArchivedEntryCapabilityReason({
       entryControl: null,
       accountMenuTrigger: null,
       overflowTrigger: null,
       appOverflowTrigger: null,
       settingsButton: null
-    })).toBe('Archived modal entry is available through the search overflow menu.');
+    })).toBe('Archived modal entry is available through the list header overflow menu.');
   });
 
   it('reports account menu capability when that is the only entry path', () => {
@@ -629,7 +630,7 @@ describe('archived-adapter', () => {
     await expect(firstPromise).resolves.toEqual({ ok: true });
   });
 
-  it('reports app header menu capability when search overflow is unavailable', () => {
+  it('reports app header menu capability when list header overflow is unavailable', () => {
     document.body.innerHTML = `
       <header>
         <button aria-label="Open menu" aria-haspopup="menu">Menu</button>
@@ -666,7 +667,7 @@ describe('archived-adapter', () => {
       .toBe(CAPABILITY_SUPPORTED);
   });
 
-  it('finds the app header overflow trigger outside the search region', () => {
+  it('finds the app header overflow trigger outside the list header region', () => {
     document.body.innerHTML = `
       <header>
         <button aria-label="Open menu" aria-haspopup="menu">Menu</button>
@@ -677,7 +678,7 @@ describe('archived-adapter', () => {
     `;
 
     expect(findArchivedAppOverflowTrigger(document)?.getAttribute('aria-label')).toBe('Open menu');
-    expect(findArchivedSearchOverflowTrigger(document)).toBeNull();
+    expect(findArchivedListHeaderOverflowTrigger(document)).toBeNull();
   });
 
   it('opens archived sidebar when overflow menu navigation does not open the modal', async () => {
@@ -864,29 +865,29 @@ describe('archived-adapter', () => {
       .toBe(CAPABILITY_SUPPORTED);
   });
 
-  it('finds the search overflow trigger from the search input parent container', () => {
+  it('finds the list header overflow trigger from the list header input parent container', () => {
     document.body.innerHTML = `
       <div>
-        <input type="search">
+        <input type="text">
         <button aria-haspopup="menu">More</button>
       </div>
     `;
 
-    expect(findArchivedSearchOverflowTrigger(document)?.textContent).toBe('More');
+    expect(findArchivedListHeaderOverflowTrigger(document)?.textContent).toBe('More');
   });
 
-  it('skips excluded search overflow triggers inside conversation rows', () => {
+  it('skips excluded list header overflow triggers inside conversation rows', () => {
     document.body.innerHTML = `
       <div>
-        <input type="search">
+        <input type="text">
         <mws-conversation-list-item>
           <button aria-haspopup="menu">Row menu</button>
         </mws-conversation-list-item>
-        <button aria-haspopup="menu">Search menu</button>
+        <button aria-haspopup="menu">Header menu</button>
       </div>
     `;
 
-    expect(findArchivedSearchOverflowTrigger(document)?.textContent).toBe('Search menu');
+    expect(findArchivedListHeaderOverflowTrigger(document)?.textContent).toBe('Header menu');
   });
 
   it('skips extension-owned account menu triggers in the app shell', () => {
@@ -926,13 +927,13 @@ describe('archived-adapter', () => {
       .toBe('Archived modal entry is available through Settings.');
   });
 
-  it('reports supported entry capability when only the search overflow path exists', () => {
+  it('reports supported entry capability when only the list header overflow path exists', () => {
     document.body.innerHTML = `
       <header>
-        <mws-search>
-          <input type="search">
+        <${LIST_HEADER_TAG}>
+          <input type="text">
           <button aria-haspopup="menu">More</button>
-        </mws-search>
+        </${LIST_HEADER_TAG}>
       </header>
     `;
 
@@ -940,19 +941,19 @@ describe('archived-adapter', () => {
 
     expect(entryCapability.state).toBe(CAPABILITY_SUPPORTED);
     expect(entryCapability.reason)
-      .toBe('Archived modal entry is available through the search overflow menu.');
+      .toBe('Archived modal entry is available through the list header overflow menu.');
     expect(entryCapability.evidenceSource).toBe('dom-query-fallback');
   });
 
-  it('finds the search overflow trigger from text search inputs and list headers', () => {
+  it('finds the list header overflow trigger from text list header inputs and list headers', () => {
     document.body.innerHTML = `
       <mws-conversations-list-header>
-        <input type="text" aria-label="Search conversations">
+        <input type="text" aria-label="Filter conversations">
         <button class="menu-button">More</button>
       </mws-conversations-list-header>
     `;
 
-    expect(findArchivedSearchOverflowTrigger(document)?.className).toBe('menu-button');
+    expect(findArchivedListHeaderOverflowTrigger(document)?.className).toBe('menu-button');
   });
 
   it('opens the archived modal through settings', async () => {
@@ -987,20 +988,20 @@ describe('archived-adapter', () => {
     expect(findArchivedSettingsEntry(document)?.textContent).toBe('Archived');
   });
 
-  it('opens the archived modal through the search overflow menu', async () => {
+  it('opens the archived modal through the list header overflow menu', async () => {
     document.body.innerHTML = `
       <header>
-        <mws-search>
-          <input type="search">
+        <${LIST_HEADER_TAG}>
+          <input type="text">
           <button aria-haspopup="menu">More</button>
-        </mws-search>
+        </${LIST_HEADER_TAG}>
       </header>
       <div role="menu">
         <button role="menuitem" class="mat-mdc-menu-item">Archived</button>
       </div>
     `;
 
-    const overflowTrigger = findArchivedSearchOverflowTrigger(document);
+    const overflowTrigger = findArchivedListHeaderOverflowTrigger(document);
     const menuItem = findArchivedMenuItem(document);
 
     vi.spyOn(overflowTrigger, 'click');
@@ -1022,13 +1023,13 @@ describe('archived-adapter', () => {
     expect(result).toEqual({ ok: true });
   });
 
-  it('fails when the search overflow trigger is present but the archived menu item is missing', async () => {
+  it('fails when the list header overflow trigger is present but the archived menu item is missing', async () => {
     document.body.innerHTML = `
       <header>
-        <mws-search>
-          <input type="search">
+        <${LIST_HEADER_TAG}>
+          <input type="text">
           <button aria-haspopup="menu">More</button>
-        </mws-search>
+        </${LIST_HEADER_TAG}>
       </header>
     `;
 
@@ -1042,13 +1043,13 @@ describe('archived-adapter', () => {
     expect(result).toEqual({ ok: false, reason: 'archived-entry-not-found' });
   });
 
-  it('times out when the search overflow archived menu item does not open the modal', async () => {
+  it('times out when the list header overflow archived menu item does not open the modal', async () => {
     document.body.innerHTML = `
       <header>
-        <mws-search>
-          <input type="search">
+        <${LIST_HEADER_TAG}>
+          <input type="text">
           <button aria-haspopup="menu">More</button>
-        </mws-search>
+        </${LIST_HEADER_TAG}>
       </header>
       <div role="menu">
         <button role="menuitem" class="mat-mdc-menu-item">Archived</button>
@@ -1068,13 +1069,13 @@ describe('archived-adapter', () => {
     });
   });
 
-  it('uses the default delay when opening archived through search overflow', async () => {
+  it('uses the default delay when opening archived through list header overflow', async () => {
     document.body.innerHTML = `
       <header>
-        <mws-search>
-          <input type="search">
+        <${LIST_HEADER_TAG}>
+          <input type="text">
           <button aria-haspopup="menu">More</button>
-        </mws-search>
+        </${LIST_HEADER_TAG}>
       </header>
       <div role="menu">
         <button role="menuitem" class="mat-mdc-menu-item">Archived</button>
@@ -1546,58 +1547,58 @@ describe('archived-adapter', () => {
     expect(isArchivedSidebarViewActive(document)).toBe(false);
   });
 
-  it('returns null when the search container does not expose an overflow trigger', () => {
-    document.body.innerHTML = '<input type="search">';
+  it('returns null when the list header container does not expose an overflow trigger', () => {
+    document.body.innerHTML = '<input type="text">';
 
-    expect(findArchivedSearchOverflowTrigger(document)).toBeNull();
+    expect(findArchivedListHeaderOverflowTrigger(document)).toBeNull();
   });
 
-  it('finds the search overflow trigger from a nested search region', () => {
+  it('finds the list header overflow trigger from a nested list header region', () => {
     document.body.innerHTML = `
-      <mws-search>
-        <input type="search">
+      <${LIST_HEADER_TAG}>
+        <input type="text">
         <button aria-haspopup="menu">More</button>
-      </mws-search>
+      </${LIST_HEADER_TAG}>
     `;
 
-    expect(findArchivedSearchOverflowTrigger(document)?.textContent).toBe('More');
+    expect(findArchivedListHeaderOverflowTrigger(document)?.textContent).toBe('More');
   });
 
-  it('finds the search overflow trigger from a parent container fallback', () => {
+  it('finds the list header overflow trigger from a parent container fallback', () => {
     document.body.innerHTML = `
-      <div id="search-shell">
-        <div><input type="search"></div>
+      <div id="list-header-shell">
+        <div><input type="text"></div>
         <button aria-haspopup="menu">More</button>
       </div>
     `;
 
-    expect(findArchivedSearchOverflowTrigger(document)?.textContent).toBe('More');
+    expect(findArchivedListHeaderOverflowTrigger(document)?.textContent).toBe('More');
   });
 
-  it('falls back to the search input parent when no search region matches', () => {
+  it('falls back to the list header input parent when no list header region matches', () => {
     document.body.innerHTML = `
-      <div id="search-parent"><input type="search"></div>
+      <div id="list-header-parent"><input type="text"></div>
     `;
 
-    expect(findArchivedSearchOverflowTrigger(document)).toBeNull();
+    expect(findArchivedListHeaderOverflowTrigger(document)).toBeNull();
   });
 
-  it('walks up to the search input grandparent when no search region matches', () => {
+  it('walks up to the list header input grandparent when no list header region matches', () => {
     document.body.innerHTML = `
-      <div id="search-grandparent">
-        <div id="search-parent"><input type="search"></div>
+      <div id="list-header-grandparent">
+        <div id="list-header-parent"><input type="text"></div>
       </div>
     `;
 
-    expect(findArchivedSearchOverflowTrigger(document)).toBeNull();
+    expect(findArchivedListHeaderOverflowTrigger(document)).toBeNull();
   });
 
-  it('uses the search input parent when the grandparent is unavailable', () => {
+  it('uses the list header input parent when the grandparent is unavailable', () => {
     const input = document.createElement('input');
-    input.type = 'search';
+    input.type = LIST_HEADER_INPUT_TYPE;
     document.documentElement.appendChild(input);
 
-    expect(findArchivedSearchOverflowTrigger(document)).toBeNull();
+    expect(findArchivedListHeaderOverflowTrigger(document)).toBeNull();
 
     input.remove();
   });

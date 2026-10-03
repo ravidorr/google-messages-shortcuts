@@ -1,4 +1,9 @@
 import {
+  getBrowserCommandLabelMap,
+  getFallbackBrowserCommandLabelMap,
+  MESSAGE_GET_BROWSER_COMMAND_LABELS
+} from '../shared/browser-command-labels.js';
+import {
   getConversationShortcutLabels,
   MESSAGE_GET_CONVERSATION_SHORTCUT_LABELS,
   UNASSIGNED_SHORTCUT_LABEL
@@ -22,18 +27,34 @@ export async function getShortcutLabels(chromeApi = chrome) {
   return getConversationShortcutLabels(commands);
 }
 
+export async function getAllBrowserCommandLabels(chromeApi = chrome) {
+  const commands = await chromeApi.commands.getAll();
+
+  return getBrowserCommandLabelMap(commands);
+}
+
 export function installShortcutLabelListener(chromeApi = chrome) {
   chromeApi.runtime.onMessage.addListener((message, _sender, sendResponse) => {
-    if (message?.type !== MESSAGE_GET_CONVERSATION_SHORTCUT_LABELS) {
-      return false;
+    if (message?.type === MESSAGE_GET_CONVERSATION_SHORTCUT_LABELS) {
+      getShortcutLabels(chromeApi)
+        .then(sendResponse)
+        .catch(() => {
+          sendResponse(getFallbackLabels());
+        });
+
+      return true;
     }
 
-    getShortcutLabels(chromeApi)
-      .then(sendResponse)
-      .catch(() => {
-        sendResponse(getFallbackLabels());
-      });
+    if (message?.type === MESSAGE_GET_BROWSER_COMMAND_LABELS) {
+      getAllBrowserCommandLabels(chromeApi)
+        .then(sendResponse)
+        .catch(() => {
+          sendResponse(getFallbackBrowserCommandLabelMap());
+        });
 
-    return true;
+      return true;
+    }
+
+    return false;
   });
 }

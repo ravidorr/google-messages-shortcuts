@@ -25,7 +25,7 @@ Keep these intact when they define behavior under test:
 
 ## Review before commit
 
-1. Search fixtures for `@`, `+1`, `(`, seven-digit sequences, and real product names.
+1. Scan fixtures for `@`, `+1`, `(`, seven-digit sequences, and real product names.
 2. Run `npm test`; the fixture sanitization test fails if forbidden patterns appear.
 3. Prefer minimal markup: include only nodes required for the scenario under test.
 

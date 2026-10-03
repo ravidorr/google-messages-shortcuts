@@ -73,7 +73,10 @@ export default [
       'coverage/**',
       'dist/**',
       'release/**',
-      'output/**'
+      'output/**/*',
+      '!output/live-validation-console.js',
+      '!output/deferred-action-validation-console.js',
+      '!output/composer-discovery-console.js'
     ]
   }
 ];

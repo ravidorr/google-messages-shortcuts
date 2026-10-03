@@ -1,8 +1,10 @@
 import { describe, expect, it, vi } from 'vitest';
 import {
+  getAllBrowserCommandLabels,
   getShortcutLabels,
   installShortcutLabelListener
 } from '../../src/background/shortcut-label-listener.js';
+import { MESSAGE_GET_BROWSER_COMMAND_LABELS } from '../../src/shared/browser-command-labels.js';
 import {
   getConversationShortcutLabels,
   MESSAGE_GET_CONVERSATION_SHORTCUT_LABELS
@@ -79,6 +81,54 @@ describe('shortcut label listener', () => {
     installShortcutLabelListener(chromeApi);
 
     expect(addListener.mock.calls[0][0]({ type: 'other-message' }, {}, vi.fn())).toBe(false);
+  });
+
+  it('loads browser command labels for the command palette', async () => {
+    const chromeApi = {
+      commands: {
+        getAll: vi.fn(async () => [
+          { name: 'archive-conversation', shortcut: 'Ctrl+Shift+Y' },
+          { name: 'open-archived', shortcut: 'Ctrl+Shift+A' }
+        ])
+      }
+    };
+
+    await expect(getAllBrowserCommandLabels(chromeApi)).resolves.toMatchObject({
+      'archive-conversation': 'Ctrl+Shift+Y',
+      'open-archived': 'Ctrl+Shift+A'
+    });
+  });
+
+  it('returns fallback browser command labels when Chrome commands cannot be read', async () => {
+    const addListener = vi.fn();
+    const chromeApi = {
+      commands: {
+        getAll: vi.fn(async () => {
+          throw new Error('commands unavailable');
+        })
+      },
+      runtime: {
+        onMessage: {
+          addListener
+        }
+      }
+    };
+    const sendResponse = vi.fn();
+
+    installShortcutLabelListener(chromeApi);
+
+    expect(
+      addListener.mock.calls[0][0](
+        { type: MESSAGE_GET_BROWSER_COMMAND_LABELS },
+        {},
+        sendResponse
+      )
+    ).toBe(true);
+    await vi.waitFor(() => {
+      expect(sendResponse).toHaveBeenCalledWith(expect.objectContaining({
+        'archive-conversation': 'Not assigned'
+      }));
+    });
   });
 
   it('returns unassigned labels when Chrome commands cannot be read', async () => {
