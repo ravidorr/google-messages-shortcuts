@@ -170,6 +170,7 @@ describe('conversation shortcut pills', () => {
     expect(localThis).toContain('background: #303134');
     expect(localThis).toContain('border-color: #5f6368');
     expect(localThis).toContain('color: #8ab4f8');
+    expect(localThis).toContain('outline-color: #8ab4f8');
     expect(localThis).toContain(':focus-visible');
   });
 

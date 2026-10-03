@@ -110,6 +110,7 @@ function addStyles(documentRoot) {
     [${PILL_HOST_ATTRIBUTE}][${MESSAGE_THEME_ATTRIBUTE}="${MESSAGE_THEME_DARK}"]
       [data-messages-shortcuts-pill]:focus-visible {
       color: #8ab4f8;
+      outline-color: #8ab4f8;
     }
 
     [data-messages-shortcuts-pill-shortcut] {
