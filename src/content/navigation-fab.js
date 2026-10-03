@@ -1,5 +1,4 @@
 import {
-  isArchivedDialogShellVisible,
   isArchivedSidebarViewActive,
   openArchivedModal
 } from './adapters/archived-adapter.js';
@@ -250,7 +249,6 @@ function removeArchivedFab(documentRoot) {
 function injectArchivedFab(documentRoot, selectors, onClick) {
   if (
     documentRoot.querySelector(`[${ARCHIVED_FAB_WRAP_ATTRIBUTE}]`)
-    || isArchivedDialogShellVisible(documentRoot, selectors)
     || isArchivedSidebarViewActive(documentRoot, selectors)
   ) {
     return;
@@ -316,13 +314,7 @@ function createInstallation({
 
       showActionFeedback(result, COMMAND_OPEN_ARCHIVED, documentRoot);
 
-      if (
-        result.ok
-        && (
-          isArchivedDialogShellVisible(documentRoot, selectors)
-          || isArchivedSidebarViewActive(documentRoot, selectors)
-        )
-      ) {
+      if (result.ok && isArchivedSidebarViewActive(documentRoot, selectors)) {
         removeArchivedFab(documentRoot);
       }
     } finally {

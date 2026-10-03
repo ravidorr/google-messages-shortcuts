@@ -249,7 +249,7 @@ describe('navigation-fab', () => {
     expect(document.querySelector(`[${ARCHIVED_FAB_ATTRIBUTE}]`)).toBeNull();
   });
 
-  it('does not inject the archived fab when the modal is already open', async () => {
+  it('injects the archived fab when the modal is already open', async () => {
     document.body.innerHTML = `${startChatFabSurface}${archivedModalSurface}`;
 
     installArchivedFab({
@@ -264,7 +264,9 @@ describe('navigation-fab', () => {
 
     await Promise.resolve();
 
-    expect(document.querySelector(`[${ARCHIVED_FAB_ATTRIBUTE}]`)).toBeNull();
+    await vi.waitFor(() => {
+      expect(document.querySelector(`[${ARCHIVED_FAB_ATTRIBUTE}]`)).not.toBeNull();
+    });
   });
 
   it('keeps the archived fab visible when opening archived fails', async () => {
@@ -494,7 +496,7 @@ describe('navigation-fab', () => {
     expect(openArchived).toHaveBeenCalledTimes(1);
   });
 
-  it('opens archived when the injected fab is clicked', async () => {
+  it('keeps the archived fab visible when the injected fab opens the modal', async () => {
     document.body.innerHTML = startChatFabSurface;
     const openArchived = vi.fn(async () => {
       document.body.insertAdjacentHTML('beforeend', archivedModalSurface);
@@ -521,7 +523,7 @@ describe('navigation-fab', () => {
     await Promise.resolve();
 
     expect(openArchived).toHaveBeenCalledTimes(1);
-    expect(document.querySelector(`[${ARCHIVED_FAB_ATTRIBUTE}]`)).toBeNull();
+    expect(document.querySelector(`[${ARCHIVED_FAB_ATTRIBUTE}]`)).not.toBeNull();
   });
 
   it('reuses an existing fab installation until the last listener disconnects', async () => {

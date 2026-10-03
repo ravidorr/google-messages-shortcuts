@@ -34,10 +34,16 @@ activation behavior. Shortcut badges are decorative because the accessible name
 already includes the control purpose, and the assigned keyboard shortcut
 remains configurable through Chrome.
 
+The navigation FAB row remains rendered while Google Messages displays any
+native modal, including Archived. The native modal scrim blocks interaction
+with the row, so the extension must not hide, disable, or otherwise change
+the controls when a modal opens.
+
 ## Implementation and testing
 
 The navigation FAB module will load shortcut labels once and keep badge state
 in sync with the rendered controls. Tests will cover compact-row styling
 injection, badge presence for assigned shortcuts, badge omission for
 unassigned shortcuts, and the distinct Spam & blocked icon. Existing FAB
-activation and teardown coverage remains intact.
+activation and teardown coverage remains intact. Tests also verify that the
+Archived FAB remains present while the Archived modal is open.

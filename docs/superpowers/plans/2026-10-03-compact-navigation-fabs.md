@@ -293,3 +293,90 @@ git commit -m "feat: show navigation shortcut badges"
 - Spec coverage: Task 1 makes the three controls compact and fixes the duplicated Spam & blocked archive icon. Task 2 renders decorative top-right badges on Start chat, Archived, and Spam & blocked only for assigned commands, including the dynamically injected Spam control. Existing activation is explicitly preserved.
 - Placeholder scan: no deferred work, unscoped test instruction, or placeholder language remains.
 - Type and interface consistency: the new installer and reset function names match the content-entry integration, and its label contract uses the existing browser-command label map.
+
+### Task 3: Preserve the navigation FAB row behind native modals
+
+**Files:**
+
+- Modify: `src/content/navigation-fab.js:225-306`
+- Modify: `test/unit/navigation-fab.test.js:228-268,473-501`
+
+**Interfaces:**
+
+- `injectArchivedFab(documentRoot, selectors, onClick)` must inject the Archived FAB whenever the sidebar route is inactive, regardless of whether an Archived modal shell is visible.
+- `handleFabClick()` must retain the FAB after `openArchived()` succeeds. Google Messages owns modal focus and blocks background controls through its scrim.
+
+- [ ] **Step 1: Write the failing behavior test**
+
+Add a test that starts from the native Start chat fixture, injects the Archived FAB, opens the Archived modal from the supplied callback, and asserts that the FAB remains:
+
+```javascript
+it('keeps the archived FAB visible while the archived modal is open', async () => {
+  document.body.innerHTML = startChatFabSurface;
+  const openArchived = vi.fn(async () => {
+    document.body.insertAdjacentHTML('beforeend', archivedModalSurface);
+    return { ok: true };
+  });
+
+  installArchivedFab({ documentRoot: document, chromeApi, openArchived });
+
+  await vi.waitFor(() => {
+    expect(document.querySelector(`[${ARCHIVED_FAB_ATTRIBUTE}]`)).not.toBeNull();
+  });
+
+  document.querySelector(`[${ARCHIVED_FAB_ATTRIBUTE}]`).click();
+  await Promise.resolve();
+
+  expect(document.querySelector(`[${ARCHIVED_FAB_ATTRIBUTE}]`)).not.toBeNull();
+});
+```
+
+- [ ] **Step 2: Run the focused test to verify failure**
+
+Run:
+
+```bash
+npx vitest run test/unit/navigation-fab.test.js
+```
+
+Expected: FAIL because the current successful-open path removes the FAB when
+the Archived modal appears.
+
+- [ ] **Step 3: Remove extension-level modal suppression**
+
+Delete the Archived modal condition from `injectArchivedFab` and delete the
+successful-open branch that invokes `removeArchivedFab(documentRoot)`. Retain
+the sidebar-route condition, pause handling, and teardown removal:
+
+```javascript
+function injectArchivedFab(documentRoot, selectors, onClick) {
+  if (
+    documentRoot.querySelector(`[${ARCHIVED_FAB_WRAP_ATTRIBUTE}]`)
+    || isArchivedSidebarViewActive(documentRoot, selectors)
+  ) {
+    return;
+  }
+
+  // Existing start-chat lookup and injection remain unchanged.
+}
+```
+
+- [ ] **Step 4: Run focused and full verification**
+
+Run:
+
+```bash
+npx vitest run test/unit/navigation-fab.test.js
+npm run lint
+npm test
+```
+
+Expected: all commands exit 0 with full coverage.
+
+- [ ] **Step 5: Commit and update the draft pull request**
+
+```bash
+git add docs/superpowers/specs/2026-10-03-compact-navigation-fabs-design.md docs/superpowers/plans/2026-10-03-compact-navigation-fabs.md src/content/navigation-fab.js test/unit/navigation-fab.test.js
+git commit -m "fix: preserve navigation FABs behind modals"
+git push
+```
