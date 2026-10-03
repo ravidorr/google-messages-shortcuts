@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.14.1 - 2026-10-03
+
+### Fixed
+
+- Ignore page-local shortcuts while conversation row menus are open so Escape closes native menus instead of hijacking focus
+- Fail closed to paused when the extension cannot read the pause preference from storage
+- Close the sibling discovery overlay before opening the command palette or shortcut help overlay
+
+### Changed
+
+- Align Phase 2 docs and validation copy with actual guard behavior, manifest command count, composer validation status, and info toasts for list boundaries
+
 ## 1.14.0 - 2026-10-03
 
 ### Added

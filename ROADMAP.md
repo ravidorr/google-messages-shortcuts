@@ -33,7 +33,7 @@ flowchart LR
   Popup[Extension popup] --> LocalPrefs[chrome.storage.local]
 ```
 
-- [manifest.json](manifest.json) permits only `storage`, `tabs`, and content scripts on `https://messages.google.com/web/*` (Phase 0 confirmed the web client path is sufficient); it defines four browser-level commands (Open Archived is page-level because of Chrome's command limit).
+- [manifest.json](manifest.json) permits only `storage`, `tabs`, and content scripts on `https://messages.google.com/web/*` (Phase 0 confirmed the web client path is sufficient); it defines seven browser-level commands (four with suggested keys, plus optional user-assigned commands for Open Archived, Start chat, and Open Spam & blocked).
 - [src/content/conversation-action.js](src/content/conversation-action.js) serializes row-menu actions, with safe archive, trash confirmation, mark-unread flows, and native focus-only block/report spam confirmation.
 - [src/content/google-messages-dom.js](src/content/google-messages-dom.js) is the private-DOM contract. It currently knows only list-row selectors and English fallback menu labels.
 - [src/content/conversation-shortcut-pills.js](src/content/conversation-shortcut-pills.js) injects pills and observes focus/read-state changes only in the conversation list.
@@ -60,7 +60,7 @@ Scores use 1–5. **Impact** is expected value for the target user. **Difficulty
 | Finding and action | Impact | Difficulty | Why it matters |
 | --- | --- | --- | --- |
 | Add a page-level keyboard controller that respects editable fields, IME composition, selected text, and browser shortcuts | 5 | 4 | Required before introducing single-key navigation without breaking typing. |
-| Add a filterable command palette with visible bindings and a `?` shortcut reference | 5 | 4 | Gives users discovery before memorization and unifies list, compose, and content commands. |
+| Add a filterable command palette with visible bindings and a `Shift+/` shortcut reference | 5 | 4 | Gives users discovery before memorization and unifies list, compose, and content commands. |
 | Add next/previous conversation, open, return-to-previous, focus composer (after DOM spike), and escape-to-list | 5 | 4 | Closes the current mouse-dependent navigation gap without native filter UI focus automation. |
 | Add next/previous unread and an unloaded-list coverage indicator | 5 | 4 | Directly addresses unread processing while avoiding false claims of complete coverage. |
 | Add mark-read and mute/unmute after live selector validation | 4 | 2 | These extend the existing menu-action pattern and provide high-value inbox triage. |

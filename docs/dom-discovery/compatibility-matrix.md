@@ -110,7 +110,7 @@ Use **pass** when `runCapabilitySelfTest()` returns `ok: true` (no DOM mutation,
 | Composer focus (Phase 2) | Priority-ordered: `div[contenteditable="true"][aria-label*="Message" i]`, then `textarea[aria-label*="Message" i]`, then `mws-message-input` variants | Fail closed when one candidate matches 2+ controls; contenteditable preferred when GM renders both mirrors; focus success accepts either mirror; focus only (no draft mutation) | en live macOS Chrome 154 | 4 | 2026-10-03 |
 | Pin (web row menu) | _not present_ | n/a | en live | 5 | 2026-10-01 |
 | Unpin (web row menu) | _not present_ | n/a | en live | 5 | 2026-10-01 |
-| Composer | _not validated_ | n/a | n/a | 1 | Phase 0 gate |
+| Composer draft read / insert / send | _not validated_ | n/a | n/a | 1 | Phase 0 gate; focus-only validated in Phase 2 |
 | Message pane | _not validated_ | n/a | n/a | 1 | Phase 0 gate |
 | Connection status | _not validated_ | n/a | n/a | 1 | Phase 0 gate |
 

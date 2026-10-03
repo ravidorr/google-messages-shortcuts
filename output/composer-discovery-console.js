@@ -54,6 +54,6 @@
     },
     editorCandidates: candidateSelectors.map(summarizeMatches),
     sendCandidates: sendCandidateSelectors.map(summarizeMatches),
-    note: 'Sanitized structural evidence only. Approve composer focus only when exactly one stable editor selector is visible, focusing it preserves any existing draft, and no send action occurs.'
+    note: 'Sanitized structural evidence only. Approve composer focus when priority-ordered editor resolution finds uniquely matched controls (fail closed only when one selector matches 2+), focusing preserves any existing draft, and no send action occurs. Production resolution order follows composer-dom.js.'
   }, null, 2));
 })();

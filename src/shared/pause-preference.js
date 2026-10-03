@@ -6,7 +6,7 @@ export async function isPaused(chromeApi = globalThis.chrome) {
 
     return storedPreference[PAUSE_STORAGE_KEY] === true;
   } catch {
-    return false;
+    return true;
   }
 }
 

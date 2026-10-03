@@ -6,6 +6,10 @@ import {
   resetCommandPaletteForTests,
   simulateCommandPaletteOpenWithoutListenerForTests
 } from '../../src/content/command-palette.js';
+import {
+  openShortcutHelpOverlay,
+  resetShortcutHelpForTests
+} from '../../src/content/shortcut-help-overlay.js';
 
 function createChromeApi() {
   return {
@@ -20,6 +24,7 @@ function createChromeApi() {
 describe('command-palette', () => {
   afterEach(() => {
     resetCommandPaletteForTests();
+    resetShortcutHelpForTests();
     document.body.innerHTML = '';
   });
 
@@ -144,6 +149,14 @@ describe('command-palette', () => {
 
     expect(document.querySelectorAll('[data-messages-shortcuts-command-palette]').length).toBe(1);
     closeCommandPalette(document);
+  });
+
+  it('closes the shortcut help overlay before opening the palette', async () => {
+    await openShortcutHelpOverlay(document, createChromeApi());
+    await openCommandPalette(document, createChromeApi());
+
+    expect(document.querySelector('[data-messages-shortcuts-shortcut-help]')).toBeNull();
+    expect(document.querySelector('[data-messages-shortcuts-command-palette]')).not.toBeNull();
   });
 
   it('closes safely when open without an attached keydown listener', () => {

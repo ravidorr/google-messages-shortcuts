@@ -29,7 +29,7 @@ describe('pause-preference', () => {
     await expect(isPaused(chromeApi)).resolves.toBe(true);
   });
 
-  it('defaults to unpaused when storage cannot be read', async () => {
+  it('fails closed to paused when storage cannot be read', async () => {
     const chromeApi = {
       storage: {
         local: {
@@ -40,7 +40,7 @@ describe('pause-preference', () => {
       }
     };
 
-    await expect(isPaused(chromeApi)).resolves.toBe(false);
+    await expect(isPaused(chromeApi)).resolves.toBe(true);
   });
 
   it('persists the selected paused state', async () => {

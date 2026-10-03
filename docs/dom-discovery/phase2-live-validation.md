@@ -143,11 +143,11 @@ Uncheck pause before continuing.
 
 4. Press **Option+ArrowUp** until you are on the **first** row, then **Option+ArrowUp** once more.
 
-   - [ ] **Pass:** Error toast. You stay on the first row.
+   - [ ] **Pass:** Info toast. You stay on the first row.
 
 5. Press **Option+ArrowDown** until you are on the **last visible** row, then **Option+ArrowDown** once more.
 
-   - [ ] **Pass:** Error toast. You stay on the last row.
+   - [ ] **Pass:** Info toast. You stay on the last row.
 
 6. Press **Option+Enter** once.
 
@@ -169,7 +169,7 @@ Need **2+ unread rows** visible. Scroll the list if needed.
 4. Press **Option+Shift+U** once → previous unread row.
 5. Press **Option+U** until you hit the last loaded unread, then **Option+U** once more.
 
-   - [ ] **Pass:** Error toast about loaded unread rows
+   - [ ] **Pass:** Info toast about loaded unread rows
    - [ ] **Pass:** Full list still visible (not filtered)
 
 6. Scroll to load more rows, repeat 2–5 once.

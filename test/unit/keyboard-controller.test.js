@@ -7,7 +7,17 @@ import {
   installKeyboardController,
   resetKeyboardControllerInstallationsForTests
 } from '../../src/content/keyboard-controller.js';
-import { multiRowNavigationList } from '../fixtures/dom/list-states.js';
+import { recordOpenedConversation, resetNavigationHistoryForTests } from '../../src/content/navigation-history.js';
+import { resetPageNavigationStateForTests } from '../../src/content/page-navigation-actions.js';
+import {
+  isShortcutHelpOpen,
+  openShortcutHelpOverlay
+} from '../../src/content/shortcut-help-overlay.js';
+import {
+  composerEditorSurface,
+  multiRowNavigationList,
+  openRowMenuMarkUnreadFallbackOnly
+} from '../fixtures/dom/list-states.js';
 
 function createChromeApi({ paused = false } = {}) {
   return {
@@ -26,13 +36,49 @@ function createChromeApi({ paused = false } = {}) {
   };
 }
 
-function dispatchAltArrowDown(target = document.body) {
-  target.dispatchEvent(new KeyboardEvent('keydown', {
-    code: 'ArrowDown',
-    altKey: true,
+function dispatchKeydown({
+  target = document.body,
+  code,
+  altKey = false,
+  ctrlKey = false,
+  metaKey = false,
+  shiftKey = false
+} = {}) {
+  const event = new KeyboardEvent('keydown', {
+    code,
+    altKey,
+    ctrlKey,
+    metaKey,
+    shiftKey,
     bubbles: true,
     cancelable: true
-  }));
+  });
+  target.dispatchEvent(event);
+
+  return event;
+}
+
+function dispatchAltArrowDown(target = document.body) {
+  return dispatchKeydown({ target, code: 'ArrowDown', altKey: true });
+}
+
+async function installReadyController(chromeApi = createChromeApi()) {
+  let pauseStateLoaded = false;
+  const disconnect = installKeyboardController({
+    documentRoot: document,
+    chromeApi,
+    getPausedState: async () => {
+      pauseStateLoaded = true;
+
+      return false;
+    }
+  });
+
+  await vi.waitFor(() => {
+    expect(pauseStateLoaded).toBe(true);
+  });
+
+  return disconnect;
 }
 
 describe('keyboard-controller', () => {
@@ -41,7 +87,10 @@ describe('keyboard-controller', () => {
   afterEach(() => {
     disconnect?.();
     resetKeyboardControllerInstallationsForTests();
+    resetNavigationHistoryForTests();
+    resetPageNavigationStateForTests();
     document.body.innerHTML = '';
+    vi.restoreAllMocks();
   });
 
   beforeEach(() => {
@@ -293,15 +342,146 @@ describe('keyboard-controller', () => {
     });
 
     await vi.waitFor(() => {
-      document.body.dispatchEvent(new KeyboardEvent('keydown', {
-        code: 'KeyP',
-        ctrlKey: true,
-        shiftKey: true,
-        bubbles: true,
-        cancelable: true
-      }));
+      dispatchKeydown({ code: 'KeyP', ctrlKey: true, shiftKey: true });
 
       expect(document.querySelector('[data-messages-shortcuts-command-palette]')).not.toBeNull();
     });
+  });
+
+  it('moves to the previous conversation with Alt+ArrowUp', async () => {
+    disconnect = await installReadyController();
+
+    await vi.waitFor(() => {
+      dispatchKeydown({ code: 'ArrowUp', altKey: true });
+
+      expect(document.activeElement.getAttribute('href')).toBe('/web/conversations/a');
+      expect(document.querySelector('[data-messages-shortcuts-list-cursor="true"]')).not.toBeNull();
+    });
+  });
+
+  it('opens the focused conversation with Alt+Enter', async () => {
+    const clickSpy = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
+    disconnect = await installReadyController();
+
+    await vi.waitFor(() => {
+      dispatchKeydown({ code: 'Enter', altKey: true });
+
+      expect(clickSpy).toHaveBeenCalled();
+    });
+  });
+
+  it('returns to the previous conversation with Alt+[', async () => {
+    recordOpenedConversation('href:/web/conversations/a');
+    recordOpenedConversation('href:/web/conversations/b');
+    const clickSpy = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
+    disconnect = await installReadyController();
+
+    await vi.waitFor(() => {
+      dispatchKeydown({ code: 'BracketLeft', altKey: true });
+
+      expect(clickSpy).toHaveBeenCalled();
+    });
+  });
+
+  it('moves to the next unread conversation with Alt+U', async () => {
+    disconnect = await installReadyController();
+
+    await vi.waitFor(() => {
+      dispatchKeydown({ code: 'KeyU', altKey: true });
+
+      expect(document.activeElement.getAttribute('href')).toBe('/web/conversations/c');
+    });
+  });
+
+  it('moves to the previous unread conversation with Alt+Shift+U', async () => {
+    disconnect = await installReadyController();
+
+    await vi.waitFor(() => {
+      dispatchKeydown({ code: 'KeyU', altKey: true });
+
+      expect(document.activeElement.getAttribute('href')).toBe('/web/conversations/c');
+    });
+
+    await vi.waitFor(() => {
+      dispatchKeydown({ code: 'KeyU', altKey: true, shiftKey: true });
+
+      expect(document.activeElement.getAttribute('href')).toBe('/web/conversations/b');
+    });
+  });
+
+  it('returns focus to the conversation list with Escape', async () => {
+    disconnect = await installReadyController();
+
+    await vi.waitFor(() => {
+      dispatchKeydown({ code: 'Escape' });
+
+      expect(
+        document.querySelector('[data-messages-shortcuts-navigation-feedback-message]')?.textContent
+      ).toContain('Focused the conversation list');
+    });
+  });
+
+  it('focuses the composer with Alt+M when a composer is visible', async () => {
+    document.body.insertAdjacentHTML('beforeend', composerEditorSurface);
+    disconnect = await installReadyController();
+
+    await vi.waitFor(() => {
+      dispatchKeydown({ code: 'KeyM', altKey: true });
+
+      expect(
+        document.querySelector('[data-messages-shortcuts-navigation-feedback-message]')?.textContent
+      ).toContain('Focused the message composer');
+      expect(document.activeElement.matches('textarea[aria-label="Message"]')).toBe(true);
+    });
+  });
+
+  it('opens the shortcut help overlay with Shift+/', async () => {
+    disconnect = await installReadyController();
+
+    dispatchKeydown({ code: 'Slash', shiftKey: true });
+
+    await vi.waitFor(() => {
+      expect(document.querySelector('[data-messages-shortcuts-shortcut-help]')).not.toBeNull();
+    });
+  });
+
+  it('ignores navigation when text is selected', async () => {
+    document.body.innerHTML = `
+      <p id="fixture-selection">Selected navigation text</p>
+      ${multiRowNavigationList}
+    `;
+    const paragraph = document.getElementById('fixture-selection');
+    const range = document.createRange();
+    range.selectNodeContents(paragraph);
+    const selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
+
+    disconnect = await installReadyController();
+    dispatchAltArrowDown();
+
+    expect(document.querySelector('[data-messages-shortcuts-navigation-feedback-message]')).toBeNull();
+    selection.removeAllRanges();
+  });
+
+  it('ignores navigation shortcuts while the shortcut help overlay is open', async () => {
+    disconnect = await installReadyController();
+    await openShortcutHelpOverlay(document, createChromeApi());
+
+    expect(isShortcutHelpOpen()).toBe(true);
+
+    dispatchAltArrowDown();
+
+    expect(document.querySelector('[data-messages-shortcuts-navigation-feedback-message]')).toBeNull();
+  });
+
+  it('ignores Escape navigation while a row menu is open', async () => {
+    document.body.innerHTML = `${multiRowNavigationList}${openRowMenuMarkUnreadFallbackOnly}`;
+    disconnect = await installReadyController();
+
+    dispatchKeydown({ code: 'Escape' });
+
+    expect(document.querySelector('[data-messages-shortcuts-navigation-feedback-message]')).toBeNull();
+    expect(document.querySelector('.conversation-actions-menu')).not.toBeNull();
   });
 });

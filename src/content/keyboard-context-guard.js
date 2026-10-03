@@ -1,3 +1,5 @@
+import { isRowMenuOpen } from './menu-action-overlay.js';
+
 const EDITABLE_SELECTOR = [
   'input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not([type="button"]):not([type="submit"]):not([type="reset"])',
   'textarea',
@@ -61,7 +63,8 @@ export function createKeyboardContext(event, documentRoot = document) {
     isImeComposing: isImeComposing(event),
     hasTextSelection: hasNonCollapsibleTextSelection(documentRoot.defaultView),
     isRepeated: isRepeatedKeyEvent(event),
-    nativeDialogOpen: isNativeDialogOpen(documentRoot)
+    nativeDialogOpen: isNativeDialogOpen(documentRoot),
+    rowMenuOpen: isRowMenuOpen(documentRoot)
   };
 }
 
@@ -83,6 +86,10 @@ export function shouldIgnorePageCommand(context, { allowWithTextSelection = fals
   }
 
   if (context.nativeDialogOpen) {
+    return true;
+  }
+
+  if (context.rowMenuOpen) {
     return true;
   }
 

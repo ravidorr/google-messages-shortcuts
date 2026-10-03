@@ -91,13 +91,25 @@ describe('keyboard-context-guard', () => {
     expect(localThis.nativeDialogOpen).toBe(true);
   });
 
-  it('ignores page commands in editable, IME, repeated, selection, and dialog contexts', () => {
+  it('detects open row menus in keyboard context', () => {
+    document.body.innerHTML = `
+      <div role="menu" class="conversation-actions-menu mat-mdc-menu-panel"></div>
+    `;
+    const event = { target: document.body, isComposing: false, keyCode: 0, repeat: false };
+    const localThis = createKeyboardContext(event, document);
+
+    expect(localThis.rowMenuOpen).toBe(true);
+    expect(shouldIgnorePageCommand(localThis)).toBe(true);
+  });
+
+  it('ignores page commands in editable, IME, repeated, selection, dialog, and row menu contexts', () => {
     const editableContext = {
       isEditable: true,
       isImeComposing: false,
       isRepeated: false,
       hasTextSelection: false,
-      nativeDialogOpen: false
+      nativeDialogOpen: false,
+      rowMenuOpen: false
     };
 
     expect(shouldIgnorePageCommand(editableContext)).toBe(true);
@@ -126,7 +138,16 @@ describe('keyboard-context-guard', () => {
       isImeComposing: false,
       isRepeated: false,
       hasTextSelection: false,
-      nativeDialogOpen: false
+      nativeDialogOpen: false,
+      rowMenuOpen: true
+    })).toBe(true);
+    expect(shouldIgnorePageCommand({
+      isEditable: false,
+      isImeComposing: false,
+      isRepeated: false,
+      hasTextSelection: false,
+      nativeDialogOpen: false,
+      rowMenuOpen: false
     })).toBe(false);
   });
 });

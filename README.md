@@ -124,7 +124,7 @@ If Chrome or the operating system already uses a suggested shortcut, Chrome may 
 
 ## Phase 2: page navigation and discovery (1.13.0+)
 
-Page-local shortcuts run only on Google Messages Web. They ignore editable fields, IME composition, native dialogs, repeated key presses, and selected text unless a command is explicitly safe for that context. Pause closes the palette and help overlay and blocks the keyboard controller.
+Page-local shortcuts run only on Google Messages Web. They ignore editable fields, IME composition, native dialogs, open row menus, repeated key presses, and selected text. Pause closes the palette and help overlay and blocks the keyboard controller.
 
 Provisional page-local bindings (validate collisions in your browser and OS before relying on them):
 

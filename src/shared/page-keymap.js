@@ -37,7 +37,7 @@ export const PAGE_KEY_BINDINGS = [
     command: PAGE_COMMAND_RETURN_PREVIOUS,
     code: 'BracketLeft',
     altKey: true,
-    label: 'Alt+[ '
+    label: 'Alt+['
   },
   {
     command: PAGE_COMMAND_NEXT_UNREAD,

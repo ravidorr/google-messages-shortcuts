@@ -1,6 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import * as pageKeymap from '../../src/shared/page-keymap.js';
 import {
+  openCommandPalette,
+  resetCommandPaletteForTests
+} from '../../src/content/command-palette.js';
+import {
   closeShortcutHelpOverlay,
   openShortcutHelpOverlay,
   resetShortcutHelpForTests,
@@ -20,6 +24,7 @@ function createChromeApi() {
 describe('shortcut-help-overlay', () => {
   afterEach(() => {
     resetShortcutHelpForTests();
+    resetCommandPaletteForTests();
     document.body.innerHTML = '';
   });
 
@@ -103,6 +108,14 @@ describe('shortcut-help-overlay', () => {
 
     expect(document.querySelectorAll('[data-messages-shortcuts-shortcut-help]').length).toBe(1);
     closeShortcutHelpOverlay(document);
+  });
+
+  it('closes the command palette before opening the help overlay', async () => {
+    await openCommandPalette(document, createChromeApi());
+    await openShortcutHelpOverlay(document, createChromeApi());
+
+    expect(document.querySelector('[data-messages-shortcuts-command-palette]')).toBeNull();
+    expect(document.querySelector('[data-messages-shortcuts-shortcut-help]')).not.toBeNull();
   });
 
   it('closes safely when open without an attached keydown listener', () => {

@@ -7,6 +7,7 @@ import {
   filterCommandRegistryEntries,
   getCommandRegistryEntries
 } from './page-command-registry.js';
+import { closeShortcutHelpOverlay } from './shortcut-help-overlay.js';
 import { restoreFocus, trapTabKey } from './overlay-focus-trap.js';
 
 export const COMMAND_PALETTE_ROOT_SELECTOR = '[data-messages-shortcuts-command-palette]';
@@ -254,6 +255,8 @@ async function mountCommandPalette(documentRoot, chromeApi) {
 }
 
 export async function openCommandPalette(documentRoot = document, chromeApi = chrome) {
+  closeShortcutHelpOverlay(documentRoot);
+
   if (isOpen) {
     closeCommandPalette(documentRoot);
   }

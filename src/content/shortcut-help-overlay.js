@@ -6,6 +6,7 @@ import {
   COMMAND_SOURCE_BROWSER,
   getCommandRegistryEntries
 } from './page-command-registry.js';
+import { closeCommandPalette } from './command-palette.js';
 import { getFocusableElements, restoreFocus, trapTabKey } from './overlay-focus-trap.js';
 
 export const SHORTCUT_HELP_ROOT_SELECTOR = '[data-messages-shortcuts-shortcut-help]';
@@ -213,6 +214,8 @@ async function mountShortcutHelpOverlay(documentRoot, chromeApi) {
 }
 
 export async function openShortcutHelpOverlay(documentRoot = document, chromeApi = chrome) {
+  closeCommandPalette(documentRoot);
+
   if (isOpen) {
     closeShortcutHelpOverlay(documentRoot);
   }

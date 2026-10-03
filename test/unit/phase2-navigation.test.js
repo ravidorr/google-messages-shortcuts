@@ -422,52 +422,75 @@ describe('phase2 navigation coverage', () => {
     }).reason).toBe('composer-not-found');
   });
 
-  it('covers final uncovered branches for one hundred percent coverage', async () => {
+  it('returns empty identity lookups for null input', () => {
     expect(findConversationLinksByIdentity(document, null)).toEqual([]);
     expect(isUnreadConversationRow(null)).toBe(false);
+  });
 
+  it('focuses an empty conversation list container when no rows are loaded', () => {
     document.body.innerHTML = '<mws-conversation-list></mws-conversation-list>';
-    expect(focusListContainer(document).ok).toBe(true);
 
+    expect(focusListContainer(document).ok).toBe(true);
+  });
+
+  it('reports list-not-found when a row has no conversation link', () => {
     document.body.innerHTML = `
       <mws-conversation-list-item>
         <button aria-haspopup="menu"></button>
       </mws-conversation-list-item>
     `;
-    expect(focusListContainer(document).reason).toBe('list-not-found');
 
+    expect(focusListContainer(document).reason).toBe('list-not-found');
+  });
+
+  it('reports cursor-not-found when no cursor identity is available', () => {
     resetPageNavigationStateForTests();
     document.body.innerHTML = '';
+
     expect(focusCurrentCursor(document).reason).toBe('cursor-not-found');
+  });
+
+  it('returns false when conversation links cannot be focused or opened', () => {
     expect(focusConversationLink(null)).toBe(false);
     expect(openConversationLink(null)).toBe(false);
 
     const link = document.createElement('a');
     link.href = '/web/conversations/a';
     Object.defineProperty(link, 'focus', { value: undefined });
+
     expect(focusConversationLink(link)).toBe(false);
+  });
 
+  it('focuses the conversation list root when rows exist without links', () => {
     document.body.innerHTML = '<mws-conversation-list tabindex="-1"></mws-conversation-list>';
-    expect(focusListContainer(document).ok).toBe(true);
 
+    expect(focusListContainer(document).ok).toBe(true);
+  });
+
+  it('reports composer-not-found when capability assessment and editor lookup diverge', () => {
     vi.spyOn(composerAdapter, 'assessComposerCapabilities').mockReturnValue({
       [COMPOSER_CAPABILITY_IDS.focus]: { state: CAPABILITY_SUPPORTED, reason: 'mock' }
     });
     vi.spyOn(focusComposerAction, 'findComposerEditor').mockReturnValue(null);
+
     expect(focusComposer(document, {
       editor: 'textarea[data-e2e-message-input]',
       sendButton: null
     }).reason).toBe('composer-not-found');
+  });
 
-    const detachedButton = document.createElement('button');
-    restoreFocus(detachedButton);
+  it('ignores restoreFocus for disconnected or non-focusable elements', () => {
+    restoreFocus(document.createElement('button'));
     restoreFocus({ isConnected: true, focus: undefined });
+  });
 
+  it('ignores keyboard shortcuts while paused even after the controller is installed', async () => {
     installKeyboardController({
       documentRoot: document,
       chromeApi: createChromeApi(),
       getPausedState: async () => true
     });
+
     document.body.dispatchEvent(new KeyboardEvent('keydown', {
       code: 'ArrowDown',
       altKey: true,
@@ -475,38 +498,26 @@ describe('phase2 navigation coverage', () => {
       cancelable: true
     }));
 
-    resetKeyboardControllerInstallationsForTests();
+    expect(document.querySelector('[data-messages-shortcuts-navigation-feedback-message]')).toBeNull();
+  });
+
+  it('blocks navigation shortcuts while the command palette is open', async () => {
     const activeChromeApi = createChromeApi();
     installKeyboardController({ documentRoot: document, chromeApi: activeChromeApi });
-    document.body.dispatchEvent(new KeyboardEvent('keydown', {
-      code: 'KeyZ',
-      bubbles: true,
-      cancelable: true
-    }));
     await openCommandPalette(document, activeChromeApi);
+
     document.body.dispatchEvent(new KeyboardEvent('keydown', {
       code: 'ArrowDown',
       altKey: true,
       bubbles: true,
       cancelable: true
     }));
-    document.body.dispatchEvent(new KeyboardEvent('keydown', {
-      code: 'KeyZ',
-      bubbles: true,
-      cancelable: true
-    }));
 
-    document.dispatchEvent(new KeyboardEvent('keydown', {
-      key: 'Tab',
-      code: 'Tab',
-      bubbles: true,
-      cancelable: true
-    }));
-
+    expect(document.querySelector('[data-messages-shortcuts-navigation-feedback-message]')).toBeNull();
     closeCommandPalette(document);
-    resetKeyboardControllerInstallationsForTests();
+  });
 
-    document.body.innerHTML = multiRowNavigationList;
+  it('returns ambiguous when duplicate loaded rows match the return target', async () => {
     recordOpenedConversation('href:/web/conversations/a');
     recordOpenedConversation('href:/web/conversations/b');
     document.body.innerHTML = `
@@ -519,7 +530,15 @@ describe('phase2 navigation coverage', () => {
         <button aria-haspopup="menu"></button>
       </mws-conversation-list-item>
     `;
-    await executePageNavigationCommand(PAGE_COMMAND_RETURN_PREVIOUS, document, activeChromeApi);
+
+    const localThis = await executePageNavigationCommand(
+      PAGE_COMMAND_RETURN_PREVIOUS,
+      document,
+      createChromeApi()
+    );
+
+    expect(localThis.ok).toBe(false);
+    expect(localThis.reason).toBe('return-ambiguous');
   });
 
   it('covers remaining branch-only paths', async () => {
