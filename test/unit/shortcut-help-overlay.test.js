@@ -110,6 +110,31 @@ describe('shortcut-help-overlay', () => {
     closeShortcutHelpOverlay(document);
   });
 
+  it('opens the help overlay after switching overlays during label fetch', async () => {
+    const labelResolvers = [];
+    const chromeApi = {
+      runtime: {
+        sendMessage: vi.fn(() => new Promise((resolve) => {
+          labelResolvers.push(resolve);
+        }))
+      }
+    };
+
+    const firstHelp = openShortcutHelpOverlay(document, chromeApi);
+    const palette = openCommandPalette(document, chromeApi);
+    const secondHelp = openShortcutHelpOverlay(document, chromeApi);
+
+    for (const resolveLabels of labelResolvers) {
+      resolveLabels({});
+    }
+
+    await Promise.all([firstHelp, palette, secondHelp]);
+
+    expect(document.querySelector('[data-messages-shortcuts-shortcut-help]')).not.toBeNull();
+    expect(document.querySelector('[data-messages-shortcuts-command-palette]')).toBeNull();
+    closeShortcutHelpOverlay(document);
+  });
+
   it('closes the command palette before opening the help overlay', async () => {
     await openCommandPalette(document, createChromeApi());
     await openShortcutHelpOverlay(document, createChromeApi());

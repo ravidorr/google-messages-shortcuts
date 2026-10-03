@@ -184,6 +184,8 @@ export function closeCommandPalette(documentRoot = document) {
   openGeneration += 1;
 
   if (!isOpen) {
+    openPromise = null;
+
     return;
   }
 
