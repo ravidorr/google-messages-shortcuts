@@ -73,8 +73,12 @@ function createInstallation({
   async function refresh() {
     paused = await isPaused(chromeApi);
 
-    if (paused || inFlight) {
+    if (paused) {
       removeSpamBlockedFab(documentRoot);
+      return;
+    }
+
+    if (inFlight) {
       return;
     }
 

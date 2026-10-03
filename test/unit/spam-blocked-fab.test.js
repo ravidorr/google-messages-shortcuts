@@ -131,6 +131,37 @@ describe('spam-blocked-fab', () => {
     secondDisconnect();
   });
 
+  it('keeps the spam tile mounted while its open action is in flight', async () => {
+    document.body.innerHTML = `<div ${ARCHIVED_FAB_ROW_ATTRIBUTE}>${startChatFabSurface}</div>`;
+    let resolveOpen;
+    const openSpamBlocked = vi.fn(async () => {
+      document.body.append(document.createElement('div'));
+      return new Promise((resolve) => {
+        resolveOpen = resolve;
+      });
+    });
+
+    installSpamBlockedFab({
+      documentRoot: document,
+      chromeApi: createChromeApi(),
+      openSpamBlocked
+    });
+
+    await vi.waitFor(() => {
+      expect(document.querySelector(`[${SPAM_BLOCKED_FAB_ATTRIBUTE}]`)).not.toBeNull();
+    });
+
+    document.querySelector(`[${SPAM_BLOCKED_FAB_ATTRIBUTE}]`).click();
+
+    await vi.waitFor(() => {
+      expect(document.querySelector(`[${SPAM_BLOCKED_FAB_ATTRIBUTE}]`)).not.toBeNull();
+      expect(openSpamBlocked).toHaveBeenCalledTimes(1);
+    });
+
+    resolveOpen({ ok: true });
+    await Promise.resolve();
+  });
+
   it('opens once, provides feedback, and keeps the tile visible after its dialog opens', async () => {
     document.body.innerHTML = `<div ${ARCHIVED_FAB_ROW_ATTRIBUTE}>${startChatFabSurface}</div>`;
     const localThis = vi.fn(async () => {

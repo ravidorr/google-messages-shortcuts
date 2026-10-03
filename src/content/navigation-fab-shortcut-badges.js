@@ -35,8 +35,8 @@ function createShortcutBadge(documentRoot, shortcut) {
   return badge;
 }
 
-function applyShortcutBadge(documentRoot, selector, shortcut) {
-  const control = documentRoot.querySelector(selector);
+function applyShortcutBadge(row, documentRoot, selector, shortcut) {
+  const control = row.querySelector(selector);
 
   if (!control) {
     return;
@@ -100,11 +100,18 @@ function createInstallation({
       return;
     }
 
-    for (const { command, selector } of NAVIGATION_CONTROLS) {
-      applyShortcutBadge(documentRoot, selector, labels[command]);
+    const row = documentRoot.querySelector(`[${ARCHIVED_FAB_ROW_ATTRIBUTE}]`);
+
+    if (!row) {
+      removeBadges(documentRoot);
+      syncNavigationTileModalState(documentRoot);
+      return;
     }
 
-    const row = documentRoot.querySelector(`[${ARCHIVED_FAB_ROW_ATTRIBUTE}]`);
+    for (const { command, selector } of NAVIGATION_CONTROLS) {
+      applyShortcutBadge(row, documentRoot, selector, labels[command]);
+    }
+
     normalizeNavigationTileRow(row);
     syncNavigationTileModalState(documentRoot);
   }

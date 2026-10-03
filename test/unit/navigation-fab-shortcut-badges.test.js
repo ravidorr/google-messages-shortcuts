@@ -80,6 +80,25 @@ describe('navigation FAB shortcut badges', () => {
     expect(document.querySelector(BADGE_SELECTOR).textContent).toBe('Ctrl+Shift+A');
   });
 
+  it('does not badge native start chat when the navigation row is absent', async () => {
+    document.body.innerHTML = startChatFabSurface;
+
+    disconnect = installNavigationFabShortcutBadges({
+      documentRoot: document,
+      getBrowserCommandLabels: vi.fn(async () => ({
+        'start-chat': 'Ctrl+Shift+S',
+        'open-archived': 'Ctrl+Shift+A',
+        'open-spam-blocked': 'Ctrl+Shift+B'
+      }))
+    });
+
+    await Promise.resolve();
+
+    expect(document.querySelectorAll(BADGE_SELECTOR)).toHaveLength(0);
+    expect(document.querySelector('a[data-e2e-start-button]').classList.contains('gm-nav-tile-badge-host'))
+      .toBe(false);
+  });
+
   it('does not add badges when no navigation controls are present', async () => {
     disconnect = installNavigationFabShortcutBadges({
       documentRoot: document,
