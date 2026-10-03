@@ -20,6 +20,11 @@ import {
   MESSAGE_GET_CONVERSATION_SHORTCUT_LABELS,
   UNASSIGNED_SHORTCUT_LABEL
 } from '../shared/shortcut-labels.js';
+import {
+  MESSAGE_THEME_ATTRIBUTE,
+  MESSAGE_THEME_DARK,
+  syncMessageTheme
+} from './message-theme.js';
 
 const PILL_GROUP_SELECTOR = '[data-messages-shortcuts-pill-group]';
 const STYLE_SELECTOR = 'style[data-messages-shortcuts-pill-styles]';
@@ -86,6 +91,25 @@ function addStyles(documentRoot) {
     [data-messages-shortcuts-pill] svg {
       height: 14px;
       width: 14px;
+    }
+
+    [data-messages-shortcuts-pill]:focus-visible {
+      outline: 2px solid #0b57d0;
+      outline-offset: 2px;
+    }
+
+    [${PILL_HOST_ATTRIBUTE}][${MESSAGE_THEME_ATTRIBUTE}="${MESSAGE_THEME_DARK}"]
+      [data-messages-shortcuts-pill] {
+      background: #303134;
+      border-color: #5f6368;
+      color: #e8eaed;
+    }
+
+    [${PILL_HOST_ATTRIBUTE}][${MESSAGE_THEME_ATTRIBUTE}="${MESSAGE_THEME_DARK}"]
+      [data-messages-shortcuts-pill]:hover,
+    [${PILL_HOST_ATTRIBUTE}][${MESSAGE_THEME_ATTRIBUTE}="${MESSAGE_THEME_DARK}"]
+      [data-messages-shortcuts-pill]:focus-visible {
+      color: #8ab4f8;
     }
 
     [data-messages-shortcuts-pill-shortcut] {
@@ -402,6 +426,7 @@ function createInstallation({
 
     safeDomMutation(() => {
       conversationRow.setAttribute(PILL_HOST_ATTRIBUTE, '');
+      syncMessageTheme(conversationRow);
       conversationRow.append(createPillGroup(
         documentRoot,
         shortcutLabels,
@@ -570,6 +595,18 @@ function createInstallation({
     childList: true,
     subtree: true
   });
+  const themeObserver = new MutationObserver((records) => {
+    if (!records.some((record) => record.target?.nodeType === 1)) {
+      return;
+    }
+
+    documentRoot.querySelectorAll(`[${PILL_HOST_ATTRIBUTE}]`).forEach(syncMessageTheme);
+  });
+  themeObserver.observe(documentRoot.body, {
+    attributes: true,
+    attributeFilter: ['class', 'style'],
+    subtree: true
+  });
   documentRoot.addEventListener('pointerover', handlePointerOver);
   documentRoot.addEventListener('pointerout', handlePointerOut);
   documentRoot.addEventListener('focusin', handleFocusIn);
@@ -609,6 +646,7 @@ function createInstallation({
   return () => {
     observer.disconnect();
     readStateObserver.disconnect();
+    themeObserver.disconnect();
     documentRoot.removeEventListener('pointerover', handlePointerOver);
     documentRoot.removeEventListener('pointerout', handlePointerOut);
     documentRoot.removeEventListener('focusin', handleFocusIn);

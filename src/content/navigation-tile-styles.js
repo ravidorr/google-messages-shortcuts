@@ -1,3 +1,11 @@
+import {
+  classifyMessageTheme,
+  MESSAGE_THEME_ATTRIBUTE,
+  MESSAGE_THEME_DARK,
+  MESSAGE_THEME_LIGHT,
+  syncMessageTheme
+} from './message-theme.js';
+
 export const NAV_TILE_ROW_CLASS = 'gm-nav-row';
 export const NAV_TILE_ROW_ATTRIBUTE = 'data-messages-shortcuts-fab-row';
 export const NAV_TILE_ARCHIVED_ATTRIBUTE = 'data-messages-shortcuts-archived-fab';
@@ -6,9 +14,11 @@ export const NAV_TILE_STYLE_SELECTOR = 'style[data-messages-shortcuts-navigation
 export const NAV_TILE_DISABLED_ATTRIBUTE = 'data-messages-shortcuts-tile-disabled';
 export const NAV_TILE_BADGE_ATTRIBUTE = 'data-messages-shortcuts-navigation-shortcut';
 export const NAV_TILE_BADGE_HOST_CLASS = 'gm-nav-tile-badge-host';
-export const NAV_TILE_THEME_ATTRIBUTE = 'data-messages-shortcuts-theme';
-export const NAV_TILE_THEME_LIGHT = 'light';
-export const NAV_TILE_THEME_DARK = 'dark';
+export const NAV_TILE_THEME_ATTRIBUTE = MESSAGE_THEME_ATTRIBUTE;
+export const NAV_TILE_THEME_LIGHT = MESSAGE_THEME_LIGHT;
+export const NAV_TILE_THEME_DARK = MESSAGE_THEME_DARK;
+export const classifyNavigationTileTheme = classifyMessageTheme;
+export const syncNavigationTileTheme = syncMessageTheme;
 
 const LEGACY_RESET = `
   backdrop-filter: none !important;
@@ -24,66 +34,6 @@ const LEGACY_RESET = `
   top: auto !important;
   transform: none !important;
 `;
-
-function parseOpaqueCssColor(color) {
-  const value = String(color ?? '').trim().toLowerCase();
-  const hexMatch = value.match(/^#([\da-f]{3}|[\da-f]{6})$/);
-
-  if (hexMatch) {
-    const hex = hexMatch[1].length === 3
-      ? [...hexMatch[1]].map((channel) => channel.repeat(2)).join('')
-      : hexMatch[1];
-
-    return [
-      Number.parseInt(hex.slice(0, 2), 16),
-      Number.parseInt(hex.slice(2, 4), 16),
-      Number.parseInt(hex.slice(4, 6), 16)
-    ];
-  }
-
-  const rgbMatch = value.match(/^rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)$/);
-
-  if (rgbMatch) {
-    const channels = rgbMatch.slice(1).map(Number);
-
-    return channels.every((channel) => channel >= 0 && channel <= 255) ? channels : null;
-  }
-
-  const rgbaMatch = value.match(
-    /^rgba\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(1(?:\.0+)?)\s*\)$/
-  );
-
-  if (!rgbaMatch) {
-    return null;
-  }
-
-  const channels = rgbaMatch.slice(1, 4).map(Number);
-
-  return channels.every((channel) => channel >= 0 && channel <= 255) ? channels : null;
-}
-
-function toLinearChannel(channel) {
-  const normalized = channel / 255;
-
-  return normalized <= 0.04045
-    ? normalized / 12.92
-    : ((normalized + 0.055) / 1.055) ** 2.4;
-}
-
-export function classifyNavigationTileTheme(color) {
-  const channels = parseOpaqueCssColor(color);
-
-  if (!channels) {
-    return NAV_TILE_THEME_LIGHT;
-  }
-
-  const [red, green, blue] = channels;
-  const luminance = (0.2126 * toLinearChannel(red))
-    + (0.7152 * toLinearChannel(green))
-    + (0.0722 * toLinearChannel(blue));
-
-  return luminance < 0.5 ? NAV_TILE_THEME_DARK : NAV_TILE_THEME_LIGHT;
-}
 
 function buildNavigationTileStylesheet() {
   return `
@@ -289,31 +239,6 @@ export function normalizeNavigationTileLink(link, variant) {
   link.classList.add('gm-nav-tile');
   link.classList.remove('gm-nav-tile-start', 'gm-nav-tile-neutral');
   link.classList.add(variant === 'start' ? 'gm-nav-tile-start' : 'gm-nav-tile-neutral');
-}
-
-export function syncNavigationTileTheme(row) {
-  if (!row) {
-    return NAV_TILE_THEME_LIGHT;
-  }
-
-  const getComputedStyle = row.ownerDocument?.defaultView?.getComputedStyle;
-  let current = row.parentElement;
-
-  while (current && current.nodeType === 1) {
-    const backgroundColor = getComputedStyle?.(current)?.backgroundColor;
-
-    if (parseOpaqueCssColor(backgroundColor)) {
-      const theme = classifyNavigationTileTheme(backgroundColor);
-
-      row.setAttribute(NAV_TILE_THEME_ATTRIBUTE, theme);
-      return theme;
-    }
-
-    current = current.parentElement;
-  }
-
-  row.setAttribute(NAV_TILE_THEME_ATTRIBUTE, NAV_TILE_THEME_LIGHT);
-  return NAV_TILE_THEME_LIGHT;
 }
 
 export function normalizeNavigationTileRow(row) {
