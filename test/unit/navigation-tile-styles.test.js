@@ -5,13 +5,18 @@ import {
   createArchivedFab
 } from '../../src/content/navigation-fab.js';
 import {
+  classifyNavigationTileTheme,
   injectNavigationTileStyles,
   NAV_TILE_BADGE_HOST_CLASS,
   NAV_TILE_DISABLED_ATTRIBUTE,
   NAV_TILE_STYLE_SELECTOR,
+  NAV_TILE_THEME_ATTRIBUTE,
+  NAV_TILE_THEME_DARK,
+  NAV_TILE_THEME_LIGHT,
   normalizeNavigationTileLink,
   normalizeNavigationTileRow,
-  removeNavigationTileStyles
+  removeNavigationTileStyles,
+  syncNavigationTileTheme
 } from '../../src/content/navigation-tile-styles.js';
 import { createSpamBlockedFab } from '../../src/content/spam-blocked-fab.js';
 import { startChatFabSurface } from '../fixtures/dom/list-states.js';
@@ -42,6 +47,45 @@ describe('navigation-tile-styles', () => {
     expect(styles).toContain('opacity: 0.38 !important');
     expect(styles).toContain('top: -6px !important');
     expect(styles).toContain('right: -2px !important');
+    expect(styles).toContain(`[${NAV_TILE_THEME_ATTRIBUTE}="${NAV_TILE_THEME_DARK}"]`);
+    expect(styles).toContain('background: #303134 !important');
+    expect(styles).toContain('background: #202124 !important');
+    expect(styles).toContain('color: #e8eaed !important');
+    expect(styles).toContain('fill: #8ab4f8 !important');
+  });
+
+  it('classifies opaque CSS colors and defaults unknown values to light', () => {
+    expect(classifyNavigationTileTheme('rgb(32, 33, 36)')).toBe(NAV_TILE_THEME_DARK);
+    expect(classifyNavigationTileTheme('#000')).toBe(NAV_TILE_THEME_DARK);
+    expect(classifyNavigationTileTheme('#f0f4f9')).toBe(NAV_TILE_THEME_LIGHT);
+    expect(classifyNavigationTileTheme('#abc')).toBe(NAV_TILE_THEME_DARK);
+    expect(classifyNavigationTileTheme('rgba(32, 33, 36, 1)')).toBe(NAV_TILE_THEME_DARK);
+    expect(classifyNavigationTileTheme('rgb(300, 33, 36)')).toBe(NAV_TILE_THEME_LIGHT);
+    expect(classifyNavigationTileTheme('rgba(32, 33, 300, 1)')).toBe(NAV_TILE_THEME_LIGHT);
+    expect(classifyNavigationTileTheme(undefined)).toBe(NAV_TILE_THEME_LIGHT);
+    expect(classifyNavigationTileTheme('transparent')).toBe(NAV_TILE_THEME_LIGHT);
+    expect(classifyNavigationTileTheme('not-a-color')).toBe(NAV_TILE_THEME_LIGHT);
+  });
+
+  it('synchronizes the row theme from its native sidebar ancestor', () => {
+    document.body.innerHTML = `
+      <aside style="background-color: rgb(32, 33, 36)">
+        <div ${ARCHIVED_FAB_ROW_ATTRIBUTE}></div>
+      </aside>
+    `;
+    const localThis = document.querySelector(`[${ARCHIVED_FAB_ROW_ATTRIBUTE}]`);
+
+    syncNavigationTileTheme(localThis);
+
+    expect(localThis.getAttribute(NAV_TILE_THEME_ATTRIBUTE)).toBe(NAV_TILE_THEME_DARK);
+  });
+
+  it('defaults to light without an opaque native surface', () => {
+    const localThis = document.createElement('div');
+
+    expect(syncNavigationTileTheme(null)).toBe(NAV_TILE_THEME_LIGHT);
+    expect(syncNavigationTileTheme(localThis)).toBe(NAV_TILE_THEME_LIGHT);
+    expect(localThis.getAttribute(NAV_TILE_THEME_ATTRIBUTE)).toBe(NAV_TILE_THEME_LIGHT);
   });
 
   it('normalizes tile links and rows for all three navigation controls', () => {

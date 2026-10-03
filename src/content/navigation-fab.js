@@ -12,7 +12,8 @@ import {
   normalizeNavigationTileLink,
   normalizeNavigationTileRow,
   NAV_TILE_STYLE_SELECTOR,
-  removeNavigationTileStyles
+  removeNavigationTileStyles,
+  syncNavigationTileTheme
 } from './navigation-tile-styles.js';
 
 export const ARCHIVED_FAB_ATTRIBUTE = 'data-messages-shortcuts-archived-fab';
@@ -140,6 +141,7 @@ function ensureFabRow(documentRoot, startChatContainer) {
   const existingRow = startChatContainer.closest(`[${ARCHIVED_FAB_ROW_ATTRIBUTE}]`);
 
   if (existingRow) {
+    syncNavigationTileTheme(existingRow);
     normalizeNavigationTileRow(existingRow);
 
     return existingRow;
@@ -149,6 +151,7 @@ function ensureFabRow(documentRoot, startChatContainer) {
   row.setAttribute(ARCHIVED_FAB_ROW_ATTRIBUTE, '');
   startChatContainer.parentElement.insertBefore(row, startChatContainer);
   row.append(startChatContainer);
+  syncNavigationTileTheme(row);
   normalizeNavigationTileRow(row);
 
   return row;
@@ -192,6 +195,7 @@ function injectArchivedFab(documentRoot, selectors, onClick) {
   const row = ensureFabRow(documentRoot, startChatContainer);
   const archivedWrap = createArchivedFab(documentRoot, startChatContainer, onClick);
   row.append(archivedWrap);
+  syncNavigationTileTheme(row);
   normalizeNavigationTileRow(row);
 }
 
@@ -252,6 +256,10 @@ function createInstallation({
   }
 
   function refreshFab() {
+    const row = documentRoot.querySelector(`[${ARCHIVED_FAB_ROW_ATTRIBUTE}]`);
+
+    syncNavigationTileTheme(row);
+
     if (paused) {
       removeArchivedFab(documentRoot);
     }
@@ -294,6 +302,8 @@ function createInstallation({
     scheduleRefreshFab();
   });
   observer.observe(documentRoot.body, {
+    attributeFilter: ['class', 'style'],
+    attributes: true,
     childList: true,
     subtree: true
   });
