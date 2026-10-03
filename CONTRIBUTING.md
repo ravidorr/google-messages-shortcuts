@@ -9,6 +9,14 @@ Thanks for contributing to Messages Shortcut Actions.
 3. Run `npm run build` to create the loadable extension in `dist/`.
 4. Load `dist/` from `chrome://extensions` with Developer mode enabled.
 
+## Documentation map
+
+- [ROADMAP.md](ROADMAP.md): phase plan and what ships next
+- [docs/product-principles.md](docs/product-principles.md): scope, shortcut model, and launch gates
+- [docs/feature-backlog.md](docs/feature-backlog.md): prioritized ideas with impact/difficulty scores
+- [docs/architecture.md](docs/architecture.md): module map and testing expectations
+- [docs/dom-discovery/](docs/dom-discovery/): live validation, compatibility matrix, and action gates
+
 ## Before opening a pull request
 
 1. Run `npm run lint`.

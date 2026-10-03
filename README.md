@@ -193,6 +193,7 @@ Every pull request must increase matching versions in `package.json` and `manife
 
 ## Community and support
 
+- See [ROADMAP.md](ROADMAP.md) for planned phases and [docs/product-principles.md](docs/product-principles.md) for scope and launch gates.
 - Read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request.
 - Follow the [Code of Conduct](CODE_OF_CONDUCT.md) in community spaces.
 - Read [SECURITY.md](SECURITY.md) to report vulnerabilities privately.
