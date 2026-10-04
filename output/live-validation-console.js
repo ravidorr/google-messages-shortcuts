@@ -1,5 +1,6 @@
 // Paste into Google Messages DevTools console (page context), then copy the printed JSON.
-// Requires at least two unread conversations: the pill test marks the first row read.
+// Requires at least two unread conversations: pill clicks mark the first and second rows read.
+// Uses only the read-only page bridge method runCapabilitySelfTest plus DOM pill interactions.
 (async () => {
   const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
   const MS = globalThis.MessagesShortcuts;
@@ -59,7 +60,7 @@
 
   const hoverRow = unreadRowsBefore[0];
   const pillRow = unreadRowsBefore[0];
-  const shortcutRow = unreadRowsBefore[1];
+  const secondRow = unreadRowsBefore[1];
   const urlBeforeHover = location.href;
   dispatchRowPointerOver(hoverRow);
   await sleep(600);
@@ -93,30 +94,37 @@
     pillResult = { attempted: false, reason: 'mark-read-pill-not-visible' };
   }
 
-  let shortcutResult = { attempted: false };
+  let secondRowPillResult = { attempted: false };
 
-  if (shortcutRow?.querySelector(unreadSelector)) {
-    const urlBeforeShortcut = location.href;
-    const commandResult = await MS.runConversationAction(MARK_READ_COMMAND, undefined, shortcutRow);
-    await sleep(2500);
+  if (secondRow?.querySelector(unreadSelector)) {
+    dispatchRowPointerOver(secondRow);
+    await sleep(400);
 
-    shortcutResult = {
-      attempted: true,
-      commandOk: commandResult?.ok === true,
-      unreadCleared: !shortcutRow.querySelector(unreadSelector),
-      paneOpened: location.href !== urlBeforeShortcut
-        || Boolean(shortcutRow.querySelector('a[aria-selected="true"]')),
-      reason: commandResult?.reason ?? null
-    };
+    const secondRowMarkReadPill = secondRow.querySelector(MARK_READ_PILL_SELECTOR);
+
+    if (secondRowMarkReadPill) {
+      const urlBeforeSecondPill = location.href;
+      secondRowMarkReadPill.click();
+      await sleep(2500);
+
+      secondRowPillResult = {
+        attempted: true,
+        unreadCleared: !secondRow.querySelector(unreadSelector),
+        paneOpened: location.href !== urlBeforeSecondPill
+          || Boolean(secondRow.querySelector('a[aria-selected="true"]'))
+      };
+    } else {
+      secondRowPillResult = { attempted: false, reason: 'mark-read-pill-not-visible' };
+    }
   } else {
-    shortcutResult = { attempted: false, reason: 'shortcut-row-no-longer-unread' };
+    secondRowPillResult = { attempted: false, reason: 'second-row-no-longer-unread' };
   }
 
   const allPassed = selfTest.ok
     && hoverCheck.unreadMarkerPersists
     && hoverCheck.markReadPillPresent
     && (pillResult.attempted ? pillResult.unreadCleared : false)
-    && (shortcutResult.attempted ? shortcutResult.unreadCleared && shortcutResult.commandOk : false);
+    && (secondRowPillResult.attempted ? secondRowPillResult.unreadCleared : false);
 
   console.log(JSON.stringify({
     ok: allPassed,
@@ -129,7 +137,7 @@
     },
     hoverCheck,
     pillResult,
-    shortcutResult,
+    secondRowPillResult,
     unreadRowsAvailableInitially: unreadRowsBefore.length
   }, null, 2));
 })();

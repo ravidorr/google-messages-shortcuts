@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.14.10 - 2026-10-04
+
+### Fixed
+
+- Update the mark-as-read live validation console helper to use pill interactions instead of the removed page bridge action API
+
 ## 1.14.9 - 2026-10-04
 
 ### Fixed
