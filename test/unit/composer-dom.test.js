@@ -34,6 +34,38 @@ describe('composer-dom', () => {
     expect(localThis.editors).toHaveLength(2);
   });
 
+  it('returns unsafe when more than two distinct composer editors match', () => {
+    document.body.innerHTML = `
+      <textarea aria-label="Message"></textarea>
+      <div contenteditable="true" aria-label="Message"></div>
+      <mws-message-input>
+        <div contenteditable="true"></div>
+      </mws-message-input>
+    `;
+
+    expect(resolveComposerEditor(document).state).toBe('unsafe');
+  });
+
+  it('returns unsafe when multiple distinct composer editors match', () => {
+    document.body.innerHTML = `
+      <div contenteditable="true" aria-label="Message"></div>
+      <div contenteditable="true" aria-label="Message"></div>
+    `;
+
+    expect(resolveComposerEditor(document).state).toBe('unsafe');
+  });
+
+  it('supports a single textarea editor when no contenteditable candidate is present', () => {
+    document.body.innerHTML = `
+      <textarea aria-label="Message"></textarea>
+    `;
+
+    const localThis = resolveComposerEditor(document);
+
+    expect(localThis.state).toBe('supported');
+    expect(localThis.editor?.tagName).toBe('TEXTAREA');
+  });
+
   it('falls back to contenteditable when no textarea is present', () => {
     document.body.innerHTML = `
       <div contenteditable="true" aria-label="Message"></div>

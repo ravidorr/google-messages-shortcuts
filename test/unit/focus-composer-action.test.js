@@ -24,6 +24,18 @@ describe('focus-composer-action', () => {
     expect(document.activeElement.matches('textarea[aria-label="Message"]')).toBe(true);
   });
 
+  it('fails closed when multiple distinct composer editors match', () => {
+    document.body.innerHTML = `
+      <div contenteditable="true" aria-label="Message"></div>
+      <div contenteditable="true" aria-label="Message"></div>
+    `;
+
+    const localThis = focusComposer(document, COMPOSER_SELECTORS);
+
+    expect(localThis.ok).toBe(false);
+    expect(localThis.reason).toBe('composer-ambiguous');
+  });
+
   it('fails closed when multiple composer editors match one candidate', () => {
     document.body.innerHTML = `
       <textarea aria-label="Message"></textarea>

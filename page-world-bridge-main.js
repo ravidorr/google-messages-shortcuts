@@ -66,16 +66,6 @@ export function installPageWorldBridgeMain(
     __pageBridgeInstalled: true,
     runCapabilitySelfTest() {
       return invokeBridgeMethod(PAGE_WORLD_BRIDGE_METHOD.runCapabilitySelfTest);
-    },
-    handleCommand(command) {
-      return invokeBridgeMethod('handleCommand', [command]);
-    },
-    runConversationAction(command, selectors, targetConversationRow) {
-      return invokeBridgeMethod('runConversationAction', [
-        command,
-        selectors,
-        targetConversationRow
-      ]);
     }
   };
 

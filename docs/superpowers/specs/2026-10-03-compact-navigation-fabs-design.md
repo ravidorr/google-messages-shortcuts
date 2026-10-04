@@ -8,10 +8,11 @@ assigned Chrome shortcuts as compact visual badges.
 
 ## Layout
 
-The extension-owned FAB row contains the native Start chat control plus injected
-Archived and Spam & blocked controls. It remains a single horizontal row that
-uses the sidebar's available width. All three controls use compact padding,
-font sizing, and gaps so their labels remain visible without overflowing.
+The extension-owned navigation row contains the native Start chat control plus
+injected Archived and Spam & blocked controls. It uses a three-column tile grid
+that fits the sidebar width. Each tile stacks its icon above a compact label,
+with bounded wrapping and clipping so labels stay inside the tile without
+overflowing the sidebar.
 
 Each control is a positioned badge host. When Chrome reports an assigned
 shortcut for its command, the control renders a small, non-interactive
@@ -34,7 +35,7 @@ activation behavior. Shortcut badges are decorative because the accessible name
 already includes the control purpose, and the assigned keyboard shortcut
 remains configurable through Chrome.
 
-The navigation FAB row remains rendered while Google Messages displays any
+The navigation tile row remains rendered while Google Messages displays any
 native modal, including Archived. The native modal scrim blocks interaction
 with the row, so the extension must not hide, disable, or otherwise change
 the controls when a modal opens.
@@ -42,7 +43,7 @@ the controls when a modal opens.
 ## Implementation and testing
 
 The navigation FAB module will load shortcut labels once and keep badge state
-in sync with the rendered controls. Tests will cover compact-row styling
+in sync with the rendered controls. Tests will cover tile-grid styling
 injection, badge presence for assigned shortcuts, badge omission for
 unassigned shortcuts, and the distinct Spam & blocked icon. Existing FAB
 activation and teardown coverage remains intact. Tests also verify that the

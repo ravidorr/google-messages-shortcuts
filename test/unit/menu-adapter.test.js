@@ -4,6 +4,7 @@ import {
   assessMenuCapabilities,
   findBlockReportSpamConfirmControl,
   findBlockReportSpamConfirmFallbackControl,
+  findTrashConfirmControl,
   hasBlockReportSpamConfirmControl,
   findFallbackMenuItemInOpenRowMenu,
   findLabelMatchedMenuItem,
@@ -115,6 +116,17 @@ describe('menu-adapter', () => {
     const localThis = assessMenuCapabilities(document, listCapabilities);
 
     expect(localThis[MENU_CAPABILITY_IDS.trashConfirm].state).toBe(CAPABILITY_UNSAFE);
+  });
+
+  it('returns null when multiple labeled trash confirm controls match the primary selector', () => {
+    document.body.innerHTML = `
+      <mat-dialog-container>
+        <button data-e2e-action-button-confirm>Move to trash</button>
+        <button data-e2e-action-button-confirm>Move to trash</button>
+      </mat-dialog-container>
+    `;
+
+    expect(findTrashConfirmControl(document, MENU_SELECTORS)).toBeNull();
   });
 
   it('supports fallback menu labels while the row menu is open', () => {

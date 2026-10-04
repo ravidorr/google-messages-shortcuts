@@ -8,7 +8,7 @@ export async function isTrashConfirmationEnabled(chromeApi = chrome) {
 
     return storedPreference[TRASH_CONFIRMATION_STORAGE_KEY] !== false;
   } catch {
-    return true;
+    return false;
   }
 }
 

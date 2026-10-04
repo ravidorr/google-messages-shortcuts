@@ -91,13 +91,30 @@ function isBlockReportSpamConfirmControl(element) {
 }
 
 function hasTrashConfirmInOpenDialog(documentRoot, selectors = MENU_SELECTORS) {
-  const dialog = documentRoot.querySelector('mat-dialog-container');
-  const candidates = new Set([
-    documentRoot.querySelector(selectors.trashConfirmButton),
-    ...dialog.querySelectorAll('button, .mat-focus-indicator')
-  ].filter(Boolean));
+  return Boolean(findTrashConfirmControl(documentRoot, selectors));
+}
 
-  return [...candidates].some(isTrashConfirmControl);
+export function findTrashConfirmControl(documentRoot, selectors = MENU_SELECTORS) {
+  const primaryMatches = [...documentRoot.querySelectorAll(selectors.trashConfirmButton)]
+    .filter(isTrashConfirmControl);
+
+  if (primaryMatches.length > 1) {
+    return null;
+  }
+
+  if (primaryMatches.length === 1) {
+    return primaryMatches[0];
+  }
+
+  const dialog = documentRoot.querySelector('mat-dialog-container');
+
+  if (!dialog) {
+    return null;
+  }
+
+  return [...dialog.querySelectorAll('button, .mat-focus-indicator')].find(
+    isTrashConfirmControl
+  ) ?? null;
 }
 
 export function findBlockReportSpamConfirmFallbackControl(documentRoot) {
@@ -334,9 +351,17 @@ function assessTrashConfirmCapability(documentRoot, confirmSelector, listTargeti
   }
 
   if (matches.length === 1) {
+    if (isTrashConfirmControl(matches[0])) {
+      return createCapabilityResult(
+        CAPABILITY_SUPPORTED,
+        'Trash confirmation control is present in the document.',
+        'dom-query'
+      );
+    }
+
     return createCapabilityResult(
-      CAPABILITY_SUPPORTED,
-      'Trash confirmation control is present in the document.',
+      CAPABILITY_UNAVAILABLE,
+      'Trash confirmation dialog is open but the confirm control was not found.',
       'dom-query'
     );
   }

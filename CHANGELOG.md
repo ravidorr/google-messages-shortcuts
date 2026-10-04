@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.14.9 - 2026-10-04
+
+### Fixed
+
+- Restrict the page-world bridge to the read-only capability self-test so page scripts cannot invoke destructive actions
+- Fail closed when trash auto-confirm preference storage is unavailable
+- Reject row actions while a native dialog is already open and require the exact Move to trash confirm label
+- Treat multiple distinct composer editor matches as unsafe unless they are a validated textarea/contenteditable mirror pair
+
+### Changed
+
+- Synchronize roadmap, DOM discovery, and navigation FAB documentation with shipped behavior
+
 ## 1.14.8 - 2026-10-04
 
 ### Fixed

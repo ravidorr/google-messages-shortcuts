@@ -19,9 +19,7 @@ describe('page-world-bridge integration', () => {
     installPageWorldBridgeHost(
       document,
       createDefaultPageWorldBridgeHandlers({
-        runCapabilitySelfTest: () => runCapabilitySelfTest(document),
-        handleCommand: async () => ({ ok: true }),
-        runConversationAction: async () => ({ ok: true })
+        runCapabilitySelfTest: () => runCapabilitySelfTest(document)
       })
     );
     installPageWorldBridgeMain(document, globalThis);
