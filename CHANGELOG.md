@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.14.8 - 2026-10-04
+
+### Fixed
+
+- Keep compact navigation controls within the available sidebar width and leave them unchanged behind native dialogs
+
 ## 1.14.7 - 2026-10-03
 
 ### Added

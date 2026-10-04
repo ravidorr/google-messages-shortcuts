@@ -92,7 +92,7 @@ describe('navigation-fab', () => {
     localThis();
   });
 
-  it('adds tile styles that lay out three equal navigation controls in a grid', async () => {
+  it('adds responsive tile styles that lay out three equal navigation controls in a grid', async () => {
     document.body.innerHTML = startChatFabSurface;
     const disconnect = installArchivedFab({
       documentRoot: document,
@@ -115,14 +115,14 @@ describe('navigation-fab', () => {
 
     expect(row?.classList.contains('gm-nav-row')).toBe(true);
     expect(styles).toContain('margin-top: 8px !important');
-    expect(styles).toContain('width: 300px !important');
+    expect(styles).toContain('width: 100% !important');
+    expect(styles).toContain('min-width: 0 !important');
     expect(styles).toContain('position: static !important');
-    expect(styles).toContain('grid-template-columns: repeat(3, 84px) !important');
-    expect(styles).toContain('padding: 6px 16px 12px !important');
+    expect(styles).toContain('grid-template-columns: repeat(3, minmax(0, 1fr)) !important');
+    expect(styles).toContain('padding: 6px 8px 12px !important');
     expect(styles).toContain('gap: 8px !important');
     expect(styles).toContain('overflow: visible !important');
-    expect(styles).toContain('height: 72px !important');
-    expect(styles).toContain('width: 84px !important');
+    expect(styles).toContain('height: 64px !important');
     expect(styles).toContain('position: relative !important');
     expect(styles).toContain('box-shadow: none !important');
     expect(styles).toContain('all: unset');

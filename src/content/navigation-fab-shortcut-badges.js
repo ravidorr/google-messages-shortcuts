@@ -8,7 +8,6 @@ import {
   MESSAGE_GET_BROWSER_COMMAND_LABELS
 } from '../shared/browser-command-labels.js';
 import { UNASSIGNED_SHORTCUT_LABEL } from '../shared/shortcut-labels.js';
-import { isNativeDialogOpen } from './keyboard-context-guard.js';
 import { ARCHIVED_FAB_ATTRIBUTE, ARCHIVED_FAB_ROW_ATTRIBUTE } from './navigation-fab.js';
 import {
   NAV_TILE_BADGE_ATTRIBUTE,
@@ -17,7 +16,6 @@ import {
 } from './navigation-tile-styles.js';
 import { SPAM_BLOCKED_FAB_ATTRIBUTE } from './spam-blocked-fab.js';
 
-const NATIVE_MODAL_OPEN_ATTRIBUTE = 'data-messages-shortcuts-native-modal-open';
 const START_CHAT_SELECTOR = 'a[data-e2e-start-button]';
 const installationRegistry = new WeakMap();
 
@@ -67,24 +65,6 @@ function removeBadges(documentRoot) {
   });
 }
 
-export function syncNavigationTileModalState(documentRoot = document) {
-  const row = documentRoot.querySelector(`[${ARCHIVED_FAB_ROW_ATTRIBUTE}]`);
-
-  if (!row) {
-    return;
-  }
-
-  const modalOpen = isNativeDialogOpen(documentRoot);
-
-  if (modalOpen) {
-    row.setAttribute(NATIVE_MODAL_OPEN_ATTRIBUTE, '');
-    row.inert = true;
-  } else {
-    row.removeAttribute(NATIVE_MODAL_OPEN_ATTRIBUTE);
-    row.inert = false;
-  }
-}
-
 function createInstallation({
   documentRoot = document,
   chromeApi = globalThis.chrome,
@@ -104,7 +84,6 @@ function createInstallation({
 
     if (!row) {
       removeBadges(documentRoot);
-      syncNavigationTileModalState(documentRoot);
       return;
     }
 
@@ -113,7 +92,6 @@ function createInstallation({
     }
 
     normalizeNavigationTileRow(row);
-    syncNavigationTileModalState(documentRoot);
   }
 
   void Promise.resolve()
@@ -138,7 +116,6 @@ function createInstallation({
     active = false;
     observer.disconnect();
     removeBadges(documentRoot);
-    syncNavigationTileModalState(documentRoot);
   };
 }
 

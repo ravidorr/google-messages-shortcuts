@@ -231,7 +231,7 @@ describe('navigation FAB shortcut badges', () => {
     expect(document.querySelectorAll(BADGE_SELECTOR)).toHaveLength(0);
   });
 
-  it('marks the navigation tile row inert while a native dialog is visible', async () => {
+  it('leaves the navigation tile row unchanged while a native dialog is visible', async () => {
     addNavigationFabs();
 
     disconnect = installNavigationFabShortcutBadges({
@@ -248,22 +248,23 @@ describe('navigation FAB shortcut badges', () => {
     });
 
     const row = document.querySelector(`[${ARCHIVED_FAB_ROW_ATTRIBUTE}]`);
-    expect(row.inert).toBe(false);
+    expect(row.inert).toBeUndefined();
     expect(row.hasAttribute('data-messages-shortcuts-native-modal-open')).toBe(false);
 
     document.body.insertAdjacentHTML('beforeend', '<mat-dialog-container></mat-dialog-container>');
 
     await vi.waitFor(() => {
-      expect(row.inert).toBe(true);
+      expect(document.querySelector('mat-dialog-container')).not.toBeNull();
     });
-    expect(row.hasAttribute('data-messages-shortcuts-native-modal-open')).toBe(true);
+    expect(row.inert).toBeUndefined();
+    expect(row.hasAttribute('data-messages-shortcuts-native-modal-open')).toBe(false);
     expect(document.querySelector('a[data-e2e-start-button]').hasAttribute('aria-disabled')).toBe(false);
     expect(document.querySelector('a[data-e2e-start-button]').style.opacity).not.toBe('0.38');
 
     document.querySelector('mat-dialog-container').remove();
 
     await vi.waitFor(() => {
-      expect(row.inert).toBe(false);
+      expect(document.querySelector('mat-dialog-container')).toBeNull();
     });
     expect(row.hasAttribute('data-messages-shortcuts-native-modal-open')).toBe(false);
   });
