@@ -23,12 +23,13 @@ describe('live validation console', () => {
     expect(localThis).not.toContain('handleCommand');
   });
 
-  it('validates mark-as-read through pill interactions on two unread rows', async () => {
+  it('performs read-only hover checks without automating pill actions', async () => {
     const localThis = await readFile(consoleProbePath, 'utf8');
 
-    expect(localThis).toContain('secondRowPillResult');
-    expect(localThis).toContain('markReadPill.click()');
-    expect(localThis).toContain('secondRowMarkReadPill.click()');
-    expect(localThis).toContain('insufficient-unread-rows');
+    expect(localThis).toContain('secondRowHoverCheck');
+    expect(localThis).toContain('markReadPillPresent');
+    expect(localThis).toContain('manualFollowUp');
+    expect(localThis).not.toContain('.click(');
+    expect(localThis).not.toContain('pillResult');
   });
 });

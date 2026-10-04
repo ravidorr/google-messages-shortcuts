@@ -1,6 +1,6 @@
 // Paste into Google Messages DevTools console (page context), then copy the printed JSON.
-// Requires at least two unread conversations: pill clicks mark the first and second rows read.
-// Uses only the read-only page bridge method runCapabilitySelfTest plus DOM pill interactions.
+// Read-only probe: uses runCapabilitySelfTest and hover visibility checks only.
+// Trigger mark-as-read manually with the assigned keyboard shortcut after this probe passes.
 (async () => {
   const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
   const MS = globalThis.MessagesShortcuts;
@@ -19,6 +19,19 @@
 
   const dispatchRowPointerOver = (row) => {
     row.dispatchEvent(new PointerEvent('pointerover', { bubbles: true }));
+  };
+
+  const inspectRowHover = async (row) => {
+    const urlBeforeHover = location.href;
+    dispatchRowPointerOver(row);
+    await sleep(600);
+
+    return {
+      unreadMarkerPersists: Boolean(row.querySelector(unreadSelector)),
+      pillGroupPresent: Boolean(row.querySelector('[data-messages-shortcuts-pill-group]')),
+      markReadPillPresent: Boolean(row.querySelector(MARK_READ_PILL_SELECTOR)),
+      urlUnchanged: location.href === urlBeforeHover
+    };
   };
 
   const selfTest = await MS.runCapabilitySelfTest();
@@ -46,7 +59,7 @@
     console.log(JSON.stringify({
       ok: false,
       error: 'insufficient-unread-rows',
-      message: 'Need at least two unread conversations: the pill test marks the first row read.',
+      message: 'Need at least two unread conversations to verify hover pills on multiple rows.',
       unreadRowsAvailableInitially: unreadRowsBefore.length,
       selfTest: {
         ok: selfTest.ok,
@@ -58,73 +71,13 @@
     return;
   }
 
-  const hoverRow = unreadRowsBefore[0];
-  const pillRow = unreadRowsBefore[0];
-  const secondRow = unreadRowsBefore[1];
-  const urlBeforeHover = location.href;
-  dispatchRowPointerOver(hoverRow);
-  await sleep(600);
-
-  const hoverCheck = {
-    unreadMarkerPersists: Boolean(hoverRow.querySelector(unreadSelector)),
-    pillGroupPresent: Boolean(hoverRow.querySelector('[data-messages-shortcuts-pill-group]')),
-    markReadPillPresent: Boolean(hoverRow.querySelector(MARK_READ_PILL_SELECTOR)),
-    urlUnchanged: location.href === urlBeforeHover
-  };
-
-  let pillResult = { attempted: false };
-
-  dispatchRowPointerOver(pillRow);
-  await sleep(400);
-
-  const markReadPill = pillRow.querySelector(MARK_READ_PILL_SELECTOR);
-
-  if (markReadPill) {
-    const urlBeforePill = location.href;
-    markReadPill.click();
-    await sleep(2500);
-
-    pillResult = {
-      attempted: true,
-      unreadCleared: !pillRow.querySelector(unreadSelector),
-      paneOpened: location.href !== urlBeforePill
-        || Boolean(pillRow.querySelector('a[aria-selected="true"]'))
-    };
-  } else {
-    pillResult = { attempted: false, reason: 'mark-read-pill-not-visible' };
-  }
-
-  let secondRowPillResult = { attempted: false };
-
-  if (secondRow?.querySelector(unreadSelector)) {
-    dispatchRowPointerOver(secondRow);
-    await sleep(400);
-
-    const secondRowMarkReadPill = secondRow.querySelector(MARK_READ_PILL_SELECTOR);
-
-    if (secondRowMarkReadPill) {
-      const urlBeforeSecondPill = location.href;
-      secondRowMarkReadPill.click();
-      await sleep(2500);
-
-      secondRowPillResult = {
-        attempted: true,
-        unreadCleared: !secondRow.querySelector(unreadSelector),
-        paneOpened: location.href !== urlBeforeSecondPill
-          || Boolean(secondRow.querySelector('a[aria-selected="true"]'))
-      };
-    } else {
-      secondRowPillResult = { attempted: false, reason: 'mark-read-pill-not-visible' };
-    }
-  } else {
-    secondRowPillResult = { attempted: false, reason: 'second-row-no-longer-unread' };
-  }
+  const hoverCheck = await inspectRowHover(unreadRowsBefore[0]);
+  const secondRowHoverCheck = await inspectRowHover(unreadRowsBefore[1]);
 
   const allPassed = selfTest.ok
     && hoverCheck.unreadMarkerPersists
     && hoverCheck.markReadPillPresent
-    && (pillResult.attempted ? pillResult.unreadCleared : false)
-    && (secondRowPillResult.attempted ? secondRowPillResult.unreadCleared : false);
+    && secondRowHoverCheck.markReadPillPresent;
 
   console.log(JSON.stringify({
     ok: allPassed,
@@ -136,8 +89,8 @@
       listConversationLink
     },
     hoverCheck,
-    pillResult,
-    secondRowPillResult,
-    unreadRowsAvailableInitially: unreadRowsBefore.length
+    secondRowHoverCheck,
+    unreadRowsAvailableInitially: unreadRowsBefore.length,
+    manualFollowUp: 'Use the assigned mark-as-read keyboard shortcut to confirm action behavior.'
   }, null, 2));
 })();

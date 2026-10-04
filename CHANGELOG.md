@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.14.11 - 2026-10-04
+
+### Fixed
+
+- Ignore untrusted shortcut pill clicks so page scripts cannot drive destructive row actions through injected pills
+- Make the mark-as-read live validation console helper read-only and document manual shortcut follow-up
+
 ## 1.14.10 - 2026-10-04
 
 ### Fixed
