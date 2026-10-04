@@ -4,6 +4,7 @@ import {
 } from './adapters/capability-states.js';
 import { assessPageCapabilities } from './adapters/page-adapter.js';
 import {
+  findTrashConfirmControl,
   hasBlockReportSpamConfirmControl,
   MENU_CAPABILITY_IDS,
   MENU_TEXT
@@ -16,10 +17,6 @@ import { waitForElement, waitForSelector } from './wait-for-element.js';
 
 function isBlockingCapabilityState(state) {
   return state === CAPABILITY_UNAVAILABLE || state === CAPABILITY_UNSAFE;
-}
-
-function normalizeText(value) {
-  return value.replace(/\s+/g, ' ').trim();
 }
 
 function createBlockedResult(capabilityId, capabilityState, capabilityReason) {
@@ -36,31 +33,12 @@ function isTrashConfirmDialogOpen(documentRoot) {
   return Boolean(documentRoot.querySelector('mat-dialog-container'));
 }
 
-export function findTrashConfirmFallbackControl(documentRoot) {
-  const dialog = documentRoot.querySelector('mat-dialog-container');
-
-  if (!dialog) {
-    return null;
-  }
-
-  const candidates = dialog.querySelectorAll('button, .mat-focus-indicator');
-  const expectedText = normalizeText(MENU_TEXT.trash);
-
-  for (const candidate of candidates) {
-    if (normalizeText(candidate.textContent || '') === expectedText) {
-      return candidate;
-    }
-  }
-
-  return null;
+export function findTrashConfirmFallbackControl(documentRoot, selectors) {
+  return findTrashConfirmControl(documentRoot, selectors);
 }
 
 function hasTrashConfirmControl(documentRoot, selectors) {
-  if (documentRoot.querySelector(selectors.trashConfirmButton)) {
-    return true;
-  }
-
-  return Boolean(findTrashConfirmFallbackControl(documentRoot));
+  return Boolean(findTrashConfirmControl(documentRoot, selectors));
 }
 
 export function assessRowActionCapability(documentRoot, action, selectors) {
@@ -245,7 +223,15 @@ export async function assessTrashConfirmCapabilityAfterRender(
   try {
     await waitForSelector(documentRoot, selectors.trashConfirmButton, timeout);
 
-    return { allowed: true };
+    if (findTrashConfirmControl(documentRoot, selectors)) {
+      return { allowed: true };
+    }
+
+    return createBlockedResult(
+      MENU_CAPABILITY_IDS.trashConfirm,
+      CAPABILITY_UNAVAILABLE,
+      'Trash confirmation dialog is open but the confirm control was not found.'
+    );
   } catch (_primaryError) {
     try {
       await waitForElement(

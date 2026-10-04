@@ -43,6 +43,13 @@ function createConversationRow({ focused = false, unread = true } = {}) {
   return row;
 }
 
+function trustedPillInstallOptions(overrides = {}) {
+  return {
+    isTrustedActivation: () => true,
+    ...overrides
+  };
+}
+
 function expectLucidePillIcon(pill, commandName) {
   const icon = getCommandIcon(commandName);
   const svg = pill.querySelector(`[data-messages-shortcuts-pill-icon="${commandName}"]`);
@@ -290,7 +297,7 @@ describe('conversation shortcut pills', () => {
     const runAction = vi.fn(async () => ({ ok: true }));
     document.body.append(row);
 
-    disconnect = installConversationShortcutPills({
+    disconnect = installConversationShortcutPills(trustedPillInstallOptions({
       documentRoot: document,
       getShortcutLabels: vi.fn(async () => ({
         archive: 'Ctrl+Shift+Y',
@@ -299,7 +306,7 @@ describe('conversation shortcut pills', () => {
         markUnread: 'Ctrl+Shift+U'
       })),
       runAction
-    });
+    }));
 
     await vi.waitFor(() => {
       expect(row.querySelector(`[data-command="${COMMAND_MARK_UNREAD}"]`)).not.toBeNull();
@@ -312,6 +319,35 @@ describe('conversation shortcut pills', () => {
   });
 
   it('does not propagate shortcut pill clicks to the conversation row', async () => {
+    const row = createConversationRow({ focused: true, unread: false });
+    const rowClick = vi.fn();
+    const runAction = vi.fn(async () => ({ ok: true }));
+    row.addEventListener('click', rowClick);
+    document.body.append(row);
+
+    disconnect = installConversationShortcutPills(trustedPillInstallOptions({
+      documentRoot: document,
+      getShortcutLabels: vi.fn(async () => ({
+        archive: 'Ctrl+Shift+Y',
+        trash: 'Ctrl+Shift+D',
+        markRead: 'Ctrl+Shift+K',
+        markUnread: 'Ctrl+Shift+U'
+      })),
+      runAction
+    }));
+
+    await vi.waitFor(() => {
+      expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(6);
+    });
+
+    row.querySelector(`[data-command="${COMMAND_ARCHIVE}"]`).click();
+    await Promise.resolve();
+
+    expect(runAction).toHaveBeenCalledWith(COMMAND_ARCHIVE, row);
+    expect(rowClick).not.toHaveBeenCalled();
+  });
+
+  it('ignores untrusted shortcut pill clicks from page scripts', async () => {
     const row = createConversationRow({ focused: true, unread: false });
     const rowClick = vi.fn();
     const runAction = vi.fn(async () => ({ ok: true }));
@@ -336,7 +372,7 @@ describe('conversation shortcut pills', () => {
     row.querySelector(`[data-command="${COMMAND_ARCHIVE}"]`).click();
     await Promise.resolve();
 
-    expect(runAction).toHaveBeenCalledWith(COMMAND_ARCHIVE, row);
+    expect(runAction).not.toHaveBeenCalled();
     expect(rowClick).not.toHaveBeenCalled();
   });
 
@@ -353,7 +389,7 @@ describe('conversation shortcut pills', () => {
     });
     document.body.append(row);
 
-    disconnect = installConversationShortcutPills({
+    disconnect = installConversationShortcutPills(trustedPillInstallOptions({
       documentRoot: document,
       getShortcutLabels: vi.fn(async () => ({
         archive: 'Ctrl+Shift+Y',
@@ -362,7 +398,7 @@ describe('conversation shortcut pills', () => {
         markUnread: 'Ctrl+Shift+U'
       })),
       runAction
-    });
+    }));
 
     await vi.waitFor(() => {
       expect(row.querySelectorAll('[data-messages-shortcuts-pill]')).toHaveLength(6);
@@ -561,11 +597,11 @@ describe('conversation shortcut pills', () => {
     }));
     document.body.append(row);
 
-    disconnect = installConversationShortcutPills({
+    disconnect = installConversationShortcutPills(trustedPillInstallOptions({
       documentRoot: document,
       getShortcutLabels,
       runAction
-    });
+    }));
     row.dispatchEvent(new Event('pointerover', { bubbles: true }));
 
     await vi.waitFor(() => {
@@ -610,14 +646,14 @@ describe('conversation shortcut pills', () => {
     document.body.append(row);
     vi.spyOn(link, 'click');
 
-    disconnect = installConversationShortcutPills({
+    disconnect = installConversationShortcutPills(trustedPillInstallOptions({
       documentRoot: document,
       getShortcutLabels: vi.fn(async () => ({
         archive: 'Ctrl+Shift+Y',
         trash: 'Ctrl+Shift+D'
       })),
       isAutoOpenEnabled: vi.fn(async () => true)
-    });
+    }));
     row.dispatchEvent(new Event('pointerover', { bubbles: true }));
 
     await vi.waitFor(() => {
@@ -632,7 +668,7 @@ describe('conversation shortcut pills', () => {
     document.body.append(row);
     vi.spyOn(link, 'click');
 
-    disconnect = installConversationShortcutPills({
+    disconnect = installConversationShortcutPills(trustedPillInstallOptions({
       documentRoot: document,
       getShortcutLabels: vi.fn(async () => ({
         archive: 'Ctrl+Shift+Y',
@@ -641,7 +677,7 @@ describe('conversation shortcut pills', () => {
       isAutoOpenEnabled: () => new Promise((resolve) => {
         resolveAutoOpenEnabled = resolve;
       })
-    });
+    }));
     row.dispatchEvent(new Event('pointerover', { bubbles: true }));
     await Promise.resolve();
     row.dispatchEvent(new Event('pointerout', { bubbles: true }));
@@ -659,7 +695,7 @@ describe('conversation shortcut pills', () => {
     document.body.append(row);
     vi.spyOn(link, 'click');
 
-    disconnect = installConversationShortcutPills({
+    disconnect = installConversationShortcutPills(trustedPillInstallOptions({
       documentRoot: document,
       getShortcutLabels: vi.fn(async () => ({
         archive: 'Ctrl+Shift+Y',
@@ -668,7 +704,7 @@ describe('conversation shortcut pills', () => {
       isAutoOpenEnabled: () => new Promise((resolve) => {
         resolveAutoOpenEnabled = resolve;
       })
-    });
+    }));
     row.dispatchEvent(new Event('pointerover', { bubbles: true }));
     await Promise.resolve();
     row.remove();
@@ -708,14 +744,14 @@ describe('conversation shortcut pills', () => {
     document.body.append(row);
     vi.spyOn(link, 'click');
 
-    disconnect = installConversationShortcutPills({
+    disconnect = installConversationShortcutPills(trustedPillInstallOptions({
       documentRoot: document,
       getShortcutLabels: vi.fn(async () => ({
         archive: 'Ctrl+Shift+Y',
         trash: 'Ctrl+Shift+D'
       })),
       isAutoOpenEnabled: vi.fn(async () => true)
-    });
+    }));
     link.dispatchEvent(new Event('pointerover', { bubbles: true }));
 
     await vi.waitFor(() => {
@@ -747,6 +783,27 @@ describe('conversation shortcut pills', () => {
     document.body.append(row);
     vi.spyOn(link, 'click');
 
+    disconnect = installConversationShortcutPills(trustedPillInstallOptions({
+      documentRoot: document,
+      getShortcutLabels: vi.fn(async () => ({
+        archive: 'Ctrl+Shift+Y',
+        trash: 'Ctrl+Shift+D'
+      })),
+      isAutoOpenEnabled: vi.fn(async () => true)
+    }));
+    link.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
+
+    await vi.waitFor(() => {
+      expect(link.click).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  it('does not open a conversation on untrusted pointerover when opening is enabled', async () => {
+    const row = createConversationRow();
+    const link = row.querySelector('a');
+    document.body.append(row);
+    vi.spyOn(link, 'click');
+
     disconnect = installConversationShortcutPills({
       documentRoot: document,
       getShortcutLabels: vi.fn(async () => ({
@@ -755,11 +812,11 @@ describe('conversation shortcut pills', () => {
       })),
       isAutoOpenEnabled: vi.fn(async () => true)
     });
-    link.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
+    row.dispatchEvent(new Event('pointerover', { bubbles: true }));
 
-    await vi.waitFor(() => {
-      expect(link.click).toHaveBeenCalledTimes(1);
-    });
+    await Promise.resolve();
+
+    expect(link.click).not.toHaveBeenCalled();
   });
 
   it('does not open a conversation when Google Messages marks its row as focused', async () => {
@@ -882,14 +939,14 @@ describe('conversation shortcut pills', () => {
     const runAction = vi.fn(async () => ({ ok: true }));
     document.body.append(selectedRow, pillRow);
 
-    disconnect = installConversationShortcutPills({
+    disconnect = installConversationShortcutPills(trustedPillInstallOptions({
       documentRoot: document,
       getShortcutLabels: vi.fn(async () => ({
         archive: 'Ctrl+Shift+Y',
         trash: 'Ctrl+Shift+D'
       })),
       runAction
-    });
+    }));
     pillRow.dispatchEvent(new Event('pointerover', { bubbles: true }));
 
     await vi.waitFor(() => {
@@ -1165,14 +1222,14 @@ describe('conversation shortcut pills', () => {
     const runAction = vi.fn(async () => ({ ok: true }));
     document.body.append(row);
 
-    disconnect = installConversationShortcutPills({
+    disconnect = installConversationShortcutPills(trustedPillInstallOptions({
       documentRoot: document,
       getShortcutLabels: vi.fn(async () => ({
         archive: 'Ctrl+Shift+Y',
         trash: 'Ctrl+Shift+D'
       })),
       runAction
-    });
+    }));
 
     await vi.waitFor(() => {
       expect(row.querySelector(`[data-command="${COMMAND_TRASH}"]`)).not.toBeNull();
@@ -1386,13 +1443,13 @@ describe('conversation shortcut pills', () => {
     vi.spyOn(menuButton, 'click');
     vi.spyOn(archiveMenuItem, 'click');
 
-    disconnect = installConversationShortcutPills({
+    disconnect = installConversationShortcutPills(trustedPillInstallOptions({
       documentRoot: document,
       getShortcutLabels: vi.fn(async () => ({
         archive: 'Ctrl+Shift+Y',
         trash: 'Ctrl+Shift+D'
       }))
-    });
+    }));
 
     await vi.waitFor(() => {
       expect(row.querySelector(`[data-command="${COMMAND_ARCHIVE}"]`)).not.toBeNull();
@@ -2078,7 +2135,7 @@ describe('conversation shortcut pills', () => {
     const warning = vi.spyOn(console, 'warn').mockImplementation(() => {});
     document.body.append(row);
 
-    disconnect = installConversationShortcutPills({
+    disconnect = installConversationShortcutPills(trustedPillInstallOptions({
       documentRoot: document,
       getShortcutLabels: vi.fn(async () => ({
         archive: 'Ctrl+Shift+Y',
@@ -2087,7 +2144,7 @@ describe('conversation shortcut pills', () => {
       runAction: vi.fn(async () => {
         throw new Error('Action failed');
       })
-    });
+    }));
 
     await vi.waitFor(() => {
       expect(row.querySelector(`[data-command="${COMMAND_ARCHIVE}"]`)).not.toBeNull();

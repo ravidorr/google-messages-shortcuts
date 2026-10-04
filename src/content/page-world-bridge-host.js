@@ -1,7 +1,12 @@
 import {
+  PAGE_WORLD_BRIDGE_METHOD,
   PAGE_WORLD_BRIDGE_REQUEST_EVENT,
   PAGE_WORLD_BRIDGE_RESPONSE_EVENT
 } from './page-world-bridge-constants.js';
+
+export const ALLOWED_PAGE_WORLD_BRIDGE_METHODS = new Set([
+  PAGE_WORLD_BRIDGE_METHOD.runCapabilitySelfTest
+]);
 
 function dispatchBridgeResponse(documentRoot, requestId, payload) {
   documentRoot.dispatchEvent(new CustomEvent(PAGE_WORLD_BRIDGE_RESPONSE_EVENT, {
@@ -12,20 +17,9 @@ function dispatchBridgeResponse(documentRoot, requestId, payload) {
   }));
 }
 
-export function createDefaultPageWorldBridgeHandlers({
-  runCapabilitySelfTest,
-  handleCommand,
-  runConversationAction
-}) {
+export function createDefaultPageWorldBridgeHandlers({ runCapabilitySelfTest }) {
   return {
-    runCapabilitySelfTest: () => runCapabilitySelfTest(document),
-    handleCommand: (command) => handleCommand(command, document),
-    runConversationAction: (command, selectors, targetConversationRow) => runConversationAction(
-      document,
-      command,
-      selectors,
-      targetConversationRow
-    )
+    [PAGE_WORLD_BRIDGE_METHOD.runCapabilitySelfTest]: () => runCapabilitySelfTest(document)
   };
 }
 
@@ -39,6 +33,15 @@ export function installPageWorldBridgeHost(documentRoot, handlers) {
     }
 
     Promise.resolve().then(async () => {
+      if (!ALLOWED_PAGE_WORLD_BRIDGE_METHODS.has(method)) {
+        dispatchBridgeResponse(documentRoot, requestId, {
+          ok: false,
+          error: `unknown-method:${method}`
+        });
+
+        return;
+      }
+
       const handler = handlers[method];
 
       if (!handler) {

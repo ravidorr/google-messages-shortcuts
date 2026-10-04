@@ -18,7 +18,8 @@ import {
 } from './conversation-read-state.js';
 import {
   findBlockReportSpamConfirmControl,
-  findLabelMatchedMenuItem
+  findLabelMatchedMenuItem,
+  findTrashConfirmControl
 } from './adapters/menu-adapter.js';
 import { MENU_TEXT, SELECTORS } from './google-messages-dom.js';
 import { beginMenuAction, endMenuAction } from './menu-action-overlay.js';
@@ -235,23 +236,22 @@ async function prepareBlockReportSpamConfirmation(documentRoot, selectors) {
   }
 }
 
-async function confirmTrash(documentRoot, shouldConfirm = true) {
-  try {
-    const confirmButton = await waitForSelector(
-      documentRoot,
-      SELECTORS.trashConfirmButton
-    );
+async function confirmTrash(documentRoot, shouldConfirm = true, selectors = SELECTORS) {
+  const immediateConfirmButton = findTrashConfirmControl(documentRoot, selectors);
 
-    return handleTrashConfirmation(confirmButton, shouldConfirm);
+  if (immediateConfirmButton) {
+    return handleTrashConfirmation(immediateConfirmButton, shouldConfirm);
+  }
+
+  try {
+    await waitForSelector(documentRoot, selectors.trashConfirmButton);
   } catch (_primaryError) {
     try {
-      const fallbackButton = await waitForElement(
+      await waitForElement(
         documentRoot,
         'mat-dialog-container button, mat-dialog-container .mat-focus-indicator',
         MENU_TEXT.trash
       );
-
-      return handleTrashConfirmation(fallbackButton, shouldConfirm);
     } catch (fallbackError) {
       return {
         ok: false,
@@ -259,6 +259,17 @@ async function confirmTrash(documentRoot, shouldConfirm = true) {
       };
     }
   }
+
+  const confirmButton = findTrashConfirmControl(documentRoot, selectors);
+
+  if (!confirmButton) {
+    return {
+      ok: false,
+      reason: 'trash-confirm-control-not-found'
+    };
+  }
+
+  return handleTrashConfirmation(confirmButton, shouldConfirm);
 }
 
 async function verifyPostClickMenuLabel(

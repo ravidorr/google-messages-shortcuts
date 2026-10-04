@@ -44,9 +44,7 @@ const disconnectNavigationFabShortcutBadges = installNavigationFabShortcutBadges
 const disconnectPageWorldBridge = installPageWorldBridgeHost(
   document,
   createDefaultPageWorldBridgeHandlers({
-    runCapabilitySelfTest,
-    handleCommand,
-    runConversationAction
+    runCapabilitySelfTest
   })
 );
 

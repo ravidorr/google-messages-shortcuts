@@ -96,26 +96,10 @@ describe('page-world-bridge-main', () => {
     );
   });
 
-  it('forwards handleCommand and runConversationAction bridge calls', async () => {
+  it('does not expose destructive page bridge methods', () => {
     installPageWorldBridgeMain(document, globalThis);
 
-    document.addEventListener(PAGE_WORLD_BRIDGE_REQUEST_EVENT, (event) => {
-      expect(event.detail.method).toBe('handleCommand');
-      expect(event.detail.args).toEqual(['archive-conversation']);
-
-      document.dispatchEvent(new CustomEvent(PAGE_WORLD_BRIDGE_RESPONSE_EVENT, {
-        detail: {
-          requestId: event.detail.requestId,
-          payload: {
-            ok: true,
-            result: { ok: true }
-          }
-        }
-      }));
-    }, { once: true });
-
-    await expect(
-      globalThis.MessagesShortcuts.handleCommand('archive-conversation')
-    ).resolves.toEqual({ ok: true });
+    expect(globalThis.MessagesShortcuts.handleCommand).toBeUndefined();
+    expect(globalThis.MessagesShortcuts.runConversationAction).toBeUndefined();
   });
 });

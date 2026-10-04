@@ -239,6 +239,21 @@ describe('action-capability-preflight', () => {
     expect(findTrashConfirmFallbackControl(document)).toBeNull();
   });
 
+  it('ignores primary confirm controls that do not match the trash label', async () => {
+    document.body.innerHTML = `
+      ${selectedReadRow}
+      <mat-dialog-container>
+        <button data-e2e-action-button-confirm>Block</button>
+      </mat-dialog-container>
+    `;
+
+    const localThis = await assessTrashConfirmCapabilityAfterRender(document, SELECTORS, 50);
+
+    expect(localThis.allowed).toBe(false);
+    expect(localThis.capabilityId).toBe('menu.trashConfirm');
+    expect(localThis.capabilityState).toBe('unavailable');
+  });
+
   it('allows mark-read when conversation links are supported', () => {
     document.body.innerHTML = selectedReadRow;
 

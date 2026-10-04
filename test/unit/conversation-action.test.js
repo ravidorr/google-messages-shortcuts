@@ -154,7 +154,16 @@ describe('runConversationAction', () => {
   });
 
   it('keeps the action lock while waiting for trash confirmation', async () => {
-    const fixture = createConversationFixture();
+    document.body.innerHTML = `
+      <mws-conversation-list-item>
+        <a aria-selected="true"></a>
+        <button aria-haspopup="menu"></button>
+      </mws-conversation-list-item>
+      <button data-e2e-conversation-delete class="mat-mdc-menu-item">
+        <span class="mat-mdc-menu-item-text">Move to trash</span>
+      </button>
+    `;
+    const trashButton = document.querySelector('[data-e2e-conversation-delete]');
     const chromeApi = {
       storage: {
         local: {
@@ -164,11 +173,10 @@ describe('runConversationAction', () => {
     };
     let resolveConfirmation;
     vi.spyOn(waitForElement, 'waitForSelector')
-      .mockResolvedValueOnce(fixture.trashButton)
+      .mockResolvedValueOnce(trashButton)
       .mockImplementationOnce(() => new Promise((resolve) => {
         resolveConfirmation = resolve;
-      }))
-      .mockResolvedValueOnce(fixture.archiveButton);
+      }));
 
     const trashAction = runConversationAction(
       document,
@@ -186,7 +194,13 @@ describe('runConversationAction', () => {
       reason: 'action-in-progress'
     });
 
-    resolveConfirmation(fixture.confirmButton);
+    document.body.insertAdjacentHTML(
+      'beforeend',
+      `<mat-dialog-container>
+        <button data-e2e-action-button-confirm>Move to trash</button>
+      </mat-dialog-container>`
+    );
+    resolveConfirmation(document.querySelector('[data-e2e-action-button-confirm]'));
 
     await expect(trashAction).resolves.toEqual({ ok: true });
   });
@@ -556,8 +570,9 @@ describe('runConversationAction', () => {
     expect(fixture.confirmButton.focus).toHaveBeenCalledTimes(1);
   });
 
-  it('confirms trash when storage cannot be read', async () => {
+  it('leaves trash confirmation pending when storage cannot be read', async () => {
     const fixture = createConversationFixture();
+    vi.spyOn(fixture.confirmButton, 'focus');
     const chromeApi = {
       storage: {
         local: {
@@ -576,8 +591,9 @@ describe('runConversationAction', () => {
       chromeApi
     );
 
-    expect(result.ok).toBe(true);
-    expect(fixture.confirmButton.click).toHaveBeenCalledTimes(1);
+    expect(result).toEqual({ ok: true, pendingTrashConfirmation: true });
+    expect(fixture.confirmButton.click).not.toHaveBeenCalled();
+    expect(fixture.confirmButton.focus).toHaveBeenCalledTimes(1);
   });
 
   it('returns no-target when no conversation row exists', async () => {
@@ -683,6 +699,36 @@ describe('runConversationAction', () => {
     expect(result).toEqual({
       ok: false,
       reason: 'trash fallback unavailable'
+    });
+  });
+
+  it('returns trash-confirm-control-not-found when confirm selector resolves without trash label', async () => {
+    const preflight = await import('../../src/content/action-capability-preflight.js');
+    document.body.innerHTML = `
+      <mws-conversation-list-item>
+        <a aria-selected="true"></a>
+        <button aria-haspopup="menu"></button>
+      </mws-conversation-list-item>
+      <div data-e2e-conversation-delete>Move to trash</div>
+      <mat-dialog-container>
+        <button data-e2e-action-button-confirm>Block</button>
+      </mat-dialog-container>
+    `;
+    const trashMenuItem = document.querySelector('[data-e2e-conversation-delete]');
+    const wrongConfirmButton = document.querySelector('[data-e2e-action-button-confirm]');
+    vi.spyOn(preflight, 'assessTrashConfirmCapabilityAfterRender')
+      .mockResolvedValue({ allowed: true });
+    vi.spyOn(waitForElement, 'waitForSelector')
+      .mockResolvedValueOnce(trashMenuItem)
+      .mockResolvedValueOnce(wrongConfirmButton);
+    vi.spyOn(waitForElement, 'waitForElement')
+      .mockRejectedValueOnce(new Error('confirmation fallback unavailable'));
+
+    const result = await runConversationAction(document, COMMAND_TRASH);
+
+    expect(result).toEqual({
+      ok: false,
+      reason: 'trash-confirm-control-not-found'
     });
   });
 

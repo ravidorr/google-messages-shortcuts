@@ -26,17 +26,41 @@ export function getComposerEditorCandidateSelectors(editorSelector = buildCompos
   return [editorSelector];
 }
 
-export function resolveComposerEditor(
-  documentRoot = document,
-  candidateSelectors = COMPOSER_EDITOR_CANDIDATE_SELECTORS
-) {
+function dedupeEditors(editors) {
+  return [...new Set(editors)];
+}
+
+function getComposerHost(editor) {
+  return editor?.closest?.(COMPOSER_HOST_TAG) ?? null;
+}
+
+function isComposerMirrorPair(firstEditor, secondEditor) {
+  const editors = [firstEditor, secondEditor];
+  const textarea = editors.find(
+    (candidate) => candidate.tagName?.toUpperCase() === 'TEXTAREA'
+  );
+  const contentEditable = editors.find(
+    (candidate) => candidate.tagName?.toUpperCase() !== 'TEXTAREA'
+      && candidate.getAttribute('contenteditable') === 'true'
+  );
+
+  if (!textarea || !contentEditable) {
+    return false;
+  }
+
+  const composerHost = getComposerHost(textarea);
+
+  return Boolean(composerHost && composerHost === getComposerHost(contentEditable));
+}
+
+function collectDistinctEditors(documentRoot, candidateSelectors) {
   const editors = [];
 
   for (const selector of candidateSelectors) {
     const matches = [...documentRoot.querySelectorAll(selector)];
 
     if (matches.length > 1) {
-      return { editor: null, editors: [], matchCount: matches.length, state: 'unsafe' };
+      return { editors: [], state: 'unsafe', matchCount: matches.length };
     }
 
     if (matches.length === 1) {
@@ -44,12 +68,50 @@ export function resolveComposerEditor(
     }
   }
 
-  if (editors.length === 0) {
-    return { editor: null, editors: [], matchCount: 0, state: 'unavailable' };
+  const distinctEditors = dedupeEditors(editors);
+
+  if (distinctEditors.length === 0) {
+    return { editors: [], state: 'unavailable', matchCount: 0 };
+  }
+
+  if (distinctEditors.length === 1) {
+    return { editors: distinctEditors, state: 'supported', matchCount: 1 };
+  }
+
+  if (
+    distinctEditors.length === 2
+    && isComposerMirrorPair(distinctEditors[0], distinctEditors[1])
+  ) {
+    return { editors: distinctEditors, state: 'supported', matchCount: 1 };
+  }
+
+  return { editors: [], state: 'unsafe', matchCount: distinctEditors.length };
+}
+
+export function resolveComposerEditor(
+  documentRoot = document,
+  candidateSelectors = COMPOSER_EDITOR_CANDIDATE_SELECTORS
+) {
+  const resolution = collectDistinctEditors(documentRoot, candidateSelectors);
+
+  if (resolution.state !== 'supported') {
+    return {
+      editor: null,
+      editors: resolution.editors,
+      matchCount: resolution.matchCount,
+      state: resolution.state
+    };
   }
 
   const editor =
-    editors.find((candidate) => candidate.isContentEditable) ?? editors[0];
+    resolution.editors.find((candidate) => candidate.getAttribute('contenteditable') === 'true'
+      && candidate.tagName?.toUpperCase() !== 'TEXTAREA')
+    ?? resolution.editors[0];
 
-  return { editor, editors, matchCount: 1, state: 'supported' };
+  return {
+    editor,
+    editors: resolution.editors,
+    matchCount: 1,
+    state: 'supported'
+  };
 }

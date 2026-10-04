@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { COMPOSER_SELECTORS } from '../../src/content/adapters/composer-adapter.js';
+import { COMPOSER_HOST_TAG } from '../../src/content/adapters/composer-dom.js';
 import { findComposerEditor, focusComposer } from '../../src/content/focus-composer-action.js';
 import { composerEditorSurface } from '../fixtures/dom/list-states.js';
 
@@ -24,6 +25,18 @@ describe('focus-composer-action', () => {
     expect(document.activeElement.matches('textarea[aria-label="Message"]')).toBe(true);
   });
 
+  it('fails closed when multiple distinct composer editors match', () => {
+    document.body.innerHTML = `
+      <div contenteditable="true" aria-label="Message"></div>
+      <div contenteditable="true" aria-label="Message"></div>
+    `;
+
+    const localThis = focusComposer(document, COMPOSER_SELECTORS);
+
+    expect(localThis.ok).toBe(false);
+    expect(localThis.reason).toBe('composer-ambiguous');
+  });
+
   it('fails closed when multiple composer editors match one candidate', () => {
     document.body.innerHTML = `
       <textarea aria-label="Message"></textarea>
@@ -38,8 +51,10 @@ describe('focus-composer-action', () => {
 
   it('focuses the contenteditable when GM renders textarea and contenteditable mirrors', () => {
     document.body.innerHTML = `
-      <textarea aria-label="Message"></textarea>
-      <div contenteditable="true" aria-label="Message" tabindex="0"></div>
+      <${COMPOSER_HOST_TAG}>
+        <textarea aria-label="Message"></textarea>
+        <div contenteditable="true" aria-label="Message" tabindex="0"></div>
+      </${COMPOSER_HOST_TAG}>
     `;
 
     const localThis = focusComposer(document, COMPOSER_SELECTORS);
@@ -50,8 +65,10 @@ describe('focus-composer-action', () => {
 
   it('succeeds when GM redirects focus from textarea to contenteditable mirror', () => {
     document.body.innerHTML = `
-      <textarea aria-label="Message"></textarea>
-      <div contenteditable="true" aria-label="Message" tabindex="0"></div>
+      <${COMPOSER_HOST_TAG}>
+        <textarea aria-label="Message"></textarea>
+        <div contenteditable="true" aria-label="Message" tabindex="0"></div>
+      </${COMPOSER_HOST_TAG}>
     `;
     const contenteditable = document.querySelector('[contenteditable="true"]');
     const textarea = document.querySelector('textarea');

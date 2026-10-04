@@ -99,6 +99,13 @@ export async function handleCommand(
     }
   }
 
+  if (isNativeDialogOpen(documentRoot)) {
+    const result = { ok: false, reason: 'native-dialog-open' };
+    showActionFeedback(result, command, documentRoot);
+
+    return result;
+  }
+
   try {
     const result = await runConversationAction(documentRoot, command);
 

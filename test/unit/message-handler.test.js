@@ -39,9 +39,6 @@ function createConversationFixture() {
     <button data-e2e-conversation-menu-mark-unread class="mat-mdc-menu-item">
       <span class="mat-mdc-menu-item-text">Mark as unread</span>
     </button>
-    <mat-dialog-container>
-      <button data-e2e-action-button-confirm>Move to trash</button>
-    </mat-dialog-container>
   `;
 }
 
@@ -110,10 +107,27 @@ describe('message-handler', () => {
 
   it('handles trash commands', async () => {
     createConversationFixture();
+    vi.spyOn(conversationAction, 'runConversationAction').mockResolvedValueOnce({ ok: true });
 
     const result = await handleCommand(COMMAND_TRASH, document, createChromeApi());
 
     expect(result.ok).toBe(true);
+  });
+
+  it('fails closed for trash commands while a native dialog is already open', async () => {
+    createConversationFixture();
+    document.body.insertAdjacentHTML(
+      'beforeend',
+      `<mat-dialog-container>
+        <button data-e2e-action-button-confirm>Move to trash</button>
+      </mat-dialog-container>`
+    );
+    vi.spyOn(conversationAction, 'runConversationAction');
+
+    const result = await handleCommand(COMMAND_TRASH, document, createChromeApi());
+
+    expect(result).toEqual({ ok: false, reason: 'native-dialog-open' });
+    expect(conversationAction.runConversationAction).not.toHaveBeenCalled();
   });
 
   it('handles mark-unread commands', async () => {
@@ -155,6 +169,20 @@ describe('message-handler', () => {
     expect(openArchived).not.toHaveBeenCalled();
     expect(openStartChat).not.toHaveBeenCalled();
     expect(openSpamBlocked).not.toHaveBeenCalled();
+  });
+
+  it('fails closed for row actions while a native dialog is open', async () => {
+    createConversationFixture();
+    document.body.insertAdjacentHTML(
+      'beforeend',
+      '<mat-dialog-container><button>Block</button></mat-dialog-container>'
+    );
+    vi.spyOn(conversationAction, 'runConversationAction');
+
+    const result = await handleCommand(COMMAND_ARCHIVE, document, createChromeApi());
+
+    expect(result).toEqual({ ok: false, reason: 'native-dialog-open' });
+    expect(conversationAction.runConversationAction).not.toHaveBeenCalled();
   });
 
   it('handles start-chat navigation commands', async () => {

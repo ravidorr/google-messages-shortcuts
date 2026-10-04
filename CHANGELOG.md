@@ -2,6 +2,57 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.14.15 - 2026-10-04
+
+### Fixed
+
+- Require textarea/contenteditable mirror pairs to share the same composer host before treating the composer as supported
+
+## 1.14.14 - 2026-10-04
+
+### Fixed
+
+- Stop rejected shortcut pill clicks from bubbling to Google Messages row handlers
+
+## 1.14.13 - 2026-10-04
+
+### Fixed
+
+- Require trusted pointer and focus events before auto-opening conversations on hover or focus
+
+## 1.14.12 - 2026-10-04
+
+### Fixed
+
+- Require hover URL and unread-marker invariants in the read-only live validation helper success criteria
+- Align roadmap current release with the shipped extension version
+
+## 1.14.11 - 2026-10-04
+
+### Fixed
+
+- Ignore untrusted shortcut pill clicks so page scripts cannot drive destructive row actions through injected pills
+- Make the mark-as-read live validation console helper read-only and document manual shortcut follow-up
+
+## 1.14.10 - 2026-10-04
+
+### Fixed
+
+- Update the mark-as-read live validation console helper to use pill interactions instead of the removed page bridge action API
+
+## 1.14.9 - 2026-10-04
+
+### Fixed
+
+- Restrict the page-world bridge to the read-only capability self-test so page scripts cannot invoke destructive actions
+- Fail closed when trash auto-confirm preference storage is unavailable
+- Reject row actions while a native dialog is already open and require the exact Move to trash confirm label
+- Treat multiple distinct composer editor matches as unsafe unless they are a validated textarea/contenteditable mirror pair
+
+### Changed
+
+- Synchronize roadmap, DOM discovery, and navigation FAB documentation with shipped behavior
+
 ## 1.14.8 - 2026-10-04
 
 ### Fixed

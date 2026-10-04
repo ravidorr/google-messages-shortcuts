@@ -26,6 +26,10 @@ import {
   syncMessageTheme
 } from './message-theme.js';
 
+function isTrustedPillActivation(event) {
+  return event.isTrusted;
+}
+
 const PILL_GROUP_SELECTOR = '[data-messages-shortcuts-pill-group]';
 const STYLE_SELECTOR = 'style[data-messages-shortcuts-pill-styles]';
 const PILL_HOST_ATTRIBUTE = 'data-messages-shortcuts-pill-host';
@@ -209,7 +213,14 @@ function createPillIcon(documentRoot, commandName) {
   return svg;
 }
 
-function createPill(documentRoot, definition, shortcut, runAction, conversationRow) {
+function createPill(
+  documentRoot,
+  definition,
+  shortcut,
+  runAction,
+  conversationRow,
+  isTrustedActivation = isTrustedPillActivation
+) {
   const pill = documentRoot.createElement('button');
   const resolvedShortcut = shortcut ?? UNASSIGNED_SHORTCUT_LABEL;
   const hasShortcut = resolvedShortcut !== UNASSIGNED_SHORTCUT_LABEL;
@@ -232,6 +243,11 @@ function createPill(documentRoot, definition, shortcut, runAction, conversationR
   pill.addEventListener('click', (event) => {
     event.preventDefault();
     event.stopPropagation();
+
+    if (!isTrustedActivation(event)) {
+      return;
+    }
+
     void runAction(definition.command, conversationRow).catch((error) => {
       console.warn('[Messages Shortcut Actions] Failed to run conversation shortcut pill.', error);
     });
@@ -240,7 +256,14 @@ function createPill(documentRoot, definition, shortcut, runAction, conversationR
   return pill;
 }
 
-function createPillGroup(documentRoot, shortcutLabels, runAction, conversationRow, pillDefinitions) {
+function createPillGroup(
+  documentRoot,
+  shortcutLabels,
+  runAction,
+  conversationRow,
+  pillDefinitions,
+  isTrustedActivation = isTrustedPillActivation
+) {
   const group = documentRoot.createElement('div');
   group.setAttribute('data-messages-shortcuts-pill-group', '');
   group.setAttribute('role', 'group');
@@ -252,7 +275,8 @@ function createPillGroup(documentRoot, shortcutLabels, runAction, conversationRo
       definition,
       shortcutLabels[definition.shortcutKey],
       runAction,
-      conversationRow
+      conversationRow,
+      isTrustedActivation
     ));
   }
 
@@ -329,7 +353,8 @@ function createInstallation({
     }
 
     return getPillVisibility(chromeApi);
-  }
+  },
+  isTrustedActivation = isTrustedPillActivation
 } = {}) {
   const style = addStyles(documentRoot);
   const focusedRows = new WeakSet();
@@ -433,7 +458,8 @@ function createInstallation({
         shortcutLabels,
         runActionWithRefresh,
         conversationRow,
-        pillDefinitions
+        pillDefinitions,
+        isTrustedActivation
       ));
     });
   }
@@ -511,7 +537,11 @@ function createInstallation({
 
     if (conversationRow && !isWithinConversationRow(event, conversationRow)) {
       hoveredRows.add(conversationRow);
-      void openConversation(conversationRow);
+
+      if (isTrustedActivation(event)) {
+        void openConversation(conversationRow);
+      }
+
       void showPills(conversationRow);
     }
   }
@@ -534,7 +564,7 @@ function createInstallation({
     if (conversationRow) {
       focusedRows.add(conversationRow);
 
-      if (!isWithinConversationRow(event, conversationRow)) {
+      if (!isWithinConversationRow(event, conversationRow) && isTrustedActivation(event)) {
         void openConversation(conversationRow);
       }
 

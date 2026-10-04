@@ -90,7 +90,8 @@ For Start chat, record evidence using this field set in [compatibility-matrix.md
 
 - target view (inbox, archived sidebar, archived modal, narrow layout)
 - primary selector count for `a[data-e2e-start-button]`
-- shortcut collision outcome for `Ctrl+Shift+G` / `Command+Shift+G` against Google Messages, browser, and OS shortcuts
+- optional Chrome command assignment in `chrome://extensions/shortcuts`
+- shortcut collision outcome for the assigned key against Google Messages, browser, and OS shortcuts
 - bounded postcondition (URL path `/web/conversations/new` or validated new-conversation surface selector)
 - behavior while a native dialog is open (Archived modal, trash confirm, block dialog)
 - editable-target guard (compose field, IME composition if available; Google Messages Web has no filter field in scope)
@@ -99,8 +100,8 @@ For Start chat, record evidence using this field set in [compatibility-matrix.md
 Optional helper: paste [output/deferred-action-validation-console.js](../../output/deferred-action-validation-console.js) into the Google Messages page console and copy the sanitized `startChat` probe JSON into the matrix.
 
 - [x] Native Start chat FAB selector count is exactly one on the inbox (2026-10-02, Chrome 154, extension 1.11.0, en LTR: `matchCount: 1`)
-- [x] Page-level shortcut opens the new-conversation view without browser or Google Messages collisions (2026-10-02, macOS Chrome: `Command+Shift+G` pass after rebinding from Incognito and split-view chords)
-- [ ] Shortcut is ignored inside editable controls and while a native dialog is open
+- [x] Optional Chrome command opens the new-conversation view without browser or Google Messages collisions (2026-10-02, macOS Chrome: assigned key pass after rebinding from Incognito and split-view chords)
+- [ ] Optional Chrome command is ignored inside editable controls and while a native dialog is open
 - [x] Capability self-test reports `startChat.entry` as supported on the inbox (2026-10-02: `dom-query`, self-test `ok: true`)
 
 ### Spam & blocked navigation (Epic C)

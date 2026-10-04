@@ -1,9 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
+  PAGE_WORLD_BRIDGE_METHOD,
   PAGE_WORLD_BRIDGE_REQUEST_EVENT,
   PAGE_WORLD_BRIDGE_RESPONSE_EVENT
 } from '../../src/content/page-world-bridge-constants.js';
 import {
+  ALLOWED_PAGE_WORLD_BRIDGE_METHODS,
   createDefaultPageWorldBridgeHandlers,
   installPageWorldBridgeHost
 } from '../../src/content/page-world-bridge-host.js';
@@ -17,7 +19,8 @@ describe('page-world-bridge-host', () => {
 
   it('responds to runCapabilitySelfTest bridge requests', async () => {
     const localThis = {
-      runCapabilitySelfTest: vi.fn(() => ({ ok: true, summary: { unsafe: 0 } }))
+      [PAGE_WORLD_BRIDGE_METHOD.runCapabilitySelfTest]:
+        vi.fn(() => ({ ok: true, summary: { unsafe: 0 } }))
     };
     const disconnect = installPageWorldBridgeHost(document, localThis);
     const responsePromise = new Promise((resolve) => {
@@ -29,7 +32,7 @@ describe('page-world-bridge-host', () => {
     document.dispatchEvent(new CustomEvent(PAGE_WORLD_BRIDGE_REQUEST_EVENT, {
       detail: {
         requestId: 'request-1',
-        method: 'runCapabilitySelfTest'
+        method: PAGE_WORLD_BRIDGE_METHOD.runCapabilitySelfTest
       }
     }));
 
@@ -40,7 +43,33 @@ describe('page-world-bridge-host', () => {
         result: { ok: true, summary: { unsafe: 0 } }
       }
     });
-    expect(localThis.runCapabilitySelfTest).toHaveBeenCalledTimes(1);
+    expect(localThis[PAGE_WORLD_BRIDGE_METHOD.runCapabilitySelfTest]).toHaveBeenCalledTimes(1);
+
+    disconnect();
+  });
+
+  it('returns unknown-method when an allowed bridge method has no handler', async () => {
+    const disconnect = installPageWorldBridgeHost(document, {});
+    const responsePromise = new Promise((resolve) => {
+      document.addEventListener(PAGE_WORLD_BRIDGE_RESPONSE_EVENT, (event) => {
+        resolve(event.detail);
+      }, { once: true });
+    });
+
+    document.dispatchEvent(new CustomEvent(PAGE_WORLD_BRIDGE_REQUEST_EVENT, {
+      detail: {
+        requestId: 'request-allowed-missing',
+        method: PAGE_WORLD_BRIDGE_METHOD.runCapabilitySelfTest
+      }
+    }));
+
+    await expect(responsePromise).resolves.toEqual({
+      requestId: 'request-allowed-missing',
+      payload: {
+        ok: false,
+        error: 'unknown-method:runCapabilitySelfTest'
+      }
+    });
 
     disconnect();
   });
@@ -56,7 +85,7 @@ describe('page-world-bridge-host', () => {
     document.dispatchEvent(new CustomEvent(PAGE_WORLD_BRIDGE_REQUEST_EVENT, {
       detail: {
         requestId: 'request-2',
-        method: 'unsupportedMethod'
+        method: 'handleCommand'
       }
     }));
 
@@ -64,7 +93,37 @@ describe('page-world-bridge-host', () => {
       requestId: 'request-2',
       payload: {
         ok: false,
-        error: 'unknown-method:unsupportedMethod'
+        error: 'unknown-method:handleCommand'
+      }
+    });
+
+    disconnect();
+  });
+
+  it('rejects destructive bridge methods even when handlers are registered', async () => {
+    const disconnect = installPageWorldBridgeHost(document, {
+      handleCommand: vi.fn(async () => ({ ok: true })),
+      runConversationAction: vi.fn(async () => ({ ok: true }))
+    });
+    const responsePromise = new Promise((resolve) => {
+      document.addEventListener(PAGE_WORLD_BRIDGE_RESPONSE_EVENT, (event) => {
+        resolve(event.detail);
+      }, { once: true });
+    });
+
+    document.dispatchEvent(new CustomEvent(PAGE_WORLD_BRIDGE_REQUEST_EVENT, {
+      detail: {
+        requestId: 'request-2b',
+        method: 'runConversationAction',
+        args: ['archive-conversation']
+      }
+    }));
+
+    await expect(responsePromise).resolves.toEqual({
+      requestId: 'request-2b',
+      payload: {
+        ok: false,
+        error: 'unknown-method:runConversationAction'
       }
     });
 
@@ -73,7 +132,7 @@ describe('page-world-bridge-host', () => {
 
   it('ignores malformed bridge requests', async () => {
     const localThis = {
-      runCapabilitySelfTest: vi.fn()
+      [PAGE_WORLD_BRIDGE_METHOD.runCapabilitySelfTest]: vi.fn()
     };
     const disconnect = installPageWorldBridgeHost(document, localThis);
     const responseListener = vi.fn();
@@ -82,21 +141,21 @@ describe('page-world-bridge-host', () => {
 
     document.dispatchEvent(new CustomEvent(PAGE_WORLD_BRIDGE_REQUEST_EVENT, {
       detail: {
-        method: 'runCapabilitySelfTest'
+        method: PAGE_WORLD_BRIDGE_METHOD.runCapabilitySelfTest
       }
     }));
 
     await Promise.resolve();
 
     expect(responseListener).not.toHaveBeenCalled();
-    expect(localThis.runCapabilitySelfTest).not.toHaveBeenCalled();
+    expect(localThis[PAGE_WORLD_BRIDGE_METHOD.runCapabilitySelfTest]).not.toHaveBeenCalled();
 
     disconnect();
   });
 
   it('stringifies non-error handler failures for the page bridge', async () => {
     const disconnect = installPageWorldBridgeHost(document, {
-      runCapabilitySelfTest: () => {
+      [PAGE_WORLD_BRIDGE_METHOD.runCapabilitySelfTest]: () => {
         throw 'plain-string-failure';
       }
     });
@@ -109,7 +168,7 @@ describe('page-world-bridge-host', () => {
     document.dispatchEvent(new CustomEvent(PAGE_WORLD_BRIDGE_REQUEST_EVENT, {
       detail: {
         requestId: 'request-4',
-        method: 'runCapabilitySelfTest'
+        method: PAGE_WORLD_BRIDGE_METHOD.runCapabilitySelfTest
       }
     }));
 
@@ -126,7 +185,7 @@ describe('page-world-bridge-host', () => {
 
   it('returns handler failures to the page bridge', async () => {
     const disconnect = installPageWorldBridgeHost(document, {
-      runCapabilitySelfTest: () => {
+      [PAGE_WORLD_BRIDGE_METHOD.runCapabilitySelfTest]: () => {
         throw new Error('self-test-failed');
       }
     });
@@ -139,7 +198,7 @@ describe('page-world-bridge-host', () => {
     document.dispatchEvent(new CustomEvent(PAGE_WORLD_BRIDGE_REQUEST_EVENT, {
       detail: {
         requestId: 'request-3',
-        method: 'runCapabilitySelfTest'
+        method: PAGE_WORLD_BRIDGE_METHOD.runCapabilitySelfTest
       }
     }));
 
@@ -154,20 +213,18 @@ describe('page-world-bridge-host', () => {
     disconnect();
   });
 
-  it('creates default handlers that delegate to the content script APIs', async () => {
+  it('creates default handlers that delegate only to the capability self-test', () => {
     document.body.innerHTML = fullListActionSurface;
 
     const localThis = createDefaultPageWorldBridgeHandlers({
-      runCapabilitySelfTest: () => runCapabilitySelfTest(document),
-      handleCommand: async (command) => ({ ok: true, command }),
-      runConversationAction: async () => ({ ok: true })
+      runCapabilitySelfTest: () => runCapabilitySelfTest(document)
     });
 
-    expect(localThis.runCapabilitySelfTest()).toMatchObject({ ok: true });
-    await expect(localThis.handleCommand('archive-conversation')).resolves.toEqual({
-      ok: true,
-      command: 'archive-conversation'
+    expect(localThis).toEqual({
+      [PAGE_WORLD_BRIDGE_METHOD.runCapabilitySelfTest]: expect.any(Function)
     });
-    await expect(localThis.runConversationAction('archive-conversation')).resolves.toEqual({ ok: true });
+    expect(localThis.runCapabilitySelfTest()).toMatchObject({ ok: true });
+    expect(ALLOWED_PAGE_WORLD_BRIDGE_METHODS.has(PAGE_WORLD_BRIDGE_METHOD.runCapabilitySelfTest))
+      .toBe(true);
   });
 });

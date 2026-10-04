@@ -41,7 +41,7 @@ describe('trash-confirmation-preference', () => {
     await expect(isTrashConfirmationEnabled(chromeApi)).resolves.toBe(false);
   });
 
-  it('defaults to enabled when storage cannot be read', async () => {
+  it('defaults to disabled when storage cannot be read', async () => {
     const chromeApi = {
       storage: {
         local: {
@@ -52,7 +52,7 @@ describe('trash-confirmation-preference', () => {
       }
     };
 
-    await expect(isTrashConfirmationEnabled(chromeApi)).resolves.toBe(true);
+    await expect(isTrashConfirmationEnabled(chromeApi)).resolves.toBe(false);
   });
 
   it('persists the selected enabled state', async () => {

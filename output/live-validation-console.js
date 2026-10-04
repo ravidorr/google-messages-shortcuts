@@ -1,5 +1,7 @@
 // Paste into Google Messages DevTools console (page context), then copy the printed JSON.
-// Requires at least two unread conversations: the pill test marks the first row read.
+// Read-only probe: uses runCapabilitySelfTest and synthetic hover visibility checks only.
+// Synthetic hover cannot open conversations because auto-open requires trusted pointer events.
+// Trigger mark-as-read manually with the assigned keyboard shortcut after this probe passes.
 (async () => {
   const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
   const MS = globalThis.MessagesShortcuts;
@@ -18,6 +20,19 @@
 
   const dispatchRowPointerOver = (row) => {
     row.dispatchEvent(new PointerEvent('pointerover', { bubbles: true }));
+  };
+
+  const inspectRowHover = async (row) => {
+    const urlBeforeHover = location.href;
+    dispatchRowPointerOver(row);
+    await sleep(600);
+
+    return {
+      unreadMarkerPersists: Boolean(row.querySelector(unreadSelector)),
+      pillGroupPresent: Boolean(row.querySelector('[data-messages-shortcuts-pill-group]')),
+      markReadPillPresent: Boolean(row.querySelector(MARK_READ_PILL_SELECTOR)),
+      urlUnchanged: location.href === urlBeforeHover
+    };
   };
 
   const selfTest = await MS.runCapabilitySelfTest();
@@ -45,7 +60,7 @@
     console.log(JSON.stringify({
       ok: false,
       error: 'insufficient-unread-rows',
-      message: 'Need at least two unread conversations: the pill test marks the first row read.',
+      message: 'Need at least two unread conversations to verify hover pills on multiple rows.',
       unreadRowsAvailableInitially: unreadRowsBefore.length,
       selfTest: {
         ok: selfTest.ok,
@@ -57,66 +72,16 @@
     return;
   }
 
-  const hoverRow = unreadRowsBefore[0];
-  const pillRow = unreadRowsBefore[0];
-  const shortcutRow = unreadRowsBefore[1];
-  const urlBeforeHover = location.href;
-  dispatchRowPointerOver(hoverRow);
-  await sleep(600);
-
-  const hoverCheck = {
-    unreadMarkerPersists: Boolean(hoverRow.querySelector(unreadSelector)),
-    pillGroupPresent: Boolean(hoverRow.querySelector('[data-messages-shortcuts-pill-group]')),
-    markReadPillPresent: Boolean(hoverRow.querySelector(MARK_READ_PILL_SELECTOR)),
-    urlUnchanged: location.href === urlBeforeHover
-  };
-
-  let pillResult = { attempted: false };
-
-  dispatchRowPointerOver(pillRow);
-  await sleep(400);
-
-  const markReadPill = pillRow.querySelector(MARK_READ_PILL_SELECTOR);
-
-  if (markReadPill) {
-    const urlBeforePill = location.href;
-    markReadPill.click();
-    await sleep(2500);
-
-    pillResult = {
-      attempted: true,
-      unreadCleared: !pillRow.querySelector(unreadSelector),
-      paneOpened: location.href !== urlBeforePill
-        || Boolean(pillRow.querySelector('a[aria-selected="true"]'))
-    };
-  } else {
-    pillResult = { attempted: false, reason: 'mark-read-pill-not-visible' };
-  }
-
-  let shortcutResult = { attempted: false };
-
-  if (shortcutRow?.querySelector(unreadSelector)) {
-    const urlBeforeShortcut = location.href;
-    const commandResult = await MS.runConversationAction(MARK_READ_COMMAND, undefined, shortcutRow);
-    await sleep(2500);
-
-    shortcutResult = {
-      attempted: true,
-      commandOk: commandResult?.ok === true,
-      unreadCleared: !shortcutRow.querySelector(unreadSelector),
-      paneOpened: location.href !== urlBeforeShortcut
-        || Boolean(shortcutRow.querySelector('a[aria-selected="true"]')),
-      reason: commandResult?.reason ?? null
-    };
-  } else {
-    shortcutResult = { attempted: false, reason: 'shortcut-row-no-longer-unread' };
-  }
+  const hoverCheck = await inspectRowHover(unreadRowsBefore[0]);
+  const secondRowHoverCheck = await inspectRowHover(unreadRowsBefore[1]);
 
   const allPassed = selfTest.ok
     && hoverCheck.unreadMarkerPersists
     && hoverCheck.markReadPillPresent
-    && (pillResult.attempted ? pillResult.unreadCleared : false)
-    && (shortcutResult.attempted ? shortcutResult.unreadCleared && shortcutResult.commandOk : false);
+    && hoverCheck.urlUnchanged
+    && secondRowHoverCheck.unreadMarkerPersists
+    && secondRowHoverCheck.markReadPillPresent
+    && secondRowHoverCheck.urlUnchanged;
 
   console.log(JSON.stringify({
     ok: allPassed,
@@ -128,8 +93,8 @@
       listConversationLink
     },
     hoverCheck,
-    pillResult,
-    shortcutResult,
-    unreadRowsAvailableInitially: unreadRowsBefore.length
+    secondRowHoverCheck,
+    unreadRowsAvailableInitially: unreadRowsBefore.length,
+    manualFollowUp: 'Use the assigned mark-as-read keyboard shortcut to confirm action behavior.'
   }, null, 2));
 })();
