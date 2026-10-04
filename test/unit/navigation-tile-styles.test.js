@@ -27,15 +27,16 @@ describe('navigation-tile-styles', () => {
     document.head.innerHTML = '';
   });
 
-  it('injects isolated tile styles with legacy resets and explicit colors', () => {
+  it('injects compact responsive tile styles with legacy resets and explicit colors', () => {
     injectNavigationTileStyles(document);
 
     const styles = document.querySelector(NAV_TILE_STYLE_SELECTOR).textContent;
 
     expect(styles).toContain('margin-top: 8px !important');
-    expect(styles).toContain('width: 300px !important');
+    expect(styles).toContain('width: 100% !important');
+    expect(styles).toContain('min-width: 0 !important');
     expect(styles).toContain('position: static !important');
-    expect(styles).toContain('grid-template-columns: repeat(3, 84px) !important');
+    expect(styles).toContain('grid-template-columns: repeat(3, minmax(0, 1fr)) !important');
     expect(styles).toContain('all: unset');
     expect(styles).toContain('box-shadow: none !important');
     expect(styles).toContain('background: #d3e3fd !important');

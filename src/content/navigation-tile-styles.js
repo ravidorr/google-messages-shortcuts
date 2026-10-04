@@ -42,25 +42,23 @@ function buildNavigationTileStylesheet() {
       box-sizing: border-box !important;
       display: grid !important;
       gap: 8px !important;
-      grid-template-columns: repeat(3, 84px) !important;
+      grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
       margin-top: 8px !important;
+      min-width: 0 !important;
       overflow: visible !important;
-      padding: 6px 16px 12px !important;
+      padding: 6px 8px 12px !important;
       position: static !important;
-      width: 300px !important;
-    }
-
-    .${NAV_TILE_ROW_CLASS}[${NAV_TILE_ROW_ATTRIBUTE}][data-messages-shortcuts-native-modal-open] {
-      pointer-events: none !important;
+      width: 100% !important;
     }
 
     .${NAV_TILE_ROW_CLASS}[${NAV_TILE_ROW_ATTRIBUTE}] > mw-fab-link {
       all: unset;
       box-sizing: border-box !important;
       display: block !important;
-      height: 72px !important;
+      height: 64px !important;
       ${LEGACY_RESET}
-      width: 84px !important;
+      min-width: 0 !important;
+      width: 100% !important;
     }
 
     .${NAV_TILE_ROW_CLASS}[${NAV_TILE_ROW_ATTRIBUTE}] > mw-fab-link > a.fab {
@@ -74,14 +72,15 @@ function buildNavigationTileStylesheet() {
       display: inline-flex !important;
       flex-direction: column !important;
       font-family: system-ui, sans-serif !important;
-      gap: 4px !important;
-      height: 72px !important;
+      gap: 2px !important;
+      height: 64px !important;
       justify-content: center !important;
-      max-width: 84px !important;
-      min-height: 72px !important;
-      padding: 8px 4px !important;
+      max-width: none !important;
+      min-height: 64px !important;
+      min-width: 0 !important;
+      padding: 6px 2px !important;
       text-decoration: none !important;
-      width: 84px !important;
+      width: 100% !important;
     }
 
     .${NAV_TILE_ROW_CLASS}[${NAV_TILE_ROW_ATTRIBUTE}] > mw-fab-link > a.fab.gm-nav-tile-start {
@@ -127,7 +126,7 @@ function buildNavigationTileStylesheet() {
       ${LEGACY_RESET}
       display: flex !important;
       flex-direction: column !important;
-      gap: 4px !important;
+      gap: 2px !important;
       max-width: 100% !important;
       width: 100% !important;
     }
@@ -157,10 +156,10 @@ function buildNavigationTileStylesheet() {
       ${LEGACY_RESET}
       color: inherit !important;
       display: block !important;
-      font-size: 11px !important;
+      font-size: 10px !important;
       font-weight: 500 !important;
-      line-height: 14px !important;
-      max-height: 28px !important;
+      line-height: 12px !important;
+      max-height: 24px !important;
       overflow: hidden !important;
       text-align: center !important;
       white-space: normal !important;
