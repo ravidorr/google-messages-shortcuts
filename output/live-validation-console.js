@@ -1,5 +1,6 @@
 // Paste into Google Messages DevTools console (page context), then copy the printed JSON.
-// Read-only probe: uses runCapabilitySelfTest and hover visibility checks only.
+// Read-only probe: uses runCapabilitySelfTest and synthetic hover visibility checks only.
+// Synthetic hover cannot open conversations because auto-open requires trusted pointer events.
 // Trigger mark-as-read manually with the assigned keyboard shortcut after this probe passes.
 (async () => {
   const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));

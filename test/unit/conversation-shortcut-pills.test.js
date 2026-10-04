@@ -643,14 +643,14 @@ describe('conversation shortcut pills', () => {
     document.body.append(row);
     vi.spyOn(link, 'click');
 
-    disconnect = installConversationShortcutPills({
+    disconnect = installConversationShortcutPills(trustedPillInstallOptions({
       documentRoot: document,
       getShortcutLabels: vi.fn(async () => ({
         archive: 'Ctrl+Shift+Y',
         trash: 'Ctrl+Shift+D'
       })),
       isAutoOpenEnabled: vi.fn(async () => true)
-    });
+    }));
     row.dispatchEvent(new Event('pointerover', { bubbles: true }));
 
     await vi.waitFor(() => {
@@ -665,7 +665,7 @@ describe('conversation shortcut pills', () => {
     document.body.append(row);
     vi.spyOn(link, 'click');
 
-    disconnect = installConversationShortcutPills({
+    disconnect = installConversationShortcutPills(trustedPillInstallOptions({
       documentRoot: document,
       getShortcutLabels: vi.fn(async () => ({
         archive: 'Ctrl+Shift+Y',
@@ -674,7 +674,7 @@ describe('conversation shortcut pills', () => {
       isAutoOpenEnabled: () => new Promise((resolve) => {
         resolveAutoOpenEnabled = resolve;
       })
-    });
+    }));
     row.dispatchEvent(new Event('pointerover', { bubbles: true }));
     await Promise.resolve();
     row.dispatchEvent(new Event('pointerout', { bubbles: true }));
@@ -692,7 +692,7 @@ describe('conversation shortcut pills', () => {
     document.body.append(row);
     vi.spyOn(link, 'click');
 
-    disconnect = installConversationShortcutPills({
+    disconnect = installConversationShortcutPills(trustedPillInstallOptions({
       documentRoot: document,
       getShortcutLabels: vi.fn(async () => ({
         archive: 'Ctrl+Shift+Y',
@@ -701,7 +701,7 @@ describe('conversation shortcut pills', () => {
       isAutoOpenEnabled: () => new Promise((resolve) => {
         resolveAutoOpenEnabled = resolve;
       })
-    });
+    }));
     row.dispatchEvent(new Event('pointerover', { bubbles: true }));
     await Promise.resolve();
     row.remove();
@@ -741,14 +741,14 @@ describe('conversation shortcut pills', () => {
     document.body.append(row);
     vi.spyOn(link, 'click');
 
-    disconnect = installConversationShortcutPills({
+    disconnect = installConversationShortcutPills(trustedPillInstallOptions({
       documentRoot: document,
       getShortcutLabels: vi.fn(async () => ({
         archive: 'Ctrl+Shift+Y',
         trash: 'Ctrl+Shift+D'
       })),
       isAutoOpenEnabled: vi.fn(async () => true)
-    });
+    }));
     link.dispatchEvent(new Event('pointerover', { bubbles: true }));
 
     await vi.waitFor(() => {
@@ -780,6 +780,27 @@ describe('conversation shortcut pills', () => {
     document.body.append(row);
     vi.spyOn(link, 'click');
 
+    disconnect = installConversationShortcutPills(trustedPillInstallOptions({
+      documentRoot: document,
+      getShortcutLabels: vi.fn(async () => ({
+        archive: 'Ctrl+Shift+Y',
+        trash: 'Ctrl+Shift+D'
+      })),
+      isAutoOpenEnabled: vi.fn(async () => true)
+    }));
+    link.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
+
+    await vi.waitFor(() => {
+      expect(link.click).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  it('does not open a conversation on untrusted pointerover when opening is enabled', async () => {
+    const row = createConversationRow();
+    const link = row.querySelector('a');
+    document.body.append(row);
+    vi.spyOn(link, 'click');
+
     disconnect = installConversationShortcutPills({
       documentRoot: document,
       getShortcutLabels: vi.fn(async () => ({
@@ -788,11 +809,11 @@ describe('conversation shortcut pills', () => {
       })),
       isAutoOpenEnabled: vi.fn(async () => true)
     });
-    link.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
+    row.dispatchEvent(new Event('pointerover', { bubbles: true }));
 
-    await vi.waitFor(() => {
-      expect(link.click).toHaveBeenCalledTimes(1);
-    });
+    await Promise.resolve();
+
+    expect(link.click).not.toHaveBeenCalled();
   });
 
   it('does not open a conversation when Google Messages marks its row as focused', async () => {

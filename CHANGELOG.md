@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.14.13 - 2026-10-04
+
+### Fixed
+
+- Require trusted pointer and focus events before auto-opening conversations on hover or focus
+
 ## 1.14.12 - 2026-10-04
 
 ### Fixed

@@ -536,7 +536,11 @@ function createInstallation({
 
     if (conversationRow && !isWithinConversationRow(event, conversationRow)) {
       hoveredRows.add(conversationRow);
-      void openConversation(conversationRow);
+
+      if (isTrustedActivation(event)) {
+        void openConversation(conversationRow);
+      }
+
       void showPills(conversationRow);
     }
   }
@@ -559,7 +563,7 @@ function createInstallation({
     if (conversationRow) {
       focusedRows.add(conversationRow);
 
-      if (!isWithinConversationRow(event, conversationRow)) {
+      if (!isWithinConversationRow(event, conversationRow) && isTrustedActivation(event)) {
         void openConversation(conversationRow);
       }
 
