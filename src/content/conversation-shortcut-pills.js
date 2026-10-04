@@ -241,12 +241,13 @@ function createPill(
     pill.append(shortcutLabel);
   }
   pill.addEventListener('click', (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+
     if (!isTrustedActivation(event)) {
       return;
     }
 
-    event.preventDefault();
-    event.stopPropagation();
     void runAction(definition.command, conversationRow).catch((error) => {
       console.warn('[Messages Shortcut Actions] Failed to run conversation shortcut pill.', error);
     });

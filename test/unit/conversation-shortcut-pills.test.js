@@ -349,7 +349,9 @@ describe('conversation shortcut pills', () => {
 
   it('ignores untrusted shortcut pill clicks from page scripts', async () => {
     const row = createConversationRow({ focused: true, unread: false });
+    const rowClick = vi.fn();
     const runAction = vi.fn(async () => ({ ok: true }));
+    row.addEventListener('click', rowClick);
     document.body.append(row);
 
     disconnect = installConversationShortcutPills({
@@ -371,6 +373,7 @@ describe('conversation shortcut pills', () => {
     await Promise.resolve();
 
     expect(runAction).not.toHaveBeenCalled();
+    expect(rowClick).not.toHaveBeenCalled();
   });
 
   it('removes the Mark as unread pill after a successful mark-unread action', async () => {

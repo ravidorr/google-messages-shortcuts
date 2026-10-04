@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.14.14 - 2026-10-04
+
+### Fixed
+
+- Stop rejected shortcut pill clicks from bubbling to Google Messages row handlers
+
 ## 1.14.13 - 2026-10-04
 
 ### Fixed
