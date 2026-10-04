@@ -290,10 +290,18 @@ describe('phase2 navigation coverage', () => {
     expect(getCommandRegistryEntry(PAGE_COMMAND_FOCUS_COMPOSER).availability.status).toBe('unsafe');
 
     document.body.innerHTML = `
+      <mws-message-input>
+        <textarea aria-label="Message"></textarea>
+        <div contenteditable="true" aria-label="Message"></div>
+      </mws-message-input>
+    `;
+    expect(getCommandRegistryEntry(PAGE_COMMAND_FOCUS_COMPOSER).availability.status).toBe('available');
+
+    document.body.innerHTML = `
       <textarea aria-label="Message"></textarea>
       <div contenteditable="true" aria-label="Message"></div>
     `;
-    expect(getCommandRegistryEntry(PAGE_COMMAND_FOCUS_COMPOSER).availability.status).toBe('available');
+    expect(getCommandRegistryEntry(PAGE_COMMAND_FOCUS_COMPOSER).availability.status).toBe('unsafe');
 
     expect(getCommandRegistryEntry('missing-command')).toBeNull();
     expect(filterCommandRegistryEntries(getCommandRegistryEntries(document), '   ').length)

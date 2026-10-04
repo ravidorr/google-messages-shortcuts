@@ -30,6 +30,10 @@ function dedupeEditors(editors) {
   return [...new Set(editors)];
 }
 
+function getComposerHost(editor) {
+  return editor?.closest?.(COMPOSER_HOST_TAG) ?? null;
+}
+
 function isComposerMirrorPair(firstEditor, secondEditor) {
   const editors = [firstEditor, secondEditor];
   const textarea = editors.find(
@@ -40,7 +44,13 @@ function isComposerMirrorPair(firstEditor, secondEditor) {
       && candidate.getAttribute('contenteditable') === 'true'
   );
 
-  return Boolean(textarea && contentEditable);
+  if (!textarea || !contentEditable) {
+    return false;
+  }
+
+  const composerHost = getComposerHost(textarea);
+
+  return Boolean(composerHost && composerHost === getComposerHost(contentEditable));
 }
 
 function collectDistinctEditors(documentRoot, candidateSelectors) {

@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.14.15 - 2026-10-04
+
+### Fixed
+
+- Require textarea/contenteditable mirror pairs to share the same composer host before treating the composer as supported
+
 ## 1.14.14 - 2026-10-04
 
 ### Fixed
