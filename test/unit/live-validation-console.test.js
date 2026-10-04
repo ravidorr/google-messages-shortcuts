@@ -28,6 +28,8 @@ describe('live validation console', () => {
 
     expect(localThis).toContain('secondRowHoverCheck');
     expect(localThis).toContain('markReadPillPresent');
+    expect(localThis).toContain('urlUnchanged');
+    expect(localThis).toContain('unreadMarkerPersists');
     expect(localThis).toContain('manualFollowUp');
     expect(localThis).not.toContain('.click(');
     expect(localThis).not.toContain('pillResult');

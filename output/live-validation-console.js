@@ -77,7 +77,10 @@
   const allPassed = selfTest.ok
     && hoverCheck.unreadMarkerPersists
     && hoverCheck.markReadPillPresent
-    && secondRowHoverCheck.markReadPillPresent;
+    && hoverCheck.urlUnchanged
+    && secondRowHoverCheck.unreadMarkerPersists
+    && secondRowHoverCheck.markReadPillPresent
+    && secondRowHoverCheck.urlUnchanged;
 
   console.log(JSON.stringify({
     ok: allPassed,

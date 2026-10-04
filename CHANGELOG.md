@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.14.12 - 2026-10-04
+
+### Fixed
+
+- Require hover URL and unread-marker invariants in the read-only live validation helper success criteria
+- Align roadmap current release with the shipped extension version
+
 ## 1.14.11 - 2026-10-04
 
 ### Fixed
