@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.14.16 - 2026-10-06
+
+### Changed
+
+- Add GitHub Sponsors funding metadata
+
 ## 1.14.15 - 2026-10-04
 
 ### Fixed
