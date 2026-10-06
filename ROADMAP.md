@@ -2,7 +2,7 @@
 
 Keyboard-first productivity for [Google Messages Web](https://messages.google.com/web/) on Chrome and Chromium.
 
-**Current release:** 1.14.15  
+**Current release:** 1.14.17  
 **Product principles:** [docs/product-principles.md](docs/product-principles.md)
 
 ## At a glance
@@ -38,6 +38,50 @@ See [README.md](README.md) and [docs/dom-discovery/phase1-action-decisions.md](d
 - Composer focus (`Alt+M` / `Option+M`) via live-validated editor selectors
 
 Live validation: [docs/dom-discovery/phase2-live-validation.md](docs/dom-discovery/phase2-live-validation.md) and [docs/dom-discovery/compatibility-matrix.md](docs/dom-discovery/compatibility-matrix.md).
+
+## Live validation pass checklist
+
+Run this pass before claiming selector support, after adapter or security-boundary changes, and whenever Google Messages ships visible UI changes. Use a **disposable test account only**; do not commit personal names, phone numbers, or message text.
+
+Full checklists: [live-validation-checklist.md](docs/dom-discovery/live-validation-checklist.md) (Phase 0/1) and [phase2-live-validation.md](docs/dom-discovery/phase2-live-validation.md) (Phase 2 navigation). Record sanitized results in [compatibility-matrix.md](docs/dom-discovery/compatibility-matrix.md).
+
+### Prerequisites
+
+- [ ] `npm run build`, then reload the unpacked extension from `dist/`
+- [ ] Open `https://messages.google.com/web/` with a healthy pairing and at least **two unread** conversations loaded in the inbox
+- [ ] Confirm **Pause shortcut actions and pills** is unchecked in the extension popup
+- [ ] Note browser version, extension version, locale, and text direction (LTR or RTL)
+
+### Quick pass (every release or adapter change)
+
+1. **Capability self-test** (Google Messages tab console):
+
+   ```javascript
+   await globalThis.MessagesShortcuts.runCapabilitySelfTest()
+   ```
+
+   - [ ] `ok` is `true`
+   - [ ] `mutated` is `false`
+   - [ ] No blocking `unsafe` or unexpected `unavailable` capabilities
+
+2. **Read-only hover probe** (paste [output/live-validation-console.js](output/live-validation-console.js), then copy the printed JSON):
+
+   - [ ] `ok` is `true`
+   - [ ] `hoverCheck` and `secondRowHoverCheck` show `markReadPillPresent: true`, `urlUnchanged: true`, and `unreadMarkerPersists: true`
+   - [ ] This probe does not mutate conversations; it only checks self-test output and pill visibility
+
+3. **Manual action confirmation** (after the probe passes):
+
+   - [ ] Press the assigned **mark-as-read** shortcut on an unread row and confirm read state updates
+   - [ ] Spot-check one row action shortcut (for example archive or trash on a disposable thread) and confirm expected feedback
+
+4. **Record the pass** in [compatibility-matrix.md](docs/dom-discovery/compatibility-matrix.md) with the self-test `environment` block and pass/fail notes only.
+
+### Full pass (before selector or navigation claims)
+
+- [ ] Complete [live-validation-checklist.md](docs/dom-discovery/live-validation-checklist.md) for row actions, menus, dialogs, and virtualization
+- [ ] Complete [phase2-live-validation.md](docs/dom-discovery/phase2-live-validation.md) for list navigation, palette, help overlay, composer focus, and collision matrix (Step 9)
+- [ ] Update [compatibility-matrix.md](docs/dom-discovery/compatibility-matrix.md) under the matching scenario IDs
 
 ## Next up: Phase 3 feasibility spikes
 

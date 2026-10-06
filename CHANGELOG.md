@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.14.17 - 2026-10-06
+
+### Changed
+
+- Document the live validation quick-pass and full-pass checklist in ROADMAP
+
 ## 1.14.16 - 2026-10-06
 
 ### Changed
