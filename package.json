@@ -1,4 +1,8 @@
 {
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/ravidorr"
+  },
   "name": "google-messages-shortcuts",
   "version": "1.14.15",
   "description": "Use shortcuts to archive, trash, mark conversations read or unread, and optionally navigate Google Messages.",
