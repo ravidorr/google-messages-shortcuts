@@ -146,6 +146,16 @@ describe('GitHub workflow security', () => {
     expect(publishWorkflowContent).toContain('"blockOnWarnings":true');
   });
 
+  it('supersedes an active Chrome Web Store submission before uploading a new release', async () => {
+    const workflows = await readWorkflowFiles();
+    const publishWorkflow = workflows.find(({ name }) => name === 'publish-chrome-web-store.yml');
+    const publishWorkflowContent = publishWorkflow?.content ?? '';
+
+    expect(publishWorkflowContent).toContain('submittedItemRevisionStatus.state');
+    expect(publishWorkflowContent).toContain('PENDING_REVIEW|STAGED');
+    expect(publishWorkflowContent).toContain(':cancelSubmission');
+  });
+
   it('validates release metadata in the version-bump workflow', async () => {
     const workflows = await readWorkflowFiles();
     const versionBumpWorkflow = workflows.find(({ name }) => name === 'version-bump.yml');
