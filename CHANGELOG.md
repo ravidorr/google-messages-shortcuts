@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.14.19 - 2026-10-08
+
+### Added
+
+- Define post-merge Chrome Web Store publishing automation
+
 ## 1.14.18 - 2026-10-08
 
 ### Changed
