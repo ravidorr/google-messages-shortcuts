@@ -12,7 +12,7 @@ export default defineConfig({
         'background.js',
         'content.js',
         'popup.js',
-        'scripts/**/*.js',
+        'scripts/**/*.{js,mjs}',
         'src/**/*.js'
       ],
       thresholds: {

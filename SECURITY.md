@@ -1,8 +1,13 @@
 # Security Policy
 
-## Supported versions
+## Supported Versions
 
-Security fixes are provided for the latest version on the `main` branch.
+Security fixes are provided for the latest release only.
+
+| Version | Supported |
+| ------- | --------- |
+| 1.14.18 | ✓ |
+| Earlier releases | ✘ |
 
 ## Reporting a vulnerability
 

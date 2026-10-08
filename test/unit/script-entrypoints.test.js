@@ -17,6 +17,7 @@ const previousChangelog = `# Changelog
 
 ## 1.0.0 - 2026-09-30
 `;
+let importIndex = 0;
 
 function scriptPath(scriptName) {
   return path.join(repositoryRoot, 'scripts', scriptName);
@@ -57,13 +58,16 @@ async function runScript(scriptName, args = [], cwd = repositoryRoot) {
 
 async function importEntrypoint(scriptName, args = []) {
   const entrypointPath = scriptPath(scriptName);
+  const entrypointUrl = pathToFileURL(entrypointPath);
   const originalArgv = process.argv;
 
+  entrypointUrl.searchParams.set('test', String(importIndex));
+  importIndex += 1;
   process.argv = [process.execPath, entrypointPath, ...args];
 
   try {
     vi.resetModules();
-    const entrypointModule = await import(pathToFileURL(entrypointPath).href);
+    const entrypointModule = await import(entrypointUrl.href);
     await entrypointModule.cliExecutionPromise;
   } finally {
     process.argv = originalArgv;
@@ -72,14 +76,17 @@ async function importEntrypoint(scriptName, args = []) {
 
 async function importAsModule(scriptName) {
   const entrypointPath = scriptPath(scriptName);
+  const entrypointUrl = pathToFileURL(entrypointPath);
   const originalArgv = process.argv;
 
+  entrypointUrl.searchParams.set('test', String(importIndex));
+  importIndex += 1;
   process.argv = [process.execPath, 'not-the-entrypoint'];
 
   try {
     vi.resetModules();
 
-    return await import(pathToFileURL(entrypointPath).href);
+    return await import(entrypointUrl.href);
   } finally {
     process.argv = originalArgv;
   }
@@ -412,7 +419,8 @@ describe('script entrypoint coverage', () => {
       'validate-package-lock-version.js',
       'validate-package-artifact.js',
       'validate-release-metadata.js',
-      'validate-version-bump.js'
+      'validate-version-bump.js',
+      'validate-security-policy-version.mjs'
     ];
 
     for (const scriptName of scriptNames) {
@@ -420,6 +428,26 @@ describe('script entrypoint coverage', () => {
 
       expect(cliExecutionPromise).toBeUndefined();
     }
+  });
+
+  it('covers security policy validation entrypoint execution', async () => {
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const processExit = vi.spyOn(process, 'exit').mockImplementation(() => {});
+    const missingPolicyDirectory = await mkdtemp(path.join(tmpdir(), 'security-policy-entrypoint-'));
+    temporaryDirectories.push(missingPolicyDirectory);
+
+    await importEntrypoint('validate-security-policy-version.mjs');
+    await withWorkingDirectory(missingPolicyDirectory, async () => {
+      await importEntrypoint('validate-security-policy-version.mjs');
+    });
+
+    expect(consoleError).toHaveBeenCalledWith(
+      expect.stringContaining('Unable to read security policy files:')
+    );
+    expect(processExit).toHaveBeenCalledWith(1);
+
+    consoleError.mockRestore();
+    processExit.mockRestore();
   });
 
   it('covers pre-commit branch guard execution in-process', async () => {

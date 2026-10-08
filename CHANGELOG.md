@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.14.18 - 2026-10-08
+
+### Changed
+
+- Enforce that the supported SECURITY policy version matches the release version
+
 ## 1.14.17 - 2026-10-06
 
 ### Changed
