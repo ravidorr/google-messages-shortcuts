@@ -1,9 +1,13 @@
 # Security Policy
 
-## Supported versions
+## Supported Versions
 
-Security fixes are provided for the latest version on the `main` branch.
+Security fixes are provided for the latest release only.
 
+| Version | Supported |
+| ------- | --------- |
+| 1.14.17 | ✓ |
+| Earlier releases | ✘ |
 ## Reporting a vulnerability
 
 Do not report security vulnerabilities in public GitHub issues.
