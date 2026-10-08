@@ -122,21 +122,28 @@ describe('GitHub workflow security', () => {
   it('publishes only merged main pull requests through OIDC', async () => {
     const workflows = await readWorkflowFiles();
     const publishWorkflow = workflows.find(({ name }) => name === 'publish-chrome-web-store.yml');
+    const publishWorkflowContent = publishWorkflow?.content ?? '';
+    const publishWorkflowConfig = parseYaml(publishWorkflowContent);
 
-    expect(publishWorkflow?.content).toContain('pull_request:');
-    expect(publishWorkflow?.content).toContain('types: [closed]');
-    expect(publishWorkflow?.content).toContain(
+    expect(publishWorkflowConfig?.on).toEqual({
+      pull_request: {
+        types: ['closed']
+      }
+    });
+    expect(publishWorkflowConfig?.permissions).toEqual({
+      contents: 'read',
+      'id-token': 'write'
+    });
+    expect(publishWorkflowContent).toContain(
       "github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main'"
     );
-    expect(publishWorkflow?.content).toContain('contents: read');
-    expect(publishWorkflow?.content).toContain('id-token: write');
-    expect(publishWorkflow?.content).toContain('GCP_WORKLOAD_IDENTITY_PROVIDER');
-    expect(publishWorkflow?.content).toContain('GCP_SERVICE_ACCOUNT');
-    expect(publishWorkflow?.content).toContain('CWS_PUBLISHER_ID');
-    expect(publishWorkflow?.content).toContain('CWS_EXTENSION_ID');
-    expect(publishWorkflow?.content).toContain('"publishType":"DEFAULT_PUBLISH"');
-    expect(publishWorkflow?.content).toContain('"skipReview":false');
-    expect(publishWorkflow?.content).toContain('"blockOnWarnings":true');
+    expect(publishWorkflowContent).toContain('GCP_WORKLOAD_IDENTITY_PROVIDER');
+    expect(publishWorkflowContent).toContain('GCP_SERVICE_ACCOUNT');
+    expect(publishWorkflowContent).toContain('CWS_PUBLISHER_ID');
+    expect(publishWorkflowContent).toContain('CWS_EXTENSION_ID');
+    expect(publishWorkflowContent).toContain('"publishType":"DEFAULT_PUBLISH"');
+    expect(publishWorkflowContent).toContain('"skipReview":false');
+    expect(publishWorkflowContent).toContain('"blockOnWarnings":true');
   });
 
   it('validates release metadata in the version-bump workflow', async () => {
