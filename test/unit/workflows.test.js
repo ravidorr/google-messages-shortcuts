@@ -119,6 +119,43 @@ describe('GitHub workflow security', () => {
     );
   });
 
+  it('publishes only merged main pull requests through OIDC', async () => {
+    const workflows = await readWorkflowFiles();
+    const publishWorkflow = workflows.find(({ name }) => name === 'publish-chrome-web-store.yml');
+    const publishWorkflowContent = publishWorkflow?.content ?? '';
+    const publishWorkflowConfig = parseYaml(publishWorkflowContent);
+
+    expect(publishWorkflowConfig?.on).toEqual({
+      pull_request: {
+        types: ['closed']
+      }
+    });
+    expect(publishWorkflowConfig?.permissions).toEqual({
+      contents: 'read',
+      'id-token': 'write'
+    });
+    expect(publishWorkflowContent).toContain(
+      "github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main'"
+    );
+    expect(publishWorkflowContent).toContain('GCP_WORKLOAD_IDENTITY_PROVIDER');
+    expect(publishWorkflowContent).toContain('GCP_SERVICE_ACCOUNT');
+    expect(publishWorkflowContent).toContain('CWS_PUBLISHER_ID');
+    expect(publishWorkflowContent).toContain('CWS_EXTENSION_ID');
+    expect(publishWorkflowContent).toContain('"publishType":"DEFAULT_PUBLISH"');
+    expect(publishWorkflowContent).toContain('"skipReview":false');
+    expect(publishWorkflowContent).toContain('"blockOnWarnings":true');
+  });
+
+  it('supersedes an active Chrome Web Store submission before uploading a new release', async () => {
+    const workflows = await readWorkflowFiles();
+    const publishWorkflow = workflows.find(({ name }) => name === 'publish-chrome-web-store.yml');
+    const publishWorkflowContent = publishWorkflow?.content ?? '';
+
+    expect(publishWorkflowContent).toContain('submittedItemRevisionStatus.state');
+    expect(publishWorkflowContent).toContain('PENDING_REVIEW|STAGED');
+    expect(publishWorkflowContent).toContain(':cancelSubmission');
+  });
+
   it('validates release metadata in the version-bump workflow', async () => {
     const workflows = await readWorkflowFiles();
     const versionBumpWorkflow = workflows.find(({ name }) => name === 'version-bump.yml');

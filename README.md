@@ -191,6 +191,24 @@ GitHub Actions posts overall and per-file coverage summaries to every pull reque
 
 Every pull request must increase matching versions in `package.json` and `manifest.json`.
 
+## Chrome Web Store publishing
+
+After a pull request merges into `main`, GitHub Actions packages the extension
+and submits it to the Chrome Web Store for review. Chrome publishes the
+approved revision to all users.
+
+The workflow uses GitHub OIDC and Google Workload Identity Federation. Configure
+these repository variables before merging a release pull request:
+
+- `CWS_PUBLISHER_ID`
+- `CWS_EXTENSION_ID`
+- `GCP_WORKLOAD_IDENTITY_PROVIDER`
+- `GCP_SERVICE_ACCOUNT`
+
+The workflow requires no Google service-account key in GitHub. Follow the
+[Chrome Web Store API service-account guide](https://developer.chrome.com/docs/webstore/service-accounts)
+to link the Google service account to the Chrome Web Store publisher.
+
 ## Community and support
 
 - See [ROADMAP.md](ROADMAP.md) for planned phases and [docs/product-principles.md](docs/product-principles.md) for scope and launch gates.
