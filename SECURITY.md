@@ -6,8 +6,9 @@ Security fixes are provided for the latest release only.
 
 | Version | Supported |
 | ------- | --------- |
-| 1.14.17 | ✓ |
+| 1.14.18 | ✓ |
 | Earlier releases | ✘ |
+
 ## Reporting a vulnerability
 
 Do not report security vulnerabilities in public GitHub issues.
