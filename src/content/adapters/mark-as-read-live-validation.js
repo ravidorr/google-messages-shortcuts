@@ -1,14 +1,15 @@
 import { COMMAND_MARK_READ } from '../../shared/commands.js';
 import { isMarkAsReadDebugValidationEnabled } from '../../shared/mark-as-read-debug-preference.js';
+import { isConversationRead } from '../conversation-read-state.js';
 import { runCapabilitySelfTest } from './capability-self-test.js';
 import { runConversationAction } from '../conversation-action.js';
-import { handleCommand } from '../message-handler.js';
 import { SELECTORS } from '../google-messages-dom.js';
 
 export const MARK_READ_PILL_SELECTOR = `[data-messages-shortcuts-pill][data-command="${COMMAND_MARK_READ}"]`;
 export const ROW_HOVER_CHECK_SLEEP_MS = 600;
 
 const DEBUG_DISABLED_MESSAGE = 'Enable chrome.storage.local enableMarkAsReadLiveValidation from the extension service worker console before running destructive mark-as-read validation.';
+const MANUAL_FOLLOW_UP = 'Synthetic hover may not match real pointer hover. Confirm pill clicks and keyboard shortcuts manually when needed.';
 
 function defaultSleep(ms) {
   return new Promise((resolve) => {
@@ -36,6 +37,20 @@ export function narrowSelfTestForValidation(selfTest) {
 
 export function dispatchRowPointerOver(row) {
   row.dispatchEvent(new PointerEvent('pointerover', { bubbles: true }));
+}
+
+export function findConflictingHoveredConversationRow(
+  documentRoot,
+  targetRow,
+  selectors = SELECTORS
+) {
+  const hoveredRow = documentRoot.querySelector(selectors.hoveredConversationItem);
+
+  if (!hoveredRow || hoveredRow === targetRow) {
+    return null;
+  }
+
+  return hoveredRow;
 }
 
 export async function inspectRowHoverState(
@@ -68,18 +83,12 @@ function hoverChecksPassed(hoverCheck) {
     && hoverCheck.urlUnchanged;
 }
 
-export function prepareShortcutTargetRow(documentRoot, row, selectors = SELECTORS) {
-  for (const candidate of documentRoot.querySelectorAll(selectors.conversationRow)) {
-    if (candidate === row) {
-      candidate.setAttribute('is-focused', 'true');
-    } else {
-      candidate.removeAttribute('is-focused');
-    }
+function markReadValidationSucceeded(result, targetRow, selectors = SELECTORS) {
+  if (!result?.ok || result.readStatePending) {
+    return false;
   }
-}
 
-function actionSucceeded(result) {
-  return Boolean(result?.ok);
+  return isConversationRead(targetRow, selectors);
 }
 
 export async function runMarkAsReadLiveValidation(
@@ -89,7 +98,6 @@ export async function runMarkAsReadLiveValidation(
     selectors = SELECTORS,
     runSelfTest = runCapabilitySelfTest,
     runRowAction = runConversationAction,
-    runShortcutCommand = handleCommand,
     isDebugEnabled = () => isMarkAsReadDebugValidationEnabled(chromeApi),
     sleep = defaultSleep,
     dispatchPointerOver = dispatchRowPointerOver,
@@ -143,11 +151,12 @@ export async function runMarkAsReadLiveValidation(
     hoverInspectOptions
   );
 
+  const pillTargetRow = unreadRowsBefore[0];
   const pillResult = await runRowAction(
     documentRoot,
     COMMAND_MARK_READ,
     selectors,
-    unreadRowsBefore[0]
+    pillTargetRow
   );
 
   const shortcutTargetRow = unreadRowsBefore[1];
@@ -166,23 +175,46 @@ export async function runMarkAsReadLiveValidation(
         ok: false,
         reason: 'shortcut-target-not-unread'
       },
-      manualFollowUp: 'Synthetic hover may not match real pointer hover. Confirm pill clicks and keyboard shortcuts manually when needed.'
+      manualFollowUp: MANUAL_FOLLOW_UP
     };
   }
 
-  prepareShortcutTargetRow(documentRoot, shortcutTargetRow, selectors);
-
-  const shortcutResult = await runShortcutCommand(
-    COMMAND_MARK_READ,
+  const conflictingHoverRow = findConflictingHoveredConversationRow(
     documentRoot,
-    chromeApi
+    shortcutTargetRow,
+    selectors
+  );
+
+  if (conflictingHoverRow) {
+    return {
+      ok: false,
+      error: 'conflicting-hover-target',
+      environment: selfTest.environment,
+      selfTest: narrowedSelfTest,
+      hoverCheck,
+      secondRowHoverCheck,
+      unreadRowsAvailableInitially: unreadRowsBefore.length,
+      pillResult,
+      shortcutResult: {
+        ok: false,
+        reason: 'conflicting-hover-target'
+      },
+      manualFollowUp: MANUAL_FOLLOW_UP
+    };
+  }
+
+  const shortcutResult = await runRowAction(
+    documentRoot,
+    COMMAND_MARK_READ,
+    selectors,
+    shortcutTargetRow
   );
 
   const allPassed = selfTest.ok
     && hoverChecksPassed(hoverCheck)
     && hoverChecksPassed(secondRowHoverCheck)
-    && actionSucceeded(pillResult)
-    && actionSucceeded(shortcutResult);
+    && markReadValidationSucceeded(pillResult, pillTargetRow, selectors)
+    && markReadValidationSucceeded(shortcutResult, shortcutTargetRow, selectors);
 
   return {
     ok: allPassed,
@@ -193,6 +225,6 @@ export async function runMarkAsReadLiveValidation(
     unreadRowsAvailableInitially: unreadRowsBefore.length,
     pillResult,
     shortcutResult,
-    manualFollowUp: 'Synthetic hover may not match real pointer hover. Confirm pill clicks and keyboard shortcuts manually when needed.'
+    manualFollowUp: MANUAL_FOLLOW_UP
   };
 }
