@@ -15,23 +15,19 @@ describe('live validation console', () => {
     expect(() => new Function(localThis)).not.toThrow();
   });
 
-  it('uses only the read-only page bridge self-test API', async () => {
+  it('delegates to the built-in page bridge validation API', async () => {
     const localThis = await readFile(consoleProbePath, 'utf8');
 
-    expect(localThis).toContain('MS.runCapabilitySelfTest()');
+    expect(localThis).toContain('MS.runMarkAsReadLiveValidation()');
     expect(localThis).not.toContain('runConversationAction');
     expect(localThis).not.toContain('handleCommand');
+    expect(localThis).not.toContain('runCapabilitySelfTest()');
   });
 
-  it('performs read-only hover checks without automating pill actions', async () => {
+  it('documents destructive debug validation requirements', async () => {
     const localThis = await readFile(consoleProbePath, 'utf8');
 
-    expect(localThis).toContain('secondRowHoverCheck');
-    expect(localThis).toContain('markReadPillPresent');
-    expect(localThis).toContain('urlUnchanged');
-    expect(localThis).toContain('unreadMarkerPersists');
-    expect(localThis).toContain('manualFollowUp');
-    expect(localThis).not.toContain('.click(');
-    expect(localThis).not.toContain('pillResult');
+    expect(localThis).toContain('enableMarkAsReadLiveValidation');
+    expect(localThis).toContain('Destructive debug validation');
   });
 });

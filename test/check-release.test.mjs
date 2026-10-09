@@ -87,9 +87,9 @@ describe('requiresRelease', () => {
 
 describe('release metadata validation', () => {
   it('reads package and manifest versions from the repository', () => {
-    expect(readPackageVersion('HEAD')).toBe('1.14.20');
-    expect(readCurrentPackageJson().version).toBe('1.14.20');
-    expect(readCurrentManifest().version).toBe('1.14.20');
+    expect(readPackageVersion('HEAD')).toBe('1.14.21');
+    expect(readCurrentPackageJson().version).toBe('1.14.21');
+    expect(readCurrentManifest().version).toBe('1.14.21');
     expect(readChangedFiles('HEAD')).toEqual([]);
   });
 
@@ -138,20 +138,20 @@ describe('release metadata validation', () => {
 
   it('extracts and validates release notes through CLI helpers', async () => {
     expect(() => runExtractReleaseNotes()).toThrow('release version is required');
-    runExtractReleaseNotes('1.14.20');
-    await expect(readFile('release-notes.md', 'utf8')).resolves.toContain('repository baseline');
+    runExtractReleaseNotes('1.14.21');
+    await expect(readFile('release-notes.md', 'utf8')).resolves.toContain('runMarkAsReadLiveValidation');
 
     expect(() => runTagReleaseValidation()).toThrow('tag name is required');
     await writeFile('release-notes.md', 'Baseline notes\n');
-    expect(() => runTagReleaseValidation('v1.14.20')).not.toThrow();
+    expect(() => runTagReleaseValidation('v1.14.21')).not.toThrow();
   });
 
   it('routes command arguments to extraction, tagging, and release validation', async () => {
-    main(['node', 'script', '--extract-release-notes', '1.14.20']);
-    await expect(readFile('release-notes.md', 'utf8')).resolves.toContain('repository baseline');
+    main(['node', 'script', '--extract-release-notes', '1.14.21']);
+    await expect(readFile('release-notes.md', 'utf8')).resolves.toContain('runMarkAsReadLiveValidation');
 
     await writeFile('release-notes.md', 'Baseline notes\n');
-    expect(() => main(['node', 'script', '--tag', 'v1.14.20'])).not.toThrow();
+    expect(() => main(['node', 'script', '--tag', 'v1.14.21'])).not.toThrow();
     expect(() => main(['node', 'script'], '0000000000000000000000000000000000000000')).not.toThrow();
   });
 

@@ -66,6 +66,9 @@ export function installPageWorldBridgeMain(
     __pageBridgeInstalled: true,
     runCapabilitySelfTest() {
       return invokeBridgeMethod(PAGE_WORLD_BRIDGE_METHOD.runCapabilitySelfTest);
+    },
+    runMarkAsReadLiveValidation() {
+      return invokeBridgeMethod(PAGE_WORLD_BRIDGE_METHOD.runMarkAsReadLiveValidation);
     }
   };
 

@@ -1,4 +1,5 @@
 import { runCapabilitySelfTest } from './src/content/adapters/capability-self-test.js';
+import { runMarkAsReadLiveValidation } from './src/content/adapters/mark-as-read-live-validation.js';
 import { runConversationAction } from './src/content/conversation-action.js';
 import {
   installConversationShortcutPills,
@@ -44,7 +45,8 @@ const disconnectNavigationFabShortcutBadges = installNavigationFabShortcutBadges
 const disconnectPageWorldBridge = installPageWorldBridgeHost(
   document,
   createDefaultPageWorldBridgeHandlers({
-    runCapabilitySelfTest
+    runCapabilitySelfTest,
+    runMarkAsReadLiveValidation: () => runMarkAsReadLiveValidation(document, { chromeApi: chrome })
   })
 );
 

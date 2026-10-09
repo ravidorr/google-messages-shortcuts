@@ -23,6 +23,28 @@ Use this checklist against a signed-in Google Messages Web test account before c
 
 5. Save capability states, reasons, and the self-test `environment` block (`browserVersion`, `extensionVersion`, `locale`, `direction`) in the compatibility matrix. Do not paste conversation content.
 
+### Optional destructive mark-as-read validation (debug only)
+
+Use disposable unread threads only. Enable the debug flag from the extension service worker console:
+
+```javascript
+await chrome.storage.local.set({ enableMarkAsReadLiveValidation: true })
+```
+
+On the Google Messages page console:
+
+```javascript
+await globalThis.MessagesShortcuts.runMarkAsReadLiveValidation()
+```
+
+Copy the returned JSON into the compatibility matrix (log it yourself in DevTools). The result includes `selfTest`, `hoverCheck`, `secondRowHoverCheck`, `pillResult`, and `shortcutResult`. Disable the flag when finished:
+
+```javascript
+await chrome.storage.local.set({ enableMarkAsReadLiveValidation: false })
+```
+
+Synthetic hover in this API does not replace manual pill or keyboard verification when real pointer hover behavior differs.
+
 ## Checklist
 
 ### Native keyboard and focus
