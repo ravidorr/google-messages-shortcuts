@@ -14,12 +14,10 @@ export default tseslint.config(
     ignores: [
       'node_modules/**',
       '.claude/**',
-      '.storybook/**',
       'coverage/**',
       'dist/**',
       'release/**',
       '.lighthouseci/**',
-      'storybook-static/**',
       'vitest.config.ts'
     ]
   },

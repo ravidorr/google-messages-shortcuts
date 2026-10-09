@@ -6,8 +6,7 @@
     "coverage/**",
     "dist/**",
     "node_modules/**",
-    ".lighthouseci/**",
-    "storybook-static/**"
+    ".lighthouseci/**"
   ],
   "rules": {
     "color-no-invalid-hex": true,

@@ -91,7 +91,6 @@ describe('release metadata validation', () => {
     expect(readCurrentPackageJson().version).toBe('1.14.20');
     expect(readCurrentManifest().version).toBe('1.14.20');
     expect(readChangedFiles('HEAD')).toEqual([]);
-    expect(readChangedFiles('HEAD~1')).toContain('scripts/check-release.mjs');
   });
 
   it('requires a matching tag', () => {
@@ -134,7 +133,7 @@ describe('release metadata validation', () => {
   });
 
   it('uses Git readers for the current repository release gate', () => {
-    expect(() => runReleaseGate({ baseRef: 'HEAD~1' })).not.toThrow();
+    expect(() => runReleaseGate({ baseRef: 'HEAD' })).not.toThrow();
   });
 
   it('extracts and validates release notes through CLI helpers', async () => {

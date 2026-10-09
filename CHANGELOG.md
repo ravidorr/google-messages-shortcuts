@@ -5,6 +5,7 @@
 ### Changed
 
 - Add the repository baseline: strict quality tooling, release gating, CI, hooks, and design-system documentation.
+- Remove Storybook tooling and use the static design-system showcase.
 
 All notable changes to this project will be documented in this file.
 

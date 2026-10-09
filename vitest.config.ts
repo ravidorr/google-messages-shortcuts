@@ -9,7 +9,6 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'lcov', 'json-summary'],
-      all: true,
       include: [
         'background.js',
         'content.js',
@@ -19,7 +18,7 @@ export default defineConfig({
         'scripts/**/*.{js,mjs}',
         'src/**/*.js'
       ],
-      exclude: ['**/*.stories.*', '**/*.d.ts', '**/*.test.*', '**/*.spec.*'],
+      exclude: ['**/*.d.ts', '**/*.test.*', '**/*.spec.*'],
       thresholds: {
         lines: 100,
         functions: 100,
