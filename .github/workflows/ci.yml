@@ -2,24 +2,60 @@ name: CI
 
 on:
   pull_request:
-    types: [opened, reopened, synchronize]
+  push:
+    branches: [main]
 
 permissions:
   contents: read
+  pull-requests: write
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  validate:
-    name: Validate extension build
+  quality:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
-          node-version: 22
+          fetch-depth: 0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version-file: .nvmrc
           cache: npm
       - run: npm ci
       - run: npm run lint
-      - run: npm test
+      - run: npm run typecheck
+      - name: Tests with 100% coverage gate
+        run: npm run test:coverage
+      - name: Coverage report (job summary and PR comment)
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          CAN_COMMENT: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.actor != 'dependabot[bot]' }}
+        run: |
+          node scripts/coverage-summary.mjs > coverage-report.md
+          cat coverage-report.md >> "$GITHUB_STEP_SUMMARY"
+          if [ "$CAN_COMMENT" = "true" ]; then
+            gh pr comment "$PR_NUMBER" --body-file coverage-report.md --edit-last --create-if-none
+          fi
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        if: always()
+        with:
+          name: coverage
+          path: coverage
       - run: npm run build
       - run: npm run package
       - run: node scripts/validate-package-artifact.js
+      - name: Dependency audit (production, blocking)
+        run: npm audit --omit=dev --audit-level=high
+      - name: Dependency audit (dev tooling, informational)
+        continue-on-error: true
+        run: npm audit --audit-level=high
+      - name: Version and changelog gate
+        if: github.actor != 'dependabot[bot]'
+        env:
+          BASE_REF: ${{ github.event_name == 'pull_request' && format('origin/{0}', github.base_ref) || github.event.before }}
+        run: node scripts/check-release.mjs

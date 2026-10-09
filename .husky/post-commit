@@ -1,4 +1,9 @@
 #!/bin/sh
 set -e
 
+npm install --package-lock-only >/dev/null 2>&1
+if ! git diff --quiet -- package-lock.json; then
+  echo "post-commit: package-lock.json changed after install. Review and commit it." >&2
+fi
+
 node scripts/synchronize-package-lock-index.js

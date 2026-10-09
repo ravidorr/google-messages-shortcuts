@@ -29,6 +29,7 @@ describe('buildExtension', () => {
     temporaryDirectories.push(sourceDirectory);
 
     await Promise.all([
+      mkdir(path.join(sourceDirectory, 'design-system')),
       mkdir(path.join(sourceDirectory, 'icons')),
       mkdir(path.join(sourceDirectory, 'src', 'content'), { recursive: true }),
       mkdir(path.join(sourceDirectory, 'src', 'shared'), { recursive: true }),
@@ -36,6 +37,7 @@ describe('buildExtension', () => {
     ]);
     await Promise.all([
       writeFile(path.join(sourceDirectory, 'background.js'), 'background'),
+      writeFile(path.join(sourceDirectory, 'design-system', 'tokens.css'), ':root {}'),
       writeFile(
         path.join(sourceDirectory, 'content.js'),
         "import { message } from './src/content/entry.js'; globalThis.contentMessage = message;"
@@ -70,6 +72,7 @@ describe('buildExtension', () => {
     await buildExtension(sourceDirectory, outputDirectory);
 
     await expect(readFile(path.join(outputDirectory, 'background.js'), 'utf8')).resolves.toBe('background');
+    await expect(readFile(path.join(outputDirectory, 'design-system', 'tokens.css'), 'utf8')).resolves.toBe(':root {}');
     await expect(readFile(path.join(outputDirectory, 'icons', 'icon.svg'), 'utf8')).resolves.toContain('<svg');
     await expect(readFile(path.join(outputDirectory, 'src', 'shared', 'commands.js'), 'utf8')).resolves.toBe('commands');
     await expect(readFile(path.join(outputDirectory, 'stale.txt'), 'utf8')).rejects.toThrow();
@@ -98,12 +101,14 @@ describe('buildExtension', () => {
     temporaryDirectories.push(sourceDirectory);
 
     await Promise.all([
+      mkdir(path.join(sourceDirectory, 'design-system')),
       mkdir(path.join(sourceDirectory, 'icons')),
       mkdir(path.join(sourceDirectory, 'src', 'content'), { recursive: true }),
       mkdir(outputDirectory)
     ]);
     await Promise.all([
       writeFile(path.join(sourceDirectory, 'background.js'), 'background'),
+      writeFile(path.join(sourceDirectory, 'design-system', 'tokens.css'), ':root {}'),
       writeFile(path.join(sourceDirectory, 'content.js'), 'globalThis.contentMessage = "ready";'),
       writeFile(path.join(sourceDirectory, 'manifest.json'), JSON.stringify({ icons: expectedIconMetadata })),
       writeFile(path.join(sourceDirectory, 'popup.css'), 'body {}'),

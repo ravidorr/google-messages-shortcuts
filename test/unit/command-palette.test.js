@@ -80,6 +80,7 @@ describe('command-palette', () => {
       bubbles: true,
       cancelable: true
     }));
+    expect(paletteItems[1]?.getAttribute('data-selected')).toBe('true');
     document.dispatchEvent(new KeyboardEvent('keydown', {
       key: 'ArrowUp',
       code: 'ArrowUp',

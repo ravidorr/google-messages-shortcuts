@@ -1,8 +1,8 @@
-blank_issues_enabled: true
+blank_issues_enabled: false
 contact_links:
   - name: Security vulnerability
     url: https://github.com/ravidorr/google-messages-shortcuts/security/advisories/new
-    about: Report security vulnerabilities privately.
+    about: Report security vulnerabilities privately, or email raanan@avidor.org.
   - name: Support
     url: https://github.com/ravidorr/google-messages-shortcuts/issues
     about: Ask questions or request help with the extension.

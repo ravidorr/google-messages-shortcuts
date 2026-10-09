@@ -178,18 +178,20 @@ Loaded-message find, native filter UI focus, and connection diagnostics remain u
 ## Development
 
 ```bash
+nvm install && nvm use
 npm install
 npm run build
 npm run package
 npm run lint
-npm test
+npm run typecheck
+npm run test:coverage
 ```
 
-`npm run build` creates a loadable extension in `dist/`, including manifest icons. `npm run package` creates `release/google-messages-shortcuts.zip`. Use `npm run clean` to remove generated build, package, and coverage output. When `package.json` is staged, the pre-commit hook stages all of its changes, runs `npm install`, and stages the rebuilt `package-lock.json`, then runs staged linting and the full test suite with coverage thresholds.
+This project requires Node.js 24.21.0 and npm 11.19.0, as pinned in `.nvmrc` and `package.json`. `npm run build` creates a loadable extension in `dist/`, including manifest icons. `npm run package` creates `release/google-messages-shortcuts.zip`. Use `npm run clean` to remove generated build, package, and coverage output. The pre-commit hook runs staged checks, while pre-push runs the full quality suite and release gate.
 
 GitHub Actions posts overall and per-file coverage summaries to every pull request.
 
-Every pull request must increase matching versions in `package.json` and `manifest.json`.
+Pull requests that change `src/`, `package.json`, or `tsconfig.json` must increase matching versions in `package.json` and `manifest.json`. Documentation, test, workflow, and tooling-only pull requests do not require a version bump.
 
 ## Chrome Web Store publishing
 
@@ -216,6 +218,8 @@ to link the Google service account to the Chrome Web Store publisher.
 - Follow the [Code of Conduct](CODE_OF_CONDUCT.md) in community spaces.
 - Read [SECURITY.md](SECURITY.md) to report vulnerabilities privately.
 - Read [SUPPORT.md](SUPPORT.md) for help, bugs, and feature requests.
+- Read [CHANGELOG.md](CHANGELOG.md) for release history.
+- Use [design-system/](design-system/README.md) for popup UI tokens and components.
 
 ## License
 

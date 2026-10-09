@@ -32,6 +32,10 @@ export async function buildExtension(sourceDirectory, outputDirectory) {
     path.join(outputDirectory, buildPath),
     { recursive: true }
   )));
+  const designSystemDirectory = path.join(sourceDirectory, 'design-system');
+  if (await fileExists(designSystemDirectory)) {
+    await cp(designSystemDirectory, path.join(outputDirectory, 'design-system'), { recursive: true });
+  }
   const bundledScripts = [
     {
       entryPoints: [path.join(sourceDirectory, 'content.js')],

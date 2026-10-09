@@ -1,0 +1,38 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*.*.*']
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: {{PM}}
+      - run: {{PM_CI}}
+      - run: {{PM_RUN}} lint
+      - run: {{PM_RUN}} typecheck
+      - run: {{PM_RUN}} test:coverage
+      - run: {{PM_RUN}} build --if-present
+      - name: Extract and validate release notes
+        run: |
+          set -euo pipefail
+          version="${GITHUB_REF_NAME#v}"
+          node scripts/check-release.mjs --extract-release-notes "$version"
+          node scripts/check-release.mjs --tag "$GITHUB_REF_NAME"
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" --title "$GITHUB_REF_NAME" --notes-file release-notes.md
+      # Published libraries only (delete otherwise): needs the NPM_TOKEN secret and `id-token: write`.
+      - run: npm publish --provenance
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

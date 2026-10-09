@@ -155,7 +155,7 @@ function handlePaletteKeydown(event, panel) {
   }
 
   const selectedIndex = items.findIndex((item) => item.getAttribute('data-selected') === 'true');
-  let nextIndex = selectedIndex;
+  let nextIndex;
 
   if (event.key === 'ArrowDown') {
     event.preventDefault();

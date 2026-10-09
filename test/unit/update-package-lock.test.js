@@ -102,10 +102,12 @@ describe('update-package-lock', () => {
     }
   });
 
-  it('runs before package-lock validation in the pre-commit hook', async () => {
+  it('runs before generated-file validation in the pre-commit hook', async () => {
     const preCommitHook = await readFile(path.join(repositoryRoot, '.husky', 'pre-commit'), 'utf8');
 
+    expect(preCommitHook).toContain('export PATH="/usr/bin:$PATH"');
+    expect(preCommitHook).toContain('npx lint-staged --config lint-staged.config.mjs');
     expect(preCommitHook.indexOf('node scripts/update-package-lock.js'))
-      .toBeLessThan(preCommitHook.indexOf('node scripts/validate-package-lock-version.js'));
+      .toBeLessThan(preCommitHook.indexOf('npm run check:generated'));
   });
 });

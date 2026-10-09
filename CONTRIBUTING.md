@@ -5,7 +5,7 @@ Thanks for contributing to Messages Shortcut Actions.
 ## Development setup
 
 1. Fork the repository and create a branch from `main`.
-2. Install dependencies with `npm install`.
+2. Run `nvm install && nvm use`, then install dependencies with `npm install`.
 3. Run `npm run build` to create the loadable extension in `dist/`.
 4. Load `dist/` from `chrome://extensions` with Developer mode enabled.
 
@@ -19,20 +19,21 @@ Thanks for contributing to Messages Shortcut Actions.
 
 ## Before opening a pull request
 
-1. Run `npm run lint`.
-2. Run `npm test`.
-3. Add or update tests for code changes.
-4. Add an entry to `CHANGELOG.md`.
-5. Bump and synchronize the versions in `package.json`, `manifest.json`, and `package-lock.json`.
-6. Stage `package.json`. The pre-commit hook stages all of its changes, runs `npm install`, and stages the rebuilt `package-lock.json`.
-7. Run `npm run verify:version-bump`.
-8. Keep each pull request focused on one change.
+1. Run `npm run lint`, `npm run typecheck`, and `npm run test:coverage`.
+2. Add or update tests for code changes.
+3. When `src/`, `package.json`, or `tsconfig.json` changes, add a `CHANGELOG.md` entry and make one SemVer version bump.
+4. Keep each pull request focused on one change.
+5. Use the tokens and components in `design-system/` for UI changes.
 
 ## Pull requests
 
-Do not commit directly to `main`. Create a branch, push it, and open a pull request. The repository checks coverage for every pull request and posts the current report as a comment.
+Do not commit directly to `main`. Create a branch, push it, and open a draft pull request that references its GitHub issue with `Closes #<issue>`. The repository checks coverage for every pull request and posts the current report as a comment.
 
 Please explain the change, include how it was tested, and update documentation when user-facing behavior changes.
+
+## Release policy
+
+When a pull request or push to `main` changes `package.json`, `tsconfig.json`, or files under `src/`, CI requires a SemVer increase and a non-empty matching `CHANGELOG.md` section. Documentation, test, workflow, and tooling-only changes do not need a version bump.
 
 ## Reporting bugs and requesting features
 
