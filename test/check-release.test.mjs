@@ -42,25 +42,30 @@ describe('extractChangelogNotes', () => {
 
 describe('validateRelease', () => {
   it('accepts an increased version with matching changelog notes', () => {
-    expect(() => validateRelease('1.0.0', '1.0.1', '## [1.0.1]\n\n- Fix')).not.toThrow();
+    expect(() => validateRelease('1.0.0', '1.0.1', '1.0.1', '## [1.0.1]\n\n- Fix')).not.toThrow();
   });
 
   it('rejects an unchanged version', () => {
-    expect(() => validateRelease('1.0.0', '1.0.0', '## [1.0.0]\n\n- Fix')).toThrow('package version must change');
+    expect(() => validateRelease('1.0.0', '1.0.0', '1.0.0', '## [1.0.0]\n\n- Fix')).toThrow('package version must change');
   });
 
   it('rejects a changelog without the version section', () => {
-    expect(() => validateRelease('1.0.0', '1.0.1', '## [1.0.0]\n\n- Fix')).toThrow('CHANGELOG.md must contain a section for 1.0.1');
+    expect(() => validateRelease('1.0.0', '1.0.1', '1.0.1', '## [1.0.0]\n\n- Fix')).toThrow('CHANGELOG.md must contain a section for 1.0.1');
   });
 
   it('rejects a version that does not increase', () => {
-    expect(() => validateRelease('1.0.1', '1.0.0', '## [1.0.0]\n\n- Fix'))
+    expect(() => validateRelease('1.0.1', '1.0.0', '1.0.0', '## [1.0.0]\n\n- Fix'))
       .toThrow('package version must increase');
   });
 
   it('rejects an empty changelog section', () => {
-    expect(() => validateRelease('1.0.0', '1.0.1', '## [1.0.1]\n\n## [1.0.0]\n\n- Previous'))
+    expect(() => validateRelease('1.0.0', '1.0.1', '1.0.1', '## [1.0.1]\n\n## [1.0.0]\n\n- Previous'))
       .toThrow('section for 1.0.1 must not be empty');
+  });
+
+  it('rejects a manifest version that differs from the package version', () => {
+    expect(() => validateRelease('1.0.0', '1.0.1', '1.0.0', '## [1.0.1]\n\n- Fix'))
+      .toThrow('manifest version must match package version');
   });
 });
 
@@ -103,6 +108,7 @@ describe('release metadata validation', () => {
       readBasePackageVersion: () => '1.0.0',
       readDiffFiles: () => ['src/popup.js'],
       readCurrentPackageJson: () => ({ version: '1.0.1' }),
+      readCurrentManifest: () => ({ version: '1.0.1' }),
       readChangelog: () => '## [1.0.1]\n\n- Fix'
     })).not.toThrow();
   });

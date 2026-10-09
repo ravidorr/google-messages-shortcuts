@@ -134,6 +134,7 @@ describe('GitHub workflow security', () => {
       contents: 'read',
       'id-token': 'write'
     });
+    expect(publishWorkflowContent).toContain('node-version-file: .nvmrc');
     expect(publishWorkflowContent).toContain(
       "github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main'"
     );

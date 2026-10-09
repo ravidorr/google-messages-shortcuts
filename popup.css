@@ -103,8 +103,8 @@ body {
 }
 
 .shortcut-status--assigned {
-  background: var(--color-popup-assigned-text);
-  color: var(--color-popup-link);
+  background: var(--color-popup-assigned-bg);
+  color: var(--color-popup-assigned-text);
 }
 
 .shortcut-status--pill-only {
@@ -204,7 +204,7 @@ body {
   }
 
   .shortcut-status--assigned {
-    background: var(--color-popup-link);
+    background: var(--color-popup-assigned-bg);
     color: var(--color-popup-assigned-text);
   }
 
@@ -215,7 +215,7 @@ body {
 
   .shortcut-status--missing {
     background: var(--color-popup-warning-bg);
-    color: var(--color-popup-warning-bg);
+    color: var(--color-popup-warning-text);
   }
 
   .popup__select {

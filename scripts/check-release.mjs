@@ -45,12 +45,15 @@ function assertChangelogContainsVersion(changelog, version) {
   }
 }
 
-export function validateRelease(baseVersion, currentVersion, changelog) {
+export function validateRelease(baseVersion, currentVersion, manifestVersion, changelog) {
   if (baseVersion === currentVersion) {
     throw new Error('package version must change');
   }
   if (compareSemver(currentVersion, baseVersion) <= 0) {
     throw new Error('package version must increase');
+  }
+  if (manifestVersion !== currentVersion) {
+    throw new Error('manifest version must match package version');
   }
 
   assertChangelogContainsVersion(changelog, currentVersion);
@@ -110,6 +113,8 @@ export function runReleaseGate({
   readDiffFiles = readChangedFiles,
   readCurrentPackageJson = () =>
     JSON.parse(readFileSync('package.json', 'utf8')),
+  readCurrentManifest = () =>
+    JSON.parse(readFileSync('manifest.json', 'utf8')),
   readChangelog = () => readFileSync('CHANGELOG.md', 'utf8')
 }) {
   if (!baseRef) {
@@ -125,6 +130,7 @@ export function runReleaseGate({
   validateRelease(
     readBasePackageVersion(baseRef),
     readCurrentPackageJson().version,
+    readCurrentManifest().version,
     readChangelog()
   );
 }
