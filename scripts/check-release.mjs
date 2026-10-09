@@ -91,14 +91,14 @@ export function validateTaggedRelease({
   assertReleaseNotesPresent(releaseNotes);
 }
 
-function readPackageVersion(ref) {
+export function readPackageVersion(ref) {
   const packageJson = execFileSync('git', ['show', `${ref}:package.json`], {
     encoding: 'utf8'
   });
   return JSON.parse(packageJson).version;
 }
 
-function readChangedFiles(baseRef) {
+export function readChangedFiles(baseRef) {
   return execFileSync('git', ['diff', '--name-only', `${baseRef}...HEAD`], {
     encoding: 'utf8'
   })
@@ -107,14 +107,20 @@ function readChangedFiles(baseRef) {
     .filter(Boolean);
 }
 
+export function readCurrentPackageJson() {
+  return JSON.parse(readFileSync('package.json', 'utf8'));
+}
+
+export function readCurrentManifest() {
+  return JSON.parse(readFileSync('manifest.json', 'utf8'));
+}
+
 export function runReleaseGate({
   baseRef,
   readBasePackageVersion = readPackageVersion,
   readDiffFiles = readChangedFiles,
-  readCurrentPackageJson = () =>
-    JSON.parse(readFileSync('package.json', 'utf8')),
-  readCurrentManifest = () =>
-    JSON.parse(readFileSync('manifest.json', 'utf8')),
+  readCurrentPackageJson: currentPackageJson = readCurrentPackageJson,
+  readCurrentManifest: currentManifest = readCurrentManifest,
   readChangelog = () => readFileSync('CHANGELOG.md', 'utf8')
 }) {
   if (!baseRef) {
@@ -129,8 +135,8 @@ export function runReleaseGate({
 
   validateRelease(
     readBasePackageVersion(baseRef),
-    readCurrentPackageJson().version,
-    readCurrentManifest().version,
+    currentPackageJson().version,
+    currentManifest().version,
     readChangelog()
   );
 }

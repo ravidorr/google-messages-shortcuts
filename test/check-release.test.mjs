@@ -6,6 +6,10 @@ import {
   assertTagMatchesPackageVersion,
   extractChangelogNotes,
   main,
+  readCurrentManifest,
+  readCurrentPackageJson,
+  readChangedFiles,
+  readPackageVersion,
   requiresRelease,
   runExtractReleaseNotes,
   runReleaseGate,
@@ -82,6 +86,14 @@ describe('requiresRelease', () => {
 });
 
 describe('release metadata validation', () => {
+  it('reads package and manifest versions from the repository', () => {
+    expect(readPackageVersion('HEAD')).toBe('1.14.20');
+    expect(readCurrentPackageJson().version).toBe('1.14.20');
+    expect(readCurrentManifest().version).toBe('1.14.20');
+    expect(readChangedFiles('HEAD')).toEqual([]);
+    expect(readChangedFiles('HEAD~1')).toContain('scripts/check-release.mjs');
+  });
+
   it('requires a matching tag', () => {
     expect(() => assertTagMatchesPackageVersion('v1.0.1', '1.0.1')).not.toThrow();
     expect(() => assertTagMatchesPackageVersion('1.0.1', '1.0.1')).not.toThrow();
@@ -110,6 +122,14 @@ describe('release metadata validation', () => {
       readCurrentPackageJson: () => ({ version: '1.0.1' }),
       readCurrentManifest: () => ({ version: '1.0.1' }),
       readChangelog: () => '## [1.0.1]\n\n- Fix'
+    })).not.toThrow();
+  });
+
+  it('uses the current changelog for a qualifying release', () => {
+    expect(() => runReleaseGate({
+      baseRef: 'main',
+      readBasePackageVersion: () => '1.14.19',
+      readDiffFiles: () => ['src/popup.js']
     })).not.toThrow();
   });
 
