@@ -5,7 +5,8 @@ import {
 } from './page-world-bridge-constants.js';
 
 export const ALLOWED_PAGE_WORLD_BRIDGE_METHODS = new Set([
-  PAGE_WORLD_BRIDGE_METHOD.runCapabilitySelfTest
+  PAGE_WORLD_BRIDGE_METHOD.runCapabilitySelfTest,
+  PAGE_WORLD_BRIDGE_METHOD.runMarkAsReadLiveValidation
 ]);
 
 function dispatchBridgeResponse(documentRoot, requestId, payload) {
@@ -17,9 +18,13 @@ function dispatchBridgeResponse(documentRoot, requestId, payload) {
   }));
 }
 
-export function createDefaultPageWorldBridgeHandlers({ runCapabilitySelfTest }) {
+export function createDefaultPageWorldBridgeHandlers({
+  runCapabilitySelfTest,
+  runMarkAsReadLiveValidation
+}) {
   return {
-    [PAGE_WORLD_BRIDGE_METHOD.runCapabilitySelfTest]: () => runCapabilitySelfTest(document)
+    [PAGE_WORLD_BRIDGE_METHOD.runCapabilitySelfTest]: () => runCapabilitySelfTest(document),
+    [PAGE_WORLD_BRIDGE_METHOD.runMarkAsReadLiveValidation]: () => runMarkAsReadLiveValidation()
   };
 }
 

@@ -1,4 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { installPageWorldBridgeMain } from '../../page-world-bridge-main.js';
+import { MARK_AS_READ_DEBUG_VALIDATION_STORAGE_KEY } from '../../src/shared/mark-as-read-debug-preference.js';
 
 function createChromeApi() {
   const listeners = [];
@@ -73,6 +75,24 @@ describe('content entry helpers', () => {
     expect(typeof globalThis.MessagesShortcuts.handleCommand).toBe('function');
     expect(typeof globalThis.MessagesShortcuts.runConversationAction).toBe('function');
     expect(typeof globalThis.MessagesShortcuts.runCapabilitySelfTest).toBe('function');
+  });
+
+  it('routes runMarkAsReadLiveValidation through the content script bridge host', async () => {
+    resetContentScriptForTests();
+    vi.resetModules();
+    globalThis.MessagesShortcuts = undefined;
+    globalThis.chrome = createChromeApi();
+    globalThis.chrome.storage.local.get = vi.fn(async () => ({
+      [MARK_AS_READ_DEBUG_VALIDATION_STORAGE_KEY]: false
+    }));
+
+    await import('../../content.js');
+    installPageWorldBridgeMain(document, globalThis);
+
+    await expect(globalThis.MessagesShortcuts.runMarkAsReadLiveValidation()).resolves.toMatchObject({
+      ok: false,
+      error: 'debug-validation-disabled'
+    });
   });
 
   it('registers exactly one runtime message listener per content script load', () => {

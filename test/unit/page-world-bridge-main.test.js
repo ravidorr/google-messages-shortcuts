@@ -102,4 +102,26 @@ describe('page-world-bridge-main', () => {
     expect(globalThis.MessagesShortcuts.handleCommand).toBeUndefined();
     expect(globalThis.MessagesShortcuts.runConversationAction).toBeUndefined();
   });
+
+  it('exposes runMarkAsReadLiveValidation through the page bridge', async () => {
+    installPageWorldBridgeMain(document, globalThis);
+
+    document.addEventListener(PAGE_WORLD_BRIDGE_REQUEST_EVENT, (event) => {
+      document.dispatchEvent(new CustomEvent(PAGE_WORLD_BRIDGE_RESPONSE_EVENT, {
+        detail: {
+          requestId: event.detail.requestId,
+          payload: {
+            ok: true,
+            result: { ok: true, pillResult: { ok: true }, shortcutResult: { ok: true } }
+          }
+        }
+      }));
+    }, { once: true });
+
+    await expect(globalThis.MessagesShortcuts.runMarkAsReadLiveValidation()).resolves.toEqual({
+      ok: true,
+      pillResult: { ok: true },
+      shortcutResult: { ok: true }
+    });
+  });
 });

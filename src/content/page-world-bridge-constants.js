@@ -3,5 +3,6 @@ export const PAGE_WORLD_BRIDGE_RESPONSE_EVENT = 'messages-shortcuts-bridge-respo
 export const PAGE_WORLD_BRIDGE_TIMEOUT_MS = 30_000;
 
 export const PAGE_WORLD_BRIDGE_METHOD = {
-  runCapabilitySelfTest: 'runCapabilitySelfTest'
+  runCapabilitySelfTest: 'runCapabilitySelfTest',
+  runMarkAsReadLiveValidation: 'runMarkAsReadLiveValidation'
 };

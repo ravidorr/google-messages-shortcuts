@@ -213,18 +213,56 @@ describe('page-world-bridge-host', () => {
     disconnect();
   });
 
-  it('creates default handlers that delegate only to the capability self-test', () => {
+  it('responds to runMarkAsReadLiveValidation bridge requests', async () => {
+    const localThis = {
+      [PAGE_WORLD_BRIDGE_METHOD.runMarkAsReadLiveValidation]:
+        vi.fn(async () => ({ ok: true, pillResult: { ok: true } }))
+    };
+    const disconnect = installPageWorldBridgeHost(document, localThis);
+    const responsePromise = new Promise((resolve) => {
+      document.addEventListener(PAGE_WORLD_BRIDGE_RESPONSE_EVENT, (event) => {
+        resolve(event.detail);
+      }, { once: true });
+    });
+
+    document.dispatchEvent(new CustomEvent(PAGE_WORLD_BRIDGE_REQUEST_EVENT, {
+      detail: {
+        requestId: 'request-mark-read-validation',
+        method: PAGE_WORLD_BRIDGE_METHOD.runMarkAsReadLiveValidation
+      }
+    }));
+
+    await expect(responsePromise).resolves.toEqual({
+      requestId: 'request-mark-read-validation',
+      payload: {
+        ok: true,
+        result: { ok: true, pillResult: { ok: true } }
+      }
+    });
+
+    disconnect();
+  });
+
+  it('creates default handlers that delegate to supported bridge methods', async () => {
     document.body.innerHTML = fullListActionSurface;
 
     const localThis = createDefaultPageWorldBridgeHandlers({
-      runCapabilitySelfTest: () => runCapabilitySelfTest(document)
+      runCapabilitySelfTest: () => runCapabilitySelfTest(document),
+      runMarkAsReadLiveValidation: async () => ({ ok: false, error: 'debug-validation-disabled' })
     });
 
     expect(localThis).toEqual({
-      [PAGE_WORLD_BRIDGE_METHOD.runCapabilitySelfTest]: expect.any(Function)
+      [PAGE_WORLD_BRIDGE_METHOD.runCapabilitySelfTest]: expect.any(Function),
+      [PAGE_WORLD_BRIDGE_METHOD.runMarkAsReadLiveValidation]: expect.any(Function)
     });
     expect(localThis.runCapabilitySelfTest()).toMatchObject({ ok: true });
+    await expect(localThis.runMarkAsReadLiveValidation()).resolves.toEqual({
+      ok: false,
+      error: 'debug-validation-disabled'
+    });
     expect(ALLOWED_PAGE_WORLD_BRIDGE_METHODS.has(PAGE_WORLD_BRIDGE_METHOD.runCapabilitySelfTest))
+      .toBe(true);
+    expect(ALLOWED_PAGE_WORLD_BRIDGE_METHODS.has(PAGE_WORLD_BRIDGE_METHOD.runMarkAsReadLiveValidation))
       .toBe(true);
   });
 });

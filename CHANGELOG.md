@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.14.21] - 2026-10-10
+
+### Added
+
+- Expose opt-in destructive mark-as-read live validation through `globalThis.MessagesShortcuts.runMarkAsReadLiveValidation()` on Google Messages Web
+
+### Changed
+
+- Thin `output/live-validation-console.js` wrapper delegates to the built-in validation API
+- Document debug storage opt-in and disposable-thread requirements in README and the live-validation checklist
+
 ## [1.14.20] - 2026-10-09
 
 ### Changed

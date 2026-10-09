@@ -64,15 +64,22 @@ Full checklists: [live-validation-checklist.md](docs/dom-discovery/live-validati
    - [ ] `mutated` is `false`
    - [ ] No blocking `unsafe` or unexpected `unavailable` capabilities
 
-2. **Read-only hover probe** (paste [output/live-validation-console.js](output/live-validation-console.js), then copy the printed JSON):
+2. **Mark-as-read live validation** (debug only; requires `enableMarkAsReadLiveValidation` in `chrome.storage.local` from the extension service worker console):
+
+   ```javascript
+   await globalThis.MessagesShortcuts.runMarkAsReadLiveValidation()
+   ```
+
+   Or paste [output/live-validation-console.js](output/live-validation-console.js) to print the same JSON.
 
    - [ ] `ok` is `true`
    - [ ] `hoverCheck` and `secondRowHoverCheck` show `markReadPillPresent: true`, `urlUnchanged: true`, and `unreadMarkerPersists: true`
-   - [ ] This probe does not mutate conversations; it only checks self-test output and pill visibility
+   - [ ] `pillResult` and `shortcutResult` report successful mark-as-read on disposable unread rows
+   - [ ] This step mutates conversations; use disposable test threads only
 
-3. **Manual action confirmation** (after the probe passes):
+3. **Manual follow-up when needed**:
 
-   - [ ] Press the assigned **mark-as-read** shortcut on an unread row and confirm read state updates
+   - [ ] Confirm real pointer hover shows the mark-as-read pill when synthetic hover results are inconclusive
    - [ ] Spot-check one row action shortcut (for example archive or trash on a disposable thread) and confirm expected feedback
 
 4. **Record the pass** in [compatibility-matrix.md](docs/dom-discovery/compatibility-matrix.md) with the self-test `environment` block and pass/fail notes only.

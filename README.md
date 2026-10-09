@@ -171,6 +171,33 @@ await globalThis.MessagesShortcuts.runCapabilitySelfTest()
 
 The capability self-test is exposed to the page through a small MAIN-world bridge script. Other console warnings from Google Messages, Grammarly, or service workers are unrelated to this extension.
 
+### Debug-only mark-as-read live validation
+
+Contributors can run destructive mark-as-read validation from the page console after enabling an explicit debug flag. This API marks disposable unread conversations read and may open the message pane. It is not a user-facing feature.
+
+1. Open the extension service worker console from `chrome://extensions` (Messages Shortcut Actions > Service worker).
+2. Enable the opt-in flag:
+
+   ```javascript
+   await chrome.storage.local.set({ enableMarkAsReadLiveValidation: true })
+   ```
+
+3. On a signed-in Google Messages tab with at least two disposable unread rows, rebuild/reload the unpacked extension from `dist/`, then run:
+
+   ```javascript
+   await globalThis.MessagesShortcuts.runMarkAsReadLiveValidation()
+   ```
+
+   Log the returned JSON in DevTools yourself; the extension does not `console.log` on your behalf.
+
+4. Disable the flag when finished:
+
+   ```javascript
+   await chrome.storage.local.set({ enableMarkAsReadLiveValidation: false })
+   ```
+
+Synthetic hover checks in the returned JSON do not fully reproduce real pointer hover for pill visibility or shortcut target resolution. Manual pill and keyboard confirmation may still be required. The compatibility wrapper at `output/live-validation-console.js` calls the same built-in API and prints JSON for copy/paste workflows.
+
 Contributors document live validation in [docs/dom-discovery/live-validation-checklist.md](docs/dom-discovery/live-validation-checklist.md), record results in [docs/dom-discovery/compatibility-matrix.md](docs/dom-discovery/compatibility-matrix.md), and follow [docs/dom-discovery/fixture-sanitization.md](docs/dom-discovery/fixture-sanitization.md) before adding DOM fixtures. Phase 1 row-action gates live in [docs/dom-discovery/phase1-action-decisions.md](docs/dom-discovery/phase1-action-decisions.md).
 
 Loaded-message find, native filter UI focus, and connection diagnostics remain unavailable until live DOM discovery validates their selectors.
