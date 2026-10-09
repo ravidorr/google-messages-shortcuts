@@ -1,3 +1,5 @@
+@import url('design-system/tokens.css');
+
 :root {
   color-scheme: light dark;
   font-family: "Segoe UI", system-ui, sans-serif;
@@ -6,8 +8,8 @@
 body {
   margin: 0;
   min-width: 320px;
-  background: #f8f9fb;
-  color: #1f1f1f;
+  background: var(--color-popup-bg);
+  color: var(--color-popup-text);
 }
 
 .popup {
@@ -36,14 +38,14 @@ body {
   margin: 0;
   font-size: 13px;
   line-height: 1.45;
-  color: #4a4a4a;
+  color: var(--color-popup-muted);
 }
 
 .popup__version {
   margin: 4px 0 0;
   font-size: 12px;
   line-height: 1.4;
-  color: #5f6368;
+  color: var(--color-popup-secondary);
 }
 
 .popup__section {
@@ -60,7 +62,7 @@ body {
   list-style: none;
   margin: 0;
   padding: 0;
-  border: 1px solid #d9dde5;
+  border: 1px solid var(--color-popup-border);
   border-radius: 8px;
   overflow: hidden;
 }
@@ -71,8 +73,8 @@ body {
   gap: 12px;
   align-items: center;
   padding: 10px 12px;
-  background: #fff;
-  border-bottom: 1px solid #e7ebf2;
+  background: var(--color-primary-contrast);
+  border-bottom: 1px solid var(--color-popup-item-border);
 }
 
 .shortcut-item:last-child {
@@ -101,24 +103,24 @@ body {
 }
 
 .shortcut-status--assigned {
-  background: #e8f0fe;
-  color: #174ea6;
+  background: var(--color-popup-assigned-bg);
+  color: var(--color-popup-assigned-text);
 }
 
 .shortcut-status--pill-only {
-  background: #f1f3f4;
-  color: #5f6368;
+  background: var(--color-popup-neutral-bg);
+  color: var(--color-popup-secondary);
 }
 
 .shortcut-status--missing {
-  background: #fce8e6;
-  color: #c5221f;
+  background: var(--color-popup-warning-bg);
+  color: var(--color-popup-warning-text);
 }
 
 .popup__warning {
   margin: 8px 0 0;
   font-size: 12px;
-  color: #c5221f;
+  color: var(--color-popup-warning-text);
 }
 
 .popup__checkbox-label {
@@ -135,10 +137,10 @@ body {
 }
 
 .popup__select {
-  background: #ffffff;
-  border: 1px solid #dadce0;
+  background: var(--color-primary-contrast);
+  border: 1px solid var(--color-border);
   border-radius: 8px;
-  color: #1f1f1f;
+  color: var(--color-popup-text);
   font: 13px/18px system-ui, sans-serif;
   min-height: 36px;
   padding: 6px 10px;
@@ -151,14 +153,14 @@ body {
 }
 
 .popup__help a {
-  color: #174ea6;
+  color: var(--color-popup-link);
 }
 
 .popup__button {
-  background: #ffffff;
-  border: 1px solid #dadce0;
+  background: var(--color-primary-contrast);
+  border: 1px solid var(--color-border);
   border-radius: 8px;
-  color: #174ea6;
+  color: var(--color-popup-link);
   cursor: pointer;
   font: 600 13px/18px system-ui, sans-serif;
   margin-top: 8px;
@@ -174,61 +176,61 @@ body {
 .popup__status {
   margin: 8px 0 0;
   font-size: 12px;
-  color: #174ea6;
+  color: var(--color-popup-link);
 }
 
 @media (prefers-color-scheme: dark) {
   body {
-    background: #202124;
-    color: #e8eaed;
+    background: var(--color-popup-bg);
+    color: var(--color-popup-text);
   }
 
   .popup__subtitle,
   .popup__help {
-    color: #bdc1c6;
+    color: var(--color-popup-muted);
   }
 
   .popup__version {
-    color: #9aa0a6;
+    color: var(--color-popup-secondary);
   }
 
   .shortcut-list {
-    border-color: #3c4043;
+    border-color: var(--color-popup-border);
   }
 
   .shortcut-item {
-    background: #292a2d;
-    border-bottom-color: #3c4043;
+    background: var(--color-surface);
+    border-bottom-color: var(--color-popup-border);
   }
 
   .shortcut-status--assigned {
-    background: #174ea6;
-    color: #e8f0fe;
+    background: var(--color-popup-assigned-bg);
+    color: var(--color-popup-assigned-text);
   }
 
   .shortcut-status--pill-only {
-    background: #3c4043;
-    color: #bdc1c6;
+    background: var(--color-popup-border);
+    color: var(--color-popup-muted);
   }
 
   .shortcut-status--missing {
-    background: #5f2120;
-    color: #fce8e6;
+    background: var(--color-popup-warning-bg);
+    color: var(--color-popup-warning-text);
   }
 
   .popup__select {
-    background: #292a2d;
-    border-color: #3c4043;
-    color: #e8eaed;
+    background: var(--color-surface);
+    border-color: var(--color-popup-border);
+    color: var(--color-popup-text);
   }
 
   .popup__button {
-    background: #292a2d;
-    border-color: #3c4043;
-    color: #8ab4f8;
+    background: var(--color-surface);
+    border-color: var(--color-popup-border);
+    color: var(--color-popup-link);
   }
 
   .popup__status {
-    color: #8ab4f8;
+    color: var(--color-popup-link);
   }
 }

@@ -27,7 +27,9 @@ output/*
 *.log
 npm-debug.log*
 
+# Tooling artifacts
+.lighthouseci/
+
 # Environment
-.env
-.env.local
-.env.*.local
+.env*
+!.env.example

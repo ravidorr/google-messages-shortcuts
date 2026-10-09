@@ -2,8 +2,9 @@
   "config": {
     "default": true,
     "MD013": false,
-    "MD024": { "siblings_only": true },
-    "MD033": false,
-    "MD041": false
-  }
+    "MD033": { "allowed_elements": ["details", "summary", "img", "br"] },
+    "MD041": true
+  },
+  "globs": ["**/*.md"],
+  "ignores": ["node_modules/**", "dist/**", ".claude/**", "CHANGELOG.md", ".github/ISSUE_TEMPLATE/**", ".github/PULL_REQUEST_TEMPLATE.md", "CLAUDE.md", "GEMINI.md", "LICENSE.md"]
 }

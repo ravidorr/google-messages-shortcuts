@@ -4,20 +4,28 @@
     "url": "https://github.com/sponsors/ravidorr"
   },
   "name": "google-messages-shortcuts",
-  "version": "1.14.19",
+  "version": "1.14.20",
   "description": "Use shortcuts to archive, trash, mark conversations read or unread, and optionally navigate Google Messages.",
   "type": "module",
+  "engines": {
+    "node": ">=24.21.0 <25"
+  },
+  "packageManager": "npm@11.19.0",
   "scripts": {
     "build": "node scripts/build.js",
     "clean": "node scripts/clean.js",
     "generate:icons": "node scripts/generate-icons.js",
-    "lint": "npm run lint:js && npm run lint:html && npm run lint:md",
-    "lint:js": "eslint . --max-warnings=0",
-    "lint:html": "htmlhint popup.html",
-    "lint:md": "markdownlint-cli2 \"**/*.md\" \"#node_modules\"",
+    "lint": "npm run lint:js && npm run lint:css && npm run lint:html && npm run lint:md",
+    "lint:js": "eslint --max-warnings=0 .",
+    "lint:css": "stylelint --allow-empty-input --max-warnings=0 \"**/*.css\"",
+    "lint:html": "node scripts/lint-html.mjs",
+    "lint:md": "markdownlint-cli2",
     "package": "npm run build && node scripts/package.js",
-    "test": "vitest run --coverage",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",
+    "typecheck": "node --check background.js && node --check content.js && node --check page-world-bridge-main.js && node --check popup.js",
+    "check:generated": "node scripts/validate-package-lock-version.js && node scripts/validate-security-policy-version.mjs",
     "validate:package-artifact": "node scripts/validate-package-artifact.js",
     "verify:version-bump": "node scripts/validate-version-bump.js origin/main",
     "prepare": "husky",
@@ -39,33 +47,28 @@
   },
   "homepage": "https://github.com/ravidorr/google-messages-shortcuts#readme",
   "devDependencies": {
-    "@eslint/js": "^9.39.2",
-    "@vitest/coverage-v8": "^5.0.3",
-    "archiver": "^8.0.0",
-    "esbuild": "^0.28.2",
-    "eslint": "^9.39.2",
-    "eslint-plugin-no-em-dash": "^1.0.0",
-    "eslint-plugin-no-emoji": "^2.0.2",
-    "globals": "^17.0.0",
-    "htmlhint": "^1.8.0",
-    "husky": "^9.1.7",
-    "jsdom": "^26.1.0",
-    "jszip": "^3.10.2",
-    "lint-staged": "^16.2.7",
-    "markdownlint-cli2": "^0.23.3",
-    "sharp": "^0.35.5",
-    "vitest": "^5.0.3",
-    "yaml": "^2.9.1"
-  },
-  "lint-staged": {
-    "*.js": [
-      "eslint --fix"
-    ],
-    "popup.html": [
-      "htmlhint"
-    ],
-    "**/*.md": [
-      "markdownlint-cli2"
-    ]
+    "@eslint/js": "10.0.1",
+    "@types/node": "26.6.5",
+    "@vitest/coverage-v8": "5.0.3",
+    "archiver": "8.0.0",
+    "esbuild": "0.28.2",
+    "eslint": "10.12.0",
+    "eslint-plugin-no-em-dash": "1.0.4",
+    "eslint-plugin-no-emoji": "2.0.3",
+    "globals": "17.13.0",
+    "html-validate": "11.16.2",
+    "husky": "9.1.7",
+    "jsdom": "30.1.2",
+    "jszip": "3.10.2",
+    "lint-staged": "17.6.0",
+    "markdownlint-cli2": "0.23.3",
+    "semver": "7.8.5",
+    "sharp": "0.35.5",
+    "stylelint": "17.16.0",
+    "stylelint-config-standard": "40.0.0",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.71.1",
+    "vitest": "5.0.3",
+    "yaml": "2.9.1"
   }
 }

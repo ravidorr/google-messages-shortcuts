@@ -81,7 +81,7 @@ export function getSelfTestEnvironment(
   try {
     extensionVersion = chromeApi?.runtime?.getManifest?.()?.version ?? 'unknown';
   } catch {
-    extensionVersion = 'unknown';
+    // Chrome may reject manifest access in restricted extension contexts.
   }
 
   return {

@@ -1,0 +1,20 @@
+# google-messages-shortcuts
+
+> Chrome extension for Google Messages Web that provides keyboard shortcuts, navigation, and accessible conversation-action controls.
+
+## Project
+
+- [Overview and quickstart](README.md): Purpose, requirements, quickstart, and usage.
+- [Changelog](CHANGELOG.md): Released changes.
+
+## Policies and support
+
+- [Security](SECURITY.md): Vulnerability reporting and supported versions.
+- [Privacy](PRIVACY.md): Data-handling policy.
+- [Support](SUPPORT.md): Support and troubleshooting information.
+
+## Miscellaneous
+
+- [Agent guide](AGENT.md): Canonical instructions for AI coding agents.
+- [Contributing](CONTRIBUTING.md): Development and contribution guidance.
+- [License](LICENSE): License terms.

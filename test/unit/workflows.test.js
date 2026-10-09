@@ -103,19 +103,19 @@ describe('GitHub workflow security', () => {
 
   it('skips coverage comment publication for fork pull requests', async () => {
     const workflows = await readWorkflowFiles();
-    const coverageWorkflow = workflows.find(({ name }) => name === 'coverage-report.yml');
+    const coverageWorkflow = workflows.find(({ name }) => name === 'ci.yml');
 
     expect(coverageWorkflow?.content).toContain(
-      'if: github.event.pull_request.head.repo.full_name == github.repository'
+      "github.event.pull_request.head.repo.full_name == github.repository && github.actor != 'dependabot[bot]'"
     );
   });
 
-  it('updates only the GitHub Actions coverage comment', async () => {
+  it('updates the pull request coverage comment from CI', async () => {
     const workflows = await readWorkflowFiles();
-    const coverageWorkflow = workflows.find(({ name }) => name === 'coverage-report.yml');
+    const coverageWorkflow = workflows.find(({ name }) => name === 'ci.yml');
 
     expect(coverageWorkflow?.content).toContain(
-      "comment.user?.login === 'github-actions[bot]'"
+      'gh pr comment "$PR_NUMBER" --body-file coverage-report.md --edit-last --create-if-none'
     );
   });
 
@@ -134,6 +134,7 @@ describe('GitHub workflow security', () => {
       contents: 'read',
       'id-token': 'write'
     });
+    expect(publishWorkflowContent).toContain('node-version-file: .nvmrc');
     expect(publishWorkflowContent).toContain(
       "github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main'"
     );
@@ -156,12 +157,10 @@ describe('GitHub workflow security', () => {
     expect(publishWorkflowContent).toContain(':cancelSubmission');
   });
 
-  it('validates release metadata in the version-bump workflow', async () => {
+  it('runs the file-based release gate in CI', async () => {
     const workflows = await readWorkflowFiles();
-    const versionBumpWorkflow = workflows.find(({ name }) => name === 'version-bump.yml');
+    const ciWorkflow = workflows.find(({ name }) => name === 'ci.yml');
 
-    expect(versionBumpWorkflow?.content).toContain(
-      'node scripts/validate-release-metadata.js origin/${{ github.base_ref }}'
-    );
+    expect(ciWorkflow?.content).toContain('node scripts/check-release.mjs');
   });
 });

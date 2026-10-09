@@ -1,0 +1,14 @@
+#!/usr/bin/env sh
+# Minimum length and Jira key prefix (e.g. APP-123456 - message).
+msg_file="$1"
+msg="$(head -n 1 "$msg_file")"
+
+if [ "${#msg}" -lt 15 ]; then
+  echo "commit-msg: subject must be at least 15 characters." >&2
+  exit 1
+fi
+
+if ! printf '%s' "$msg" | grep -Eq '^(Merge |Revert |{{JIRA_PREFIX}}-[0-9]+ )'; then
+  echo "commit-msg: subject must start with a {{JIRA_PREFIX}}-<number> key, e.g. {{JIRA_PREFIX}}-123456 Add thing." >&2
+  exit 1
+fi

@@ -1,9 +1,9 @@
 #!/bin/sh
 set -e
 
+export PATH="/usr/bin:$PATH"
+
 node scripts/prevent-main-commit.js
 node scripts/update-package-lock.js
-node scripts/validate-release-metadata.js
-node scripts/validate-package-lock-version.js
-npx lint-staged
-npm test
+npx lint-staged --config lint-staged.config.mjs
+npm run check:generated

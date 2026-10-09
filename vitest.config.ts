@@ -5,21 +5,25 @@ export default defineConfig({
     environment: 'jsdom',
     fileParallelism: false,
     setupFiles: ['./test/setup.js'],
+    exclude: ['node_modules/**', '.claude/**'],
     coverage: {
       provider: 'v8',
-      reporter: ['text', 'json-summary'],
+      reporter: ['text', 'lcov', 'json-summary'],
       include: [
         'background.js',
         'content.js',
+        'page-world-bridge-main.js',
+        'page-world-bridge.js',
         'popup.js',
         'scripts/**/*.{js,mjs}',
         'src/**/*.js'
       ],
+      exclude: ['**/*.d.ts', '**/*.test.*', '**/*.spec.*'],
       thresholds: {
         lines: 100,
+        functions: 100,
         branches: 100,
-        statements: 100,
-        functions: 100
+        statements: 100
       }
     }
   }

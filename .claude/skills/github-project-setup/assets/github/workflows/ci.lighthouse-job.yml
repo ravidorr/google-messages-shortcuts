@@ -1,0 +1,19 @@
+# Append to the end of ci.yml for web apps and static sites only.
+
+  lighthouse:
+    runs-on: ubuntu-latest
+    needs: quality
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: {{PM}}
+      - run: {{PM_CI}}
+      - run: {{PM_RUN}} build
+      - run: npx --yes @lhci/cli@0.15.1 autorun
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: lighthouse-reports
+          path: .lighthouseci
