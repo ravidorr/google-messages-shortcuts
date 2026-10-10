@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.14.22] - 2026-10-10
+
+### Fixed
+
+- Override vulnerable Markdown lint transitive dependencies
+
 ## [1.14.21] - 2026-10-10
 
 ### Added
