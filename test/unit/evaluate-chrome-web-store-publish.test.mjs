@@ -33,6 +33,15 @@ async function createTemporaryDirectory() {
   return directory;
 }
 
+function restoreGithubOutput(previousOutput) {
+  if (previousOutput === undefined) {
+    delete process.env.GITHUB_OUTPUT;
+    return;
+  }
+
+  process.env.GITHUB_OUTPUT = previousOutput;
+}
+
 describe('evaluate-chrome-web-store-publish', () => {
   it('reads the manifest version', () => {
     const localThis = readPackageVersionFromManifest(JSON.stringify({ version: '1.14.24' }));
@@ -157,7 +166,7 @@ describe('evaluate-chrome-web-store-publish', () => {
         'Skipping Chrome Web Store publish: version 1.14.24 is already published.\n'
       );
     } finally {
-      process.env.GITHUB_OUTPUT = previousOutput;
+      restoreGithubOutput(previousOutput);
     }
   });
 
@@ -194,7 +203,7 @@ describe('evaluate-chrome-web-store-publish', () => {
         'Publishing 1.14.25 (store has 1.14.24).\n'
       );
     } finally {
-      process.env.GITHUB_OUTPUT = previousOutput;
+      restoreGithubOutput(previousOutput);
     }
   });
 
@@ -224,7 +233,7 @@ describe('evaluate-chrome-web-store-publish', () => {
         'Publishing 1.14.25 (no published crxVersion in fetchStatus).\n'
       );
     } finally {
-      process.env.GITHUB_OUTPUT = previousOutput;
+      restoreGithubOutput(previousOutput);
     }
   });
 
