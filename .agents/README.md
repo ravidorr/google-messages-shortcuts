@@ -15,7 +15,7 @@ From the repository root:
 ./scripts/install-agent-skills.sh
 ```
 
-That runs the Modern Web Guidance CLI (non-interactive in Cursor) and refreshes `modern-web-guidance`. The `chrome-extensions` skill is tracked in this repository.
+That runs the Modern Web Guidance CLI and refreshes the **`modern-web-guidance`** skill only. The CLI may open an interactive wizard when it cannot detect your agent environment; use `npx modern-web-guidance@latest install --choose` when you need to pick skills explicitly. The **`chrome-extensions`** skill is vendored in this repository (update by re-copying from upstream or selecting it in `--choose`).
 
 To pick skills interactively (for example, reinstall both from upstream):
 

@@ -28,8 +28,8 @@ Chrome extension for Google Messages Web that provides keyboard shortcuts, navig
 
 ## Chrome extension AI tooling
 
-- **Skills:** [Modern Web Guidance](https://developer.chrome.com/docs/extensions/ai/build-with-ai) skills live under `.agents/skills/` (`chrome-extensions`, `modern-web-guidance`). Install or refresh with `./scripts/install-agent-skills.sh` (see [.agents/README.md](.agents/README.md)).
-- **Chrome DevTools MCP:** Project MCP config is [.cursor/mcp.json](.cursor/mcp.json) (`chrome-devtools-mcp` with `--categoryExtensions` and `--autoConnect`). Enable **Allow remote debugging for this browser instance** at `chrome://inspect/#remote-debugging` when the agent should drive your existing Chrome profile (signed-in Google Messages, unpacked `dist/` load, popup and service worker inspection).
+- **Skills:** [Modern Web Guidance](https://developer.chrome.com/docs/extensions/ai/build-with-ai) skills live under `.agents/skills/`. Run `./scripts/install-agent-skills.sh` to refresh **`modern-web-guidance`** only; **`chrome-extensions`** is vendored in-repo (see [.agents/README.md](.agents/README.md)).
+- **Chrome DevTools MCP:** Project MCP config is [.cursor/mcp.json](.cursor/mcp.json) (`chrome-devtools-mcp` with `--categoryExtensions`). Do not combine `--autoConnect` with `--categoryExtensions` on Chrome versions before 149; extension tools use the MCP pipe-launched browser. Sign in to Google Messages in that browser or load unpacked `dist/` there for agent-driven extension debugging.
 
 ## Layout
 

@@ -72,17 +72,21 @@ window.addEventListener('message', (e) => { eval(e.data.js); /* allowed in sandb
 
 // ✅ OPTION B: Blob URL (creates separate origin, bypasses extension CSP)
 iframe.src = URL.createObjectURL(new Blob([doc], { type: 'text/html' }));
-
-// ✅ OPTION C: srcdoc
-iframe.srcdoc = `<style>${css}</style>${html}<script>${js}<\/script>`;
 ```
+
+`srcdoc` on extension pages is still subject to extension CSP, so inline scripts in that string do not run. Use manifest-declared sandbox pages instead.
 
 See `references/extensions/csp-sandbox.md` for full details.
 
-#### 4. `tab.url` requires the `tabs` permission
+#### 4. Reading `tab.url` needs the right permission model
 
-Without it, `tab.url` silently returns `undefined` — no error thrown. See
-`references/extensions/permissions.md`.
+Without any qualifying permission, `tab.url` can silently return `undefined`. Prefer the narrowest option:
+
+- **`activeTab`**: temporary access after the user invokes the extension (action click, popup open, etc.).
+- **Matching `host_permissions`**: URL access for origins you already inject into.
+- **`tabs`**: only when you need persistent URL access across tabs without a user gesture.
+
+See `references/extensions/permissions.md`.
 
 #### 5. Always use async/await — never `.then()` chains
 
@@ -503,7 +507,7 @@ Verify EVERY item before delivering:
 - [ ] All icon files referenced in manifest exist as real files with correct dimensions — or icons are omitted
 - [ ] Side panel has an explicit open trigger (not just a manifest declaration)
 - [ ] Code execution uses sandbox/blob/srcdoc — no `eval()` in extension pages
-- [ ] `tabs` permission declared if `tab.url` or `tab.title` is accessed
+- [ ] Tab URL/title access uses `activeTab`, matching `host_permissions`, or `tabs` only when narrower options are insufficient
 - [ ] All code uses `async`/`await` — no `.then()` chains
 - [ ] Content scripts batch DOM updates with `requestAnimationFrame`
 - [ ] Service worker stores NO state in global variables — uses `chrome.storage`

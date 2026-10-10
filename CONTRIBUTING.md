@@ -8,7 +8,7 @@ Thanks for contributing to Messages Shortcut Actions.
 2. Run `nvm install && nvm use`, then install dependencies with `npm install`.
 3. Run `npm run build` to create the loadable extension in `dist/`.
 4. Load `dist/` from `chrome://extensions` with Developer mode enabled.
-5. Optional for AI-assisted work: run `./scripts/install-agent-skills.sh` for Modern Web Guidance skills, enable Chrome DevTools MCP from [.cursor/mcp.json](.cursor/mcp.json) in Cursor, and see [AGENT.md](AGENT.md).
+5. Optional for AI-assisted work: run `./scripts/install-agent-skills.sh` for the `modern-web-guidance` skill, reload Chrome DevTools MCP from [.cursor/mcp.json](.cursor/mcp.json) in Cursor, and see [AGENT.md](AGENT.md).
 
 ## Documentation map
 
