@@ -15,6 +15,9 @@ output/*
 !output/deferred-action-validation-console.js
 !output/composer-discovery-console.js
 
+# Agent skills installed by scripts/install-agent-skills.sh (chrome-extensions is tracked)
+.agents/skills/modern-web-guidance/
+
 # IDE and OS
 .idea/
 .vscode/

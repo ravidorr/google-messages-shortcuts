@@ -24,9 +24,18 @@ Chrome extension for Google Messages Web that provides keyboard shortcuts, navig
 - Pin Node 24.21.0 via `.nvmrc` and npm 11.19.0 via `package.json`. Keep `package-lock.json` committed.
 - Pull requests that change `src/`, `package.json`, or `tsconfig.json` update `CHANGELOG.md` and bump the version once per pull request. Docs-only, test-only, and tooling-only pull requests do not.
 - Track open work in `TODO.md`.
+- When creating or changing extension behavior, permissions, host access, store-facing copy, or release metadata, create or update [CHROMEWEBSTORE.md](CHROMEWEBSTORE.md) (see the `chrome-extensions` skill in `.agents/skills/`).
+
+## Chrome extension AI tooling
+
+- **Skills:** [Modern Web Guidance](https://developer.chrome.com/docs/extensions/ai/build-with-ai) skills live under `.agents/skills/`. Run `./scripts/install-agent-skills.sh` to refresh **`modern-web-guidance`** only; **`chrome-extensions`** is vendored in-repo (see [.agents/README.md](.agents/README.md)).
+- **Chrome DevTools MCP:** Project MCP config is [.cursor/mcp.json](.cursor/mcp.json) (`chrome-devtools-mcp` with `--categoryExtensions`). Do not combine `--autoConnect` with `--categoryExtensions` on Chrome versions before 149; extension tools use the MCP pipe-launched browser. Sign in to Google Messages in that browser or load unpacked `dist/` there for agent-driven extension debugging.
 
 ## Layout
 
 - `design-system/` - tokens, components, showcase
 - `.husky/` - git hooks (pre-commit fast, pre-push broad)
 - `.github/` - CI, release, Dependabot, templates
+- `.agents/skills/` - Modern Web Guidance agent skills
+- `.cursor/mcp.json` - Chrome DevTools MCP for extension debugging in Cursor
+- `CHROMEWEBSTORE.md` - Chrome Web Store listing and permission justifications (not shipped in the ZIP)
