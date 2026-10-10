@@ -13,38 +13,44 @@ export function readPackageVersionFromManifest(manifestJson) {
   }
 }
 
-export function readPublishedCrxVersion(fetchStatus) {
+export function readPublishedCrxVersions(fetchStatus) {
   const channels = fetchStatus?.publishedItemRevisionStatus?.distributionChannels;
 
   if (!Array.isArray(channels)) {
-    return null;
+    return [];
   }
 
+  const publishedCrxVersions = [];
+
   for (const channel of channels) {
-    if (typeof channel?.crxVersion === 'string' && channel.crxVersion.length > 0) {
-      return channel.crxVersion;
+    if (typeof channel?.crxVersion !== 'string' || channel.crxVersion.length === 0) {
+      continue;
+    }
+
+    if (!publishedCrxVersions.includes(channel.crxVersion)) {
+      publishedCrxVersions.push(channel.crxVersion);
     }
   }
 
-  return null;
+  return publishedCrxVersions;
 }
 
-export function shouldSkipChromeWebStorePublish(packageVersion, publishedCrxVersion) {
-  if (!packageVersion || !publishedCrxVersion) {
+export function shouldSkipChromeWebStorePublish(packageVersion, publishedCrxVersions) {
+  if (!packageVersion || !Array.isArray(publishedCrxVersions) || publishedCrxVersions.length === 0) {
     return false;
   }
 
-  return packageVersion === publishedCrxVersion;
+  return publishedCrxVersions.includes(packageVersion);
 }
 
 export function evaluateChromeWebStorePublish(packageVersion, fetchStatus) {
-  const publishedCrxVersion = readPublishedCrxVersion(fetchStatus);
-  const skipPublish = shouldSkipChromeWebStorePublish(packageVersion, publishedCrxVersion);
+  const publishedCrxVersions = readPublishedCrxVersions(fetchStatus);
+  const skipPublish = shouldSkipChromeWebStorePublish(packageVersion, publishedCrxVersions);
 
   return {
     skipPublish,
     packageVersion,
-    publishedCrxVersion
+    publishedCrxVersions
   };
 }
 
@@ -99,7 +105,7 @@ export async function runChromeWebStorePublishGuard({
   writeGithubOutput('package_version', result.packageVersion);
   writeGithubOutput(
     'published_crx_version',
-    result.publishedCrxVersion ?? ''
+    result.publishedCrxVersions.join(',')
   );
 
   if (result.skipPublish) {
@@ -109,9 +115,9 @@ export async function runChromeWebStorePublishGuard({
     return result;
   }
 
-  if (result.publishedCrxVersion) {
+  if (result.publishedCrxVersions.length > 0) {
     process.stdout.write(
-      `Publishing ${result.packageVersion} (store has ${result.publishedCrxVersion}).\n`
+      `Publishing ${result.packageVersion} (store has ${result.publishedCrxVersions.join(', ')}).\n`
     );
   } else {
     process.stdout.write(

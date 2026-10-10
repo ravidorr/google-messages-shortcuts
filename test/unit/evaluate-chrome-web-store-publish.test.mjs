@@ -9,7 +9,7 @@ import {
   evaluateChromeWebStorePublish,
   fetchChromeWebStoreStatus,
   readPackageVersionFromManifest,
-  readPublishedCrxVersion,
+  readPublishedCrxVersions,
   runChromeWebStorePublishGuard,
   shouldSkipChromeWebStorePublish
 } from '../../scripts/evaluate-chrome-web-store-publish.mjs';
@@ -55,39 +55,68 @@ describe('evaluate-chrome-web-store-publish', () => {
     expect(readPackageVersionFromManifest(JSON.stringify({ name: 'x' }))).toBeNull();
   });
 
-  it('reads the published crxVersion from fetchStatus', () => {
-    const localThis = readPublishedCrxVersion({
+  it('reads every published crxVersion from fetchStatus', () => {
+    const localThis = readPublishedCrxVersions({
       publishedItemRevisionStatus: {
-        distributionChannels: [{ deployPercentage: 100, crxVersion: '1.14.24' }]
+        distributionChannels: [
+          { deployPercentage: 10, crxVersion: '1.14.23' },
+          { deployPercentage: 100, crxVersion: '1.14.24' }
+        ]
       }
     });
 
-    expect(localThis).toBe('1.14.24');
+    expect(localThis).toEqual(['1.14.23', '1.14.24']);
   });
 
-  it('returns null when fetchStatus has no published channels', () => {
-    expect(readPublishedCrxVersion({})).toBeNull();
-    expect(readPublishedCrxVersion({
+  it('returns an empty list when fetchStatus has no published channels', () => {
+    expect(readPublishedCrxVersions({})).toEqual([]);
+    expect(readPublishedCrxVersions({
       publishedItemRevisionStatus: { distributionChannels: [{ deployPercentage: 100 }] }
-    })).toBeNull();
+    })).toEqual([]);
   });
 
-  it('skips publish when the packaged version matches the store', () => {
-    const localThis = shouldSkipChromeWebStorePublish('1.14.24', '1.14.24');
+  it('deduplicates repeated crxVersion values across channels', () => {
+    const localThis = readPublishedCrxVersions({
+      publishedItemRevisionStatus: {
+        distributionChannels: [
+          { crxVersion: '1.14.24' },
+          { crxVersion: '1.14.24' }
+        ]
+      }
+    });
+
+    expect(localThis).toEqual(['1.14.24']);
+  });
+
+  it('skips publish when the packaged version matches any published channel', () => {
+    const localThis = shouldSkipChromeWebStorePublish('1.14.24', ['1.14.23', '1.14.24']);
 
     expect(localThis).toBe(true);
   });
 
-  it('does not skip when either version is missing', () => {
-    expect(shouldSkipChromeWebStorePublish('', '1.14.24')).toBe(false);
-    expect(shouldSkipChromeWebStorePublish('1.14.24', '')).toBe(false);
+  it('does not skip when the package version or channel list is missing', () => {
+    expect(shouldSkipChromeWebStorePublish('', ['1.14.24'])).toBe(false);
+    expect(shouldSkipChromeWebStorePublish('1.14.24', [])).toBe(false);
+  });
+
+  it('skips when the matching version is not the first distribution channel', () => {
+    const localThis = evaluateChromeWebStorePublish('1.14.24', {
+      publishedItemRevisionStatus: {
+        distributionChannels: [
+          { crxVersion: '1.14.23' },
+          { crxVersion: '1.14.24' }
+        ]
+      }
+    });
+
+    expect(localThis.skipPublish).toBe(true);
   });
 
   it('does not skip when the store has no published crxVersion', () => {
     const localThis = evaluateChromeWebStorePublish('1.14.24', {});
 
     expect(localThis.skipPublish).toBe(false);
-    expect(localThis.publishedCrxVersion).toBeNull();
+    expect(localThis.publishedCrxVersions).toEqual([]);
   });
 
   it('does not skip when the packaged version is newer', () => {
