@@ -21,7 +21,6 @@
               rel="noopener noreferrer"
             >Full shortcut guide</a>
           </p>
-          <p id="extension-version" class="popup__version" hidden></p>
         </div>
       </header>
 
@@ -59,11 +58,20 @@
           <input id="pause-extension" type="checkbox" disabled>
           Pause shortcut actions and pills
         </label>
-        <button id="reset-extension-preferences" type="button" class="popup__button" disabled>
+        <button
+          id="reset-extension-preferences"
+          type="button"
+          class="popup__button popup__button--destructive"
+          disabled
+        >
           Reset extension preferences
         </button>
         <p id="reset-status" class="popup__status" role="status" aria-live="polite" hidden></p>
       </section>
+
+      <footer class="popup__footer">
+        <p id="extension-version" class="popup__version" hidden></p>
+      </footer>
     </main>
     <script type="module" src="popup.js"></script>
   </body>

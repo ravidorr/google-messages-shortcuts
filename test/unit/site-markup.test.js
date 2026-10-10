@@ -30,6 +30,7 @@ describe('support site markup', () => {
       expect(link.getAttribute('rel')).toBe('noopener noreferrer');
     }
     expect(document.querySelector('link[href="site.css"]')).not.toBeNull();
+    expect(document.querySelector('.site-footer__version')?.textContent).toContain('Version __EXTENSION_VERSION__');
   });
 
   it('links in-page navigation targets to section ids', async () => {

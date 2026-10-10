@@ -41,10 +41,21 @@ body {
 
 .popup__guide-link {
   color: var(--color-popup-link);
+  display: inline-block;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.4;
+  margin-top: 4px;
+}
+
+.popup__footer {
+  border-top: 1px solid var(--color-popup-item-border);
+  margin-top: 4px;
+  padding-top: 12px;
 }
 
 .popup__version {
-  margin: 4px 0 0;
+  margin: 0;
   font-size: 12px;
   line-height: 1.4;
   color: var(--color-popup-secondary);
@@ -96,9 +107,13 @@ body {
   color: var(--color-popup-link);
   cursor: pointer;
   font: 600 13px/18px system-ui, sans-serif;
-  margin-top: 8px;
   min-height: 36px;
   padding: 8px 12px;
+}
+
+.popup__button--destructive {
+  color: var(--color-danger);
+  margin-top: 16px;
 }
 
 .popup__button:disabled {
@@ -132,6 +147,10 @@ body {
     background: var(--color-surface);
     border-color: var(--color-popup-border);
     color: var(--color-popup-link);
+  }
+
+  .popup__button--destructive {
+    color: var(--color-danger);
   }
 
   .popup__status {
