@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Messages Shortcut Actions: User guide</title>
+    <meta
+      name="description"
+      content="Keyboard shortcuts, navigation, and settings for the Messages Shortcut Actions Chrome extension on Google Messages Web."
+    >
+    <link rel="stylesheet" href="site.css">
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="site-header__inner">
+        <h1 class="site-header__title">Messages Shortcut Actions</h1>
+        <p class="site-header__lede">
+          Keyboard shortcuts and row pills for
+          <a href="https://messages.google.com/web/" target="_blank" rel="noopener noreferrer">Google Messages Web</a>.
+        </p>
+        <nav aria-label="On this page">
+          <ul class="site-nav">
+            <li><a href="#actions">Actions</a></li>
+            <li><a href="#chrome-shortcuts">Chrome shortcuts</a></li>
+            <li><a href="#page-navigation">Page navigation</a></li>
+            <li><a href="#preferences">Preferences</a></li>
+            <li><a href="#limitations">Limitations</a></li>
+            <li><a href="#privacy">Privacy</a></li>
+            <li><a href="#install">Install</a></li>
+            <li><a href="#support">Support</a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <main class="site-main">
+      <section id="actions" class="site-section" aria-labelledby="actions-heading">
+        <h2 id="actions-heading">Actions</h2>
+        <p>
+          The extension automates conversation-list actions on Google Messages Web: archive, trash,
+          mark read or unread, mute, unmute, block / report spam, open Archived, open Spam &amp; blocked,
+          start chat, and unarchive (via Google Messages native controls in the Archived dialog).
+        </p>
+        <ul>
+          <li>Archive, trash, mark read, and mark unread use Chrome extension keyboard shortcuts (defaults below).</li>
+          <li>Mute, unmute, and block / report spam appear as row pills (Chrome allows four shortcuts per extension).</li>
+          <li>Optional Chrome commands: Open Archived, Start chat, and Open Spam &amp; blocked.</li>
+          <li>Row pills do not appear inside the Archived dialog; use Google Messages unarchive controls there.</li>
+        </ul>
+      </section>
+
+      <section id="chrome-shortcuts" class="site-section" aria-labelledby="chrome-shortcuts-heading">
+        <h2 id="chrome-shortcuts-heading">Chrome shortcuts</h2>
+        <p>
+          Chrome controls extension shortcuts. Open
+          <a href="https://support.google.com/chrome/answer/15719163" target="_blank" rel="noopener noreferrer">Chrome shortcut settings</a>
+          or visit <code>chrome://extensions/shortcuts</code> and assign keys for Messages Shortcut Actions.
+        </p>
+        <h3>Default row-action shortcuts</h3>
+        <table class="site-table">
+          <thead>
+            <tr>
+              <th scope="col">Action</th>
+              <th scope="col">Windows / Linux</th>
+              <th scope="col">macOS</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Archive conversation</td>
+              <td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Y</kbd></td>
+              <td><kbd>Command</kbd>+<kbd>Shift</kbd>+<kbd>Y</kbd></td>
+            </tr>
+            <tr>
+              <td>Trash conversation</td>
+              <td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>D</kbd></td>
+              <td><kbd>Command</kbd>+<kbd>Shift</kbd>+<kbd>D</kbd></td>
+            </tr>
+            <tr>
+              <td>Mark as read</td>
+              <td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>K</kbd></td>
+              <td><kbd>Command</kbd>+<kbd>Shift</kbd>+<kbd>K</kbd></td>
+            </tr>
+            <tr>
+              <td>Mark as unread</td>
+              <td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>U</kbd></td>
+              <td><kbd>Command</kbd>+<kbd>Shift</kbd>+<kbd>U</kbd></td>
+            </tr>
+          </tbody>
+        </table>
+        <p>
+          Assign optional navigation commands (Open Archived, Start chat, Open Spam &amp; blocked) in the same
+          Chrome shortcuts page. If a key combination is already used by Chrome or your OS, choose another.
+        </p>
+      </section>
+
+      <section id="page-navigation" class="site-section" aria-labelledby="page-navigation-heading">
+        <h2 id="page-navigation-heading">Page navigation</h2>
+        <p>
+          Page-local shortcuts run only on Google Messages Web. They ignore editable fields, IME composition,
+          native dialogs, open row menus, repeated key presses, and selected text. When the extension is paused,
+          navigation shortcuts and the command palette are blocked.
+        </p>
+        <p>Press <kbd>Shift</kbd>+<kbd>/</kbd> on Google Messages for the in-page shortcut reference.</p>
+        <table class="site-table">
+          <thead>
+            <tr>
+              <th scope="col">Action</th>
+              <th scope="col">Windows / Linux</th>
+              <th scope="col">macOS</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Next conversation</td>
+              <td><kbd>Alt</kbd>+<kbd>ArrowDown</kbd></td>
+              <td><kbd>Option</kbd>+<kbd>ArrowDown</kbd></td>
+            </tr>
+            <tr>
+              <td>Previous conversation</td>
+              <td><kbd>Alt</kbd>+<kbd>ArrowUp</kbd></td>
+              <td><kbd>Option</kbd>+<kbd>ArrowUp</kbd></td>
+            </tr>
+            <tr>
+              <td>Open focused conversation</td>
+              <td><kbd>Alt</kbd>+<kbd>Enter</kbd></td>
+              <td><kbd>Option</kbd>+<kbd>Enter</kbd></td>
+            </tr>
+            <tr>
+              <td>Return to previous conversation</td>
+              <td><kbd>Alt</kbd>+<kbd>[</kbd></td>
+              <td><kbd>Option</kbd>+<kbd>[</kbd></td>
+            </tr>
+            <tr>
+              <td>Next unread</td>
+              <td><kbd>Alt</kbd>+<kbd>U</kbd></td>
+              <td><kbd>Option</kbd>+<kbd>U</kbd></td>
+            </tr>
+            <tr>
+              <td>Previous unread</td>
+              <td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>U</kbd></td>
+              <td><kbd>Option</kbd>+<kbd>Shift</kbd>+<kbd>U</kbd></td>
+            </tr>
+            <tr>
+              <td>Return focus to conversation list</td>
+              <td><kbd>Escape</kbd></td>
+              <td><kbd>Escape</kbd></td>
+            </tr>
+            <tr>
+              <td>Command palette</td>
+              <td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd></td>
+              <td><kbd>Command</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd></td>
+            </tr>
+            <tr>
+              <td>Focus composer</td>
+              <td><kbd>Alt</kbd>+<kbd>M</kbd></td>
+              <td><kbd>Option</kbd>+<kbd>M</kbd></td>
+            </tr>
+          </tbody>
+        </table>
+        <p>
+          List and unread navigation cover <strong>loaded rows only</strong>. The command palette filters command
+          labels and descriptions; it does not search conversations or message content.
+        </p>
+      </section>
+
+      <section id="preferences" class="site-section" aria-labelledby="preferences-heading">
+        <h2 id="preferences-heading">Preferences</h2>
+        <p>Change these in the extension popup on Google Messages Web.</p>
+        <h3>Trash confirmation</h3>
+        <p>
+          <strong>Automatically confirm Move to trash</strong> (default on) confirms Google Messages native trash
+          dialog when you use a trash shortcut or pill.
+        </p>
+        <h3>Conversation opening</h3>
+        <p>
+          <strong>Open conversations on hover or focus</strong> (default off) opens a conversation when you hover
+          or tab to its row. Mark as read remains an explicit action and follows Google Messages behavior for
+          selecting a conversation.
+        </p>
+        <h3>Pill visibility</h3>
+        <ul>
+          <li><strong>On hover or focus</strong> (default): pills on hover, keyboard focus, or selected row.</li>
+          <li><strong>On selected row only</strong>: pills only when Google Messages marks the row focused.</li>
+          <li><strong>Hidden</strong>: no pills; keyboard shortcuts still work.</li>
+        </ul>
+        <h3>Pause and reset</h3>
+        <p>
+          <strong>Pause shortcut actions and pills</strong> disables extension shortcuts and pills on Google Messages
+          without changing native Google Messages behavior.
+        </p>
+        <p>
+          <strong>Reset extension preferences</strong> restores popup defaults only. It does not change conversations
+          in Google Messages or store message content.
+        </p>
+      </section>
+
+      <section id="limitations" class="site-section" aria-labelledby="limitations-heading">
+        <h2 id="limitations-heading">Limitations</h2>
+        <ul>
+          <li>Google Messages UI can change; menu targeting may break after updates.</li>
+          <li>Mark as read uses row open when no row-menu control exists in the current UI.</li>
+          <li>Pin and unpin are not available in Google Messages Web row menus.</li>
+          <li>Block / report spam opens Google Messages native dialog; you confirm block and spam choices there.</li>
+          <li>Open Spam &amp; blocked is validated for the English UI chrome; ambiguous or missing controls fail closed.</li>
+          <li>Shortcut automation depends on Google Messages accepting programmatic clicks.</li>
+        </ul>
+      </section>
+
+      <section id="privacy" class="site-section" aria-labelledby="privacy-heading">
+        <h2 id="privacy-heading">Privacy</h2>
+        <p>
+          The extension does not collect or transmit conversation content. Preferences are stored locally in Chrome.
+          Return-to-previous conversation navigation keeps the last opened link in memory only for the session.
+        </p>
+      </section>
+
+      <section id="install" class="site-section" aria-labelledby="install-heading">
+        <h2 id="install-heading">Install</h2>
+        <p>
+          <a
+            href="https://chromewebstore.google.com/detail/messages-shortcut-actions/dhdkppijmdfhgmbedgimkgenbmfhldjn"
+            target="_blank"
+            rel="noopener noreferrer"
+          >Install from the Chrome Web Store</a>
+          or load an unpacked build from the
+          <a href="https://github.com/ravidorr/google-messages-shortcuts" target="_blank" rel="noopener noreferrer">GitHub repository</a>
+          (<code>dist/</code> after <code>npm run build</code>).
+        </p>
+        <p>Requires Google Chrome or another Chromium browser with Manifest V3 and an open Google Messages Web tab.</p>
+      </section>
+
+      <section id="support" class="site-section" aria-labelledby="support-heading">
+        <h2 id="support-heading">Support</h2>
+        <ul>
+          <li><a href="https://github.com/ravidorr/google-messages-shortcuts/issues" target="_blank" rel="noopener noreferrer">GitHub issues</a> for bugs and feature requests</li>
+          <li><a href="https://github.com/ravidorr/google-messages-shortcuts/blob/main/SUPPORT.md" target="_blank" rel="noopener noreferrer">Support policy</a></li>
+          <li><a href="https://github.com/ravidorr/google-messages-shortcuts/blob/main/CHANGELOG.md" target="_blank" rel="noopener noreferrer">Changelog</a></li>
+        </ul>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <p>
+        Messages Shortcut Actions
+        <a href="https://github.com/ravidorr/google-messages-shortcuts/blob/main/LICENSE.md" target="_blank" rel="noopener noreferrer">MIT License</a>
+      </p>
+    </footer>
+  </body>
+</html>

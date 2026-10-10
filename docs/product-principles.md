@@ -16,7 +16,7 @@ The extension uses a hybrid Chrome Commands model:
 
 - **Default Chrome commands:** Archive, trash, mark unread, and mark read ship with suggested keys in the manifest.
 - **Optional Chrome commands:** Open Archived, Start chat, and Open Spam & blocked have no `suggested_key`. Users assign or rebind them in `chrome://extensions/shortcuts`.
-- **Popup disclosure:** The popup shows each optional command's current assignment or **Not assigned**, and links users to Chrome's shortcut manager. Navigation FABs remain available when no shortcut is assigned.
+- **Popup disclosure:** The popup shows extension preferences, the installed version, and a link to the GitHub Pages user guide. The guide documents default Chrome commands, optional command assignment via `chrome://extensions/shortcuts`, and page-local shortcuts. Navigation FABs remain available when no optional Chrome shortcut is assigned.
 - **Page-local shortcuts:** Do not add new fixed page-level `keydown` shortcuts for navigation that could have been Chrome commands. A content-script listener supports unlimited page-local combinations, but those bindings are not visible or rebindable in Chrome's shortcut manager and can conflict with browser, OS, or Google Messages behavior.
 - **Guard rules:** `keydown` handlers for in-page interactions must ignore editable controls, IME composition, repeated keys, selected text where relevant, and native dialogs. Use `event.code` for physical-key matching when layout independence matters. Call `preventDefault()` only after an action is safe to run.
 

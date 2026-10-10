@@ -12,42 +12,18 @@
         <img src="icons/icon48.png" alt="" width="32" height="32" class="popup__icon">
         <div>
           <h1 class="popup__title">Messages Shortcut Actions</h1>
-          <p class="popup__subtitle">Archive, trash, read/unread, mute, block / report spam, page navigation, and open Archived from Google Messages conversation rows.</p>
+          <p class="popup__meta">
+            <a
+              id="guide-link"
+              class="popup__guide-link"
+              href="https://ravidorr.github.io/google-messages-shortcuts/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >Full shortcut guide</a>
+          </p>
           <p id="extension-version" class="popup__version" hidden></p>
         </div>
       </header>
-
-      <section class="popup__section" aria-labelledby="shortcuts-heading">
-        <h2 id="shortcuts-heading" class="popup__section-title">Keyboard shortcuts</h2>
-        <ul id="shortcut-list" class="shortcut-list"></ul>
-        <p id="shortcut-warning" class="popup__warning" hidden>
-          One or more shortcuts are not assigned. Open Chrome shortcut settings to configure them.
-        </p>
-      </section>
-
-      <section class="popup__section" aria-labelledby="navigation-shortcuts-heading">
-        <h2 id="navigation-shortcuts-heading" class="popup__section-title">Navigation shortcuts</h2>
-        <ul id="navigation-shortcut-list" class="shortcut-list"></ul>
-        <p class="popup__help">
-          Assign navigation shortcuts in Chrome shortcut settings. The Archived dialog uses Google Messages' native Unarchive controls. Block / report spam opens Google Messages' native dialog and focuses the final confirmation control without auto-clicking.
-        </p>
-      </section>
-
-      <section class="popup__section" aria-labelledby="page-navigation-heading">
-        <h2 id="page-navigation-heading" class="popup__section-title">Page navigation</h2>
-        <p class="popup__help">
-          These shortcuts work on Google Messages Web only. They move focus across loaded conversation rows, open the focused row, jump between loaded unread rows, return to the last opened conversation, focus the message composer when a conversation is open, and open the command palette or shortcut reference. Press <kbd>Shift+/</kbd> on Google Messages for the full list. List and unread navigation cover loaded rows only.
-        </p>
-      </section>
-
-      <section class="popup__section" aria-labelledby="help-heading">
-        <h2 id="help-heading" class="popup__section-title">Change shortcuts</h2>
-        <p class="popup__help">
-          Chrome controls extension shortcuts. Open
-          <a id="shortcuts-link" href="#">chrome://extensions/shortcuts</a>
-          and assign keys for this extension.
-        </p>
-      </section>
 
       <section class="popup__section" aria-labelledby="trash-confirmation-heading">
         <h2 id="trash-confirmation-heading" class="popup__section-title">Trash confirmation</h2>
@@ -75,9 +51,6 @@
           <option value="selected-row-only">On selected row only</option>
           <option value="hidden">Hidden</option>
         </select>
-        <p class="popup__help">
-          Selected row means the conversation Google Messages marks with keyboard focus in the list. Keyboard shortcuts still work when pills are hidden.
-        </p>
       </section>
 
       <section class="popup__section" aria-labelledby="extension-controls-heading">
@@ -86,15 +59,9 @@
           <input id="pause-extension" type="checkbox" disabled>
           Pause shortcut actions and pills
         </label>
-        <p class="popup__help">
-          While paused, keyboard shortcuts and conversation pills do not run on Google Messages.
-        </p>
         <button id="reset-extension-preferences" type="button" class="popup__button" disabled>
           Reset extension preferences
         </button>
-        <p class="popup__help">
-          Restores popup settings only. This does not change Google Messages or store conversation data.
-        </p>
         <p id="reset-status" class="popup__status" role="status" aria-live="polite" hidden></p>
       </section>
     </main>

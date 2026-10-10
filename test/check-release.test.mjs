@@ -42,6 +42,14 @@ describe('extractChangelogNotes', () => {
   it('returns no notes when the version is absent', () => {
     expect(extractChangelogNotes('## [1.0.0]\n\n- Fix', '2.0.0')).toBe('');
   });
+
+  it('does not include the global intro line in a version section', async () => {
+    const changelog = await readFile('CHANGELOG.md', 'utf8');
+    const notes = extractChangelogNotes(changelog, '1.14.20');
+
+    expect(notes).toContain('Remove Storybook tooling');
+    expect(notes).not.toContain('All notable changes to this project will be documented in this file.');
+  });
 });
 
 describe('validateRelease', () => {
@@ -87,9 +95,9 @@ describe('requiresRelease', () => {
 
 describe('release metadata validation', () => {
   it('reads package and manifest versions from the repository', () => {
-    expect(readPackageVersion('HEAD')).toBe('1.14.22');
-    expect(readCurrentPackageJson().version).toBe('1.14.22');
-    expect(readCurrentManifest().version).toBe('1.14.22');
+    expect(readPackageVersion('HEAD')).toBe('1.14.23');
+    expect(readCurrentPackageJson().version).toBe('1.14.23');
+    expect(readCurrentManifest().version).toBe('1.14.23');
     expect(readChangedFiles('HEAD')).toEqual([]);
   });
 
@@ -145,17 +153,17 @@ describe('release metadata validation', () => {
 
     expect(() => runTagReleaseValidation()).toThrow('tag name is required');
     await writeFile('release-notes.md', 'Baseline notes\n');
-    expect(() => runTagReleaseValidation('v1.14.22')).not.toThrow();
+    expect(() => runTagReleaseValidation('v1.14.23')).not.toThrow();
   });
 
   it('routes command arguments to extraction, tagging, and release validation', async () => {
-    main(['node', 'script', '--extract-release-notes', '1.14.22']);
+    main(['node', 'script', '--extract-release-notes', '1.14.23']);
     await expect(readFile('release-notes.md', 'utf8')).resolves.toContain(
-      'Override vulnerable Markdown lint transitive dependencies'
+      'Slim the extension popup'
     );
 
     await writeFile('release-notes.md', 'Baseline notes\n');
-    expect(() => main(['node', 'script', '--tag', 'v1.14.22'])).not.toThrow();
+    expect(() => main(['node', 'script', '--tag', 'v1.14.23'])).not.toThrow();
     expect(() => main(['node', 'script'], '0000000000000000000000000000000000000000')).not.toThrow();
   });
 

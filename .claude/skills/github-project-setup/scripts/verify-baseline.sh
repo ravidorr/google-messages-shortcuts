@@ -16,7 +16,7 @@ done
 if [ "$kind" != web ]; then check "no Lighthouse job in CI for non-web" "! grep -q lighthouse .github/workflows/ci.yml && test ! -f lighthouserc.json"; fi
 if [ "$kind" = web ]; then for f in robots.txt sitemap.xml lighthouserc.json; do check "file $f" "test -f $f"; done; fi
 
-check "no unfilled placeholders" "! grep -RIl '{{[A-Z_]*}}' . --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=.github"
+check "no unfilled placeholders" "! grep -RIl '{{[A-Z_]*}}' . --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=.github --exclude-dir=.claude"
 check ".husky hooks executable" "test -x .husky/pre-commit && test -x .husky/pre-push"
 check "pre-push blocks direct pushes to main" "grep -q 'refs/heads/main' .husky/pre-push"
 check "pre-push runs coverage" "grep -q 'test:coverage' .husky/pre-push"

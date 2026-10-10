@@ -5,20 +5,14 @@ import {
   bindPausePreference,
   bindResetExtensionPreferences,
   bindTrashConfirmationPreference,
-  bindShortcutsLink,
-  initializePopup,
-  updateShortcutWarning
+  initializePopup
 } from '../../src/popup/init-popup.js';
 import { DEFAULT_EXTENSION_PREFERENCES } from '../../src/shared/reset-extension-preferences.js';
 
 describe('init-popup', () => {
   beforeEach(() => {
     document.body.innerHTML = `
-      <ul id="shortcut-list"></ul>
-      <ul id="navigation-shortcut-list"></ul>
       <p id="extension-version" class="popup__version" hidden></p>
-      <p id="shortcut-warning" hidden></p>
-      <a id="shortcuts-link" href="#">shortcuts</a>
       <input id="auto-confirm-trash" type="checkbox" checked disabled>
       <label for="auto-confirm-trash">Automatically confirm Move to trash</label>
       <input id="open-conversation-on-focus" type="checkbox" disabled>
@@ -34,38 +28,6 @@ describe('init-popup', () => {
       <button id="reset-extension-preferences" type="button" disabled>Reset extension preferences</button>
       <p id="reset-status" hidden></p>
     `;
-  });
-
-  it('shows a warning when shortcuts are missing', () => {
-    updateShortcutWarning([
-      { name: 'archive-conversation', shortcut: 'Ctrl+Shift+Y' },
-      { name: 'trash-conversation', shortcut: '' }
-    ]);
-
-    expect(document.getElementById('shortcut-warning').hidden).toBe(false);
-  });
-
-  it('ignores the unassigned Chrome extension activation shortcut', () => {
-    updateShortcutWarning([
-      { name: '_execute_action', shortcut: '' },
-      { name: 'archive-conversation', shortcut: 'Ctrl+Shift+Y' },
-      { name: 'trash-conversation', shortcut: 'Ctrl+Shift+D' },
-      { name: 'mark-read-conversation', shortcut: 'Ctrl+Shift+K' },
-      { name: 'mark-unread-conversation', shortcut: 'Ctrl+Shift+U' }
-    ]);
-
-    expect(document.getElementById('shortcut-warning').hidden).toBe(true);
-  });
-
-  it('opens Chrome shortcut settings when the link is clicked', () => {
-    const create = vi.fn(async () => ({}));
-    const chromeApi = { tabs: { create } };
-
-    bindShortcutsLink(document, chromeApi);
-
-    document.getElementById('shortcuts-link').click();
-
-    expect(create).toHaveBeenCalledWith({ url: 'chrome://extensions/shortcuts' });
   });
 
   it('loads a missing confirmation preference as checked', async () => {
@@ -171,15 +133,6 @@ describe('init-popup', () => {
   it('loads and persists the conversation open preference', async () => {
     const set = vi.fn(async () => {});
     const chromeApi = {
-      commands: {
-        getAll: vi.fn(async () => [
-          { name: 'archive-conversation', shortcut: 'Ctrl+Shift+Y' },
-          { name: 'trash-conversation', shortcut: 'Ctrl+Shift+D' }
-        ])
-      },
-      tabs: {
-        create: vi.fn(async () => ({}))
-      },
       storage: {
         local: {
           get: vi.fn(async () => ({ openConversationOnFocus: true })),
@@ -408,21 +361,10 @@ describe('init-popup', () => {
     expect(document.getElementById('reset-status').hidden).toBe(false);
   });
 
-  it('initializes the popup shortcut list', async () => {
+  it('initializes the popup version and preference controls', async () => {
     const chromeApi = {
-      commands: {
-        getAll: vi.fn(async () => [
-          { name: 'archive-conversation', shortcut: 'Ctrl+Shift+Y' },
-          { name: 'trash-conversation', shortcut: 'Ctrl+Shift+D' },
-          { name: 'mark-read-conversation', shortcut: 'Ctrl+Shift+K' },
-          { name: 'mark-unread-conversation', shortcut: 'Ctrl+Shift+U' }
-        ])
-      },
       runtime: {
         getManifest: vi.fn(() => ({ version: '1.8.0' }))
-      },
-      tabs: {
-        create: vi.fn(async () => ({}))
       },
       storage: {
         local: {
@@ -435,10 +377,11 @@ describe('init-popup', () => {
     await initializePopup(chromeApi, document);
 
     expect(document.getElementById('extension-version').textContent).toBe('Version 1.8.0');
-    expect(document.querySelectorAll('.shortcut-item')).toHaveLength(10);
-    expect(document.getElementById('navigation-shortcut-list').querySelectorAll('.shortcut-item'))
-      .toHaveLength(3);
-    expect(document.getElementById('shortcut-warning').hidden).toBe(true);
     expect(document.getElementById('auto-confirm-trash').checked).toBe(true);
+    expect(document.getElementById('auto-confirm-trash').disabled).toBe(false);
+    expect(document.getElementById('open-conversation-on-focus').disabled).toBe(false);
+    expect(document.getElementById('pill-visibility').disabled).toBe(false);
+    expect(document.getElementById('pause-extension').disabled).toBe(false);
+    expect(document.getElementById('reset-extension-preferences').disabled).toBe(false);
   });
 });

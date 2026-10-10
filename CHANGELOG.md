@@ -1,5 +1,14 @@
 # Changelog
 
+All notable changes to this project will be documented in this file.
+
+## [1.14.23] - 2026-10-10
+
+### Changed
+
+- Slim the extension popup to preference controls, version, and a link to the full user guide
+- Publish the user guide on GitHub Pages with a dedicated deploy workflow (enable GitHub Actions as the Pages source after merge)
+
 ## [1.14.22] - 2026-10-10
 
 ### Fixed
@@ -23,8 +32,6 @@
 
 - Add the repository baseline: strict quality tooling, release gating, CI, hooks, and design-system documentation.
 - Remove Storybook tooling and use the static design-system showcase.
-
-All notable changes to this project will be documented in this file.
 
 ## [1.14.19] - 2026-10-08
 

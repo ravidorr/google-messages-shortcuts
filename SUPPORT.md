@@ -4,6 +4,8 @@
 
 Use the GitHub issue tracker for bugs, feature requests, and questions about using the extension. You can also email [raanan@avidor.org](mailto:raanan@avidor.org).
 
+For shortcuts, preferences, and limitations, read the [Messages Shortcut Actions user guide](https://ravidorr.github.io/google-messages-shortcuts/).
+
 ## Security vulnerabilities
 
 Do not use public issues for security vulnerabilities. Follow the instructions in [SECURITY.md](SECURITY.md).

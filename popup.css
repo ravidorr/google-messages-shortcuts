@@ -33,12 +33,14 @@ body {
   line-height: 1.3;
 }
 
-.popup__subtitle,
-.popup__help {
+.popup__meta {
   margin: 0;
   font-size: 13px;
   line-height: 1.45;
-  color: var(--color-popup-muted);
+}
+
+.popup__guide-link {
+  color: var(--color-popup-link);
 }
 
 .popup__version {
@@ -56,71 +58,6 @@ body {
   margin: 0 0 8px;
   font-size: 13px;
   font-weight: 600;
-}
-
-.shortcut-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  border: 1px solid var(--color-popup-border);
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-.shortcut-item {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  align-items: center;
-  padding: 10px 12px;
-  background: var(--color-primary-contrast);
-  border-bottom: 1px solid var(--color-popup-item-border);
-}
-
-.shortcut-item:last-child {
-  border-bottom: 0;
-}
-
-.shortcut-item__label {
-  display: inline-flex;
-  gap: 8px;
-  align-items: center;
-  font-size: 13px;
-}
-
-.shortcut-item__icon {
-  flex: 0 0 auto;
-  width: 16px;
-  height: 16px;
-}
-
-.shortcut-status {
-  font-size: 12px;
-  font-weight: 600;
-  padding: 4px 8px;
-  border-radius: 999px;
-  white-space: nowrap;
-}
-
-.shortcut-status--assigned {
-  background: var(--color-popup-assigned-bg);
-  color: var(--color-popup-assigned-text);
-}
-
-.shortcut-status--pill-only {
-  background: var(--color-popup-neutral-bg);
-  color: var(--color-popup-secondary);
-}
-
-.shortcut-status--missing {
-  background: var(--color-popup-warning-bg);
-  color: var(--color-popup-warning-text);
-}
-
-.popup__warning {
-  margin: 8px 0 0;
-  font-size: 12px;
-  color: var(--color-popup-warning-text);
 }
 
 .popup__checkbox-label {
@@ -152,10 +89,6 @@ body {
   opacity: 0.6;
 }
 
-.popup__help a {
-  color: var(--color-popup-link);
-}
-
 .popup__button {
   background: var(--color-primary-contrast);
   border: 1px solid var(--color-border);
@@ -185,37 +118,8 @@ body {
     color: var(--color-popup-text);
   }
 
-  .popup__subtitle,
-  .popup__help {
-    color: var(--color-popup-muted);
-  }
-
   .popup__version {
     color: var(--color-popup-secondary);
-  }
-
-  .shortcut-list {
-    border-color: var(--color-popup-border);
-  }
-
-  .shortcut-item {
-    background: var(--color-surface);
-    border-bottom-color: var(--color-popup-border);
-  }
-
-  .shortcut-status--assigned {
-    background: var(--color-popup-assigned-bg);
-    color: var(--color-popup-assigned-text);
-  }
-
-  .shortcut-status--pill-only {
-    background: var(--color-popup-border);
-    color: var(--color-popup-muted);
-  }
-
-  .shortcut-status--missing {
-    background: var(--color-popup-warning-bg);
-    color: var(--color-popup-warning-text);
   }
 
   .popup__select {

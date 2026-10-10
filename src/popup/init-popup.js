@@ -1,9 +1,4 @@
-import {
-  populateNavigationShortcutList,
-  populateShortcutList,
-  renderExtensionVersion
-} from './popup-view.js';
-import { DEFAULT_MANIFEST_COMMANDS } from '../shared/commands.js';
+import { renderExtensionVersion } from './popup-view.js';
 import {
   isConversationOpeningEnabled,
   setConversationOpeningEnabled
@@ -22,28 +17,6 @@ import {
   isTrashConfirmationEnabled,
   setTrashConfirmationEnabled
 } from '../shared/trash-confirmation-preference.js';
-
-const SHORTCUT_COMMANDS = DEFAULT_MANIFEST_COMMANDS;
-
-export function updateShortcutWarning(commands, documentRoot = document) {
-  const warning = documentRoot.getElementById('shortcut-warning');
-  const hasMissingShortcut = SHORTCUT_COMMANDS.some((commandName) => {
-    const command = commands.find((entry) => entry.name === commandName);
-
-    return !command?.shortcut;
-  });
-
-  warning.hidden = !hasMissingShortcut;
-}
-
-export function bindShortcutsLink(documentRoot = document, chromeApi = chrome) {
-  const link = documentRoot.getElementById('shortcuts-link');
-
-  link.addEventListener('click', (event) => {
-    event.preventDefault();
-    chromeApi.tabs.create({ url: 'chrome://extensions/shortcuts' });
-  });
-}
 
 export async function bindTrashConfirmationPreference(
   documentRoot = document,
@@ -186,16 +159,7 @@ export async function bindConversationOpenPreference(
 }
 
 export async function initializePopup(chromeApi = chrome, documentRoot = document) {
-  bindShortcutsLink(documentRoot, chromeApi);
   renderExtensionVersion(documentRoot, chromeApi);
-
-  const shortcutList = documentRoot.getElementById('shortcut-list');
-  const navigationShortcutList = documentRoot.getElementById('navigation-shortcut-list');
-  const commands = await chromeApi.commands.getAll();
-
-  populateShortcutList(shortcutList, commands);
-  populateNavigationShortcutList(navigationShortcutList, commands, documentRoot);
-  updateShortcutWarning(commands, documentRoot);
   await bindTrashConfirmationPreference(documentRoot, chromeApi);
   await bindConversationOpenPreference(documentRoot, chromeApi);
   const syncPillVisibilityPreference = await bindPillVisibilityPreference(documentRoot, chromeApi);
