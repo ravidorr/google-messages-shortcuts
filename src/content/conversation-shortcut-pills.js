@@ -142,7 +142,7 @@ function addStyles(documentRoot) {
     [data-messages-shortcuts-pill][data-messages-shortcuts-pill-has-shortcut]:hover,
     [data-messages-shortcuts-pill][data-messages-shortcuts-pill-has-shortcut]:focus {
       gap: 3px;
-      transform: translateY(-17px);
+      transform: translateY(-13px);
     }
 
     [data-messages-shortcuts-pill][data-messages-shortcuts-pill-has-shortcut]:hover

@@ -178,7 +178,7 @@ describe('conversation shortcut pills', () => {
     const localThis = document.querySelector('[data-messages-shortcuts-pill-styles]').textContent;
 
     expect(localThis).toContain('flex-direction: column-reverse');
-    expect(localThis).toContain('transform: translateY(-17px)');
+    expect(localThis).toContain('transform: translateY(-13px)');
     expect(localThis).toContain(':hover');
     expect(localThis).toContain(':focus');
     expect(localThis).toContain('gap 160ms ease');
