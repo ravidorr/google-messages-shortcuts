@@ -6,6 +6,7 @@ on:
     paths:
       - 'site/**'
       - 'design-system/tokens.css'
+      - 'scripts/build-github-pages-site.mjs'
       - '.github/workflows/deploy-pages.yml'
 
 permissions:

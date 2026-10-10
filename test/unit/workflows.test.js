@@ -208,6 +208,7 @@ describe('GitHub workflow security', () => {
     expect(pagesWorkflowConfig?.on?.push?.paths).toEqual([
       'site/**',
       'design-system/tokens.css',
+      'scripts/build-github-pages-site.mjs',
       '.github/workflows/deploy-pages.yml'
     ]);
     expect(pagesWorkflowConfig?.permissions).toMatchObject({
@@ -217,5 +218,7 @@ describe('GitHub workflow security', () => {
     });
     expect(pagesWorkflow?.content).toContain('node scripts/build-github-pages-site.mjs _site');
     expect(pagesWorkflow?.content).toContain("path: _site");
+    expect(pagesWorkflow?.content).toContain('actions/upload-pages-artifact@');
+    expect(pagesWorkflow?.content).toContain('actions/deploy-pages@');
   });
 });
