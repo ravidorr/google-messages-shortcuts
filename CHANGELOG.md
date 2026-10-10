@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.14.25] - 2026-10-10
+
+### Changed
+
+- Collapse conversation action pills to icons and reveal assigned shortcuts with a reversible hover or focus animation
+
 ## [1.14.24] - 2026-10-10
 
 ### Fixed

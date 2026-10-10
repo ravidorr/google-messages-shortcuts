@@ -66,6 +66,7 @@ function addStyles(documentRoot) {
   style.setAttribute('data-messages-shortcuts-pill-styles', '');
   style.textContent = `
     [data-messages-shortcuts-pill-group] {
+      align-items: flex-start;
       display: flex;
       gap: 4px;
       position: absolute;
@@ -83,13 +84,20 @@ function addStyles(documentRoot) {
       background: #ffffff;
       border: 1px solid #dadce0;
       border-radius: 999px;
+      box-sizing: border-box;
       color: #174ea6;
       cursor: pointer;
       display: inline-flex;
+      flex-direction: column-reverse;
       font: 600 10px/14px system-ui, sans-serif;
-      gap: 3px;
+      gap: 0;
+      justify-content: center;
       min-height: 24px;
+      min-width: 24px;
       padding: 2px 5px;
+      transition:
+        gap 160ms ease,
+        transform 160ms ease;
     }
 
     [data-messages-shortcuts-pill] svg {
@@ -118,7 +126,40 @@ function addStyles(documentRoot) {
     }
 
     [data-messages-shortcuts-pill-shortcut] {
+      max-height: 0;
+      max-width: 0;
+      opacity: 0;
+      overflow: hidden;
+      transform: translateY(4px);
+      transition:
+        max-height 160ms ease,
+        max-width 160ms ease,
+        opacity 120ms ease,
+        transform 160ms ease;
       white-space: nowrap;
+    }
+
+    [data-messages-shortcuts-pill][data-messages-shortcuts-pill-has-shortcut]:hover,
+    [data-messages-shortcuts-pill][data-messages-shortcuts-pill-has-shortcut]:focus {
+      gap: 3px;
+      transform: translateY(-17px);
+    }
+
+    [data-messages-shortcuts-pill][data-messages-shortcuts-pill-has-shortcut]:hover
+      [data-messages-shortcuts-pill-shortcut],
+    [data-messages-shortcuts-pill][data-messages-shortcuts-pill-has-shortcut]:focus
+      [data-messages-shortcuts-pill-shortcut] {
+      max-height: 14px;
+      max-width: 160px;
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      [data-messages-shortcuts-pill],
+      [data-messages-shortcuts-pill-shortcut] {
+        transition: none;
+      }
     }
   `;
   documentRoot.head.append(style);
@@ -236,6 +277,7 @@ function createPill(
   if (hasShortcut) {
     const shortcutLabel = documentRoot.createElement('span');
 
+    pill.setAttribute('data-messages-shortcuts-pill-has-shortcut', '');
     shortcutLabel.setAttribute('data-messages-shortcuts-pill-shortcut', '');
     shortcutLabel.textContent = resolvedShortcut;
     pill.append(shortcutLabel);

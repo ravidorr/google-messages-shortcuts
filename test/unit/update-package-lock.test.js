@@ -106,6 +106,7 @@ describe('update-package-lock', () => {
     const preCommitHook = await readFile(path.join(repositoryRoot, '.husky', 'pre-commit'), 'utf8');
 
     expect(preCommitHook).toContain('export PATH="/usr/bin:$PATH"');
+    expect(preCommitHook).toContain('nvm use --silent');
     expect(preCommitHook).toContain('npx lint-staged --config lint-staged.config.mjs');
     expect(preCommitHook.indexOf('node scripts/update-package-lock.js'))
       .toBeLessThan(preCommitHook.indexOf('npm run check:generated'));
