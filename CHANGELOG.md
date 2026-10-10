@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.14.23] - 2026-10-10
+
+### Changed
+
+- Slim the extension popup to preference controls, version, and a link to the full user guide
+- Publish the user guide on GitHub Pages with a dedicated deploy workflow
+
 ## [1.14.22] - 2026-10-10
 
 ### Fixed
