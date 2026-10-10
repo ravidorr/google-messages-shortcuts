@@ -93,7 +93,7 @@ function addStyles(documentRoot) {
       gap: 0;
       justify-content: center;
       min-height: 24px;
-      min-width: 24px;
+      min-width: 38px;
       padding: 2px 5px;
       transition:
         gap 160ms ease,
