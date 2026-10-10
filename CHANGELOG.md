@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.14.24] - 2026-10-10
+
+### Fixed
+
+- Redeploy GitHub Pages when the site build script changes
+- Move changelog intro above version sections and align GEMINI.md with AGENT.md routing
+
+### Changed
+
+- Document compact popup and user guide links in README, SUPPORT, and product principles
+- Add GitHub Pages build and docs drift tests
+
 ## [1.14.23] - 2026-10-10
 
 ### Changed
