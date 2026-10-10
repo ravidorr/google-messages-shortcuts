@@ -1,14 +1,17 @@
 // @vitest-environment node
 
 import { execFileSync } from 'node:child_process';
-import { accessSync, mkdtempSync, rmSync } from 'node:fs';
+import { accessSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { pathToFileURL, fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import {
   buildGithubPagesSite,
+  EXTENSION_VERSION_PLACEHOLDER,
   main,
+  readExtensionVersion,
+  renderSiteIndexHtml,
   runCliEntrypoint
 } from '../../scripts/build-github-pages-site.mjs';
 
@@ -19,16 +22,29 @@ const scriptUrl = pathToFileURL(scriptPath);
 describe('build-github-pages-site', () => {
   it('stages HTML, CSS, and design tokens for the site.css import', () => {
     const outputDirectory = mkdtempSync(path.join(tmpdir(), 'gms-pages-'));
+    const packageVersion = readExtensionVersion(projectDirectory);
 
     try {
       buildGithubPagesSite(projectDirectory, outputDirectory);
 
+      const builtIndexHtml = readFileSync(path.join(outputDirectory, 'index.html'), 'utf8');
+
       expect(() => accessSync(path.join(outputDirectory, 'index.html'))).not.toThrow();
       expect(() => accessSync(path.join(outputDirectory, 'site.css'))).not.toThrow();
       expect(() => accessSync(path.join(outputDirectory, 'design-system/tokens.css'))).not.toThrow();
+      expect(builtIndexHtml).toContain(`Version ${packageVersion}`);
+      expect(builtIndexHtml).not.toContain(EXTENSION_VERSION_PLACEHOLDER);
     } finally {
       rmSync(outputDirectory, { recursive: true, force: true });
     }
+  });
+
+  it('injects the package version into the site footer HTML', () => {
+    const packageVersion = readExtensionVersion(projectDirectory);
+    const renderedIndexHtml = renderSiteIndexHtml(projectDirectory);
+
+    expect(renderedIndexHtml).toContain(`Version ${packageVersion}`);
+    expect(renderedIndexHtml).not.toContain(EXTENSION_VERSION_PLACEHOLDER);
   });
 
   it('uses the default _site output directory when none is provided', () => {

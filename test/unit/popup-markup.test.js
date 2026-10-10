@@ -22,8 +22,11 @@ describe('popup markup', () => {
     expect(guideLink.getAttribute('href')).toBe(GUIDE_URL);
     expect(guideLink.getAttribute('target')).toBe('_blank');
     expect(guideLink.getAttribute('rel')).toBe('noopener noreferrer');
+    expect(document.querySelector('.popup__footer')).not.toBeNull();
+    expect(document.getElementById('extension-version').closest('.popup__footer')).not.toBeNull();
     expect(document.getElementById('extension-version').className).toBe('popup__version');
     expect(document.getElementById('extension-version').hidden).toBe(true);
+    expect(document.getElementById('reset-extension-preferences').classList.contains('popup__button--destructive')).toBe(true);
     expect(sections.map((section) => section.querySelector('.popup__section-title').textContent.trim()))
       .toEqual([
         'Trash confirmation',
