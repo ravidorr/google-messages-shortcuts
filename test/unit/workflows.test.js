@@ -119,6 +119,41 @@ describe('GitHub workflow security', () => {
     );
   });
 
+  it('runs CodeQL on main pull requests with the required analysis check names', async () => {
+    const workflows = await readWorkflowFiles();
+    const localThis = {
+      codeqlWorkflow: workflows.find(({ name }) => name === 'codeql.yml')
+    };
+    localThis.codeqlWorkflowConfig = parseYaml(localThis.codeqlWorkflow?.content ?? '');
+
+    expect(localThis.codeqlWorkflowConfig).toMatchObject({
+      name: 'CodeQL',
+      on: {
+        pull_request: {
+          branches: ['main']
+        }
+      },
+      permissions: {
+        contents: 'read',
+        'security-events': 'write'
+      },
+      jobs: {
+        analyze: {
+          name: 'Analyze (${{ matrix.language }})',
+          strategy: {
+            matrix: {
+              include: [
+                { language: 'actions', 'build-mode': 'none' },
+                { language: 'javascript-typescript', 'build-mode': 'none' }
+              ]
+            }
+          }
+        }
+      }
+    });
+    expect(localThis.codeqlWorkflowConfig.on.schedule).toHaveLength(1);
+  });
+
   it('publishes only merged main pull requests through OIDC', async () => {
     const workflows = await readWorkflowFiles();
     const publishWorkflow = workflows.find(({ name }) => name === 'publish-chrome-web-store.yml');
