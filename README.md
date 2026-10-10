@@ -22,7 +22,7 @@ Chrome extension for keyboard shortcuts and row pills that automate conversation
 - Do not show extension pills inside the Archived dialog; use Google Messages' native Unarchive controls there
 - Show an Archived FAB beside Start chat when Archived is not already open (modal or sidebar route)
 - Optionally open conversations immediately when they are hovered or focused
-- Popup UI that shows the effective Chrome shortcut assignments, including optional navigation commands
+- Compact popup for extension preferences, version, and a link to the [full user guide on GitHub Pages](https://ravidorr.github.io/google-messages-shortcuts/)
 - Configurable automatic confirmation for the native Move to trash dialog
 - Configurable pill visibility: on hover or focus (default), on selected row only, or hidden
 - Pause shortcut actions and conversation pills without disabling the extension
@@ -48,7 +48,7 @@ Chrome extension for keyboard shortcuts and row pills that automate conversation
 
 ## Change shortcuts
 
-Chrome controls extension keyboard shortcuts. Archive, trash, mark as read, and mark as unread have default assignments. Open the extension popup or go to `chrome://extensions/shortcuts` to assign keys for optional navigation commands: Open Archived, Start chat, and Open Spam & blocked.
+Chrome controls extension keyboard shortcuts. Archive, trash, mark as read, and mark as unread have default assignments. See the [user guide](https://ravidorr.github.io/google-messages-shortcuts/#chrome-shortcuts) for defaults and page-local shortcuts, or go to `chrome://extensions/shortcuts` to assign optional navigation commands: Open Archived, Start chat, and Open Spam & blocked.
 
 ## Configure trash confirmation
 

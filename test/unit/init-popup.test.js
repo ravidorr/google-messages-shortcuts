@@ -379,5 +379,9 @@ describe('init-popup', () => {
     expect(document.getElementById('extension-version').textContent).toBe('Version 1.8.0');
     expect(document.getElementById('auto-confirm-trash').checked).toBe(true);
     expect(document.getElementById('auto-confirm-trash').disabled).toBe(false);
+    expect(document.getElementById('open-conversation-on-focus').disabled).toBe(false);
+    expect(document.getElementById('pill-visibility').disabled).toBe(false);
+    expect(document.getElementById('pause-extension').disabled).toBe(false);
+    expect(document.getElementById('reset-extension-preferences').disabled).toBe(false);
   });
 });

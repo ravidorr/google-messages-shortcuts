@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { GUIDE_URL } from '../helpers/guide-url.js';
 import { loadPopupMarkup } from '../helpers/load-popup-markup.js';
 
 function createChromeApi(overrides = {}) {
@@ -45,15 +46,17 @@ describe('popup entry', () => {
 
     const guideLink = document.getElementById('guide-link');
 
-    expect(guideLink.getAttribute('href')).toBe('https://ravidorr.github.io/google-messages-shortcuts/');
+    expect(guideLink.getAttribute('href')).toBe(GUIDE_URL);
     expect(guideLink.getAttribute('target')).toBe('_blank');
+    expect(guideLink.getAttribute('rel')).toBe('noopener noreferrer');
   });
 
   it('logs popup initialization failures', async () => {
     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
     vi.resetModules();
-    document.body.innerHTML = '';
+    await loadPopupMarkup();
+    document.getElementById('auto-confirm-trash').remove();
     globalThis.chrome = createChromeApi();
 
     await import('../../popup.js');

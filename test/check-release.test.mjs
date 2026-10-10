@@ -42,6 +42,14 @@ describe('extractChangelogNotes', () => {
   it('returns no notes when the version is absent', () => {
     expect(extractChangelogNotes('## [1.0.0]\n\n- Fix', '2.0.0')).toBe('');
   });
+
+  it('does not include the global intro line in a version section', async () => {
+    const changelog = await readFile('CHANGELOG.md', 'utf8');
+    const notes = extractChangelogNotes(changelog, '1.14.20');
+
+    expect(notes).toContain('Remove Storybook tooling');
+    expect(notes).not.toContain('All notable changes to this project will be documented in this file.');
+  });
 });
 
 describe('validateRelease', () => {

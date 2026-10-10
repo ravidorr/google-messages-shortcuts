@@ -5,9 +5,9 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { JSDOM } from 'jsdom';
 import { describe, expect, it } from 'vitest';
+import { GUIDE_URL } from '../helpers/guide-url.js';
 
 const projectDirectory = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-const GUIDE_URL = 'https://ravidorr.github.io/google-messages-shortcuts/';
 
 describe('popup markup', () => {
   it('keeps settings controls, version, and an external guide link', async () => {

@@ -31,4 +31,21 @@ describe('support site markup', () => {
     }
     expect(document.querySelector('link[href="site.css"]')).not.toBeNull();
   });
+
+  it('links in-page navigation targets to section ids', async () => {
+    const siteHtml = await readFile(path.join(projectDirectory, 'site/index.html'), 'utf8');
+    const document = new JSDOM(siteHtml).window.document;
+
+    for (const link of document.querySelectorAll('.site-nav a[href^="#"]')) {
+      const targetId = link.getAttribute('href').slice(1);
+
+      expect(document.getElementById(targetId), targetId).not.toBeNull();
+    }
+  });
+
+  it('imports shared design tokens from the deployed layout path', async () => {
+    const siteCss = await readFile(path.join(projectDirectory, 'site/site.css'), 'utf8');
+
+    expect(siteCss).toContain("@import url('design-system/tokens.css');");
+  });
 });

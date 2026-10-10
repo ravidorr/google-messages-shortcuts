@@ -198,4 +198,24 @@ describe('GitHub workflow security', () => {
 
     expect(ciWorkflow?.content).toContain('node scripts/check-release.mjs');
   });
+
+  it('deploys the GitHub Pages user guide from site sources', async () => {
+    const workflows = await readWorkflowFiles();
+    const pagesWorkflow = workflows.find(({ name }) => name === 'deploy-pages.yml');
+    const pagesWorkflowConfig = parseYaml(pagesWorkflow?.content ?? '');
+
+    expect(pagesWorkflowConfig?.on?.push?.branches).toEqual(['main']);
+    expect(pagesWorkflowConfig?.on?.push?.paths).toEqual([
+      'site/**',
+      'design-system/tokens.css',
+      '.github/workflows/deploy-pages.yml'
+    ]);
+    expect(pagesWorkflowConfig?.permissions).toMatchObject({
+      contents: 'read',
+      pages: 'write',
+      'id-token': 'write'
+    });
+    expect(pagesWorkflow?.content).toContain('node scripts/build-github-pages-site.mjs _site');
+    expect(pagesWorkflow?.content).toContain("path: _site");
+  });
 });
