@@ -6,15 +6,12 @@ import { describe, expect, it } from 'vitest';
 
 const popupStylesPath = fileURLToPath(new URL('../../popup.css', import.meta.url));
 
-describe('popup shortcut status styles', () => {
-  it('uses contrasting assigned and missing status tokens in each color scheme', async () => {
+describe('popup styles', () => {
+  it('styles the guide link and version with popup tokens', async () => {
     const popupStyles = await readFile(popupStylesPath, 'utf8');
 
-    expect(popupStyles).toContain(
-      '.shortcut-status--assigned {\n  background: var(--color-popup-assigned-bg);\n  color: var(--color-popup-assigned-text);'
-    );
-    expect(popupStyles).toContain(
-      '.shortcut-status--missing {\n    background: var(--color-popup-warning-bg);\n    color: var(--color-popup-warning-text);'
-    );
+    expect(popupStyles).toContain('.popup__guide-link {\n  color: var(--color-popup-link);');
+    expect(popupStyles).toContain('.popup__version {\n  margin: 4px 0 0;');
+    expect(popupStyles).not.toContain('.shortcut-list');
   });
 });

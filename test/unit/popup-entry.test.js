@@ -3,17 +3,6 @@ import { loadPopupMarkup } from '../helpers/load-popup-markup.js';
 
 function createChromeApi(overrides = {}) {
   return {
-    commands: {
-      getAll: vi.fn(async () => [
-        { name: 'archive-conversation', shortcut: 'Ctrl+Shift+Y' },
-        { name: 'trash-conversation', shortcut: '' },
-        { name: 'mark-read-conversation', shortcut: '' },
-        { name: 'mark-unread-conversation', shortcut: '' }
-      ])
-    },
-    tabs: {
-      create: vi.fn(async () => ({}))
-    },
     storage: {
       local: {
         get: vi.fn(async () => ({})),
@@ -37,43 +26,35 @@ describe('popup entry', () => {
     globalThis.chrome = createChromeApi();
   });
 
-  it('loads shortcut data into the shipped popup markup', async () => {
+  it('initializes preference controls in the shipped popup markup', async () => {
     await import('../../popup.js');
     await Promise.resolve();
     await Promise.resolve();
 
-    expect(document.querySelectorAll('.shortcut-item')).toHaveLength(10);
-    expect(document.getElementById('shortcut-warning').hidden).toBe(false);
+    expect(document.getElementById('shortcut-list')).toBeNull();
     expect(document.getElementById('auto-confirm-trash').checked).toBe(true);
     expect(document.getElementById('auto-confirm-trash').disabled).toBe(false);
     expect(document.getElementById('open-conversation-on-focus').disabled).toBe(false);
     expect(document.getElementById('extension-version').textContent).toBe('Version 1.8.0');
   });
 
-  it('opens Chrome shortcut settings from the shipped popup link', async () => {
+  it('includes the external guide link in shipped markup', async () => {
     await import('../../popup.js');
     await Promise.resolve();
     await Promise.resolve();
 
-    document.getElementById('shortcuts-link').click();
+    const guideLink = document.getElementById('guide-link');
 
-    expect(globalThis.chrome.tabs.create).toHaveBeenCalledWith({
-      url: 'chrome://extensions/shortcuts'
-    });
+    expect(guideLink.getAttribute('href')).toBe('https://ravidorr.github.io/google-messages-shortcuts/');
+    expect(guideLink.getAttribute('target')).toBe('_blank');
   });
 
   it('logs popup initialization failures', async () => {
     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
     vi.resetModules();
-    await loadPopupMarkup();
-    globalThis.chrome = createChromeApi({
-      commands: {
-        getAll: vi.fn(async () => {
-          throw new Error('commands unavailable');
-        })
-      }
-    });
+    document.body.innerHTML = '';
+    globalThis.chrome = createChromeApi();
 
     await import('../../popup.js');
     await Promise.resolve();

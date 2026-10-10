@@ -7,23 +7,25 @@ import { JSDOM } from 'jsdom';
 import { describe, expect, it } from 'vitest';
 
 const projectDirectory = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
+const GUIDE_URL = 'https://ravidorr.github.io/google-messages-shortcuts/';
 
 describe('popup markup', () => {
-  it('places shortcut help directly after the keyboard shortcut table', async () => {
+  it('keeps settings controls, version, and an external guide link', async () => {
     const popupHtml = await readFile(path.join(projectDirectory, 'popup.html'), 'utf8');
     const document = new JSDOM(popupHtml).window.document;
     const sections = [...document.querySelectorAll('.popup__section')];
+    const guideLink = document.getElementById('guide-link');
 
-    expect(document.querySelector('.popup__subtitle').textContent.trim())
-      .toBe('Archive, trash, read/unread, mute, block / report spam, page navigation, and open Archived from Google Messages conversation rows.');
+    expect(document.querySelector('.popup__subtitle')).toBeNull();
+    expect(document.getElementById('shortcut-list')).toBeNull();
+    expect(document.getElementById('shortcuts-link')).toBeNull();
+    expect(guideLink.getAttribute('href')).toBe(GUIDE_URL);
+    expect(guideLink.getAttribute('target')).toBe('_blank');
+    expect(guideLink.getAttribute('rel')).toBe('noopener noreferrer');
     expect(document.getElementById('extension-version').className).toBe('popup__version');
     expect(document.getElementById('extension-version').hidden).toBe(true);
     expect(sections.map((section) => section.querySelector('.popup__section-title').textContent.trim()))
       .toEqual([
-        'Keyboard shortcuts',
-        'Navigation shortcuts',
-        'Page navigation',
-        'Change shortcuts',
         'Trash confirmation',
         'Conversation opening',
         'Pill visibility',

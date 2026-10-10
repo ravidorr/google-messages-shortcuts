@@ -1,0 +1,129 @@
+@import url('design-system/tokens.css');
+
+:root {
+  color-scheme: light dark;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-md);
+  line-height: 1.55;
+}
+
+a {
+  color: var(--color-primary);
+}
+
+a:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.site-header {
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  padding: var(--space-4) var(--space-3);
+}
+
+.site-header__inner {
+  margin: 0 auto;
+  max-width: 48rem;
+}
+
+.site-header__title {
+  font-size: var(--font-size-lg);
+  margin: 0 0 var(--space-2);
+}
+
+.site-header__lede {
+  color: var(--color-text-muted);
+  margin: 0 0 var(--space-3);
+}
+
+.site-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.site-nav a {
+  font-size: var(--font-size-sm);
+}
+
+.site-main {
+  margin: 0 auto;
+  max-width: 48rem;
+  padding: var(--space-4) var(--space-3) var(--space-5);
+}
+
+.site-section {
+  margin-bottom: var(--space-5);
+}
+
+.site-section h2 {
+  font-size: 1.125rem;
+  margin: 0 0 var(--space-2);
+}
+
+.site-section h3 {
+  font-size: 1rem;
+  margin: var(--space-3) 0 var(--space-2);
+}
+
+.site-section p,
+.site-section ul {
+  margin: 0 0 var(--space-2);
+}
+
+.site-section ul {
+  padding-left: 1.25rem;
+}
+
+.site-table {
+  border-collapse: collapse;
+  font-size: var(--font-size-sm);
+  margin: var(--space-2) 0 var(--space-3);
+  width: 100%;
+}
+
+.site-table th,
+.site-table td {
+  border: 1px solid var(--color-border);
+  padding: var(--space-2);
+  text-align: left;
+  vertical-align: top;
+}
+
+.site-table th {
+  background: var(--color-surface);
+}
+
+kbd {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  font-size: 0.8125rem;
+  padding: 0.1rem 0.35rem;
+}
+
+.site-footer {
+  border-top: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  margin: 0 auto;
+  max-width: 48rem;
+  padding: var(--space-4) var(--space-3);
+}
