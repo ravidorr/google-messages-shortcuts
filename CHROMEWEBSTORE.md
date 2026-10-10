@@ -123,6 +123,7 @@ https://chromewebstore.google.com/detail/messages-shortcut-actions/dhdkppijmdfhg
 
 | Version | Date | Changes | Status |
 | --- | --- | --- | --- |
+| 1.14.25 | 2026-10-10 | Icon-only action pills with shortcut reveal on hover or focus | Unreleased |
 | 1.14.24 | 2026-10-10 | GitHub Pages guide deploy fixes; popup points to hosted user guide | Published |
 | 1.14.23 | 2026-10-10 | Compact popup; GitHub Pages user guide | Published |
 

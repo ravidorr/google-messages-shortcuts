@@ -136,7 +136,7 @@ describe('conversation shortcut pills', () => {
     expect(blockPill.textContent).toBe('');
   });
 
-  it('renders compact icon-and-shortcut pills for the focused row', async () => {
+  it('renders icon-only pills that retain assigned shortcuts for reveal', async () => {
     const row = createConversationRow({ focused: true });
     document.body.append(row);
 
@@ -161,11 +161,31 @@ describe('conversation shortcut pills', () => {
     expect(archivePill.getAttribute('aria-label')).toBe('Archive conversation, Ctrl+Shift+Y');
     expect(archivePill.getAttribute('title')).toBe('Archive conversation, Ctrl+Shift+Y');
     expect(archivePill.textContent).toBe('Ctrl+Shift+Y');
+    expect(archivePill.hasAttribute('data-messages-shortcuts-pill-has-shortcut')).toBe(true);
+    expect(
+      archivePill.querySelector('[data-messages-shortcuts-pill-shortcut]').textContent
+    ).toBe('Ctrl+Shift+Y');
     expectLucidePillIcon(archivePill, COMMAND_ARCHIVE);
     expect(trashPill.getAttribute('aria-label')).toBe('Trash conversation');
     expect(trashPill.getAttribute('title')).toBe('Trash conversation');
     expect(trashPill.textContent).toBe('');
+    expect(trashPill.hasAttribute('data-messages-shortcuts-pill-has-shortcut')).toBe(false);
     expectLucidePillIcon(trashPill, COMMAND_TRASH);
+  });
+
+  it('adds reversible hover and focus shortcut-reveal animations', () => {
+    disconnect = installConversationShortcutPills({ documentRoot: document });
+    const localThis = document.querySelector('[data-messages-shortcuts-pill-styles]').textContent;
+
+    expect(localThis).toContain('flex-direction: column-reverse');
+    expect(localThis).toContain('min-width: 38px');
+    expect(localThis).toContain('transform: translateY(-13px)');
+    expect(localThis).toContain(':hover');
+    expect(localThis).toContain(':focus');
+    expect(localThis).toContain('gap 160ms ease');
+    expect(localThis).toContain('transform 160ms ease');
+    expect(localThis).toContain('transition: none');
+    expect(localThis).toContain('@media (prefers-reduced-motion: reduce)');
   });
 
   it('adds dark pill tokens without changing light pill styles', () => {

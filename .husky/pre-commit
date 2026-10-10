@@ -3,6 +3,11 @@ set -e
 
 export PATH="/usr/bin:$PATH"
 
+if [ -s "$HOME/.nvm/nvm.sh" ]; then
+  . "$HOME/.nvm/nvm.sh"
+  nvm use --silent
+fi
+
 node scripts/prevent-main-commit.js
 node scripts/update-package-lock.js
 npx lint-staged --config lint-staged.config.mjs
