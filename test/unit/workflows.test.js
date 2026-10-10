@@ -209,6 +209,7 @@ describe('GitHub workflow security', () => {
       'site/**',
       'design-system/tokens.css',
       'scripts/build-github-pages-site.mjs',
+      'package.json',
       '.github/workflows/deploy-pages.yml'
     ]);
     expect(pagesWorkflowConfig?.permissions).toMatchObject({
