@@ -8,6 +8,7 @@ Thanks for contributing to Messages Shortcut Actions.
 2. Run `nvm install && nvm use`, then install dependencies with `npm install`.
 3. Run `npm run build` to create the loadable extension in `dist/`.
 4. Load `dist/` from `chrome://extensions` with Developer mode enabled.
+5. Optional for AI-assisted work: run `./scripts/install-agent-skills.sh` for the `modern-web-guidance` skill, reload Chrome DevTools MCP from [.cursor/mcp.json](.cursor/mcp.json) in Cursor, and see [AGENT.md](AGENT.md).
 
 ## Documentation map
 
@@ -16,6 +17,7 @@ Thanks for contributing to Messages Shortcut Actions.
 - [docs/feature-backlog.md](docs/feature-backlog.md): prioritized ideas with impact/difficulty scores
 - [docs/architecture.md](docs/architecture.md): module map and testing expectations
 - [docs/dom-discovery/](docs/dom-discovery/): live validation, compatibility matrix, and action gates
+- [CHROMEWEBSTORE.md](CHROMEWEBSTORE.md): Chrome Web Store listing and permission justifications (update when manifest or store copy changes)
 
 ## Before opening a pull request
 
