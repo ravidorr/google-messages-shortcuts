@@ -192,6 +192,16 @@ describe('GitHub workflow security', () => {
     expect(publishWorkflowContent).toContain(':cancelSubmission');
   });
 
+  it('skips Chrome Web Store upload when the packaged version is already published', async () => {
+    const workflows = await readWorkflowFiles();
+    const publishWorkflow = workflows.find(({ name }) => name === 'publish-chrome-web-store.yml');
+    const publishWorkflowContent = publishWorkflow?.content ?? '';
+
+    expect(publishWorkflowContent).toContain('id: publish_guard');
+    expect(publishWorkflowContent).toContain('node scripts/evaluate-chrome-web-store-publish.mjs');
+    expect(publishWorkflowContent).toContain("steps.publish_guard.outputs.skip_publish != 'true'");
+  });
+
   it('runs the file-based release gate in CI', async () => {
     const workflows = await readWorkflowFiles();
     const ciWorkflow = workflows.find(({ name }) => name === 'ci.yml');

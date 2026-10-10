@@ -33,7 +33,15 @@ jobs:
           service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
           token_format: access_token
           access_token_scopes: https://www.googleapis.com/auth/chromewebstore
+      - id: publish_guard
+        name: Skip publish when store already has this version
+        env:
+          ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
+          EXTENSION_ID: ${{ vars.CWS_EXTENSION_ID }}
+          PUBLISHER_ID: ${{ vars.CWS_PUBLISHER_ID }}
+        run: node scripts/evaluate-chrome-web-store-publish.mjs
       - name: Supersede active Chrome Web Store submission
+        if: steps.publish_guard.outputs.skip_publish != 'true'
         env:
           ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
           EXTENSION_ID: ${{ vars.CWS_EXTENSION_ID }}
@@ -61,6 +69,7 @@ jobs:
               ;;
           esac
       - name: Upload package
+        if: steps.publish_guard.outputs.skip_publish != 'true'
         env:
           ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
           EXTENSION_ID: ${{ vars.CWS_EXTENSION_ID }}
@@ -99,6 +108,7 @@ jobs:
           echo "Chrome Web Store upload did not finish within five minutes."
           exit 1
       - name: Submit release for review and publication
+        if: steps.publish_guard.outputs.skip_publish != 'true'
         env:
           ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
           EXTENSION_ID: ${{ vars.CWS_EXTENSION_ID }}
