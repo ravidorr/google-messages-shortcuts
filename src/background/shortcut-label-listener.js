@@ -17,7 +17,8 @@ function getFallbackLabels() {
     markRead: UNASSIGNED_SHORTCUT_LABEL,
     mute: UNASSIGNED_SHORTCUT_LABEL,
     unmute: UNASSIGNED_SHORTCUT_LABEL,
-    blockReportSpam: UNASSIGNED_SHORTCUT_LABEL
+    blockReportSpam: UNASSIGNED_SHORTCUT_LABEL,
+    copyOtp: UNASSIGNED_SHORTCUT_LABEL
   };
 }
 

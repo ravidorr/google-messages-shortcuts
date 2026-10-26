@@ -1,6 +1,7 @@
 import {
   COMMAND_ARCHIVE,
   COMMAND_BLOCK_REPORT_SPAM,
+  COMMAND_COPY_OTP,
   COMMAND_MARK_READ,
   COMMAND_MARK_UNREAD,
   COMMAND_MUTE,
@@ -27,6 +28,7 @@ const SUCCESS_MESSAGES = {
   [COMMAND_MUTE]: 'Conversation muted.',
   [COMMAND_UNMUTE]: 'Conversation unmuted.',
   [COMMAND_UNARCHIVE]: 'Conversation unarchived.',
+  [COMMAND_COPY_OTP]: 'One-time code copied.',
   [COMMAND_OPEN_ARCHIVED]: 'Archived opened.',
   [COMMAND_OPEN_SPAM_BLOCKED]: 'Spam & blocked opened.',
   [COMMAND_START_CHAT]: 'Start chat opened.'
@@ -255,6 +257,21 @@ export function getActionFeedbackMessage(result, command) {
       return {
         kind: 'info',
         message: 'This conversation is not muted.'
+      };
+    case 'otp-not-found':
+      return {
+        kind: 'info',
+        message: 'No one-time code found in this conversation preview.'
+      };
+    case 'clipboard-write-failed':
+      return {
+        kind: 'error',
+        message: 'Could not copy the one-time code. Try again.'
+      };
+    case 'clipboard-unavailable':
+      return {
+        kind: 'error',
+        message: 'Clipboard access is not available on this page.'
       };
     case 'action-in-progress':
       return {

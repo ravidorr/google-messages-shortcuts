@@ -30,6 +30,7 @@ Chrome extension for keyboard shortcuts and row pills that automate conversation
 - Show a Mark as read pill on unread conversations
 - Show a Mark as unread pill on read conversations
 - Show Mute, Unmute, and Block / report spam pills on hovered and focused conversations
+- Show a Copy one-time code pill on conversations whose latest message contains a verification code (4-8 digits); the code is copied to the clipboard locally and never stored or sent anywhere
 - Do not show extension pills inside the Archived dialog; use Google Messages' native Unarchive controls there
 - Show an Archived FAB beside Start chat when Archived is not already open (modal or sidebar route)
 - Optionally open conversations immediately when they are hovered or focused

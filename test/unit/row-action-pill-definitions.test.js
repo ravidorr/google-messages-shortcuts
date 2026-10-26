@@ -3,6 +3,7 @@ import { getPillDefinitionsForRow } from '../../src/content/row-action-registry.
 import {
   COMMAND_ARCHIVE,
   COMMAND_BLOCK_REPORT_SPAM,
+  COMMAND_COPY_OTP,
   COMMAND_MARK_READ,
   COMMAND_MARK_UNREAD,
   COMMAND_MUTE,
@@ -59,5 +60,29 @@ describe('row action pill definitions', () => {
     const archivedRow = document.getElementById('fixture-archived-row');
 
     expect(getPillDefinitionsForRow(archivedRow)).toEqual([]);
+  });
+
+  it('adds a copy one-time code pill only for rows with a detectable code', () => {
+    const row = createConversationRow();
+    row.textContent = 'Bank Your verification code is 482913';
+
+    expect(getPillDefinitionsForRow(row)).toContainEqual({
+      command: COMMAND_COPY_OTP,
+      label: 'Copy one-time code',
+      ariaLabel: 'Copy last one-time code',
+      shortcutKey: 'copyOtp'
+    });
+  });
+
+  it.each([
+    ['digits without a keyword', 'Bank Your balance is 482913'],
+    ['a keyword without digits', 'Bank Your code is in the app'],
+    ['an empty row', '']
+  ])('omits the copy one-time code pill for %s', (_label, text) => {
+    const row = createConversationRow();
+    row.textContent = text;
+
+    expect(getPillDefinitionsForRow(row).map(({ command }) => command))
+      .not.toContain(COMMAND_COPY_OTP);
   });
 });

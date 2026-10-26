@@ -95,9 +95,9 @@ describe('requiresRelease', () => {
 
 describe('release metadata validation', () => {
   it('reads package and manifest versions from the repository', () => {
-    expect(readPackageVersion('HEAD')).toBe('1.14.25');
-    expect(readCurrentPackageJson().version).toBe('1.14.25');
-    expect(readCurrentManifest().version).toBe('1.14.25');
+    expect(readPackageVersion('HEAD')).toBe('1.15.0');
+    expect(readCurrentPackageJson().version).toBe('1.15.0');
+    expect(readCurrentManifest().version).toBe('1.15.0');
     expect(readChangedFiles('HEAD')).toEqual([]);
   });
 
@@ -153,17 +153,17 @@ describe('release metadata validation', () => {
 
     expect(() => runTagReleaseValidation()).toThrow('tag name is required');
     await writeFile('release-notes.md', 'Baseline notes\n');
-    expect(() => runTagReleaseValidation('v1.14.25')).not.toThrow();
+    expect(() => runTagReleaseValidation('v1.15.0')).not.toThrow();
   });
 
   it('routes command arguments to extraction, tagging, and release validation', async () => {
-    main(['node', 'script', '--extract-release-notes', '1.14.25']);
+    main(['node', 'script', '--extract-release-notes', '1.15.0']);
     await expect(readFile('release-notes.md', 'utf8')).resolves.toContain(
-      'Collapse conversation action pills'
+      'Add a Copy one-time code pill'
     );
 
     await writeFile('release-notes.md', 'Baseline notes\n');
-    expect(() => main(['node', 'script', '--tag', 'v1.14.25'])).not.toThrow();
+    expect(() => main(['node', 'script', '--tag', 'v1.15.0'])).not.toThrow();
     expect(() => main(['node', 'script'], '0000000000000000000000000000000000000000')).not.toThrow();
   });
 

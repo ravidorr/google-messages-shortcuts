@@ -11,6 +11,7 @@ import { getRowAction } from '../../src/content/row-action-registry.js';
 import {
   COMMAND_ARCHIVE,
   COMMAND_BLOCK_REPORT_SPAM,
+  COMMAND_COPY_OTP,
   COMMAND_MARK_READ,
   COMMAND_TRASH,
   COMMAND_UNARCHIVE
@@ -45,6 +46,13 @@ describe('action-capability-preflight', () => {
     );
 
     expect(localThis).toEqual({ allowed: true });
+  });
+
+  it('allows copying a one-time code without any menu capability', () => {
+    document.body.innerHTML = '';
+
+    expect(assessRowActionCapability(document, getRowAction(COMMAND_COPY_OTP), SELECTORS))
+      .toEqual({ allowed: true });
   });
 
   it('blocks archive when multiple primary menu selectors match', () => {
