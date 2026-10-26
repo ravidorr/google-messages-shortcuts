@@ -121,13 +121,18 @@ https://chromewebstore.google.com/detail/messages-shortcut-actions/dhdkppijmdfhg
 
 ## Version History
 
-| Version | Date | Changes | Status |
-| --- | --- | --- | --- |
-| 1.15.1 | 2026-10-26 | Development dependency updates; no user-facing changes | Unreleased |
-| 1.15.0 | 2026-10-26 | Copy one-time code pill on conversations with a detected verification code | Unreleased |
-| 1.14.25 | 2026-10-10 | Icon-only action pills with shortcut reveal on hover or focus | Unreleased |
-| 1.14.24 | 2026-10-10 | GitHub Pages guide deploy fixes; popup points to hosted user guide | Published |
-| 1.14.23 | 2026-10-10 | Compact popup; GitHub Pages user guide | Published |
+Each merge to `main` triggers the Publish Chrome Web Store workflow, which submits the version in `manifest.json` unless the store already publishes that version. A newer merge cancels any submission still pending review, so not every merged version is reviewed or published. The Chrome Web Store developer dashboard is the source of truth for review and publication status; this table lists recent versions only (see [CHANGELOG.md](CHANGELOG.md) for the full history).
+
+| Version | Date | Changes |
+| --- | --- | --- |
+| 1.15.1 | 2026-10-26 | Development dependency updates; no user-facing changes |
+| 1.15.0 | 2026-10-26 | Copy one-time code pill on conversations with a detected verification code |
+| 1.14.25 | 2026-10-10 | Icon-only action pills with shortcut reveal on hover or focus |
+| 1.14.24 | 2026-10-10 | GitHub Pages guide deploy fixes; popup points to hosted user guide |
+| 1.14.23 | 2026-10-10 | Compact popup; GitHub Pages user guide |
+| 1.14.22 | 2026-10-10 | Override vulnerable Markdown lint transitive dependencies |
+| 1.14.21 | 2026-10-10 | Built-in mark-as-read live validation API on Google Messages Web |
+| 1.14.20 | 2026-10-09 | Repository baseline: quality tooling, release gating, CI, hooks, design-system docs |
 
 ## Review Notes
 
