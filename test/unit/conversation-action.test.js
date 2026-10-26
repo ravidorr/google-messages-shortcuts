@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { runConversationAction } from '../../src/content/conversation-action.js';
 import { READ_STATE_TIMEOUT_MS } from '../../src/content/conversation-read-state.js';
 import { MENU_ACTION_ATTRIBUTE } from '../../src/content/menu-action-overlay.js';
@@ -1341,6 +1341,10 @@ describe('runConversationAction', () => {
 
 
   describe('copy one-time code', () => {
+    afterEach(() => {
+      vi.unstubAllGlobals();
+    });
+
     it('copies the code from the targeted row without opening any menu', async () => {
       const writeText = vi.fn().mockResolvedValue(undefined);
       vi.stubGlobal('navigator', { clipboard: { writeText } });
@@ -1355,7 +1359,6 @@ describe('runConversationAction', () => {
 
       expect(result).toEqual({ ok: true });
       expect(writeText).toHaveBeenCalledWith('482913');
-      vi.unstubAllGlobals();
     });
 
     it('reports when the targeted row has no code', async () => {

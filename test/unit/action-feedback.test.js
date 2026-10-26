@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   COMMAND_ARCHIVE,
   COMMAND_BLOCK_REPORT_SPAM,
+  COMMAND_COPY_OTP,
   COMMAND_MARK_READ,
   COMMAND_MUTE,
   COMMAND_OPEN_ARCHIVED,
@@ -37,6 +38,10 @@ describe('action-feedback', () => {
     expect(localThis).toEqual({
       kind: 'success',
       message: 'Conversation archived.'
+    });
+    expect(getActionFeedbackMessage({ ok: true }, COMMAND_COPY_OTP)).toEqual({
+      kind: 'success',
+      message: 'One-time code copied.'
     });
     expect(getActionFeedbackMessage({ ok: true }, COMMAND_MUTE)).toEqual({
       kind: 'success',
@@ -125,6 +130,7 @@ describe('action-feedback', () => {
       ['not-muted', 'info'],
       ['otp-not-found', 'info'],
       ['clipboard-write-failed', 'error'],
+      ['clipboard-unavailable', 'error'],
       ['archived-modal-required', 'info'],
       ['archived-entry-not-found', 'error'],
       ['archived-modal-timeout', 'error'],

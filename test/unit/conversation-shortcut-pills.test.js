@@ -8,7 +8,10 @@ import {
   COMMAND_TRASH
 } from '../../src/shared/commands.js';
 import { getCommandIcon } from '../../src/shared/command-icons.js';
-import { resetActionFeedbackForTests } from '../../src/content/action-feedback.js';
+import {
+  FEEDBACK_MESSAGE_SELECTOR,
+  resetActionFeedbackForTests
+} from '../../src/content/action-feedback.js';
 import {
   PILL_VISIBILITY_HIDDEN,
   PILL_VISIBILITY_HOVER_OR_FOCUS,
@@ -154,6 +157,87 @@ describe('conversation shortcut pills', () => {
     expect(
       row.querySelector(`[data-command="${COMMAND_COPY_OTP}"]`).getAttribute('aria-label')
     ).toBe('Copy last one-time code');
+  });
+
+  it('does not render the copy one-time code pill without a code', async () => {
+    const row = createConversationRow({ focused: true });
+    row.append('Bank: your balance is 123456');
+    document.body.append(row);
+
+    disconnect = installConversationShortcutPills({
+      documentRoot: document,
+      getShortcutLabels: vi.fn(async () => ({}))
+    });
+
+    await vi.waitFor(() => {
+      expect(row.querySelector(`[data-command="${COMMAND_ARCHIVE}"]`)).not.toBeNull();
+    });
+
+    expect(row.querySelector(`[data-command="${COMMAND_COPY_OTP}"]`)).toBeNull();
+  });
+
+  it('runs the copy one-time code command for the pill row', async () => {
+    const row = createConversationRow({ focused: true, unread: false });
+    const runAction = vi.fn(async () => ({ ok: true }));
+    row.append('Bank: your verification code is 482913');
+    document.body.append(row);
+
+    disconnect = installConversationShortcutPills(trustedPillInstallOptions({
+      documentRoot: document,
+      getShortcutLabels: vi.fn(async () => ({})),
+      runAction
+    }));
+
+    await vi.waitFor(() => {
+      expect(row.querySelector(`[data-command="${COMMAND_COPY_OTP}"]`)).not.toBeNull();
+    });
+
+    row.querySelector(`[data-command="${COMMAND_COPY_OTP}"]`).click();
+    await Promise.resolve();
+
+    expect(runAction).toHaveBeenCalledWith(COMMAND_COPY_OTP, row);
+  });
+
+  it('logs failed results and shows feedback when a pill action throws', async () => {
+    const warning = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const row = createConversationRow({ focused: true, unread: false });
+    const runAction = vi.fn()
+      .mockResolvedValueOnce({ ok: false, reason: 'clipboard-write-failed' })
+      .mockRejectedValueOnce(new Error('boom'));
+    document.body.append(row);
+
+    disconnect = installConversationShortcutPills(trustedPillInstallOptions({
+      documentRoot: document,
+      getShortcutLabels: vi.fn(async () => ({})),
+      runAction
+    }));
+
+    await vi.waitFor(() => {
+      expect(row.querySelector(`[data-command="${COMMAND_ARCHIVE}"]`)).not.toBeNull();
+    });
+
+    const archivePill = row.querySelector(`[data-command="${COMMAND_ARCHIVE}"]`);
+
+    archivePill.click();
+    await vi.waitFor(() => {
+      expect(warning).toHaveBeenCalledWith(
+        '[Messages Shortcut Actions] Failed to clipboard-write-failed.',
+        'clipboard-write-failed'
+      );
+    });
+
+    archivePill.click();
+    await vi.waitFor(() => {
+      expect(warning).toHaveBeenCalledWith(
+        '[Messages Shortcut Actions] Failed to run conversation shortcut pill.',
+        expect.any(Error)
+      );
+      expect(document.querySelector(FEEDBACK_MESSAGE_SELECTOR).textContent)
+        .toBe('The action failed unexpectedly. Try again or pause and reload the page.');
+    });
+
+    warning.mockRestore();
+    resetActionFeedbackForTests();
   });
 
   it('renders icon-only pills that retain assigned shortcuts for reveal', async () => {

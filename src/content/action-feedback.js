@@ -261,12 +261,17 @@ export function getActionFeedbackMessage(result, command) {
     case 'otp-not-found':
       return {
         kind: 'info',
-        message: 'No one-time code found in the latest message.'
+        message: 'No one-time code found in this conversation preview.'
       };
     case 'clipboard-write-failed':
       return {
         kind: 'error',
-        message: 'Could not copy the one-time code. Check clipboard permissions and try again.'
+        message: 'Could not copy the one-time code. Try again.'
+      };
+    case 'clipboard-unavailable':
+      return {
+        kind: 'error',
+        message: 'Clipboard access is not available on this page.'
       };
     case 'action-in-progress':
       return {

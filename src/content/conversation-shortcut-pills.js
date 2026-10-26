@@ -7,6 +7,7 @@ import {
   getPillDefinitionsForRow,
   getRowAction
 } from './row-action-registry.js';
+import { shouldWarnActionFailure, warnActionFailure } from './message-handler.js';
 import { isConversationOpeningEnabled } from '../shared/conversation-open-preference.js';
 import {
   DEFAULT_PILL_VISIBILITY,
@@ -293,6 +294,7 @@ function createPill(
 
     void runAction(definition.command, conversationRow).catch((error) => {
       console.warn('[Messages Shortcut Actions] Failed to run conversation shortcut pill.', error);
+      showActionFeedback({ ok: false, reason: 'execute-action-failed' }, definition.command, documentRoot);
     });
   });
 
@@ -521,6 +523,11 @@ function createInstallation({
 
   async function runActionWithRefresh(command, conversationRow) {
     const result = await runAction(command, conversationRow);
+
+    if (shouldWarnActionFailure(result)) {
+      warnActionFailure(result.reason, result.reason);
+    }
+
     const action = getRowAction(command);
 
     showActionFeedback(result, command, documentRoot);

@@ -72,8 +72,17 @@ describe('row action pill definitions', () => {
       ariaLabel: 'Copy last one-time code',
       shortcutKey: 'copyOtp'
     });
-    expect(
-      getPillDefinitionsForRow(createConversationRow()).map(({ command }) => command)
-    ).not.toContain(COMMAND_COPY_OTP);
+  });
+
+  it.each([
+    ['digits without a keyword', 'Bank Your balance is 482913'],
+    ['a keyword without digits', 'Bank Your code is in the app'],
+    ['an empty row', '']
+  ])('omits the copy one-time code pill for %s', (_label, text) => {
+    const row = createConversationRow();
+    row.textContent = text;
+
+    expect(getPillDefinitionsForRow(row).map(({ command }) => command))
+      .not.toContain(COMMAND_COPY_OTP);
   });
 });
