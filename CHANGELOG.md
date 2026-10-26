@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.15.1] - 2026-10-26
+
+### Changed
+
+- Update development dependencies (vitest, eslint, jsdom, markdownlint-cli2, typescript-eslint, and others)
+
 ## [1.15.0] - 2026-10-26
 
 ### Added
