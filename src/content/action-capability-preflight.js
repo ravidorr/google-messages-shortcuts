@@ -11,6 +11,7 @@ import {
 } from './adapters/menu-adapter.js';
 import {
   EXECUTION_KIND_ARCHIVED_MODAL_CLICK,
+  EXECUTION_KIND_COPY_OTP,
   EXECUTION_KIND_OPEN_ROW
 } from './row-action-registry.js';
 import { waitForElement, waitForSelector } from './wait-for-element.js';
@@ -42,6 +43,10 @@ function hasTrashConfirmControl(documentRoot, selectors) {
 }
 
 export function assessRowActionCapability(documentRoot, action, selectors) {
+  if (action.executionKind === EXECUTION_KIND_COPY_OTP) {
+    return { allowed: true };
+  }
+
   const capabilities = assessPageCapabilities(documentRoot, selectors);
 
   if (action.executionKind === EXECUTION_KIND_OPEN_ROW) {

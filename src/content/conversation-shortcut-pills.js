@@ -1,3 +1,4 @@
+import { COMMAND_COPY_OTP } from '../shared/commands.js';
 import { showActionFeedback } from './action-feedback.js';
 import { runConversationAction } from './conversation-action.js';
 import { SELECTORS } from './google-messages-dom.js';
@@ -7,6 +8,8 @@ import {
   getPillDefinitionsForRow,
   getRowAction
 } from './row-action-registry.js';
+import { findConversationOneTimeCode } from './copy-otp-action.js';
+import { shouldWarnActionFailure, warnActionFailure } from './message-handler.js';
 import { isConversationOpeningEnabled } from '../shared/conversation-open-preference.js';
 import {
   DEFAULT_PILL_VISIBILITY,
@@ -215,6 +218,21 @@ export function getConversationRowForUnreadMutation(record) {
   return null;
 }
 
+function getConversationRowForTextMutation(record) {
+  if (record.type !== 'characterData' && record.type !== 'childList') {
+    return null;
+  }
+
+  return getConversationRowFromNode(
+    record.target.nodeType === 1 ? record.target : record.target.parentElement
+  );
+}
+
+function hasStaleCopyOtpPill(conversationRow) {
+  return Boolean(conversationRow.querySelector(`[data-command="${COMMAND_COPY_OTP}"]`))
+    !== Boolean(findConversationOneTimeCode(conversationRow));
+}
+
 function getConversationRow(event, { allowPillGroup = false } = {}) {
   if (!(event.target instanceof Element)) {
     return null;
@@ -265,7 +283,8 @@ function createPill(
   const pill = documentRoot.createElement('button');
   const resolvedShortcut = shortcut ?? UNASSIGNED_SHORTCUT_LABEL;
   const hasShortcut = resolvedShortcut !== UNASSIGNED_SHORTCUT_LABEL;
-  const ariaLabel = `${definition.label} conversation${hasShortcut ? `, ${resolvedShortcut}` : ''}`;
+  const baseLabel = definition.ariaLabel ?? `${definition.label} conversation`;
+  const ariaLabel = `${baseLabel}${hasShortcut ? `, ${resolvedShortcut}` : ''}`;
 
   pill.type = 'button';
   pill.setAttribute('data-messages-shortcuts-pill', '');
@@ -292,6 +311,7 @@ function createPill(
 
     void runAction(definition.command, conversationRow).catch((error) => {
       console.warn('[Messages Shortcut Actions] Failed to run conversation shortcut pill.', error);
+      showActionFeedback({ ok: false, reason: 'execute-action-failed' }, definition.command, documentRoot);
     });
   });
 
@@ -520,6 +540,11 @@ function createInstallation({
 
   async function runActionWithRefresh(command, conversationRow) {
     const result = await runAction(command, conversationRow);
+
+    if (shouldWarnActionFailure(result)) {
+      warnActionFailure(result.reason, result.reason);
+    }
+
     const action = getRowAction(command);
 
     showActionFeedback(result, command, documentRoot);
@@ -652,9 +677,14 @@ function createInstallation({
 
     for (const record of records) {
       const conversationRow = getConversationRowForUnreadMutation(record);
+      const textRow = getConversationRowForTextMutation(record);
 
       if (conversationRow?.querySelector(PILL_GROUP_SELECTOR)) {
         rowsToRefresh.add(conversationRow);
+      }
+
+      if (textRow?.querySelector(PILL_GROUP_SELECTOR) && hasStaleCopyOtpPill(textRow)) {
+        rowsToRefresh.add(textRow);
       }
     }
 
@@ -665,6 +695,7 @@ function createInstallation({
   readStateObserver.observe(documentRoot.body, {
     attributes: true,
     attributeFilter: ['data-e2e-is-unread'],
+    characterData: true,
     childList: true,
     subtree: true
   });

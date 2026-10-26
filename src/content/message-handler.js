@@ -29,7 +29,7 @@ export function warnActionFailure(step, error) {
   );
 }
 
-function shouldWarnActionFailure(result) {
+export function shouldWarnActionFailure(result) {
   return !result.ok
     && result.reason !== 'no-target'
     && result.reason !== 'already-unread'

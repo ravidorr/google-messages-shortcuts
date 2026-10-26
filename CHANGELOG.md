@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.15.0] - 2026-10-26
+
+### Added
+
+- Add a Copy one-time code pill that copies the verification code from a conversation's latest message and appears only on rows where a code is detected
+
 ## [1.14.25] - 2026-10-10
 
 ### Changed

@@ -11,6 +11,7 @@ import {
   findConversationRow,
   findRowMenuButton
 } from './conversation-target.js';
+import { executeCopyOtpAction } from './copy-otp-action.js';
 import { findUnarchiveButtonForRow } from './adapters/archived-adapter.js';
 import {
   hasConversationNavigationStarted,
@@ -27,6 +28,7 @@ import { waitForTargetRowPostcondition } from './row-postcondition.js';
 import {
   EXECUTION_KIND_ARCHIVED_MODAL_CLICK,
   EXECUTION_KIND_BLOCK_REPORT_SPAM_WITH_NATIVE_CONFIRM,
+  EXECUTION_KIND_COPY_OTP,
   EXECUTION_KIND_MENU_CLICK,
   EXECUTION_KIND_OPEN_ROW,
   EXECUTION_KIND_TRASH_WITH_CONFIRM,
@@ -426,6 +428,10 @@ async function executeRowAction(documentRoot, action, selectors, chromeApi, conv
     return executeOpenRowAction(documentRoot, conversationRow, selectors);
   }
 
+  if (action.executionKind === EXECUTION_KIND_COPY_OTP) {
+    return executeCopyOtpAction(conversationRow);
+  }
+
   if (action.executionKind === EXECUTION_KIND_TRASH_WITH_CONFIRM) {
     return executeTrashWithConfirmAction(documentRoot, action, selectors, chromeApi);
   }
@@ -496,6 +502,7 @@ export async function runConversationAction(
     if (
       action.executionKind === EXECUTION_KIND_OPEN_ROW
       || action.executionKind === EXECUTION_KIND_ARCHIVED_MODAL_CLICK
+      || action.executionKind === EXECUTION_KIND_COPY_OTP
     ) {
       return await executeRowAction(
         documentRoot,

@@ -2,6 +2,7 @@ import {
   COMMAND_ARCHIVE,
   COMMAND_MARK_READ,
   COMMAND_BLOCK_REPORT_SPAM,
+  COMMAND_COPY_OTP,
   COMMAND_MARK_UNREAD,
   COMMAND_MUTE,
   COMMAND_TRASH,
@@ -16,6 +17,7 @@ import {
   isConversationRead,
   isConversationUnread
 } from './conversation-read-state.js';
+import { findConversationOneTimeCode } from './copy-otp-action.js';
 import { LIST_CAPABILITY_IDS } from './adapters/list-adapter.js';
 import { MENU_CAPABILITY_IDS, MENU_TEXT } from './adapters/menu-adapter.js';
 
@@ -31,6 +33,7 @@ export const EXECUTION_KIND_TRASH_WITH_CONFIRM = 'trash-with-confirm';
 export const EXECUTION_KIND_BLOCK_REPORT_SPAM_WITH_NATIVE_CONFIRM =
   'block-report-spam-with-native-confirm';
 export const EXECUTION_KIND_ARCHIVED_MODAL_CLICK = 'archived-modal-click';
+export const EXECUTION_KIND_COPY_OTP = 'copy-otp';
 
 export const APPROVED_ROW_ACTIONS = [
   {
@@ -152,6 +155,20 @@ export const APPROVED_ROW_ACTIONS = [
     showPillWhenUnreadOnly: false
   },
   {
+    command: COMMAND_COPY_OTP,
+    decision: ACTION_DECISION_APPROVE,
+    executionKind: EXECUTION_KIND_COPY_OTP,
+    precondition: (conversationRow) => Boolean(findConversationOneTimeCode(conversationRow)),
+    preconditionFailureReason: 'otp-not-found',
+    pillLabel: 'Copy one-time code',
+    pillAriaLabel: 'Copy last one-time code',
+    popupLabel: 'Copy last one-time code',
+    shortcutKey: 'copyOtp',
+    pillOnly: true,
+    showPillWhenReadOnly: false,
+    showPillWhenUnreadOnly: false
+  },
+  {
     command: COMMAND_UNARCHIVE,
     capabilityId: ARCHIVED_CAPABILITY_IDS.unarchive,
     decision: ACTION_DECISION_APPROVE,
@@ -198,6 +215,10 @@ export function getPillDefinitionsForRow(conversationRow, selectors) {
       return false;
     }
 
+    if (action.executionKind === EXECUTION_KIND_COPY_OTP) {
+      return action.precondition(conversationRow, selectors);
+    }
+
     if (action.showPillWhenReadOnly) {
       return isRead;
     }
@@ -207,9 +228,10 @@ export function getPillDefinitionsForRow(conversationRow, selectors) {
     }
 
     return true;
-  }).map(({ command, pillLabel, shortcutKey }) => ({
+  }).map(({ command, pillLabel, pillAriaLabel, shortcutKey }) => ({
     command,
     label: pillLabel,
+    ...(pillAriaLabel && { ariaLabel: pillAriaLabel }),
     shortcutKey
   }));
 }

@@ -1,6 +1,7 @@
 import {
   COMMAND_ARCHIVE,
   COMMAND_BLOCK_REPORT_SPAM,
+  COMMAND_COPY_OTP,
   COMMAND_MARK_READ,
   COMMAND_MARK_UNREAD,
   COMMAND_MUTE,
@@ -66,6 +67,13 @@ const COMMAND_ICONS = {
     paths: [
       'M11 5 6 9H2v6h4l5 4V5Z',
       'M15.54 8.46a5 5 0 0 1 0 7.07'
+    ]
+  },
+  [COMMAND_COPY_OTP]: {
+    viewBox: '0 0 24 24',
+    paths: [
+      'M10 9h10a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H10a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2z',
+      'M4 15H3a1 1 0 0 1-1-1V4a2 2 0 0 1 2-2h10a1 1 0 0 1 1 1v1'
     ]
   },
   [COMMAND_UNARCHIVE]: {

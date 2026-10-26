@@ -4,11 +4,11 @@
 
 Security fixes are provided for the latest release only.
 
-Version 1.14.25 is the unreleased next version. The Chrome Web Store currently distributes 1.14.20 until 1.14.25 is approved and published.
+Version 1.15.0 is the unreleased next version. The Chrome Web Store currently distributes 1.14.20 until 1.15.0 is approved and published.
 
 | Version | Supported |
 | ------- | --------- |
-| 1.14.25 | ✓ |
+| 1.15.0 | ✓ |
 | Earlier releases | ✘ |
 
 ## Reporting a vulnerability
