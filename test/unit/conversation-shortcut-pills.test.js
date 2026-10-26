@@ -240,6 +240,35 @@ describe('conversation shortcut pills', () => {
     resetActionFeedbackForTests();
   });
 
+  it('adds and removes the copy one-time code pill when the preview text changes', async () => {
+    const row = createConversationRow({ focused: true, unread: false });
+    const preview = document.createElement('span');
+    preview.textContent = 'Hello there';
+    row.append(preview);
+    document.body.append(row);
+
+    disconnect = installConversationShortcutPills({
+      documentRoot: document,
+      getShortcutLabels: vi.fn(async () => ({}))
+    });
+
+    await vi.waitFor(() => {
+      expect(row.querySelector(`[data-command="${COMMAND_ARCHIVE}"]`)).not.toBeNull();
+    });
+    expect(row.querySelector(`[data-command="${COMMAND_COPY_OTP}"]`)).toBeNull();
+
+    preview.firstChild.data = 'Your verification code is 482913';
+    await vi.waitFor(() => {
+      expect(row.querySelector(`[data-command="${COMMAND_COPY_OTP}"]`)).not.toBeNull();
+    });
+
+    preview.textContent = 'Thanks!';
+    await vi.waitFor(() => {
+      expect(row.querySelector(`[data-command="${COMMAND_COPY_OTP}"]`)).toBeNull();
+    });
+    expect(row.querySelectorAll('[data-messages-shortcuts-pill-group]')).toHaveLength(1);
+  });
+
   it('renders icon-only pills that retain assigned shortcuts for reveal', async () => {
     const row = createConversationRow({ focused: true });
     document.body.append(row);

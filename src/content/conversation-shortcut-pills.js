@@ -1,3 +1,4 @@
+import { COMMAND_COPY_OTP } from '../shared/commands.js';
 import { showActionFeedback } from './action-feedback.js';
 import { runConversationAction } from './conversation-action.js';
 import { SELECTORS } from './google-messages-dom.js';
@@ -7,6 +8,7 @@ import {
   getPillDefinitionsForRow,
   getRowAction
 } from './row-action-registry.js';
+import { findConversationOneTimeCode } from './copy-otp-action.js';
 import { shouldWarnActionFailure, warnActionFailure } from './message-handler.js';
 import { isConversationOpeningEnabled } from '../shared/conversation-open-preference.js';
 import {
@@ -214,6 +216,21 @@ export function getConversationRowForUnreadMutation(record) {
   }
 
   return null;
+}
+
+function getConversationRowForTextMutation(record) {
+  if (record.type !== 'characterData' && record.type !== 'childList') {
+    return null;
+  }
+
+  return getConversationRowFromNode(
+    record.target.nodeType === 1 ? record.target : record.target.parentElement
+  );
+}
+
+function hasStaleCopyOtpPill(conversationRow) {
+  return Boolean(conversationRow.querySelector(`[data-command="${COMMAND_COPY_OTP}"]`))
+    !== Boolean(findConversationOneTimeCode(conversationRow));
 }
 
 function getConversationRow(event, { allowPillGroup = false } = {}) {
@@ -660,9 +677,14 @@ function createInstallation({
 
     for (const record of records) {
       const conversationRow = getConversationRowForUnreadMutation(record);
+      const textRow = getConversationRowForTextMutation(record);
 
       if (conversationRow?.querySelector(PILL_GROUP_SELECTOR)) {
         rowsToRefresh.add(conversationRow);
+      }
+
+      if (textRow?.querySelector(PILL_GROUP_SELECTOR) && hasStaleCopyOtpPill(textRow)) {
+        rowsToRefresh.add(textRow);
       }
     }
 
@@ -673,6 +695,7 @@ function createInstallation({
   readStateObserver.observe(documentRoot.body, {
     attributes: true,
     attributeFilter: ['data-e2e-is-unread'],
+    characterData: true,
     childList: true,
     subtree: true
   });

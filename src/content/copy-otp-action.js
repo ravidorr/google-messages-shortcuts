@@ -1,9 +1,18 @@
 import { extractOneTimeCode } from '../shared/one-time-code.js';
 
+const PILL_GROUP_SELECTOR = '[data-messages-shortcuts-pill-group]';
+
 function getTextBlocks(conversationRow) {
   const walker = conversationRow.ownerDocument.createTreeWalker(
     conversationRow,
-    NodeFilter.SHOW_TEXT
+    NodeFilter.SHOW_TEXT,
+    {
+      acceptNode: (node) => (
+        node.parentElement?.closest(PILL_GROUP_SELECTOR)
+          ? NodeFilter.FILTER_REJECT
+          : NodeFilter.FILTER_ACCEPT
+      )
+    }
   );
   const blocks = [];
 
