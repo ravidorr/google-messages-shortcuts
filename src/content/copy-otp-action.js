@@ -1,7 +1,7 @@
 import { extractOneTimeCode } from '../shared/one-time-code.js';
 
 export function findConversationOneTimeCode(conversationRow) {
-  return extractOneTimeCode(conversationRow.textContent ?? '');
+  return extractOneTimeCode(conversationRow.textContent);
 }
 
 export async function executeCopyOtpAction(
