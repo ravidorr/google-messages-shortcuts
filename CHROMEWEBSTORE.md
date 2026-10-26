@@ -121,13 +121,15 @@ https://chromewebstore.google.com/detail/messages-shortcut-actions/dhdkppijmdfhg
 
 ## Version History
 
-| Version | Date | Changes | Status |
-| --- | --- | --- | --- |
-| 1.15.1 | 2026-10-26 | Development dependency updates; no user-facing changes | Unreleased |
-| 1.15.0 | 2026-10-26 | Copy one-time code pill on conversations with a detected verification code | Unreleased |
-| 1.14.25 | 2026-10-10 | Icon-only action pills with shortcut reveal on hover or focus | Unreleased |
-| 1.14.24 | 2026-10-10 | GitHub Pages guide deploy fixes; popup points to hosted user guide | Published |
-| 1.14.23 | 2026-10-10 | Compact popup; GitHub Pages user guide | Published |
+Every version merged to `main` is submitted to the Chrome Web Store by the Publish Chrome Web Store workflow. The Chrome Web Store developer dashboard is the source of truth for review and publication status, so this table records versions only.
+
+| Version | Date | Changes |
+| --- | --- | --- |
+| 1.15.1 | 2026-10-26 | Development dependency updates; no user-facing changes |
+| 1.15.0 | 2026-10-26 | Copy one-time code pill on conversations with a detected verification code |
+| 1.14.25 | 2026-10-10 | Icon-only action pills with shortcut reveal on hover or focus |
+| 1.14.24 | 2026-10-10 | GitHub Pages guide deploy fixes; popup points to hosted user guide |
+| 1.14.23 | 2026-10-10 | Compact popup; GitHub Pages user guide |
 
 ## Review Notes
 
