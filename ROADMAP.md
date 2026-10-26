@@ -2,7 +2,7 @@
 
 Keyboard-first productivity for [Google Messages Web](https://messages.google.com/web/) on Chrome and Chromium.
 
-**Current release:** 1.14.17  
+**Latest release:** see [CHANGELOG.md](CHANGELOG.md)  
 **Product principles:** [docs/product-principles.md](docs/product-principles.md)
 
 ## At a glance

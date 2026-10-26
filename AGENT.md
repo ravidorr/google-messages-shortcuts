@@ -25,6 +25,7 @@ Chrome extension for Google Messages Web that provides keyboard shortcuts, navig
 - Pull requests that change `src/`, `package.json`, or `tsconfig.json` update `CHANGELOG.md` and bump the version once per pull request. Docs-only, test-only, and tooling-only pull requests do not.
 - Track open work in `TODO.md`.
 - When creating or changing extension behavior, permissions, host access, store-facing copy, or release metadata, create or update [CHROMEWEBSTORE.md](CHROMEWEBSTORE.md) (see the `chrome-extensions` skill in `.agents/skills/`).
+- In `CHROMEWEBSTORE.md`, Version History has no Status column: merging to `main` publishes automatically, and the Chrome Web Store dashboard is the source of truth for review status. Add a row for every version bump, newest first, and record rejections under Review Notes. This overrides the status column and Version History rejection notes in the vendored skill template.
 
 ## Chrome extension AI tooling
 
