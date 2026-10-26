@@ -123,6 +123,8 @@ describe('action-feedback', () => {
       ['already-unread', 'info'],
       ['already-muted', 'info'],
       ['not-muted', 'info'],
+      ['otp-not-found', 'info'],
+      ['clipboard-write-failed', 'error'],
       ['archived-modal-required', 'info'],
       ['archived-entry-not-found', 'error'],
       ['archived-modal-timeout', 'error'],

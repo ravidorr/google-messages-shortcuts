@@ -3,6 +3,7 @@ import {
   COMMAND_ARCHIVE,
   COMMAND_MARK_READ,
   COMMAND_BLOCK_REPORT_SPAM,
+  COMMAND_COPY_OTP,
   COMMAND_MARK_UNREAD,
   COMMAND_TRASH
 } from '../../src/shared/commands.js';
@@ -134,6 +135,25 @@ describe('conversation shortcut pills', () => {
     expect(blockPill.getAttribute('aria-label')).toBe('Block / report spam conversation');
     expect(blockPill.getAttribute('title')).toBe('Block / report spam conversation');
     expect(blockPill.textContent).toBe('');
+  });
+
+  it('renders a copy one-time code pill with a descriptive label only when a code is present', async () => {
+    const row = createConversationRow({ focused: true });
+    row.append('Bank: your verification code is 482913');
+    document.body.append(row);
+
+    disconnect = installConversationShortcutPills({
+      documentRoot: document,
+      getShortcutLabels: vi.fn(async () => ({}))
+    });
+
+    await vi.waitFor(() => {
+      expect(row.querySelector(`[data-command="${COMMAND_COPY_OTP}"]`)).not.toBeNull();
+    });
+
+    expect(
+      row.querySelector(`[data-command="${COMMAND_COPY_OTP}"]`).getAttribute('aria-label')
+    ).toBe('Copy last one-time code');
   });
 
   it('renders icon-only pills that retain assigned shortcuts for reveal', async () => {

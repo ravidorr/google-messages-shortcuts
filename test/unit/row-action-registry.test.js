@@ -16,6 +16,7 @@ import {
 import {
   COMMAND_ARCHIVE,
   COMMAND_BLOCK_REPORT_SPAM,
+  COMMAND_COPY_OTP,
   COMMAND_MARK_READ,
   COMMAND_MARK_UNREAD,
   COMMAND_MUTE,
@@ -41,6 +42,7 @@ describe('row-action-registry', () => {
       COMMAND_MUTE,
       COMMAND_UNMUTE,
       COMMAND_BLOCK_REPORT_SPAM,
+      COMMAND_COPY_OTP,
       COMMAND_UNARCHIVE
     ]);
     expect(APPROVED_ROW_ACTIONS.every((action) => action.decision === ACTION_DECISION_APPROVE)).toBe(
@@ -93,6 +95,7 @@ describe('row-action-registry', () => {
       'Mute conversation',
       'Unmute conversation',
       'Block / report spam',
+      'Copy last one-time code',
       'Unarchive'
     ];
 

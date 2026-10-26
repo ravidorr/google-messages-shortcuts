@@ -265,7 +265,8 @@ function createPill(
   const pill = documentRoot.createElement('button');
   const resolvedShortcut = shortcut ?? UNASSIGNED_SHORTCUT_LABEL;
   const hasShortcut = resolvedShortcut !== UNASSIGNED_SHORTCUT_LABEL;
-  const ariaLabel = `${definition.label} conversation${hasShortcut ? `, ${resolvedShortcut}` : ''}`;
+  const baseLabel = definition.ariaLabel ?? `${definition.label} conversation`;
+  const ariaLabel = `${baseLabel}${hasShortcut ? `, ${resolvedShortcut}` : ''}`;
 
   pill.type = 'button';
   pill.setAttribute('data-messages-shortcuts-pill', '');

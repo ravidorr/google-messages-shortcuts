@@ -6,6 +6,7 @@ export const COMMAND_MUTE = 'mute-conversation';
 export const COMMAND_UNMUTE = 'unmute-conversation';
 export const COMMAND_UNARCHIVE = 'unarchive-conversation';
 export const COMMAND_BLOCK_REPORT_SPAM = 'block-report-spam-conversation';
+export const COMMAND_COPY_OTP = 'copy-otp-conversation';
 export const COMMAND_OPEN_ARCHIVED = 'open-archived';
 export const COMMAND_START_CHAT = 'start-chat';
 export const COMMAND_OPEN_SPAM_BLOCKED = 'open-spam-blocked';
@@ -43,7 +44,8 @@ export const VALID_COMMANDS = new Set([
   COMMAND_MUTE,
   COMMAND_UNMUTE,
   COMMAND_UNARCHIVE,
-  COMMAND_BLOCK_REPORT_SPAM
+  COMMAND_BLOCK_REPORT_SPAM,
+  COMMAND_COPY_OTP
 ]);
 
 export function isValidCommand(command) {

@@ -19,6 +19,6 @@ describe('phase1 action decisions', () => {
     expect(localThis).toContain('| Block / report spam | **Approve** |');
     expect(localThis).toContain('Composer adapter | **Approve** (focus only)');
     expect(localThis).toContain('| Unarchive | **Approve** |');
-    expect(getApprovedCommands()).toHaveLength(8);
+    expect(getApprovedCommands()).toHaveLength(9);
   });
 });

@@ -5,6 +5,7 @@ import { MENU_ACTION_ATTRIBUTE } from '../../src/content/menu-action-overlay.js'
 import {
   COMMAND_ARCHIVE,
   COMMAND_BLOCK_REPORT_SPAM,
+  COMMAND_COPY_OTP,
   COMMAND_MARK_READ,
   COMMAND_MARK_UNREAD,
   COMMAND_MUTE,
@@ -1338,4 +1339,30 @@ describe('runConversationAction', () => {
     vi.useRealTimers();
   });
 
+
+  describe('copy one-time code', () => {
+    it('copies the code from the targeted row without opening any menu', async () => {
+      const writeText = vi.fn().mockResolvedValue(undefined);
+      vi.stubGlobal('navigator', { clipboard: { writeText } });
+      document.body.innerHTML = `
+        <mws-conversation-list-item>
+          <a aria-selected="true"></a>
+          <span>Bank: your verification code is 482913</span>
+        </mws-conversation-list-item>
+      `;
+
+      const result = await runConversationAction(document, COMMAND_COPY_OTP, SELECTORS);
+
+      expect(result).toEqual({ ok: true });
+      expect(writeText).toHaveBeenCalledWith('482913');
+      vi.unstubAllGlobals();
+    });
+
+    it('reports when the targeted row has no code', async () => {
+      document.body.innerHTML = selectedReadRow;
+
+      await expect(runConversationAction(document, COMMAND_COPY_OTP, SELECTORS))
+        .resolves.toEqual({ ok: false, reason: 'otp-not-found' });
+    });
+  });
 });
