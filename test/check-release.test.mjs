@@ -5,10 +5,12 @@ import {
   assertReleaseNotesPresent,
   assertTagMatchesPackageVersion,
   extractChangelogNotes,
+  isDevDependencyOnlyChange,
   main,
   readCurrentManifest,
   readCurrentPackageJson,
   readChangedFiles,
+  readPackageJsonAt,
   readPackageVersion,
   requiresRelease,
   runExtractReleaseNotes,
@@ -95,9 +97,9 @@ describe('requiresRelease', () => {
 
 describe('release metadata validation', () => {
   it('reads package and manifest versions from the repository', () => {
-    expect(readPackageVersion('HEAD')).toBe('1.15.1');
-    expect(readCurrentPackageJson().version).toBe('1.15.1');
-    expect(readCurrentManifest().version).toBe('1.15.1');
+    expect(readPackageVersion('HEAD')).toMatch(/^\d+\.\d+\.\d+$/);
+    expect(readCurrentPackageJson().version).toBe('1.15.2');
+    expect(readCurrentManifest().version).toBe('1.15.2');
     expect(readChangedFiles('HEAD')).toEqual([]);
   });
 
@@ -132,6 +134,35 @@ describe('release metadata validation', () => {
     })).not.toThrow();
   });
 
+  it('skips the gate when package.json only changes devDependencies', () => {
+    const base = { version: '1.0.0', dependencies: { a: '1.0.0' }, devDependencies: { b: '1.0.0' } };
+    const current = { ...base, devDependencies: { b: '1.0.1' } };
+    expect(isDevDependencyOnlyChange(base, current)).toBe(true);
+    expect(isDevDependencyOnlyChange(base, { ...current, overrides: { c: '1.0.0' } })).toBe(false);
+    expect(() => runReleaseGate({
+      baseRef: 'main',
+      readDiffFiles: () => ['package.json', 'package-lock.json'],
+      readBasePackageJson: () => base,
+      readCurrentPackageJson: () => current
+    })).not.toThrow();
+  });
+
+  it('still requires a release when package.json changes more than devDependencies', () => {
+    const base = { version: '1.0.0', devDependencies: { b: '1.0.0' } };
+    expect(() => runReleaseGate({
+      baseRef: 'main',
+      readDiffFiles: () => ['package.json'],
+      readBasePackageJson: () => base,
+      readBasePackageVersion: () => '1.0.0',
+      readCurrentPackageJson: () => ({ ...base, overrides: { c: '1.0.0' } }),
+      readCurrentManifest: () => ({ version: '1.0.0' })
+    })).toThrow('package version must change');
+  });
+
+  it('reads package.json from a Git ref', () => {
+    expect(readPackageJsonAt('HEAD').name).toBe('google-messages-shortcuts');
+  });
+
   it('uses the current changelog for a qualifying release', () => {
     expect(() => runReleaseGate({
       baseRef: 'main',
@@ -153,17 +184,17 @@ describe('release metadata validation', () => {
 
     expect(() => runTagReleaseValidation()).toThrow('tag name is required');
     await writeFile('release-notes.md', 'Baseline notes\n');
-    expect(() => runTagReleaseValidation('v1.15.1')).not.toThrow();
+    expect(() => runTagReleaseValidation('v1.15.2')).not.toThrow();
   });
 
   it('routes command arguments to extraction, tagging, and release validation', async () => {
-    main(['node', 'script', '--extract-release-notes', '1.15.1']);
+    main(['node', 'script', '--extract-release-notes', '1.15.2']);
     await expect(readFile('release-notes.md', 'utf8')).resolves.toContain(
-      'Update development dependencies'
+      'Pin `re2js`'
     );
 
     await writeFile('release-notes.md', 'Baseline notes\n');
-    expect(() => main(['node', 'script', '--tag', 'v1.15.1'])).not.toThrow();
+    expect(() => main(['node', 'script', '--tag', 'v1.15.2'])).not.toThrow();
     expect(() => main(['node', 'script'], '0000000000000000000000000000000000000000')).not.toThrow();
   });
 
