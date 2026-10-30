@@ -1,6 +1,7 @@
 import { execFileSync } from 'node:child_process';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
+import { isDeepStrictEqual } from 'node:util';
 import semver from 'semver';
 
 const RELEASE_TRIGGER_ROOT_FILES = new Set(['package.json', 'tsconfig.json']);
@@ -105,7 +106,7 @@ export function readPackageVersion(ref) {
 export function isDevDependencyOnlyChange(basePackageJson, currentPackageJson) {
   const { devDependencies: _baseDevDependencies, ...baseRest } = basePackageJson;
   const { devDependencies: _currentDevDependencies, ...currentRest } = currentPackageJson;
-  return JSON.stringify(baseRest) === JSON.stringify(currentRest);
+  return isDeepStrictEqual(baseRest, currentRest);
 }
 
 export function readChangedFiles(baseRef) {

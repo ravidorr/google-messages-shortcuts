@@ -138,6 +138,8 @@ describe('release metadata validation', () => {
     const base = { version: '1.0.0', dependencies: { a: '1.0.0' }, devDependencies: { b: '1.0.0' } };
     const current = { ...base, devDependencies: { b: '1.0.1' } };
     expect(isDevDependencyOnlyChange(base, current)).toBe(true);
+    const reordered = { devDependencies: current.devDependencies, dependencies: base.dependencies, version: base.version };
+    expect(isDevDependencyOnlyChange(base, reordered)).toBe(true);
     expect(isDevDependencyOnlyChange(base, { ...current, overrides: { c: '1.0.0' } })).toBe(false);
     expect(() => runReleaseGate({
       baseRef: 'main',
