@@ -125,6 +125,7 @@ Each merge to `main` triggers the Publish Chrome Web Store workflow, which submi
 
 | Version | Date | Changes |
 | --- | --- | --- |
+| 1.15.2 | 2026-10-30 | Pin patched re2js and stop dev-dependency-only changes from requiring a release; no user-facing changes |
 | 1.15.1 | 2026-10-26 | Development dependency updates; no user-facing changes |
 | 1.15.0 | 2026-10-26 | Copy one-time code pill on conversations with a detected verification code |
 | 1.14.25 | 2026-10-10 | Icon-only action pills with shortcut reveal on hover or focus |

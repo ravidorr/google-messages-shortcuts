@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.15.2] - 2026-10-30
+
+### Fixed
+
+- Pin `re2js` to the patched 2.8.7 so Dependabot can apply the security update that `markdownlint-cli2` otherwise blocks
+- Stop the version and changelog gate from failing pushes that only change `devDependencies`, such as merged Dependabot updates
+
 ## [1.15.1] - 2026-10-26
 
 ### Changed

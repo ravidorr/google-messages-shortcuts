@@ -1,6 +1,7 @@
 import { execFileSync } from 'node:child_process';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
+import { isDeepStrictEqual } from 'node:util';
 import semver from 'semver';
 
 const RELEASE_TRIGGER_ROOT_FILES = new Set(['package.json', 'tsconfig.json']);
@@ -91,11 +92,21 @@ export function validateTaggedRelease({
   assertReleaseNotesPresent(releaseNotes);
 }
 
-export function readPackageVersion(ref) {
+export function readPackageJsonAt(ref) {
   const packageJson = execFileSync('git', ['show', `${ref}:package.json`], {
     encoding: 'utf8'
   });
-  return JSON.parse(packageJson).version;
+  return JSON.parse(packageJson);
+}
+
+export function readPackageVersion(ref) {
+  return readPackageJsonAt(ref).version;
+}
+
+export function isDevDependencyOnlyChange(basePackageJson, currentPackageJson) {
+  const { devDependencies: _baseDevDependencies, ...baseRest } = basePackageJson;
+  const { devDependencies: _currentDevDependencies, ...currentRest } = currentPackageJson;
+  return isDeepStrictEqual(baseRest, currentRest);
 }
 
 export function readChangedFiles(baseRef) {
@@ -118,6 +129,7 @@ export function readCurrentManifest() {
 export function runReleaseGate({
   baseRef,
   readBasePackageVersion = readPackageVersion,
+  readBasePackageJson = readPackageJsonAt,
   readDiffFiles = readChangedFiles,
   readCurrentPackageJson: currentPackageJson = readCurrentPackageJson,
   readCurrentManifest: currentManifest = readCurrentManifest,
@@ -129,7 +141,13 @@ export function runReleaseGate({
   if (/^0+$/.test(baseRef)) {
     return;
   }
-  if (!requiresRelease(readDiffFiles(baseRef))) {
+  const changedFiles = readDiffFiles(baseRef);
+  const releaseFiles =
+    changedFiles.includes('package.json') &&
+    isDevDependencyOnlyChange(readBasePackageJson(baseRef), currentPackageJson())
+      ? changedFiles.filter((file) => file !== 'package.json')
+      : changedFiles;
+  if (!requiresRelease(releaseFiles)) {
     return;
   }
 
