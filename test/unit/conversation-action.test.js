@@ -1376,7 +1376,11 @@ describe('runConversationAction', () => {
       document.body.innerHTML = `
         <mws-conversation-list-item>
           <a aria-selected="true"></a>
-          <span>Alice</span><span>See you at 5</span>
+          <span>Alice</span><mws-conversation-snippet>See you at 5</mws-conversation-snippet>
+        </mws-conversation-list-item>
+        <mws-conversation-list-item>
+          <a></a>
+          <span>Bob</span><mws-conversation-snippet>Other row text</mws-conversation-snippet>
         </mws-conversation-list-item>
       `;
 
@@ -1390,7 +1394,11 @@ describe('runConversationAction', () => {
       document.body.innerHTML = `
         <mws-conversation-list-item>
           <a aria-selected="true"></a>
-          <span>Alice</span><span>See you at 5</span>
+          <span>Alice</span><mws-conversation-snippet>See you at 5</mws-conversation-snippet>
+        </mws-conversation-list-item>
+        <mws-conversation-list-item>
+          <a></a>
+          <span>Bob</span><mws-conversation-snippet>Other row text</mws-conversation-snippet>
         </mws-conversation-list-item>
       `;
 

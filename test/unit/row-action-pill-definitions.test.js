@@ -80,7 +80,9 @@ describe('row action pill definitions', () => {
     const row = createConversationRow();
     row.append(
       Object.assign(document.createElement('span'), { textContent: 'Alice' }),
-      Object.assign(document.createElement('span'), { textContent: 'See you at 5' })
+      Object.assign(document.createElement('mws-conversation-snippet'), {
+        textContent: 'See you at 5'
+      })
     );
     const commands = getPillDefinitionsForRow(row).map(({ command }) => command);
 
@@ -92,6 +94,17 @@ describe('row action pill definitions', () => {
       ariaLabel: 'Share latest message on WhatsApp',
       shortcutKey: 'shareWhatsapp'
     });
+
+    const nameAndTimeRow = createConversationRow();
+    nameAndTimeRow.append(
+      Object.assign(document.createElement('span'), { textContent: 'Alice' }),
+      Object.assign(document.createElement('span'), { textContent: 'Sun' })
+    );
+    const nameAndTimeCommands = getPillDefinitionsForRow(nameAndTimeRow)
+      .map(({ command }) => command);
+
+    expect(nameAndTimeCommands).not.toContain(COMMAND_COPY_MESSAGE);
+    expect(nameAndTimeCommands).not.toContain(COMMAND_SHARE_WHATSAPP);
 
     const emptyCommands = getPillDefinitionsForRow(createConversationRow())
       .map(({ command }) => command);

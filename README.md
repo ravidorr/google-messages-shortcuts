@@ -30,7 +30,8 @@ Chrome extension for keyboard shortcuts and row pills that automate conversation
 - Show a Mark as read pill on unread conversations
 - Show a Mark as unread pill on read conversations
 - Show Mute, Unmute, and Block / report spam pills on hovered and focused conversations
-- Show Copy message and Share on WhatsApp pills on conversations with a message preview; the latest message text (never the sender name) is copied locally or prefilled into a `wa.me` link that opens in a new tab, and nothing is sent until you pick a chat in WhatsApp
+- Show a Copy message pill on conversations with a message preview; the preview text is copied to the clipboard locally and is never stored
+- Show a Share on WhatsApp pill on conversations with a message preview; clicking it opens a `wa.me` link in a new tab with the preview text prefilled, which sends that text to WhatsApp, and nothing is shared with a contact until you pick a chat there
 - Show a Copy one-time code pill on conversations whose latest message contains a verification code (4-8 digits); the code is copied to the clipboard locally and never stored or sent anywhere
 - Do not show extension pills inside the Archived dialog; use Google Messages' native Unarchive controls there
 - Show an Archived FAB beside Start chat when Archived is not already open (modal or sidebar route)
@@ -132,7 +133,7 @@ If Chrome or the operating system already uses a suggested shortcut, Chrome may 
 - Block / report spam opens Google Messages' native dialog and focuses the final confirmation control. You complete the block and any report-spam choice in the native UI.
 - Open Spam & blocked is validated only for the current English UI. The extension does not open it when the Main menu or exact English drawer label is missing or ambiguous.
 - Supported locale evidence is documented in [docs/dom-discovery/compatibility-matrix.md](docs/dom-discovery/compatibility-matrix.md). en-US and RTL baseline passes are complete; non-English LTR UI chrome and non-en-US confirm labels are Phase 5 work.
-- The extension does not collect or transmit conversation data.
+- The extension does not collect conversation data or transmit it in the background. The Share on WhatsApp pill sends the message preview text to WhatsApp (via a `wa.me` link) only when you click it.
 - Shortcut automation depends on Google Messages accepting programmatic clicks in its UI.
 
 ## Phase 2: page navigation and discovery (1.13.0+)

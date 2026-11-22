@@ -18,9 +18,9 @@ Keyboard shortcuts and row actions for Google Messages Web: archive, trash, read
 
 Messages Shortcut Actions adds keyboard shortcuts, on-row action pills, and list navigation to Google Messages Web in Chrome.
 
-Use default shortcuts to archive, move to trash, mark conversations read or unread, and optional shortcuts to open Archived, start a chat, or open Spam and blocked. Mute, unmute, and block or report spam appear as pills on conversation rows when you hover or focus a row. A compact popup controls trash confirmation, whether conversations open on hover, pill visibility, pause, and reset preferences.
+Use default shortcuts to archive, move to trash, mark conversations read or unread, and optional shortcuts to open Archived, start a chat, or open Spam and blocked. Mute, unmute, block or report spam, copy message, and share on WhatsApp appear as pills on conversation rows when you hover or focus a row. A compact popup controls trash confirmation, whether conversations open on hover, pill visibility, pause, and reset preferences.
 
-Open the full shortcut guide from the popup for defaults, page-local navigation keys, and limitations. The extension runs only on Google Messages Web and does not read or send your messages to any third-party service.
+Open the full shortcut guide from the popup for defaults, page-local navigation keys, and limitations. The extension runs only on Google Messages Web. It sends nothing in the background; the Share on WhatsApp pill opens WhatsApp with the latest message preview text only when you click it.
 
 **Category**
 
@@ -65,7 +65,7 @@ English
 
 **Does the extension collect user data?** No
 
-The extension does not collect, store on a server, or transmit conversation content, contacts, or usage analytics. Local preference keys live in `chrome.storage.local` on the device. See [PRIVACY.md](PRIVACY.md).
+The extension does not collect, store on a server, or transmit conversation content, contacts, or usage analytics in the background. The one user-initiated exception is the Share on WhatsApp pill, which opens `https://wa.me/?text=…` with the latest message preview text when you click it. Local preference keys live in `chrome.storage.local` on the device. See [PRIVACY.md](PRIVACY.md).
 
 | Data Type | Collected? | Transmitted Off-Device? | Purpose | Shared with Third Parties? |
 | --- | --- | --- | --- | --- |
@@ -73,7 +73,7 @@ The extension does not collect, store on a server, or transmit conversation cont
 | Health info | No | No | — | No |
 | Financial info | No | No | — | No |
 | Authentication info | No | No | — | No |
-| Personal communications | No | No | — | No |
+| Personal communications | No | Only when you click Share on WhatsApp | Prefills the message preview text in a `wa.me` link | Only WhatsApp, and only on your click |
 | Location | No | No | — | No |
 | Web history | No | No | — | No |
 | User activity | No | No | — | No |
@@ -125,7 +125,7 @@ Each merge to `main` triggers the Publish Chrome Web Store workflow, which submi
 
 | Version | Date | Changes |
 | --- | --- | --- |
-| 1.16.0 | 2026-11-22 | Copy message and Share on WhatsApp pills on conversations with message text |
+| 1.16.0 | 2026-11-22 | Copy message and Share on WhatsApp pills on conversations with a message preview; privacy and store disclosures updated for the user-initiated wa.me share |
 | 1.15.2 | 2026-10-30 | Pin patched re2js and stop dev-dependency-only changes from requiring a release; no user-facing changes |
 | 1.15.1 | 2026-10-26 | Development dependency updates; no user-facing changes |
 | 1.15.0 | 2026-10-26 | Copy one-time code pill on conversations with a detected verification code |

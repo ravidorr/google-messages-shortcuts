@@ -6,8 +6,13 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
-- Copy message pill that copies a conversation's latest message text to the clipboard
-- Share on WhatsApp pill that opens `wa.me` in a new tab with the latest message text prefilled; the sender name is never included and nothing is sent until the user picks a chat in WhatsApp
+- Copy message pill that copies a conversation's message preview text to the clipboard
+- Share on WhatsApp pill that opens `wa.me` in a new tab with the message preview text prefilled; the text goes to WhatsApp only when the pill is clicked and nothing is shared with a contact until a chat is picked
+- Both pills read only the row's native preview element and are hidden on rows without one
+
+### Changed
+
+- Privacy policy and Chrome Web Store disclosures now describe the user-initiated Share on WhatsApp transfer
 
 ## [1.15.2] - 2026-10-30
 

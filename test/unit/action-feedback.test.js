@@ -51,8 +51,24 @@ describe('action-feedback', () => {
     });
     expect(getActionFeedbackMessage({ ok: true }, COMMAND_SHARE_WHATSAPP)).toEqual({
       kind: 'success',
-      message: 'WhatsApp opened with the message.'
+      message: 'Opening WhatsApp with the message.'
     });
+    expect(getActionFeedbackMessage({ ok: false, reason: 'clipboard-write-failed' }, COMMAND_COPY_MESSAGE))
+      .toEqual({
+        kind: 'error',
+        message: 'Could not copy the message. Click the page and try again.'
+      });
+    expect(getActionFeedbackMessage({ ok: false, reason: 'clipboard-write-failed' }, COMMAND_COPY_OTP))
+      .toEqual({
+        kind: 'error',
+        message: 'Could not copy the one-time code. Try again.'
+      });
+    for (const reason of ['window-unavailable', 'share-open-failed']) {
+      expect(getActionFeedbackMessage({ ok: false, reason }, COMMAND_SHARE_WHATSAPP)).toEqual({
+        kind: 'error',
+        message: 'Could not open WhatsApp. Try again or copy the message instead.'
+      });
+    }
     expect(getActionFeedbackMessage({ ok: false, reason: 'message-not-found' }, COMMAND_COPY_MESSAGE))
       .toEqual({
         kind: 'info',

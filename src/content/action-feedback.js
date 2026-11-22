@@ -32,7 +32,7 @@ const SUCCESS_MESSAGES = {
   [COMMAND_UNARCHIVE]: 'Conversation unarchived.',
   [COMMAND_COPY_OTP]: 'One-time code copied.',
   [COMMAND_COPY_MESSAGE]: 'Message copied.',
-  [COMMAND_SHARE_WHATSAPP]: 'WhatsApp opened with the message.',
+  [COMMAND_SHARE_WHATSAPP]: 'Opening WhatsApp with the message.',
   [COMMAND_OPEN_ARCHIVED]: 'Archived opened.',
   [COMMAND_OPEN_SPAM_BLOCKED]: 'Spam & blocked opened.',
   [COMMAND_START_CHAT]: 'Start chat opened.'
@@ -270,7 +270,9 @@ export function getActionFeedbackMessage(result, command) {
     case 'clipboard-write-failed':
       return {
         kind: 'error',
-        message: 'Could not copy the one-time code. Try again.'
+        message: command === COMMAND_COPY_MESSAGE
+          ? 'Could not copy the message. Click the page and try again.'
+          : 'Could not copy the one-time code. Try again.'
       };
     case 'clipboard-unavailable':
       return {
@@ -281,6 +283,12 @@ export function getActionFeedbackMessage(result, command) {
       return {
         kind: 'info',
         message: 'No message text found in this conversation preview.'
+      };
+    case 'window-unavailable':
+    case 'share-open-failed':
+      return {
+        kind: 'error',
+        message: 'Could not open WhatsApp. Try again or copy the message instead.'
       };
     case 'action-in-progress':
       return {

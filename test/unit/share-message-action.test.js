@@ -5,13 +5,19 @@ import {
   findConversationMessageText
 } from '../../src/content/share-message-action.js';
 
-function createRow(...texts) {
+function createRow({ name = 'Alice', preview, timestamp = 'Sun' } = {}) {
   const row = document.createElement('mws-conversation-list-item');
 
-  for (const text of texts) {
+  for (const text of [name, timestamp]) {
     const element = document.createElement('span');
     element.textContent = text;
-    row.append(element, '  ');
+    row.append(element);
+  }
+
+  if (preview !== undefined) {
+    const snippet = document.createElement('mws-conversation-snippet');
+    snippet.textContent = preview;
+    row.insertBefore(snippet, row.lastChild);
   }
 
   return row;
@@ -22,46 +28,26 @@ describe('share message action', () => {
     vi.restoreAllMocks();
   });
 
-  it('prefers the native snippet element and excludes the sender', () => {
-    const row = createRow('Alice');
-    const snippet = document.createElement('mws-conversation-snippet');
-    snippet.textContent = '  See you\n at 5  ';
-    row.append(snippet, createRow('Sun').firstChild);
-
-    expect(findConversationMessageText(row)).toBe('See you at 5');
+  it('reads only the native snippet element and normalizes whitespace', () => {
+    expect(findConversationMessageText(createRow({ preview: '  See you\n at 5  ' })))
+      .toBe('See you at 5');
   });
 
-  it('falls back to the longest text block when there is no snippet element', () => {
-    expect(findConversationMessageText(createRow('Alice', 'See you at 5 tonight', 'Sun')))
-      .toBe('See you at 5 tonight');
+  it('never returns the sender name or timestamp when the message is shorter', () => {
+    expect(findConversationMessageText(
+      createRow({ name: 'Bartholomew Jefferson-Smith', preview: 'Ok', timestamp: 'Yesterday' })
+    )).toBe('Ok');
   });
 
-  it('ignores an empty snippet element', () => {
-    const row = createRow('Alice', 'Hello there');
-    row.append(document.createElement('mws-conversation-snippet'));
-
-    expect(findConversationMessageText(row)).toBe('Hello there');
-  });
-
-  it('ignores text inside the extension pill group', () => {
-    const row = createRow('Alice');
-    const group = document.createElement('div');
-    group.setAttribute('data-messages-shortcuts-pill-group', '');
-    group.textContent = 'Share on WhatsApp, a very long pill label';
-    row.append(group);
-
-    expect(findConversationMessageText(row)).toBeNull();
-  });
-
-  it('returns null for rows with fewer than two text blocks', () => {
-    expect(findConversationMessageText(createRow('Alice'))).toBeNull();
+  it('returns null without a usable snippet element', () => {
     expect(findConversationMessageText(createRow())).toBeNull();
+    expect(findConversationMessageText(createRow({ preview: '   ' }))).toBeNull();
   });
 
   it('copies the message text', async () => {
     const clipboard = { writeText: vi.fn().mockResolvedValue(undefined) };
 
-    await expect(executeCopyMessageAction(createRow('Alice', 'See you at 5', 'Sun'), clipboard))
+    await expect(executeCopyMessageAction(createRow({ preview: 'See you at 5' }), clipboard))
       .resolves.toEqual({ ok: true });
     expect(clipboard.writeText).toHaveBeenCalledWith('See you at 5');
   });
@@ -69,13 +55,13 @@ describe('share message action', () => {
   it('reports a missing message when copying', async () => {
     const clipboard = { writeText: vi.fn() };
 
-    await expect(executeCopyMessageAction(createRow('Alice'), clipboard))
+    await expect(executeCopyMessageAction(createRow(), clipboard))
       .resolves.toEqual({ ok: false, reason: 'message-not-found' });
     expect(clipboard.writeText).not.toHaveBeenCalled();
   });
 
   it('reports an unavailable clipboard', async () => {
-    await expect(executeCopyMessageAction(createRow('Alice', 'Hello there'), undefined))
+    await expect(executeCopyMessageAction(createRow({ preview: 'Hello there' }), undefined))
       .resolves.toEqual({ ok: false, reason: 'clipboard-unavailable' });
   });
 
@@ -83,7 +69,7 @@ describe('share message action', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
     const clipboard = { writeText: vi.fn().mockRejectedValue(new Error('denied')) };
 
-    await expect(executeCopyMessageAction(createRow('Alice', 'Hello there'), clipboard))
+    await expect(executeCopyMessageAction(createRow({ preview: 'Hello there' }), clipboard))
       .resolves.toEqual({ ok: false, reason: 'clipboard-write-failed' });
     expect(warn).toHaveBeenCalled();
   });
@@ -91,10 +77,10 @@ describe('share message action', () => {
   it('opens WhatsApp with the encoded message in a new tab', () => {
     const openWindow = vi.fn();
 
-    expect(executeShareWhatsAppAction(createRow('Alice', 'Dinner? 6 & 7', 'Sun'), openWindow))
+    expect(executeShareWhatsAppAction(createRow({ preview: 'שלום? 6 & 7' }), openWindow))
       .toEqual({ ok: true });
     expect(openWindow).toHaveBeenCalledWith(
-      'https://wa.me/?text=Dinner%3F%206%20%26%207',
+      `https://wa.me/?text=${encodeURIComponent('שלום? 6 & 7')}`,
       '_blank',
       'noopener,noreferrer'
     );
@@ -103,15 +89,35 @@ describe('share message action', () => {
   it('does not open WhatsApp when there is no message', () => {
     const openWindow = vi.fn();
 
-    expect(executeShareWhatsAppAction(createRow('Alice'), openWindow))
+    expect(executeShareWhatsAppAction(createRow(), openWindow))
       .toEqual({ ok: false, reason: 'message-not-found' });
     expect(openWindow).not.toHaveBeenCalled();
+  });
+
+  it('reports an unavailable window.open', () => {
+    expect(executeShareWhatsAppAction(createRow({ preview: 'Hello there' }), null))
+      .toEqual({ ok: false, reason: 'window-unavailable' });
+  });
+
+  it('reports a window.open that throws', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const openWindow = vi.fn(() => {
+      throw new Error('blocked');
+    });
+
+    expect(executeShareWhatsAppAction(createRow({ preview: 'Hello there' }), openWindow))
+      .toEqual({ ok: false, reason: 'share-open-failed' });
+    expect(warn).toHaveBeenCalled();
   });
 
   it('defaults to window.open', () => {
     const open = vi.spyOn(window, 'open').mockImplementation(() => null);
 
-    expect(executeShareWhatsAppAction(createRow('Alice', 'Hello there'))).toEqual({ ok: true });
-    expect(open).toHaveBeenCalledOnce();
+    expect(executeShareWhatsAppAction(createRow({ preview: 'Hello there' }))).toEqual({ ok: true });
+    expect(open).toHaveBeenCalledWith(
+      'https://wa.me/?text=Hello%20there',
+      '_blank',
+      'noopener,noreferrer'
+    );
   });
 });
