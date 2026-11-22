@@ -1,12 +1,14 @@
 import {
   COMMAND_ARCHIVE,
   COMMAND_BLOCK_REPORT_SPAM,
+  COMMAND_COPY_MESSAGE,
   COMMAND_COPY_OTP,
   COMMAND_MARK_READ,
   COMMAND_MARK_UNREAD,
   COMMAND_MUTE,
   COMMAND_OPEN_ARCHIVED,
   COMMAND_OPEN_SPAM_BLOCKED,
+  COMMAND_SHARE_WHATSAPP,
   COMMAND_START_CHAT,
   COMMAND_TRASH,
   COMMAND_UNARCHIVE,
@@ -29,6 +31,8 @@ const SUCCESS_MESSAGES = {
   [COMMAND_UNMUTE]: 'Conversation unmuted.',
   [COMMAND_UNARCHIVE]: 'Conversation unarchived.',
   [COMMAND_COPY_OTP]: 'One-time code copied.',
+  [COMMAND_COPY_MESSAGE]: 'Message copied.',
+  [COMMAND_SHARE_WHATSAPP]: 'Opening WhatsApp with the message.',
   [COMMAND_OPEN_ARCHIVED]: 'Archived opened.',
   [COMMAND_OPEN_SPAM_BLOCKED]: 'Spam & blocked opened.',
   [COMMAND_START_CHAT]: 'Start chat opened.'
@@ -266,12 +270,25 @@ export function getActionFeedbackMessage(result, command) {
     case 'clipboard-write-failed':
       return {
         kind: 'error',
-        message: 'Could not copy the one-time code. Try again.'
+        message: command === COMMAND_COPY_MESSAGE
+          ? 'Could not copy the message. Click the page and try again.'
+          : 'Could not copy the one-time code. Try again.'
       };
     case 'clipboard-unavailable':
       return {
         kind: 'error',
         message: 'Clipboard access is not available on this page.'
+      };
+    case 'message-not-found':
+      return {
+        kind: 'info',
+        message: 'No message text found in this conversation preview.'
+      };
+    case 'window-unavailable':
+    case 'share-open-failed':
+      return {
+        kind: 'error',
+        message: 'Could not open WhatsApp. Try again or copy the message instead.'
       };
     case 'action-in-progress':
       return {

@@ -7,6 +7,8 @@ export const COMMAND_UNMUTE = 'unmute-conversation';
 export const COMMAND_UNARCHIVE = 'unarchive-conversation';
 export const COMMAND_BLOCK_REPORT_SPAM = 'block-report-spam-conversation';
 export const COMMAND_COPY_OTP = 'copy-otp-conversation';
+export const COMMAND_COPY_MESSAGE = 'copy-message-conversation';
+export const COMMAND_SHARE_WHATSAPP = 'share-whatsapp-conversation';
 export const COMMAND_OPEN_ARCHIVED = 'open-archived';
 export const COMMAND_START_CHAT = 'start-chat';
 export const COMMAND_OPEN_SPAM_BLOCKED = 'open-spam-blocked';
@@ -45,7 +47,9 @@ export const VALID_COMMANDS = new Set([
   COMMAND_UNMUTE,
   COMMAND_UNARCHIVE,
   COMMAND_BLOCK_REPORT_SPAM,
-  COMMAND_COPY_OTP
+  COMMAND_COPY_OTP,
+  COMMAND_COPY_MESSAGE,
+  COMMAND_SHARE_WHATSAPP
 ]);
 
 export function isValidCommand(command) {

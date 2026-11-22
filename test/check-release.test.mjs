@@ -98,8 +98,8 @@ describe('requiresRelease', () => {
 describe('release metadata validation', () => {
   it('reads package and manifest versions from the repository', () => {
     expect(readPackageVersion('HEAD')).toMatch(/^\d+\.\d+\.\d+$/);
-    expect(readCurrentPackageJson().version).toBe('1.15.2');
-    expect(readCurrentManifest().version).toBe('1.15.2');
+    expect(readCurrentPackageJson().version).toBe('1.16.0');
+    expect(readCurrentManifest().version).toBe('1.16.0');
     expect(readChangedFiles('HEAD')).toEqual([]);
   });
 
@@ -186,17 +186,17 @@ describe('release metadata validation', () => {
 
     expect(() => runTagReleaseValidation()).toThrow('tag name is required');
     await writeFile('release-notes.md', 'Baseline notes\n');
-    expect(() => runTagReleaseValidation('v1.15.2')).not.toThrow();
+    expect(() => runTagReleaseValidation('v1.16.0')).not.toThrow();
   });
 
   it('routes command arguments to extraction, tagging, and release validation', async () => {
-    main(['node', 'script', '--extract-release-notes', '1.15.2']);
+    main(['node', 'script', '--extract-release-notes', '1.16.0']);
     await expect(readFile('release-notes.md', 'utf8')).resolves.toContain(
-      'Pin `re2js`'
+      'Copy message pill'
     );
 
     await writeFile('release-notes.md', 'Baseline notes\n');
-    expect(() => main(['node', 'script', '--tag', 'v1.15.2'])).not.toThrow();
+    expect(() => main(['node', 'script', '--tag', 'v1.16.0'])).not.toThrow();
     expect(() => main(['node', 'script'], '0000000000000000000000000000000000000000')).not.toThrow();
   });
 

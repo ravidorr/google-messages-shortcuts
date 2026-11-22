@@ -4,7 +4,7 @@ Messages Shortcut Actions operates locally in your browser.
 
 ## Data collection
 
-This extension does not collect, store, or transmit conversation content, contact information, account identifiers, or usage analytics.
+This extension does not collect or store conversation content, contact information, account identifiers, or usage analytics. It transmits message text only when you click the Share on WhatsApp pill, as described under Network access.
 
 ## Local processing
 
@@ -35,7 +35,9 @@ Resetting extension preferences from the popup restores those defaults. It does 
 
 ## Network access
 
-The extension content scripts run only on `https://messages.google.com/web/*`, the Google Messages Web client path validated in Phase 0. The extension makes no project-operated network calls and does not send your conversation data to any third-party service.
+The extension content scripts run only on `https://messages.google.com/web/*`, the Google Messages Web client path validated in Phase 0. The extension makes no project-operated network calls and sends no conversation data in the background.
+
+The one exception is the Share on WhatsApp pill. When you click it, the extension opens `https://wa.me/?text=…` in a new tab. The latest message preview text of that conversation (never the sender name) is part of that address, so it is sent to WhatsApp and appears in your browser history. Nothing is sent to anyone until you choose a chat in WhatsApp. Do not click the pill if you do not want that text shared with WhatsApp.
 
 ## Permissions
 

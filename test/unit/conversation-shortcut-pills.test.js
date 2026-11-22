@@ -3,8 +3,10 @@ import {
   COMMAND_ARCHIVE,
   COMMAND_MARK_READ,
   COMMAND_BLOCK_REPORT_SPAM,
+  COMMAND_COPY_MESSAGE,
   COMMAND_COPY_OTP,
   COMMAND_MARK_UNREAD,
+  COMMAND_SHARE_WHATSAPP,
   COMMAND_TRASH
 } from '../../src/shared/commands.js';
 import { getCommandIcon } from '../../src/shared/command-icons.js';
@@ -267,6 +269,124 @@ describe('conversation shortcut pills', () => {
       expect(row.querySelector(`[data-command="${COMMAND_COPY_OTP}"]`)).toBeNull();
     });
     expect(row.querySelectorAll('[data-messages-shortcuts-pill-group]')).toHaveLength(1);
+  });
+
+  it('renders and runs the message pills for rows with a preview', async () => {
+    const row = createConversationRow({ focused: true, unread: false });
+    const runAction = vi.fn(async () => ({ ok: true }));
+    const snippet = document.createElement('mws-conversation-snippet');
+    snippet.textContent = 'See you at 5';
+    row.append(snippet);
+    document.body.append(row);
+
+    disconnect = installConversationShortcutPills(trustedPillInstallOptions({
+      documentRoot: document,
+      getShortcutLabels: vi.fn(async () => ({})),
+      runAction
+    }));
+
+    await vi.waitFor(() => {
+      expect(row.querySelector(`[data-command="${COMMAND_SHARE_WHATSAPP}"]`)).not.toBeNull();
+    });
+
+    const copyPill = row.querySelector(`[data-command="${COMMAND_COPY_MESSAGE}"]`);
+    const sharePill = row.querySelector(`[data-command="${COMMAND_SHARE_WHATSAPP}"]`);
+
+    expect(copyPill.getAttribute('aria-label')).toBe('Copy latest message text');
+    expect(sharePill.getAttribute('aria-label')).toBe('Share latest message on WhatsApp');
+
+    sharePill.click();
+    await Promise.resolve();
+
+    expect(runAction).toHaveBeenCalledWith(COMMAND_SHARE_WHATSAPP, row);
+  });
+
+  it('adds and removes the message pills when the preview appears and disappears', async () => {
+    const row = createConversationRow({ focused: true, unread: false });
+    row.append(Object.assign(document.createElement('span'), { textContent: 'Alice' }));
+    document.body.append(row);
+
+    disconnect = installConversationShortcutPills({
+      documentRoot: document,
+      getShortcutLabels: vi.fn(async () => ({}))
+    });
+
+    await vi.waitFor(() => {
+      expect(row.querySelector(`[data-command="${COMMAND_ARCHIVE}"]`)).not.toBeNull();
+    });
+    expect(row.querySelector(`[data-command="${COMMAND_COPY_MESSAGE}"]`)).toBeNull();
+    expect(row.querySelector(`[data-command="${COMMAND_SHARE_WHATSAPP}"]`)).toBeNull();
+
+    const snippet = document.createElement('mws-conversation-snippet');
+    snippet.textContent = 'See you at 5';
+    row.append(snippet);
+
+    await vi.waitFor(() => {
+      expect(row.querySelector(`[data-command="${COMMAND_COPY_MESSAGE}"]`)).not.toBeNull();
+      expect(row.querySelector(`[data-command="${COMMAND_SHARE_WHATSAPP}"]`)).not.toBeNull();
+    });
+
+    snippet.textContent = '';
+
+    await vi.waitFor(() => {
+      expect(row.querySelector(`[data-command="${COMMAND_COPY_MESSAGE}"]`)).toBeNull();
+      expect(row.querySelector(`[data-command="${COMMAND_SHARE_WHATSAPP}"]`)).toBeNull();
+    });
+    expect(row.querySelectorAll('[data-messages-shortcuts-pill-group]')).toHaveLength(1);
+  });
+
+  it.each([COMMAND_COPY_MESSAGE, COMMAND_SHARE_WHATSAPP])(
+    'restores a missing %s pill when text changes',
+    async (command) => {
+      const row = createConversationRow({ focused: true, unread: false });
+      const snippet = document.createElement('mws-conversation-snippet');
+      snippet.textContent = 'See you at 5';
+      row.append(snippet);
+      document.body.append(row);
+
+      disconnect = installConversationShortcutPills({
+        documentRoot: document,
+        getShortcutLabels: vi.fn(async () => ({}))
+      });
+
+      await vi.waitFor(() => {
+        expect(row.querySelector(`[data-command="${command}"]`)).not.toBeNull();
+      });
+
+      row.querySelector(`[data-command="${command}"]`).remove();
+      snippet.textContent = 'See you at 6';
+
+      await vi.waitFor(() => {
+        expect(row.querySelector(`[data-command="${command}"]`)).not.toBeNull();
+      });
+    }
+  );
+
+  it('keeps the same pills when a text change leaves them correct', async () => {
+    const row = createConversationRow({ focused: true, unread: false });
+    const snippet = document.createElement('mws-conversation-snippet');
+    const timestamp = document.createElement('span');
+    snippet.textContent = 'See you at 5';
+    timestamp.textContent = 'Sun';
+    row.append(snippet, timestamp);
+    document.body.append(row);
+
+    disconnect = installConversationShortcutPills({
+      documentRoot: document,
+      getShortcutLabels: vi.fn(async () => ({}))
+    });
+
+    await vi.waitFor(() => {
+      expect(row.querySelector(`[data-command="${COMMAND_SHARE_WHATSAPP}"]`)).not.toBeNull();
+    });
+
+    const before = row.querySelector(`[data-command="${COMMAND_SHARE_WHATSAPP}"]`);
+
+    timestamp.textContent = 'Mon';
+    snippet.textContent = 'See you at 6';
+    await new Promise((resolve) => setTimeout(resolve, 50));
+
+    expect(row.querySelector(`[data-command="${COMMAND_SHARE_WHATSAPP}"]`)).toBe(before);
   });
 
   it('renders icon-only pills that retain assigned shortcuts for reveal', async () => {

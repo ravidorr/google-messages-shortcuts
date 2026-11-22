@@ -1,4 +1,8 @@
-import { COMMAND_COPY_OTP } from '../shared/commands.js';
+import {
+  COMMAND_COPY_MESSAGE,
+  COMMAND_COPY_OTP,
+  COMMAND_SHARE_WHATSAPP
+} from '../shared/commands.js';
 import { showActionFeedback } from './action-feedback.js';
 import { runConversationAction } from './conversation-action.js';
 import { SELECTORS } from './google-messages-dom.js';
@@ -9,6 +13,7 @@ import {
   getRowAction
 } from './row-action-registry.js';
 import { findConversationOneTimeCode } from './copy-otp-action.js';
+import { findConversationMessageText } from './share-message-action.js';
 import { shouldWarnActionFailure, warnActionFailure } from './message-handler.js';
 import { isConversationOpeningEnabled } from '../shared/conversation-open-preference.js';
 import {
@@ -228,9 +233,17 @@ function getConversationRowForTextMutation(record) {
   );
 }
 
-function hasStaleCopyOtpPill(conversationRow) {
-  return Boolean(conversationRow.querySelector(`[data-command="${COMMAND_COPY_OTP}"]`))
-    !== Boolean(findConversationOneTimeCode(conversationRow));
+function hasPill(conversationRow, command) {
+  return Boolean(conversationRow.querySelector(`[data-command="${command}"]`));
+}
+
+function hasStaleTextPill(conversationRow) {
+  const hasMessageText = Boolean(findConversationMessageText(conversationRow));
+
+  return hasPill(conversationRow, COMMAND_COPY_OTP)
+    !== Boolean(findConversationOneTimeCode(conversationRow))
+    || hasPill(conversationRow, COMMAND_COPY_MESSAGE) !== hasMessageText
+    || hasPill(conversationRow, COMMAND_SHARE_WHATSAPP) !== hasMessageText;
 }
 
 function getConversationRow(event, { allowPillGroup = false } = {}) {
@@ -683,7 +696,7 @@ function createInstallation({
         rowsToRefresh.add(conversationRow);
       }
 
-      if (textRow?.querySelector(PILL_GROUP_SELECTOR) && hasStaleCopyOtpPill(textRow)) {
+      if (textRow?.querySelector(PILL_GROUP_SELECTOR) && hasStaleTextPill(textRow)) {
         rowsToRefresh.add(textRow);
       }
     }

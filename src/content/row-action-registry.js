@@ -2,9 +2,11 @@ import {
   COMMAND_ARCHIVE,
   COMMAND_MARK_READ,
   COMMAND_BLOCK_REPORT_SPAM,
+  COMMAND_COPY_MESSAGE,
   COMMAND_COPY_OTP,
   COMMAND_MARK_UNREAD,
   COMMAND_MUTE,
+  COMMAND_SHARE_WHATSAPP,
   COMMAND_TRASH,
   COMMAND_UNARCHIVE,
   COMMAND_UNMUTE
@@ -18,6 +20,7 @@ import {
   isConversationUnread
 } from './conversation-read-state.js';
 import { findConversationOneTimeCode } from './copy-otp-action.js';
+import { findConversationMessageText } from './share-message-action.js';
 import { LIST_CAPABILITY_IDS } from './adapters/list-adapter.js';
 import { MENU_CAPABILITY_IDS, MENU_TEXT } from './adapters/menu-adapter.js';
 
@@ -34,6 +37,8 @@ export const EXECUTION_KIND_BLOCK_REPORT_SPAM_WITH_NATIVE_CONFIRM =
   'block-report-spam-with-native-confirm';
 export const EXECUTION_KIND_ARCHIVED_MODAL_CLICK = 'archived-modal-click';
 export const EXECUTION_KIND_COPY_OTP = 'copy-otp';
+export const EXECUTION_KIND_COPY_MESSAGE = 'copy-message';
+export const EXECUTION_KIND_SHARE_WHATSAPP = 'share-whatsapp';
 
 export const APPROVED_ROW_ACTIONS = [
   {
@@ -169,6 +174,34 @@ export const APPROVED_ROW_ACTIONS = [
     showPillWhenUnreadOnly: false
   },
   {
+    command: COMMAND_COPY_MESSAGE,
+    decision: ACTION_DECISION_APPROVE,
+    executionKind: EXECUTION_KIND_COPY_MESSAGE,
+    precondition: (conversationRow) => Boolean(findConversationMessageText(conversationRow)),
+    preconditionFailureReason: 'message-not-found',
+    pillLabel: 'Copy message',
+    pillAriaLabel: 'Copy latest message text',
+    popupLabel: 'Copy latest message text',
+    shortcutKey: 'copyMessage',
+    pillOnly: true,
+    showPillWhenReadOnly: false,
+    showPillWhenUnreadOnly: false
+  },
+  {
+    command: COMMAND_SHARE_WHATSAPP,
+    decision: ACTION_DECISION_APPROVE,
+    executionKind: EXECUTION_KIND_SHARE_WHATSAPP,
+    precondition: (conversationRow) => Boolean(findConversationMessageText(conversationRow)),
+    preconditionFailureReason: 'message-not-found',
+    pillLabel: 'Share on WhatsApp',
+    pillAriaLabel: 'Share latest message on WhatsApp',
+    popupLabel: 'Share latest message on WhatsApp',
+    shortcutKey: 'shareWhatsapp',
+    pillOnly: true,
+    showPillWhenReadOnly: false,
+    showPillWhenUnreadOnly: false
+  },
+  {
     command: COMMAND_UNARCHIVE,
     capabilityId: ARCHIVED_CAPABILITY_IDS.unarchive,
     decision: ACTION_DECISION_APPROVE,
@@ -215,7 +248,11 @@ export function getPillDefinitionsForRow(conversationRow, selectors) {
       return false;
     }
 
-    if (action.executionKind === EXECUTION_KIND_COPY_OTP) {
+    if (
+      action.executionKind === EXECUTION_KIND_COPY_OTP
+      || action.executionKind === EXECUTION_KIND_COPY_MESSAGE
+      || action.executionKind === EXECUTION_KIND_SHARE_WHATSAPP
+    ) {
       return action.precondition(conversationRow, selectors);
     }
 

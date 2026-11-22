@@ -1,12 +1,14 @@
 import {
   COMMAND_ARCHIVE,
   COMMAND_BLOCK_REPORT_SPAM,
+  COMMAND_COPY_MESSAGE,
   COMMAND_COPY_OTP,
   COMMAND_MARK_READ,
   COMMAND_MARK_UNREAD,
   COMMAND_MUTE,
   COMMAND_OPEN_ARCHIVED,
   COMMAND_OPEN_SPAM_BLOCKED,
+  COMMAND_SHARE_WHATSAPP,
   COMMAND_START_CHAT,
   COMMAND_TRASH,
   COMMAND_UNARCHIVE,
@@ -74,6 +76,23 @@ const COMMAND_ICONS = {
     paths: [
       'M10 9h10a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H10a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2z',
       'M4 15H3a1 1 0 0 1-1-1V4a2 2 0 0 1 2-2h10a1 1 0 0 1 1 1v1'
+    ]
+  },
+  [COMMAND_COPY_MESSAGE]: {
+    viewBox: '0 0 24 24',
+    paths: [
+      'M3 9a1 1 0 0 1 1-1h7l4 4v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z',
+      'M11 8v4h4',
+      'M6 15h6',
+      'M6 18h6',
+      'M8 8V3a1 1 0 0 1 1-1h7l4 4v8a1 1 0 0 1-1 1h-5'
+    ]
+  },
+  [COMMAND_SHARE_WHATSAPP]: {
+    viewBox: '0 0 24 24',
+    paths: [
+      'M3 21l1.65-3.8a9 9 0 1 1 3.4 2.9L3 21',
+      'M9 10a.5.5 0 0 0 1 0V9a.5.5 0 0 0-1 0v1a5 5 0 0 0 5 5h1a.5.5 0 0 0 0-1h-1a.5.5 0 0 0 0 1'
     ]
   },
   [COMMAND_UNARCHIVE]: {

@@ -5,7 +5,9 @@ import { MENU_ACTION_ATTRIBUTE } from '../../src/content/menu-action-overlay.js'
 import {
   COMMAND_ARCHIVE,
   COMMAND_BLOCK_REPORT_SPAM,
+  COMMAND_COPY_MESSAGE,
   COMMAND_COPY_OTP,
+  COMMAND_SHARE_WHATSAPP,
   COMMAND_MARK_READ,
   COMMAND_MARK_UNREAD,
   COMMAND_MUTE,
@@ -1366,6 +1368,54 @@ describe('runConversationAction', () => {
 
       await expect(runConversationAction(document, COMMAND_COPY_OTP, SELECTORS))
         .resolves.toEqual({ ok: false, reason: 'otp-not-found' });
+    });
+
+    it('copies the targeted row message text', async () => {
+      const writeText = vi.fn().mockResolvedValue(undefined);
+      vi.stubGlobal('navigator', { clipboard: { writeText } });
+      document.body.innerHTML = `
+        <mws-conversation-list-item>
+          <a aria-selected="true"></a>
+          <span>Alice</span><mws-conversation-snippet>See you at 5</mws-conversation-snippet>
+        </mws-conversation-list-item>
+        <mws-conversation-list-item>
+          <a></a>
+          <span>Bob</span><mws-conversation-snippet>Other row text</mws-conversation-snippet>
+        </mws-conversation-list-item>
+      `;
+
+      await expect(runConversationAction(document, COMMAND_COPY_MESSAGE, SELECTORS))
+        .resolves.toEqual({ ok: true });
+      expect(writeText).toHaveBeenCalledWith('See you at 5');
+    });
+
+    it('opens WhatsApp for the targeted row message text', async () => {
+      const open = vi.spyOn(window, 'open').mockImplementation(() => null);
+      document.body.innerHTML = `
+        <mws-conversation-list-item>
+          <a aria-selected="true"></a>
+          <span>Alice</span><mws-conversation-snippet>See you at 5</mws-conversation-snippet>
+        </mws-conversation-list-item>
+        <mws-conversation-list-item>
+          <a></a>
+          <span>Bob</span><mws-conversation-snippet>Other row text</mws-conversation-snippet>
+        </mws-conversation-list-item>
+      `;
+
+      await expect(runConversationAction(document, COMMAND_SHARE_WHATSAPP, SELECTORS))
+        .resolves.toEqual({ ok: true });
+      expect(open).toHaveBeenCalledWith(
+        'https://wa.me/?text=See%20you%20at%205',
+        '_blank',
+        'noopener,noreferrer'
+      );
+    });
+
+    it('reports when the targeted row has no message text', async () => {
+      document.body.innerHTML = selectedReadRow;
+
+      await expect(runConversationAction(document, COMMAND_SHARE_WHATSAPP, SELECTORS))
+        .resolves.toEqual({ ok: false, reason: 'message-not-found' });
     });
   });
 });
