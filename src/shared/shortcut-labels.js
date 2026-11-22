@@ -24,6 +24,8 @@ export function getConversationShortcutLabels(commands) {
     mute: getShortcutLabel(commands, COMMAND_MUTE),
     unmute: getShortcutLabel(commands, COMMAND_UNMUTE),
     blockReportSpam: UNASSIGNED_SHORTCUT_LABEL,
-    copyOtp: UNASSIGNED_SHORTCUT_LABEL
+    copyOtp: UNASSIGNED_SHORTCUT_LABEL,
+    copyMessage: UNASSIGNED_SHORTCUT_LABEL,
+    shareWhatsapp: UNASSIGNED_SHORTCUT_LABEL
   };
 }

@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.16.0] - 2026-11-22
+
+### Added
+
+- Copy message pill that copies a conversation's latest message text to the clipboard
+- Share on WhatsApp pill that opens `wa.me` in a new tab with the latest message text prefilled; the sender name is never included and nothing is sent until the user picks a chat in WhatsApp
+
 ## [1.15.2] - 2026-10-30
 
 ### Fixed

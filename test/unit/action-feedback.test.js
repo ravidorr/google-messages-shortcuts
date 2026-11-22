@@ -2,7 +2,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   COMMAND_ARCHIVE,
   COMMAND_BLOCK_REPORT_SPAM,
+  COMMAND_COPY_MESSAGE,
   COMMAND_COPY_OTP,
+  COMMAND_SHARE_WHATSAPP,
   COMMAND_MARK_READ,
   COMMAND_MUTE,
   COMMAND_OPEN_ARCHIVED,
@@ -43,6 +45,19 @@ describe('action-feedback', () => {
       kind: 'success',
       message: 'One-time code copied.'
     });
+    expect(getActionFeedbackMessage({ ok: true }, COMMAND_COPY_MESSAGE)).toEqual({
+      kind: 'success',
+      message: 'Message copied.'
+    });
+    expect(getActionFeedbackMessage({ ok: true }, COMMAND_SHARE_WHATSAPP)).toEqual({
+      kind: 'success',
+      message: 'WhatsApp opened with the message.'
+    });
+    expect(getActionFeedbackMessage({ ok: false, reason: 'message-not-found' }, COMMAND_COPY_MESSAGE))
+      .toEqual({
+        kind: 'info',
+        message: 'No message text found in this conversation preview.'
+      });
     expect(getActionFeedbackMessage({ ok: true }, COMMAND_MUTE)).toEqual({
       kind: 'success',
       message: 'Conversation muted.'

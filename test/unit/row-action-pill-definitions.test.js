@@ -3,7 +3,9 @@ import { getPillDefinitionsForRow } from '../../src/content/row-action-registry.
 import {
   COMMAND_ARCHIVE,
   COMMAND_BLOCK_REPORT_SPAM,
+  COMMAND_COPY_MESSAGE,
   COMMAND_COPY_OTP,
+  COMMAND_SHARE_WHATSAPP,
   COMMAND_MARK_READ,
   COMMAND_MARK_UNREAD,
   COMMAND_MUTE,
@@ -72,6 +74,30 @@ describe('row action pill definitions', () => {
       ariaLabel: 'Copy last one-time code',
       shortcutKey: 'copyOtp'
     });
+  });
+
+  it('adds message pills only for rows with message text', () => {
+    const row = createConversationRow();
+    row.append(
+      Object.assign(document.createElement('span'), { textContent: 'Alice' }),
+      Object.assign(document.createElement('span'), { textContent: 'See you at 5' })
+    );
+    const commands = getPillDefinitionsForRow(row).map(({ command }) => command);
+
+    expect(commands).toContain(COMMAND_COPY_MESSAGE);
+    expect(commands).toContain(COMMAND_SHARE_WHATSAPP);
+    expect(getPillDefinitionsForRow(row)).toContainEqual({
+      command: COMMAND_SHARE_WHATSAPP,
+      label: 'Share on WhatsApp',
+      ariaLabel: 'Share latest message on WhatsApp',
+      shortcutKey: 'shareWhatsapp'
+    });
+
+    const emptyCommands = getPillDefinitionsForRow(createConversationRow())
+      .map(({ command }) => command);
+
+    expect(emptyCommands).not.toContain(COMMAND_COPY_MESSAGE);
+    expect(emptyCommands).not.toContain(COMMAND_SHARE_WHATSAPP);
   });
 
   it.each([

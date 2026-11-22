@@ -11,7 +11,9 @@ import { getRowAction } from '../../src/content/row-action-registry.js';
 import {
   COMMAND_ARCHIVE,
   COMMAND_BLOCK_REPORT_SPAM,
+  COMMAND_COPY_MESSAGE,
   COMMAND_COPY_OTP,
+  COMMAND_SHARE_WHATSAPP,
   COMMAND_MARK_READ,
   COMMAND_TRASH,
   COMMAND_UNARCHIVE
@@ -54,6 +56,16 @@ describe('action-capability-preflight', () => {
     expect(assessRowActionCapability(document, getRowAction(COMMAND_COPY_OTP), SELECTORS))
       .toEqual({ allowed: true });
   });
+
+  it.each([COMMAND_COPY_MESSAGE, COMMAND_SHARE_WHATSAPP])(
+    'allows %s without any menu capability',
+    (command) => {
+      document.body.innerHTML = '';
+
+      expect(assessRowActionCapability(document, getRowAction(command), SELECTORS))
+        .toEqual({ allowed: true });
+    }
+  );
 
   it('blocks archive when multiple primary menu selectors match', () => {
     document.body.innerHTML = `

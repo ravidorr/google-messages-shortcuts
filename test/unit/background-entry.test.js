@@ -77,7 +77,9 @@ describe('background entry', () => {
         mute: 'Not assigned',
         unmute: 'Not assigned',
         blockReportSpam: 'Not assigned',
-        copyOtp: 'Not assigned'
+        copyOtp: 'Not assigned',
+        copyMessage: 'Not assigned',
+        shareWhatsapp: 'Not assigned'
       });
     });
   });

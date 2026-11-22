@@ -12,6 +12,10 @@ import {
   findRowMenuButton
 } from './conversation-target.js';
 import { executeCopyOtpAction } from './copy-otp-action.js';
+import {
+  executeCopyMessageAction,
+  executeShareWhatsAppAction
+} from './share-message-action.js';
 import { findUnarchiveButtonForRow } from './adapters/archived-adapter.js';
 import {
   hasConversationNavigationStarted,
@@ -28,7 +32,9 @@ import { waitForTargetRowPostcondition } from './row-postcondition.js';
 import {
   EXECUTION_KIND_ARCHIVED_MODAL_CLICK,
   EXECUTION_KIND_BLOCK_REPORT_SPAM_WITH_NATIVE_CONFIRM,
+  EXECUTION_KIND_COPY_MESSAGE,
   EXECUTION_KIND_COPY_OTP,
+  EXECUTION_KIND_SHARE_WHATSAPP,
   EXECUTION_KIND_MENU_CLICK,
   EXECUTION_KIND_OPEN_ROW,
   EXECUTION_KIND_TRASH_WITH_CONFIRM,
@@ -432,6 +438,14 @@ async function executeRowAction(documentRoot, action, selectors, chromeApi, conv
     return executeCopyOtpAction(conversationRow);
   }
 
+  if (action.executionKind === EXECUTION_KIND_COPY_MESSAGE) {
+    return executeCopyMessageAction(conversationRow);
+  }
+
+  if (action.executionKind === EXECUTION_KIND_SHARE_WHATSAPP) {
+    return executeShareWhatsAppAction(conversationRow);
+  }
+
   if (action.executionKind === EXECUTION_KIND_TRASH_WITH_CONFIRM) {
     return executeTrashWithConfirmAction(documentRoot, action, selectors, chromeApi);
   }
@@ -503,6 +517,8 @@ export async function runConversationAction(
       action.executionKind === EXECUTION_KIND_OPEN_ROW
       || action.executionKind === EXECUTION_KIND_ARCHIVED_MODAL_CLICK
       || action.executionKind === EXECUTION_KIND_COPY_OTP
+      || action.executionKind === EXECUTION_KIND_COPY_MESSAGE
+      || action.executionKind === EXECUTION_KIND_SHARE_WHATSAPP
     ) {
       return await executeRowAction(
         documentRoot,

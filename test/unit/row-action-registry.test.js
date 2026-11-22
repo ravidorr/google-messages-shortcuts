@@ -16,7 +16,9 @@ import {
 import {
   COMMAND_ARCHIVE,
   COMMAND_BLOCK_REPORT_SPAM,
+  COMMAND_COPY_MESSAGE,
   COMMAND_COPY_OTP,
+  COMMAND_SHARE_WHATSAPP,
   COMMAND_MARK_READ,
   COMMAND_MARK_UNREAD,
   COMMAND_MUTE,
@@ -43,6 +45,8 @@ describe('row-action-registry', () => {
       COMMAND_UNMUTE,
       COMMAND_BLOCK_REPORT_SPAM,
       COMMAND_COPY_OTP,
+      COMMAND_COPY_MESSAGE,
+      COMMAND_SHARE_WHATSAPP,
       COMMAND_UNARCHIVE
     ]);
     expect(APPROVED_ROW_ACTIONS.every((action) => action.decision === ACTION_DECISION_APPROVE)).toBe(
@@ -96,6 +100,8 @@ describe('row-action-registry', () => {
       'Unmute conversation',
       'Block / report spam',
       'Copy last one-time code',
+      'Copy latest message',
+      'Share latest message on WhatsApp',
       'Unarchive'
     ];
 
